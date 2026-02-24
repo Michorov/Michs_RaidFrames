@@ -51,6 +51,7 @@ local function QueueLateRosterRefresh()
 	for _, delay in ipairs(delays) do
 		C_Timer.After(delay, function()
 			addon.UpdateScheduler:Notify("rosterChanged")
+			addon.UpdateScheduler:Notify("layoutChanged")
 		end)
 	end
 end

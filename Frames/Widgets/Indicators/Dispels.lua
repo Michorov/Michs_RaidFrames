@@ -23,55 +23,12 @@ end
 
 local function CreateTypeIcon(container, dispelType)
 	local icon = container:CreateTexture(nil, "ARTWORK")
-	icon:SetAtlas(ATLAS_BY_TYPE[dispelType], true)
+	icon:SetAtlas(ATLAS_BY_TYPE[dispelType], false)
 	icon:Hide()
 	return icon
 end
 
-local function IsSafeTableKey(v)
-	if type(v) ~= "number" and type(v) ~= "string" then
-		return false
-	end
-	if issecretvalue and issecretvalue(v) then
-		return false
-	end
-	return true
-end
-
-local function CollectActiveTypesFromBucket(unit)
-	local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
-
-	local dispellable = bucket and bucket.dispellable
-	if not dispellable then
-		return nil
-	end
-
-	local active = {}
-
-	for auraInstanceID in pairs(dispellable) do
-		if IsSafeTableKey(auraInstanceID) then
-			local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID)
-			if aura then
-				local dispelType = aura.dispelType
-				if dispelType == 1 then
-					active.Magic = true
-				elseif dispelType == 4 then
-					active.Poison = true
-				elseif dispelType == 2 then
-					active.Curse = true
-				elseif dispelType == 3 then
-					active.Disease = true
-				elseif dispelType == 11 or dispelType == 9 then
-					active.Bleed = true
-				end
-			end
-		end
-	end
-
-	return active
-end
-
-function Dispels:Ensure(frame, settings)
+function Dispels:Ensure(frame)
 	if not frame then
 		return
 	end
@@ -101,16 +58,15 @@ function Dispels:UpdateSettings(frame, settings)
 		return
 	end
 
-	local s = GetDispelsSettings(settings) or {}
-	local anchor = s.anchor or "TOPRIGHT"
-	local relativeAnchor = s.relativeAnchor or "TOPRIGHT"
-	local offsetX = s.offsetX or -1
-	local offsetY = s.offsetY or -1
-	local iconSizePx = s.iconSize or 14
-	local spacingPx = s.spacing or 1
-	local alpha = s.alpha or 1
+	local dispelSettings = GetDispelsSettings(settings) or {}
+	local anchor = dispelSettings.anchor or "TOPRIGHT"
+	local relativeAnchor = dispelSettings.relativeAnchor or "TOPRIGHT"
+	local offsetX = dispelSettings.offsetX or -1
+	local offsetY = dispelSettings.offsetY or -1
+	local iconSizePx = dispelSettings.iconSize or 14
+	local spacingPx = dispelSettings.spacing or 1
+	local alpha = dispelSettings.alpha or 1
 
-	-- fixed 5 slots width; compact packing handled in UpdateState
 	local widthPx = (#ORDER * iconSizePx) + ((#ORDER - 1) * spacingPx)
 	local heightPx = iconSizePx
 
@@ -152,12 +108,14 @@ function Dispels:UpdateState(frame, settings)
 		return
 	end
 
-	local s = GetDispelsSettings(settings) or {}
-	local iconSizePx = s.iconSize or 14
-	local spacingPx = s.spacing or 1
+	local dispelSettings = GetDispelsSettings(settings) or {}
+	local iconSizePx = dispelSettings.iconSize or 14
+	local spacingPx = dispelSettings.spacing or 1
 
-	local active = CollectActiveTypesFromBucket(unit)
-	if not active then
+	local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
+	local dispellable = bucket and bucket.dispellable
+
+	if not dispellable or #dispellable == 0 then
 		for i = 1, #ORDER do
 			local icon = container.typeIcons[ORDER[i]]
 			if icon then
@@ -168,29 +126,31 @@ function Dispels:UpdateState(frame, settings)
 		return
 	end
 
-	-- Compact right-to-left packing with no gaps.
-	local shown = 0
 	for i = 1, #ORDER do
-		local dispelType = ORDER[i]
-		local icon = container.typeIcons[dispelType]
-		if icon then
-			if active[dispelType] then
-				local xPx = -(shown * (iconSizePx + spacingPx))
-				icon:ClearAllPoints()
-				icon:SetPoint("TOPRIGHT", container, "TOPRIGHT", addon.Utilities:FromPixels(xPx), 0)
-				icon:Show()
-				shown = shown + 1
-			else
-				icon:Hide()
-			end
-		end
-	end
-
-	-- Hide any remaining icons that were previously shown
-	for i = shown + 1, #ORDER do
 		local icon = container.typeIcons[ORDER[i]]
 		if icon then
 			icon:Hide()
+		end
+	end
+
+	local shown = 0
+	for i = 1, #dispellable do
+		if shown >= #ORDER then
+			break
+		end
+
+		local data = dispellable[i]
+		local atlas = data and data.atlas
+		if atlas then
+			shown = shown + 1
+			local icon = container.typeIcons[ORDER[shown]]
+			if icon then
+				local xPx = -((shown - 1) * (iconSizePx + spacingPx))
+				icon:ClearAllPoints()
+				icon:SetPoint("TOPRIGHT", container, "TOPRIGHT", addon.Utilities:FromPixels(xPx), 0)
+				icon:SetAtlas(atlas, false)
+				icon:Show()
+			end
 		end
 	end
 

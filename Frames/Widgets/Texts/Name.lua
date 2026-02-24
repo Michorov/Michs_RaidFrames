@@ -28,7 +28,7 @@ local function GetNameSettings(settings)
 		},
 		font = name.font or "Fonts\\FRIZQT__.TTF",
 		size = name.size or 12,
-		outline = name.outline or "OUTLINE",
+		outline = name.outline or "NONE",
 	}
 end
 

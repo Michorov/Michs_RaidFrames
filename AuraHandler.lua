@@ -85,7 +85,6 @@ local function CaptureCompactFrameAuras(service, compactFrame)
 	local bucket = GetOrCreateBucket(service, guid)
 	ClearBucket(bucket)
 
-	-- Buffs Blizzard decided to show
 	if compactFrame.buffFrames then
 		for _, f in ipairs(compactFrame.buffFrames) do
 			if f:IsShown() then
@@ -94,7 +93,6 @@ local function CaptureCompactFrameAuras(service, compactFrame)
 		end
 	end
 
-	-- Debuffs Blizzard decided to show
 	if compactFrame.debuffFrames then
 		for _, f in ipairs(compactFrame.debuffFrames) do
 			if f:IsShown() then
@@ -103,17 +101,26 @@ local function CaptureCompactFrameAuras(service, compactFrame)
 		end
 	end
 
-	-- Dispellable debuffs
 	if compactFrame.dispelDebuffFrames then
 		for _, f in ipairs(compactFrame.dispelDebuffFrames) do
 			if f:IsShown() then
 				SafeMark(bucket.debuffs, f.auraInstanceID)
-				SafeMark(bucket.dispellable, f.auraInstanceID)
+
+				local atlas
+				if f.icon and f.icon.GetAtlas then
+					atlas = f.icon:GetAtlas()
+				elseif f.GetAtlas then
+					atlas = f:GetAtlas()
+				end
+
+				table.insert(bucket.dispellable, {
+					auraInstanceID = f.auraInstanceID,
+					atlas = atlas,
+				})
 			end
 		end
 	end
 
-	-- Big defensive
 	local def = compactFrame.CenterDefensiveBuff
 	if def and def:IsShown() then
 		SafeMark(bucket.defensive, def.auraInstanceID)
@@ -184,7 +191,6 @@ function AuraHandler:GetBucketForUnit(unit)
 	return self.approvedByGuid[guid]
 end
 
--- Convenience helpers (optional)
 function AuraHandler:IsApprovedBuff(unit, auraInstanceID)
 	local b = self:GetBucketForUnit(unit)
 	return b and auraInstanceID and b.buffs[auraInstanceID] or false
@@ -193,11 +199,6 @@ end
 function AuraHandler:IsApprovedDebuff(unit, auraInstanceID)
 	local b = self:GetBucketForUnit(unit)
 	return b and auraInstanceID and b.debuffs[auraInstanceID] or false
-end
-
-function AuraHandler:IsPlayerDispellable(unit, auraInstanceID)
-	local b = self:GetBucketForUnit(unit)
-	return b and auraInstanceID and b.dispellable[auraInstanceID] or false
 end
 
 function AuraHandler:GetDefensiveAuraInstanceID(unit)

@@ -55,22 +55,30 @@ local function IsRaidPartyCompactUnit(frame)
 	return unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$")
 end
 
+local function SafeHide(obj)
+	if obj and obj.Hide then
+		pcall(function()
+			obj:Hide()
+		end)
+	end
+end
+
 local function HideCompactVisualOverlays(frame)
 	if not frame or not IsRaidPartyCompactUnit(frame) then
 		return
 	end
 
-	if frame.selectionHighlight and frame.selectionHighlight.Hide then
-		pcall(function()
-			frame.selectionHighlight:Hide()
-		end)
-	end
+	SafeHide(frame.selectionHighlight)
+	SafeHide(frame.aggroHighlight)
 
-	if frame.aggroHighlight and frame.aggroHighlight.Hide then
-		pcall(function()
-			frame.aggroHighlight:Hide()
-		end)
-	end
+	-- Ready check
+	SafeHide(frame.readyCheckIcon)
+	SafeHide(frame.readyCheckStatus)
+
+	-- Summon
+	SafeHide(frame.summonStatus)
+	SafeHide(frame.summonIcon)
+	SafeHide(frame.summonFrame)
 end
 
 local function InstallCompactOverlayHooks()
@@ -79,17 +87,27 @@ local function InstallCompactOverlayHooks()
 	end
 	compactOverlayHooksInstalled = true
 
-	hooksecurefunc("CompactUnitFrame_UpdateSelectionHighlight", function(frame)
+	local function HideIfNeeded(frame)
 		if ShouldHideBlizzardFrames() then
 			HideCompactVisualOverlays(frame)
 		end
-	end)
+	end
 
-	hooksecurefunc("CompactUnitFrame_UpdateAggroHighlight", function(frame)
-		if ShouldHideBlizzardFrames() then
-			HideCompactVisualOverlays(frame)
+	local hookNames = {
+		"CompactUnitFrame_UpdateSelectionHighlight",
+		"CompactUnitFrame_UpdateAggroHighlight",
+		"CompactUnitFrame_UpdateReadyCheck",
+		"CompactUnitFrame_UpdateReadyCheckStatus",
+		"CompactUnitFrame_UpdateSummonStatus",
+		"CompactUnitFrame_UpdateStatusIcon",
+	}
+
+	for _, fnName in ipairs(hookNames) do
+		local fn = _G[fnName]
+		if type(fn) == "function" then
+			hooksecurefunc(fnName, HideIfNeeded)
 		end
-	end)
+	end
 end
 
 local function ApplyBlizzardFramesVisibility()
@@ -333,7 +351,7 @@ function FrameRegistry:Initialize()
 	end
 
 	local raidUnits = {}
-	for raidIndex = 1, 25 do
+	for raidIndex = 1, 40 do
 		raidUnits[raidIndex] = "raid" .. raidIndex
 	end
 
