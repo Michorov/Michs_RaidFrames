@@ -1,0 +1,121 @@
+local _, addon = ...
+
+addon.Frames = addon.Frames or {}
+addon.Frames.Widgets = addon.Frames.Widgets or {}
+addon.Frames.Widgets.Bars = addon.Frames.Widgets.Bars or {}
+addon.Frames.Widgets.Bars.HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs or {}
+
+local HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs
+
+local function GetHealAbsorbSettings(settings)
+	return settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.healAbsorbs
+end
+
+local function GetClampedHealAbsorb(frame, unit)
+	if not frame or not unit then
+		return nil
+	end
+
+	-- Preferred path: prediction calculator (secret-safe)
+	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
+		frame.healAbsorbCalculator = frame.healAbsorbCalculator or CreateUnitHealPredictionCalculator()
+		local calc = frame.healAbsorbCalculator
+
+		if calc.SetHealAbsorbClampMode then
+			pcall(calc.SetHealAbsorbClampMode, calc, 0)
+		end
+
+		UnitGetDetailedHealPrediction(unit, nil, calc)
+
+		if calc.GetHealAbsorbs then
+			local ok, value = pcall(calc.GetHealAbsorbs, calc)
+			if ok then
+				return value
+			end
+		end
+	end
+
+	-- Fallback
+	if UnitGetTotalHealAbsorbs then
+		return UnitGetTotalHealAbsorbs(unit)
+	end
+
+	return nil
+end
+
+function HealAbsorbs:Ensure(frame)
+	if not frame then
+		return
+	end
+
+	local widgetsOverlay = frame.widgetsOverlay
+	if not widgetsOverlay then
+		return
+	end
+
+	if not frame.healAbsorbBar then
+		local bar = CreateFrame("StatusBar", nil, widgetsOverlay)
+		bar:SetFrameStrata(widgetsOverlay:GetFrameStrata())
+		bar:SetFrameLevel(widgetsOverlay:GetFrameLevel() + 4)
+		bar:SetOrientation("HORIZONTAL")
+		bar:SetReverseFill(false) -- left -> right
+		bar:Hide()
+		frame.healAbsorbBar = bar
+	end
+end
+
+function HealAbsorbs:UpdateSettings(frame, settings)
+	local healAbsorbSettings = GetHealAbsorbSettings(settings)
+	local bar = frame and frame.healAbsorbBar
+	if not bar then
+		return
+	end
+
+	local texture = (healAbsorbSettings and healAbsorbSettings.texture) or "Interface\\Buttons\\WHITE8x8"
+	local color = (healAbsorbSettings and healAbsorbSettings.color) or { r = 1, g = 0, b = 0, a = 0.5 }
+
+	bar:SetStatusBarTexture(texture)
+	bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 0.5)
+end
+
+function HealAbsorbs:UpdateState(frame)
+	local bar = frame and frame.healAbsorbBar
+	local healthBar = frame and frame.healthBar
+	if not bar or not healthBar then
+		return
+	end
+
+	local unit = frame.unit
+	if not UnitExists(unit) or UnitCanAttack("player", unit) then
+		bar:Hide()
+		return
+	end
+
+	local currentHealth = UnitHealth(unit)
+	if currentHealth == nil then
+		bar:Hide()
+		return
+	end
+
+	local healAbsorbValue = GetClampedHealAbsorb(frame, unit)
+	if healAbsorbValue == nil then
+		bar:Hide()
+		return
+	end
+
+	local healthTex = healthBar.GetStatusBarTexture and healthBar:GetStatusBarTexture()
+	if not healthTex then
+		bar:Hide()
+		return
+	end
+
+	-- Restrict the heal-absorb bar to the current-health area.
+	bar:ClearAllPoints()
+	bar:SetPoint("TOPLEFT", healthTex, "TOPLEFT", 0, 0)
+	bar:SetPoint("BOTTOMRIGHT", healthTex, "BOTTOMRIGHT", 0, 0)
+
+	-- Clamp to current health (not max health).
+	bar:SetMinMaxValues(0, currentHealth)
+	bar:SetValue(healAbsorbValue)
+	bar:Show()
+end

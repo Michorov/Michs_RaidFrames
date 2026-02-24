@@ -1,0 +1,282 @@
+local _, addon = ...
+
+local Database = {}
+addon.Database = Database
+
+local AceDB = LibStub("AceDB-3.0")
+
+local initialized = false
+
+local DEFAULTS = {
+	profile = {
+		core = {
+			showSoloPartyFrame = true,
+			hideBlizzardRaidFrames = true,
+			outOfRangeAlpha = 0.5,
+		},
+		party = {
+			size = { width = 128, height = 64 },
+			position = { x = 0, y = 0 },
+			spacing = { x = -1, y = -1 },
+			background = {
+				color = {
+					r = 0.12,
+					g = 0.12,
+					b = 0.12,
+					a = 1.0,
+				},
+			},
+			health = {
+				texture = "Interface\\Buttons\\WHITE8x8",
+				classColor = true,
+				color = {
+					r = 0.12,
+					g = 0.12,
+					b = 0.12,
+					a = 1.0,
+				},
+			},
+			border = {
+				thicknessPx = 1,
+				color = { r = 0, g = 0, b = 0, a = 1 },
+			},
+			widgets = {
+				texts = {
+					name = {
+						anchor = "TOPLEFT",
+						position = {
+							x = 2,
+							y = -2,
+						},
+						classColor = false,
+						color = {
+							r = 0,
+							g = 0,
+							b = 0,
+							a = 1,
+						},
+						font = "Fonts\\ARIALN.TTF",
+						size = 12,
+						outline = "NONE",
+					},
+				},
+				icons = {
+					buffs = {
+						anchor = "BOTTOMRIGHT",
+						relativeAnchor = "BOTTOMRIGHT",
+						offsetX = -2,
+						offsetY = 2,
+
+						maxIcons = 6,
+						iconsPerRow = 3,
+						iconSize = 20,
+						spacing = -1,
+
+						stacksFontSize = 10,
+						borderSizePx = 1,
+					},
+					debuffs = {
+						anchor = "BOTTOMLEFT",
+						relativeAnchor = "BOTTOMLEFT",
+						offsetX = 2,
+						offsetY = 2,
+
+						maxIcons = 6,
+						iconsPerRow = 3,
+						iconSize = 20,
+						spacing = -1,
+
+						stacksFontSize = 10,
+						borderSizePx = 1,
+					},
+					privateAuras = {
+						anchor = "LEFT",
+						relativeAnchor = "LEFT",
+						offsetX = 2,
+						offsetY = 4,
+
+						maxIcons = 3,
+						iconSize = 24,
+						spacing = 1,
+					},
+					bigDefensive = {
+						anchor = "CENTER",
+						relativeAnchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+
+						maxIcons = 1,
+						iconSize = 32,
+
+						stacksFontSize = 16,
+						borderSizePx = 1,
+					},
+				},
+				bars = {
+					absorbs = {},
+				},
+				indicators = {
+					readyCheck = {},
+					dispels = {
+						anchor = "TOPRIGHT",
+						relativeAnchor = "TOPRIGHT",
+						offsetX = -5,
+						offsetY = -5,
+
+						iconSize = 20,
+						spacing = 2,
+						alpha = 1.0,
+					},
+				},
+			},
+		},
+		raid = {
+			size = { width = 110, height = 56 },
+			position = { x = 0, y = 0 },
+			spacing = { x = -1, y = -1 },
+			background = {
+				color = {
+					r = 0.12,
+					g = 0.12,
+					b = 0.12,
+					a = 1.0,
+				},
+			},
+			health = {
+				texture = "Interface\\Buttons\\WHITE8x8",
+				classColor = true,
+				color = {
+					r = 0.12,
+					g = 0.12,
+					b = 0.12,
+					a = 1.0,
+				},
+			},
+			border = {
+				thicknessPx = 1,
+				color = { r = 0, g = 0, b = 0, a = 1 },
+			},
+			widgets = {
+				texts = {
+					name = {
+						anchor = "TOPLEFT",
+						position = {
+							x = 2,
+							y = -2,
+						},
+						classColor = false,
+						color = {
+							r = 0,
+							g = 0,
+							b = 0,
+							a = 1,
+						},
+						font = "Fonts\\ARIALN.TTF",
+						size = 10,
+						outline = "NONE",
+					},
+				},
+				icons = {
+					buffs = {
+						anchor = "BOTTOMRIGHT",
+						relativeAnchor = "BOTTOMRIGHT",
+						offsetX = -2,
+						offsetY = 2,
+
+						maxIcons = 6,
+						iconsPerRow = 3,
+						iconSize = 16,
+						spacing = -1,
+
+						stacksFontSize = 10,
+						borderSizePx = 1,
+					},
+					debuffs = {
+						anchor = "BOTTOMLEFT",
+						relativeAnchor = "BOTTOMLEFT",
+						offsetX = 2,
+						offsetY = 2,
+
+						maxIcons = 6,
+						iconsPerRow = 3,
+						iconSize = 16,
+						spacing = -1,
+
+						stacksFontSize = 10,
+						borderSizePx = 1,
+					},
+					privateAuras = {
+						anchor = "LEFT",
+						relativeAnchor = "LEFT",
+						offsetX = 2,
+						offsetY = 2,
+
+						maxIcons = 3,
+						iconSize = 20,
+						spacing = 1,
+					},
+					bigDefensive = {
+						anchor = "CENTER",
+						relativeAnchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+
+						maxIcons = 1,
+						iconSize = 28,
+
+						stacksFontSize = 16,
+						borderSizePx = 1,
+					},
+				},
+				bars = {
+					absorbs = {},
+				},
+				indicators = {
+					readyCheck = {},
+					dispels = {
+						anchor = "TOPRIGHT",
+						relativeAnchor = "TOPRIGHT",
+						offsetX = -5,
+						offsetY = -5,
+
+						iconSize = 20,
+						spacing = 2,
+						alpha = 1.0,
+					},
+				},
+			},
+		},
+	},
+	global = {},
+	char = {},
+}
+
+function Database:Initialize()
+	if initialized then
+		error("Database already initialized", 2)
+	end
+
+	self.db = AceDB:New("Michs_RaidFramesDB", DEFAULTS, true)
+	initialized = true
+end
+
+function Database:GetProfile()
+	if not initialized then
+		error("Database is not initialized", 2)
+	end
+	return self.db.profile
+end
+
+function Database:GetGlobal()
+	if not initialized then
+		error("Database is not initialized", 2)
+	end
+	return self.db.global
+end
+
+function Database:GetChar()
+	if not initialized then
+		error("Database is not initialized", 2)
+	end
+	return self.db.char
+end
