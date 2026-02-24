@@ -18,6 +18,7 @@ local DEFAULTS = {
 			size = { width = 128, height = 64 },
 			position = { x = 0, y = 0 },
 			spacing = { x = -1, y = -1 },
+			direction = "VERTICAL",
 			background = {
 				color = {
 					r = 0.12,
@@ -120,10 +121,10 @@ local DEFAULTS = {
 					dispels = {
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
-						offsetX = -5,
-						offsetY = -5,
+						offsetX = -2,
+						offsetY = -2,
 
-						iconSize = 20,
+						iconSize = 16,
 						spacing = 2,
 						alpha = 1.0,
 					},
@@ -134,6 +135,18 @@ local DEFAULTS = {
 			size = { width = 110, height = 56 },
 			position = { x = 0, y = 0 },
 			spacing = { x = -1, y = -1 },
+			groups = {
+				[1] = true,
+				[2] = true,
+				[3] = true,
+				[4] = true,
+				[5] = true,
+				[6] = false,
+				[7] = false,
+				[8] = false,
+			},
+			direction = "HORIZONTAL",
+			reverse = false,
 			background = {
 				color = {
 					r = 0.12,
@@ -236,10 +249,10 @@ local DEFAULTS = {
 					dispels = {
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
-						offsetX = -5,
-						offsetY = -5,
+						offsetX = -2,
+						offsetY = -2,
 
-						iconSize = 20,
+						iconSize = 12,
 						spacing = 2,
 						alpha = 1.0,
 					},
