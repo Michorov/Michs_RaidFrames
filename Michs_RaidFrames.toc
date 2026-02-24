@@ -1,0 +1,63 @@
+## Interface: 120000, 120001
+## Title: Mich's RaidFrames
+## Notes: Addon that manages custom Party/Raid frames
+## Author: Mich
+## Version: 0.1.3
+## SavedVariables: Michs_RaidFramesDB
+
+# Ace3
+Libs/LibStub/LibStub.lua
+Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
+Libs/AceEvent-3.0/AceEvent-3.0.xml
+Libs/AceDB-3.0/AceDB-3.0.xml
+Libs/AceGUI-3.0/AceGUI-3.0.xml
+Libs/AceConfig-3.0/AceConfig-3.0.xml
+
+# Helpers
+Utilities.lua
+Database.lua
+AuraHandler.lua
+
+# Widgets
+Frames/Widgets/WidgetsOverlay.lua
+
+# Widgets Text
+Frames/Widgets/Texts/Name.lua
+Frames/Widgets/Texts/StatusText.lua
+
+# Widgets Indicators
+Frames/Widgets/Indicators/ReadyCheck.lua
+Frames/Widgets/Indicators/Dispels.lua
+
+# Widgets Icons
+Frames/Widgets/Icons/Factory.lua
+Frames/Widgets/Icons/Buffs.lua
+Frames/Widgets/Icons/Debuffs.lua
+Frames/Widgets/Icons/BigDefensive.lua
+Frames/Widgets/Icons/PrivateAuras.lua
+
+# Widgets Bars
+Frames/Widgets/Bars/Absorbs.lua
+Frames/Widgets/Bars/HealAbsorbs.lua
+
+# Frames
+Frames/RangeChecker.lua
+Frames/Layout.lua
+Frames/Factory.lua
+
+# Frames Base
+Frames/Base/Border.lua
+Frames/Base/Health.lua
+Frames/Base/Background.lua
+
+# Infrastructure
+Infrastructure/UpdateScheduler.lua
+Infrastructure/Updater.lua
+Infrastructure/EventHandler.lua
+Infrastructure/FrameRegistry.lua
+
+# Options
+Options.lua
+
+# Entry Point
+Core.lua
