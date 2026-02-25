@@ -264,13 +264,37 @@ local DEFAULTS = {
 	char = {},
 }
 
-function Database:Initialize()
-	if initialized then
-		error("Database already initialized", 2)
-	end
+function Database:GetCurrentProfileName()
+	return self.db:GetCurrentProfile()
+end
 
-	self.db = AceDB:New("Michs_RaidFramesDB", DEFAULTS, true)
-	initialized = true
+function Database:GetProfileNames()
+	local t = {}
+	for _, name in ipairs({ self.db:GetProfiles() }) do
+		t[name] = name
+	end
+	return t
+end
+
+function Database:HasProfile(name)
+	for _, n in ipairs(self.db:GetProfiles() or {}) do
+		if n == name then
+			return true
+		end
+	end
+	return false
+end
+
+function Database:SetProfile(name)
+	self.db:SetProfile(name)
+end
+
+function Database:CopyProfile(sourceName)
+	self.db:CopyProfile(sourceName)
+end
+
+function Database:DeleteProfile(name)
+	self.db:DeleteProfile(name, true)
 end
 
 function Database:GetProfile()
@@ -292,4 +316,31 @@ function Database:GetChar()
 		error("Database is not initialized", 2)
 	end
 	return self.db.char
+end
+
+function Database:Initialize()
+	if initialized then
+		error("Database already initialized", 2)
+	end
+
+	self.db = AceDB:New("Michs_RaidFramesDB", DEFAULTS, true)
+
+	local function OnProfileChanged()
+		addon.UpdateScheduler:Notify("layoutChanged")
+		addon.UpdateScheduler:Notify("backgroundSettingsChanged")
+		addon.UpdateScheduler:Notify("healthSettingsChanged")
+		addon.UpdateScheduler:Notify("borderSettingsChanged")
+		addon.UpdateScheduler:Notify("nameSettingsChanged")
+		addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+		addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+		addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+	end
+
+	self.db:RegisterCallback("OnProfileChanged", OnProfileChanged)
+	self.db:RegisterCallback("OnProfileCopied", OnProfileChanged)
+	self.db:RegisterCallback("OnProfileReset", OnProfileChanged)
+
+	initialized = true
 end
