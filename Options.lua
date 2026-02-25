@@ -5,6 +5,40 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local APP_NAME = "Michs_RaidFrames"
 
+local function AddPageHeader(args, orderStart)
+	args.pageTopSpacer = {
+		type = "description",
+		order = orderStart,
+		name = "\n",
+		width = "full",
+	}
+
+	args.pageHeaderTitle = {
+		type = "description",
+		order = orderStart + 0.01,
+		fontSize = "large",
+		name = "|cffff9900   Mich's RaidFrames|r",
+		width = "full",
+	}
+
+	args.pageHeaderProfile = {
+		type = "description",
+		order = orderStart + 0.02,
+		name = function()
+			local current = addon.Database:GetCurrentProfileName() or "Default"
+			return "     Active Profile: |cff00ff96" .. current .. "|r"
+		end,
+		width = "full",
+	}
+
+	args.pageHeaderSpacer = {
+		type = "description",
+		order = orderStart + 0.03,
+		name = " ",
+		width = "full",
+	}
+end
+
 function addon:IsOptionsOpen()
 	local openFrames = AceConfigDialog and AceConfigDialog.OpenFrames
 	return openFrames and openFrames[APP_NAME] ~= nil
@@ -32,6 +66,48 @@ local function ShowCombatLockMessage()
 	print("|cffff9900Mich's RaidFrames:|r Layout changes are disabled during combat.")
 end
 
+local profileUI = {
+	newName = "",
+	copyName = "",
+	copyFrom = nil,
+	deleteName = nil,
+}
+
+local function Trim(s)
+	if type(s) ~= "string" then
+		return ""
+	end
+	return (s:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+local function GetProfileValues(includeDefault)
+	local values = {}
+	local db = addon.Database and addon.Database.db
+	if not db then
+		return values
+	end
+
+	local names = db:GetProfiles() or {}
+
+	table.sort(names, function(a, b)
+		return string.lower(tostring(a)) < string.lower(tostring(b))
+	end)
+
+	for _, name in ipairs(names) do
+		if type(name) == "string" then
+			if includeDefault or name ~= "Default" then
+				values[name] = name
+			end
+		end
+	end
+
+	return values
+end
+
+local function PrintProfileMsg(msg)
+	print("|cffff9900Mich's RaidFrames:|r " .. msg)
+end
+
 local options = {
 	type = "group",
 	name = "Mich's RaidFrames",
@@ -45,6 +121,7 @@ local options = {
 					type = "toggle",
 					name = "Show Solo Party Frame",
 					order = 1,
+					width = "full",
 					get = function()
 						local profile = addon.Database:GetProfile()
 						return profile.core.showSoloPartyFrame == true
@@ -59,6 +136,7 @@ local options = {
 					type = "toggle",
 					name = "Hide Blizzard Party/Raid Frames",
 					order = 2,
+					width = "full",
 					get = function()
 						local profile = addon.Database:GetProfile()
 						return profile.core.hideBlizzardRaidFrames == true
@@ -69,10 +147,16 @@ local options = {
 						addon.UpdateScheduler:Notify("layoutChanged")
 					end,
 				},
+				rowSpacer1 = {
+					type = "description",
+					name = " ",
+					order = 10,
+					width = "full",
+				},
 				outOfRangeAlpha = {
 					type = "range",
 					name = "Out of Range Alpha",
-					order = 20,
+					order = 11,
 					min = 0,
 					max = 1,
 					step = 0.05,
@@ -2572,8 +2656,234 @@ local options = {
 				},
 			},
 		},
+		profiles = {
+			type = "group",
+			name = "Profiles",
+			order = 4,
+			disabled = function()
+				return InCombatLockdown()
+			end,
+			args = {
+				activeGroup = {
+					type = "group",
+					name = "Select Active Profile",
+					inline = true,
+					order = 10,
+					width = "full",
+					args = {
+						activeProfile = {
+							type = "select",
+							name = "Profile",
+							order = 1,
+							width = 1.2,
+							values = function()
+								return GetProfileValues(true)
+							end,
+							get = function()
+								return addon.Database:GetCurrentProfileName()
+							end,
+							set = function(_, value)
+								if InCombatLockdown() then
+									ShowCombatLockMessage()
+									return
+								end
+								addon.Database:SetProfile(value)
+								PrintProfileMsg("Switched profile to '" .. value .. "'.")
+							end,
+						},
+					},
+				},
+
+				createGroup = {
+					type = "group",
+					name = "Create New Profile",
+					inline = true,
+					order = 20,
+					width = "full",
+					args = {
+						newName = {
+							type = "input",
+							name = "New Profile Name",
+							order = 1,
+							width = 1.5,
+							get = function()
+								return profileUI.newName
+							end,
+							set = function(_, value)
+								profileUI.newName = value or ""
+							end,
+						},
+						createBtn = {
+							type = "execute",
+							name = "Create & Switch",
+							order = 2,
+							width = 1.0,
+							func = function()
+								if InCombatLockdown() then
+									ShowCombatLockMessage()
+									return
+								end
+
+								local name = Trim(profileUI.newName)
+								if name == "" then
+									PrintProfileMsg("Enter a profile name first.")
+									return
+								end
+								if addon.Database:HasProfile(name) then
+									PrintProfileMsg("Profile '" .. name .. "' already exists.")
+									return
+								end
+
+								addon.Database:SetProfile(name)
+								profileUI.newName = ""
+								PrintProfileMsg("Created and switched to '" .. name .. "'.")
+							end,
+						},
+					},
+				},
+
+				copyGroup = {
+					type = "group",
+					name = "Copy Profile",
+					inline = true,
+					order = 30,
+					width = "full",
+					args = {
+						copyFrom = {
+							type = "select",
+							name = "Copy From",
+							order = 1,
+							width = 1.0,
+							values = function()
+								return GetProfileValues(true)
+							end,
+							get = function()
+								return profileUI.copyFrom
+							end,
+							set = function(_, value)
+								profileUI.copyFrom = value
+							end,
+						},
+						copyName = {
+							type = "input",
+							name = "New Profile Name",
+							order = 2,
+							width = 1.2,
+							get = function()
+								return profileUI.copyName
+							end,
+							set = function(_, value)
+								profileUI.copyName = value or ""
+							end,
+						},
+						copyBtn = {
+							type = "execute",
+							name = "Create Copy",
+							order = 3,
+							width = 0.8,
+							func = function()
+								if InCombatLockdown() then
+									ShowCombatLockMessage()
+									return
+								end
+
+								local source = profileUI.copyFrom
+								local name = Trim(profileUI.copyName)
+
+								if not source or source == "" then
+									PrintProfileMsg("Select a source profile.")
+									return
+								end
+								if name == "" then
+									PrintProfileMsg("Enter a new profile name.")
+									return
+								end
+								if addon.Database:HasProfile(name) then
+									PrintProfileMsg("Profile '" .. name .. "' already exists.")
+									return
+								end
+
+								addon.Database:SetProfile(name)
+								addon.Database:CopyProfile(source)
+
+								profileUI.copyName = ""
+								profileUI.copyFrom = nil
+								PrintProfileMsg("Created '" .. name .. "' by copying '" .. source .. "'.")
+							end,
+						},
+					},
+				},
+
+				deleteGroup = {
+					type = "group",
+					name = "Delete Profile",
+					inline = true,
+					order = 40,
+					width = "full",
+					args = {
+						deleteProfile = {
+							type = "select",
+							name = "Profile",
+							order = 1,
+							width = 1.2,
+							values = function()
+								return GetProfileValues(false) -- excludes Default
+							end,
+							get = function()
+								return profileUI.deleteName
+							end,
+							set = function(_, value)
+								profileUI.deleteName = value
+							end,
+						},
+						deleteBtn = {
+							type = "execute",
+							name = "Delete",
+							order = 2,
+							width = 0.8,
+							confirm = true,
+							confirmText = "Delete selected profile?",
+							func = function()
+								if InCombatLockdown() then
+									ShowCombatLockMessage()
+									return
+								end
+
+								local target = profileUI.deleteName
+								if not target or target == "" then
+									PrintProfileMsg("Select a profile to delete.")
+									return
+								end
+								if target == "Default" then
+									PrintProfileMsg("Default profile cannot be deleted.")
+									return
+								end
+								if not addon.Database:HasProfile(target) then
+									PrintProfileMsg("Profile '" .. target .. "' does not exist.")
+									return
+								end
+
+								local current = addon.Database:GetCurrentProfileName()
+								if current == target then
+									addon.Database:SetProfile("Default")
+								end
+
+								addon.Database:DeleteProfile(target)
+								profileUI.deleteName = nil
+								PrintProfileMsg("Deleted profile '" .. target .. "'.")
+							end,
+						},
+					},
+				},
+			},
+		},
 	},
 }
+
+AddPageHeader(options.args.general.args, 0)
+AddPageHeader(options.args.party.args, 0)
+AddPageHeader(options.args.raid.args, 0)
+AddPageHeader(options.args.profiles.args, 0)
 
 function addon:RegisterOptions()
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
