@@ -513,6 +513,153 @@ local options = {
 								addon.UpdateScheduler:Notify("backgroundSettingsChanged")
 							end,
 						},
+						rowSpacer4 = {
+							type = "description",
+							name = " ",
+							order = 40,
+							width = "full",
+						},
+						powerBarGroup = {
+							type = "group",
+							name = "Power Bar",
+							inline = true,
+							order = 200,
+							args = {
+								enabled = {
+									type = "toggle",
+									name = "Enabled",
+									order = 1,
+									width = 1.0,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).enabled == true
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.power = p.party.power or {}
+										p.party.power.enabled = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								healerOnly = {
+									type = "toggle",
+									name = "Healers Only",
+									order = 2,
+									width = 1.0,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).healerOnly == true
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.power = p.party.power or {}
+										p.party.power.healerOnly = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								height = {
+									type = "range",
+									name = "Height",
+									order = 3,
+									width = 1.0,
+									min = 1,
+									max = 20,
+									step = 1,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).height or 4
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.power = p.party.power or {}
+										p.party.power.height = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								borderEnabled = {
+									type = "toggle",
+									name = "Border",
+									order = 4,
+									width = 2.0,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).borderEnabled ~= false
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.power = p.party.power or {}
+										p.party.power.borderEnabled = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								borderThickness = {
+									type = "range",
+									name = "Border Thickness",
+									order = 5,
+									width = 1.0,
+									min = 1,
+									max = 6,
+									step = 1,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										local power = ((p.party or {}).power or {})
+										return (power.enabled ~= true) or (power.borderEnabled == false)
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.party or {}).power or {}).borderThicknessPx or 1
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.power = p.party.power or {}
+										p.party.power.borderThicknessPx = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+							},
+						},
 					},
 				},
 				texts = {
@@ -1942,6 +2089,153 @@ local options = {
 								profile.raid.background.color = { r = r, g = g, b = b, a = a }
 								addon.UpdateScheduler:Notify("backgroundSettingsChanged")
 							end,
+						},
+						rowSpacer4 = {
+							type = "description",
+							name = " ",
+							order = 40,
+							width = "full",
+						},
+						powerBarGroup = {
+							type = "group",
+							name = "Power Bar",
+							inline = true,
+							order = 200,
+							args = {
+								enabled = {
+									type = "toggle",
+									name = "Enabled",
+									order = 1,
+									width = 1.0,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).enabled == true
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.power = p.raid.power or {}
+										p.raid.power.enabled = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								healerOnly = {
+									type = "toggle",
+									name = "Healers Only",
+									order = 2,
+									width = 1.0,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).healerOnly == true
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.power = p.raid.power or {}
+										p.raid.power.healerOnly = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								height = {
+									type = "range",
+									name = "Height",
+									order = 3,
+									width = 1.0,
+									min = 1,
+									max = 20,
+									step = 1,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).height or 4
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.power = p.raid.power or {}
+										p.raid.power.height = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								borderEnabled = {
+									type = "toggle",
+									name = "Border",
+									order = 4,
+									width = 2.0,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).enabled ~= true
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).borderEnabled ~= false
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.power = p.raid.power or {}
+										p.raid.power.borderEnabled = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+								borderThickness = {
+									type = "range",
+									name = "Border Thickness",
+									order = 5,
+									width = 1.0,
+									min = 1,
+									max = 6,
+									step = 1,
+									disabled = function()
+										local p = addon.Database:GetProfile()
+										local power = ((p.raid or {}).power or {})
+										return (power.enabled ~= true) or (power.borderEnabled == false)
+									end,
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((p.raid or {}).power or {}).borderThicknessPx or 1
+									end,
+									set = function(_, v)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.power = p.raid.power or {}
+										p.raid.power.borderThicknessPx = v
+										addon.UpdateScheduler:Notify("powerSettingsChanged")
+										addon.UpdateScheduler:Notify("powerStateChanged")
+									end,
+								},
+							},
 						},
 					},
 				},

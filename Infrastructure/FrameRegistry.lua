@@ -176,6 +176,7 @@ local function EnsureWidgets()
 		for _, unitFrame in ipairs(group.frames) do
 			addon.Frames.Base.Background:Ensure(unitFrame, settings)
 			addon.Frames.Base.Health:Ensure(unitFrame, settings)
+			addon.Frames.Base.Power:Ensure(unitFrame, settings)
 			addon.Frames.Base.Border:Ensure(unitFrame, settings)
 
 			addon.Frames.Widgets.Overlay:Ensure(unitFrame)
@@ -217,6 +218,7 @@ local function UpdateSettings()
 		for _, unitFrame in ipairs(group.frames) do
 			addon.Frames.Base.Background:UpdateSettings(unitFrame, settings)
 			addon.Frames.Base.Health:UpdateSettings(unitFrame, settings)
+			addon.Frames.Base.Power:UpdateSettings(unitFrame, settings)
 			addon.Frames.Base.Border:UpdateSettings(unitFrame, settings)
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(unitFrame, settings)
 

@@ -23,10 +23,15 @@ function EventHandler:Initialize()
 	self:RegisterEvent("READY_CHECK_CONFIRM")
 	self:RegisterEvent("READY_CHECK_FINISHED")
 
-	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
-	self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
 	self:RegisterEvent("UNIT_MAXHEALTH")
 	self:RegisterEvent("UNIT_HEALTH")
+	self:RegisterEvent("UNIT_POWER_UPDATE")
+	self:RegisterEvent("UNIT_MAXPOWER")
+	self:RegisterEvent("UNIT_DISPLAYPOWER")
+
+	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
+	self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
+
 	self:RegisterEvent("UNIT_AURA")
 	self:RegisterEvent("CVAR_UPDATE")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
@@ -152,6 +157,18 @@ function EventHandler:UNIT_MAXHEALTH(event, unit)
 	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+end
+
+function EventHandler:UNIT_POWER_UPDATE(event, unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
+end
+
+function EventHandler:UNIT_MAXPOWER(event, unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
+end
+
+function EventHandler:UNIT_DISPLAYPOWER(event, unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
 function EventHandler:UNIT_AURA(event, unit)

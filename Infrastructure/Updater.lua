@@ -19,6 +19,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Base.Health:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.powerSettingsChanged then
+			addon.Frames.Base.Power:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.borderSettingsChanged then
 			addon.Frames.Base.Border:UpdateSettings(frame, settings)
 		end
@@ -65,6 +69,10 @@ local function BuildStateUpdater(updateReasons)
 	return function(frame, settings)
 		if updateReasons.rosterChanged or updateReasons.healthStateChanged then
 			addon.Frames.Base.Health:UpdateState(frame, settings)
+		end
+
+		if updateReasons.rosterChanged or updateReasons.powerStateChanged then
+			addon.Frames.Base.Power:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.nameStateChanged or updateReasons.healthStateChanged then
