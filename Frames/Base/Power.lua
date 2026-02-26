@@ -121,11 +121,6 @@ function Power:UpdateSettings(frame, settings)
 
 	local powerSettings = GetPowerSettings(settings)
 
-	if not powerSettings.enabled then
-		powerBar:Hide()
-		return
-	end
-
 	local scaledHeightPx = math.max(1, addon.Utilities:Scale(powerSettings.heightPx))
 	local scaledBorderPx = math.max(1, addon.Utilities:Scale(powerSettings.borderThicknessPx))
 
@@ -163,6 +158,19 @@ function Power:UpdateSettings(frame, settings)
 			powerBar.border:Hide()
 		end
 	end
+
+	local unit = frame.unit
+	local showBar = powerSettings.enabled
+
+	if showBar and powerSettings.healerOnly then
+		showBar = IsHealerUnit(unit)
+	end
+
+	if showBar then
+		powerBar:Show()
+	else
+		powerBar:Hide()
+	end
 end
 
 function Power:UpdateState(frame, settings)
@@ -173,19 +181,16 @@ function Power:UpdateState(frame, settings)
 
 	local powerSettings = GetPowerSettings(settings)
 	if not powerSettings.enabled then
-		powerBar:Hide()
 		return
 	end
 
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
-		powerBar:Hide()
 		return
 	end
 
 	local current, max, token = GetDisplayedPower(unit, powerSettings)
 	if not current or not max or max <= 0 then
-		powerBar:Hide()
 		return
 	end
 
@@ -194,5 +199,4 @@ function Power:UpdateState(frame, settings)
 
 	powerBar:SetMinMaxValues(0, max)
 	powerBar:SetValue(current)
-	powerBar:Show()
 end

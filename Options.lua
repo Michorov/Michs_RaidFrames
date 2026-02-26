@@ -544,7 +544,6 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.enabled = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								healerOnly = {
@@ -570,7 +569,6 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.healerOnly = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								height = {
@@ -599,7 +597,6 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.height = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								borderEnabled = {
@@ -625,7 +622,6 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.borderEnabled = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								borderThickness = {
@@ -655,7 +651,6 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.borderThicknessPx = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 							},
@@ -2121,7 +2116,6 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.enabled = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								healerOnly = {
@@ -2147,7 +2141,6 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.healerOnly = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								height = {
@@ -2176,7 +2169,6 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.height = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								borderEnabled = {
@@ -2202,7 +2194,6 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.borderEnabled = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 								borderThickness = {
@@ -2232,7 +2223,6 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.borderThicknessPx = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
-										addon.UpdateScheduler:Notify("powerStateChanged")
 									end,
 								},
 							},
