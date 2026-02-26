@@ -38,6 +38,15 @@ local DEFAULTS = {
 					a = 1.0,
 				},
 			},
+			power = {
+				enabled = true,
+				healerOnly = false,
+				texture = "Interface\\Buttons\\WHITE8x8",
+				height = 8,
+				borderEnabled = true,
+				borderThicknessPx = 1,
+				backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
+			},
 			border = {
 				thicknessPx = 1,
 				color = { r = 0, g = 0, b = 0, a = 1 },
@@ -180,6 +189,15 @@ local DEFAULTS = {
 					b = 0.12,
 					a = 1.0,
 				},
+			},
+			power = {
+				enabled = true,
+				healerOnly = false,
+				texture = "Interface\\Buttons\\WHITE8x8",
+				height = 6,
+				borderEnabled = true,
+				borderThicknessPx = 1,
+				backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
 			},
 			border = {
 				thicknessPx = 1,
