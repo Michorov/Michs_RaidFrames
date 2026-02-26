@@ -70,7 +70,7 @@ function HealAbsorbs:Ensure(frame)
 		bar:SetFrameStrata(widgetsOverlay:GetFrameStrata())
 		bar:SetFrameLevel(widgetsOverlay:GetFrameLevel() + 4)
 		bar:SetOrientation("HORIZONTAL")
-		bar:SetReverseFill(false) -- left -> right
+		bar:SetReverseFill(false)
 		bar:Hide()
 		frame.healAbsorbBar = bar
 	end
@@ -81,6 +81,14 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 	local bar = frame and frame.healAbsorbBar
 	if not bar then
 		return
+	end
+
+	local healthBar = frame.healthBar
+	local healthTex = healthBar and healthBar.GetStatusBarTexture and healthBar:GetStatusBarTexture()
+	if healthTex then
+		bar:ClearAllPoints()
+		bar:SetPoint("TOPLEFT", healthTex, "TOPLEFT", 0, 0)
+		bar:SetPoint("BOTTOMRIGHT", healthTex, "BOTTOMRIGHT", 0, 0)
 	end
 
 	bar:SetStatusBarTexture(healAbsorbSettings.texture)
@@ -94,8 +102,7 @@ end
 
 function HealAbsorbs:UpdateState(frame)
 	local bar = frame and frame.healAbsorbBar
-	local healthBar = frame and frame.healthBar
-	if not bar or not healthBar then
+	if not frame or not bar then
 		return
 	end
 
@@ -116,16 +123,6 @@ function HealAbsorbs:UpdateState(frame)
 		bar:Hide()
 		return
 	end
-
-	local healthTex = healthBar.GetStatusBarTexture and healthBar:GetStatusBarTexture()
-	if not healthTex then
-		bar:Hide()
-		return
-	end
-
-	bar:ClearAllPoints()
-	bar:SetPoint("TOPLEFT", healthTex, "TOPLEFT", 0, 0)
-	bar:SetPoint("BOTTOMRIGHT", healthTex, "BOTTOMRIGHT", 0, 0)
 
 	bar:SetMinMaxValues(0, currentHealth)
 	bar:SetValue(healAbsorbValue)

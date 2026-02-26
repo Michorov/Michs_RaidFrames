@@ -259,7 +259,7 @@ local DEFAULTS = {
 						offsetY = 2,
 
 						maxIcons = 3,
-						iconSize = 20,
+						iconSize = 16,
 						spacing = 1,
 					},
 					bigDefensive = {
@@ -378,6 +378,8 @@ function Database:Initialize()
 		addon.UpdateScheduler:Notify("layoutChanged")
 		addon.UpdateScheduler:Notify("backgroundSettingsChanged")
 		addon.UpdateScheduler:Notify("healthSettingsChanged")
+		addon.UpdateScheduler:Notify("powerSettingsChanged")
+		addon.UpdateScheduler:Notify("powerStateChanged")
 		addon.UpdateScheduler:Notify("borderSettingsChanged")
 		addon.UpdateScheduler:Notify("nameSettingsChanged")
 		addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
