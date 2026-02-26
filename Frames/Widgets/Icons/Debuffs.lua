@@ -8,65 +8,92 @@ addon.Frames.Widgets.Icons.Debuffs = addon.Frames.Widgets.Icons.Debuffs or {}
 local Debuffs = addon.Frames.Widgets.Icons.Debuffs
 
 local function GetDebuffSettings(settings)
-	return settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.debuffs
+	local debuffs = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.debuffs or {}
+
+	return {
+		anchor = debuffs.anchor or "BOTTOMLEFT",
+		relativeAnchor = debuffs.relativeAnchor or "BOTTOMLEFT",
+		offsetXPx = addon.Utilities:ToPixels(debuffs.offsetX or 2),
+		offsetYPx = addon.Utilities:ToPixels(debuffs.offsetY or 2),
+		maxIcons = math.max(1, debuffs.maxIcons or 6),
+		iconsPerRow = math.max(1, debuffs.iconsPerRow or 3),
+		iconSizePx = addon.Utilities:ToPixels(debuffs.iconSize or 20),
+		spacingPx = addon.Utilities:ToPixels(debuffs.spacing or -1),
+		stacksFontSize = debuffs.stacksFontSize or 10,
+		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
+	}
 end
 
 local function UpdateIconSettings(icon, debuffSettings)
-	local iconSizePx = debuffSettings.iconSize
-	local borderSizePx = debuffSettings.borderSizePx
-	local stacksFontSize = debuffSettings.stacksFontSize
+	local scaledIconPx = addon.Utilities:Scale(debuffSettings.iconSizePx)
+	local scaledBorderPx = math.max(1, addon.Utilities:Scale(debuffSettings.borderSizePx))
 
-	local iconSize = addon.Utilities:FromPixels(iconSizePx)
-	local inset = addon.Utilities:FromPixels(borderSizePx)
-
-	icon:SetSize(iconSize, iconSize)
+	icon:SetSize(addon.Utilities:ToUI(scaledIconPx), addon.Utilities:ToUI(scaledIconPx))
 
 	icon.texture:ClearAllPoints()
-	icon.texture:SetPoint("TOPLEFT", icon, "TOPLEFT", inset, -inset)
-	icon.texture:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.texture:SetPoint(
+		"TOPLEFT",
+		icon,
+		"TOPLEFT",
+		addon.Utilities:ToUI(scaledBorderPx),
+		-addon.Utilities:ToUI(scaledBorderPx)
+	)
+	icon.texture:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderPx),
+		addon.Utilities:ToUI(scaledBorderPx)
+	)
 
 	icon.border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:FromPixels(borderSizePx),
+		edgeSize = addon.Utilities:ToUI(scaledBorderPx),
 	})
 	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
 
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", stacksFontSize, "OUTLINE")
+	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(debuffSettings.stacksFontSize), "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
-	icon.countText:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.countText:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderPx),
+		addon.Utilities:ToUI(scaledBorderPx)
+	)
 end
 
 function Debuffs:UpdateSettings(frame, settings)
 	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
-	if not debuffSettings or not container then
+	if not container then
 		return
 	end
 
-	local maxIcons = math.max(1, debuffSettings.maxIcons)
-	local iconsPerRow = math.max(1, debuffSettings.iconsPerRow)
-	local iconSizePx = debuffSettings.iconSize
-	local spacingPx = debuffSettings.spacing
+	local iconSizePx = addon.Utilities:Scale(debuffSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(debuffSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(debuffSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(debuffSettings.offsetYPx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		"BOTTOMLEFT",
+		debuffSettings.anchor,
 		container:GetParent(),
-		"BOTTOMLEFT",
-		addon.Utilities:FromPixels(debuffSettings.offsetX),
-		addon.Utilities:FromPixels(debuffSettings.offsetY)
+		debuffSettings.relativeAnchor,
+		addon.Utilities:ToUI(offsetXPx),
+		addon.Utilities:ToUI(offsetYPx)
 	)
 
-	local visibleCols = math.min(maxIcons, iconsPerRow)
-	local rowCount = math.max(1, math.ceil(maxIcons / iconsPerRow))
+	local visibleCols = math.min(debuffSettings.maxIcons, debuffSettings.iconsPerRow)
+	local rowCount = math.max(1, math.ceil(debuffSettings.maxIcons / debuffSettings.iconsPerRow))
 
 	local widthPx = (visibleCols * iconSizePx) + ((visibleCols - 1) * spacingPx)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
-	container:SetSize(addon.Utilities:FromPixels(widthPx), addon.Utilities:FromPixels(heightPx))
+	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	for i = 1, maxIcons do
+	for i = 1, debuffSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
@@ -76,23 +103,24 @@ function Debuffs:UpdateSettings(frame, settings)
 		UpdateIconSettings(icon, debuffSettings)
 
 		local idx = i - 1
-		local col = idx % iconsPerRow
-		local row = math.floor(idx / iconsPerRow)
+		local col = idx % debuffSettings.iconsPerRow
+		local row = math.floor(idx / debuffSettings.iconsPerRow)
 
-		local xPx = (col * (iconSizePx + spacingPx))
-		local yPx = (row * (iconSizePx + spacingPx))
+		local stepPx = iconSizePx + spacingPx
+		local xPx = (col * stepPx)
+		local yPx = (row * stepPx)
 
 		icon:ClearAllPoints()
 		icon:SetPoint(
 			"BOTTOMLEFT",
 			container,
 			"BOTTOMLEFT",
-			addon.Utilities:FromPixels(xPx),
-			addon.Utilities:FromPixels(yPx)
+			addon.Utilities:ToUI(xPx),
+			addon.Utilities:ToUI(yPx)
 		)
 	end
 
-	for i = maxIcons + 1, #container.icons do
+	for i = debuffSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -103,7 +131,7 @@ end
 function Debuffs:UpdateState(frame, settings)
 	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
-	if not debuffSettings or not container then
+	if not container then
 		return
 	end
 
@@ -197,7 +225,7 @@ end
 
 function Debuffs:Ensure(frame, settings)
 	local debuffSettings = GetDebuffSettings(settings)
-	if not frame or not debuffSettings then
+	if not frame then
 		return
 	end
 

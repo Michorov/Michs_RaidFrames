@@ -35,6 +35,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Bars.Absorbs:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.healAbsorbsSettingsChanged then
+			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.buffAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.Buffs:UpdateSettings(frame, settings)
 		end

@@ -13,6 +13,7 @@ local DEFAULTS = {
 			showSoloPartyFrame = true,
 			hideBlizzardRaidFrames = true,
 			outOfRangeAlpha = 0.5,
+			uiScale = 1.0,
 		},
 		party = {
 			size = { width = 128, height = 64 },
@@ -70,7 +71,7 @@ local DEFAULTS = {
 
 						maxIcons = 6,
 						iconsPerRow = 3,
-						iconSize = 20,
+						iconSize = 16,
 						spacing = -1,
 
 						stacksFontSize = 10,
@@ -84,7 +85,7 @@ local DEFAULTS = {
 
 						maxIcons = 6,
 						iconsPerRow = 3,
-						iconSize = 20,
+						iconSize = 16,
 						spacing = -1,
 
 						stacksFontSize = 10,
@@ -94,10 +95,10 @@ local DEFAULTS = {
 						anchor = "LEFT",
 						relativeAnchor = "LEFT",
 						offsetX = 2,
-						offsetY = 4,
+						offsetY = 2,
 
 						maxIcons = 3,
-						iconSize = 24,
+						iconSize = 20,
 						spacing = 1,
 					},
 					bigDefensive = {
@@ -114,7 +115,22 @@ local DEFAULTS = {
 					},
 				},
 				bars = {
-					absorbs = {},
+					absorbs = {
+						color = {
+							r = 0.2,
+							g = 0.8,
+							b = 1.0,
+							a = 0.5,
+						},
+					},
+					healAbsorbs = {
+						color = {
+							r = 1,
+							g = 0,
+							b = 0,
+							a = 0.5,
+						},
+					},
 				},
 				indicators = {
 					readyCheck = {},
@@ -242,7 +258,22 @@ local DEFAULTS = {
 					},
 				},
 				bars = {
-					absorbs = {},
+					absorbs = {
+						color = {
+							r = 0.2,
+							g = 0.8,
+							b = 1.0,
+							a = 0.5,
+						},
+					},
+					healAbsorbs = {
+						color = {
+							r = 1,
+							g = 0,
+							b = 0,
+							a = 0.5,
+						},
+					},
 				},
 				indicators = {
 					readyCheck = {},

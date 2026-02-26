@@ -8,53 +8,83 @@ addon.Frames.Widgets.Icons.BigDefensive = addon.Frames.Widgets.Icons.BigDefensiv
 local BigDefensive = addon.Frames.Widgets.Icons.BigDefensive
 
 local function GetBigDefensiveSettings(settings)
-	return settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.bigDefensive
+	local bigDefensive = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.bigDefensive or {}
+
+	return {
+		anchor = bigDefensive.anchor or "CENTER",
+		relativeAnchor = bigDefensive.relativeAnchor or "CENTER",
+		offsetXPx = addon.Utilities:ToPixels(bigDefensive.offsetX or 0),
+		offsetYPx = addon.Utilities:ToPixels(bigDefensive.offsetY or 0),
+		maxIcons = math.max(1, bigDefensive.maxIcons or 1),
+		iconSizePx = addon.Utilities:ToPixels(bigDefensive.iconSize or 32),
+		borderSizePx = addon.Utilities:ToPixels(bigDefensive.borderSizePx or 1),
+		stacksFontSize = bigDefensive.stacksFontSize or 16,
+	}
 end
 
 local function UpdateIconSettings(icon, settings)
-	local iconSize = addon.Utilities:FromPixels(settings.iconSize or 32)
-	local inset = addon.Utilities:FromPixels(settings.borderSizePx or 1)
+	local iconSizePx = addon.Utilities:ScaleEven(settings.iconSizePx)
+	local borderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
 
-	icon:SetSize(iconSize, iconSize)
+	icon:SetSize(addon.Utilities:ToUI(iconSizePx), addon.Utilities:ToUI(iconSizePx))
 
 	icon.texture:ClearAllPoints()
-	icon.texture:SetPoint("TOPLEFT", icon, "TOPLEFT", inset, -inset)
-	icon.texture:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.texture:SetPoint(
+		"TOPLEFT",
+		icon,
+		"TOPLEFT",
+		addon.Utilities:ToUI(borderSizePx),
+		-addon.Utilities:ToUI(borderSizePx)
+	)
+	icon.texture:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(borderSizePx),
+		addon.Utilities:ToUI(borderSizePx)
+	)
 
 	icon.border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:FromPixels(settings.borderSizePx),
+		edgeSize = addon.Utilities:ToUI(borderSizePx),
 	})
 	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
 
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", settings.stacksFontSize, "OUTLINE")
+	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(settings.stacksFontSize), "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
-	icon.countText:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.countText:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(borderSizePx),
+		addon.Utilities:ToUI(borderSizePx)
+	)
 end
 
 function BigDefensive:UpdateSettings(frame, settings)
 	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	local container = frame and frame.bigDefensiveContainer
-	if not bigDefensiveSettings or not container then
+	if not container then
 		return
 	end
 
-	local maxIcons = math.max(1, bigDefensiveSettings.maxIcons or 1)
+	local offsetXPx = addon.Utilities:Scale(bigDefensiveSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(bigDefensiveSettings.offsetYPx)
+	local iconSizePx = addon.Utilities:ScaleEven(bigDefensiveSettings.iconSizePx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
 		bigDefensiveSettings.anchor,
 		container:GetParent(),
 		bigDefensiveSettings.relativeAnchor,
-		addon.Utilities:FromPixels(bigDefensiveSettings.offsetX),
-		addon.Utilities:FromPixels(bigDefensiveSettings.offsetY)
+		addon.Utilities:ToUI(offsetXPx),
+		addon.Utilities:ToUI(offsetYPx)
 	)
 
-	local iconSize = addon.Utilities:FromPixels(bigDefensiveSettings.iconSize or 32)
-	container:SetSize(iconSize, iconSize) -- maxIcons=1 for now
+	container:SetSize(addon.Utilities:ToUI(iconSizePx), addon.Utilities:ToUI(iconSizePx))
 
-	for i = 1, maxIcons do
+	for i = 1, bigDefensiveSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 15)
@@ -66,7 +96,7 @@ function BigDefensive:UpdateSettings(frame, settings)
 		icon:SetPoint("CENTER", container, "CENTER", 0, 0)
 	end
 
-	for i = maxIcons + 1, #container.icons do
+	for i = bigDefensiveSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -77,7 +107,7 @@ end
 function BigDefensive:UpdateState(frame, settings)
 	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	local container = frame and frame.bigDefensiveContainer
-	if not bigDefensiveSettings or not container then
+	if not container then
 		return
 	end
 
@@ -87,7 +117,7 @@ function BigDefensive:UpdateState(frame, settings)
 		return
 	end
 
-	local maxIcons = math.max(1, bigDefensiveSettings.maxIcons or 1)
+	local maxIcons = bigDefensiveSettings.maxIcons
 	local shown = 0
 
 	local auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
@@ -146,7 +176,7 @@ end
 
 function BigDefensive:Ensure(frame, settings)
 	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
-	if not frame or not bigDefensiveSettings then
+	if not frame then
 		return
 	end
 
@@ -159,8 +189,7 @@ function BigDefensive:Ensure(frame, settings)
 		return
 	end
 
-	local maxIcons = math.max(1, bigDefensiveSettings.maxIcons or 1)
-	for i = 1, maxIcons do
+	for i = 1, bigDefensiveSettings.maxIcons do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 15)
 		end

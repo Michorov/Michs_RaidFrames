@@ -8,7 +8,18 @@ addon.Frames.Widgets.Icons.PrivateAuras = addon.Frames.Widgets.Icons.PrivateAura
 local PrivateAuras = addon.Frames.Widgets.Icons.PrivateAuras
 
 local function GetPrivateAurasSettings(settings)
-	return settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.privateAuras
+	local privateAuras = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.privateAuras
+		or {}
+
+	return {
+		anchor = privateAuras.anchor or "LEFT",
+		relativeAnchor = privateAuras.relativeAnchor or "LEFT",
+		offsetXPx = addon.Utilities:ToPixels(privateAuras.offsetX or 2),
+		offsetYPx = addon.Utilities:ToPixels(privateAuras.offsetY or 2),
+		maxIcons = math.max(1, privateAuras.maxIcons or 3),
+		iconSizePx = addon.Utilities:ToPixels(privateAuras.iconSize or 20),
+		spacingPx = addon.Utilities:ToPixels(privateAuras.spacing or 1),
+	}
 end
 
 local function RemovePrivateAuraAnchors(frame)
@@ -26,18 +37,16 @@ local function RemovePrivateAuraAnchors(frame)
 	wipe(frame.privateAurasAnchorIDs)
 end
 
-local function EnsurePrivateAuraAnchors(frame, settings)
+local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	local container = frame and frame.privateAurasContainer
 	if not container then
 		return
 	end
 
 	local unit = frame.unit
-	local privateAuraSettings = GetPrivateAurasSettings(settings) or {}
 
-	local maxIcons = math.max(1, privateAuraSettings.maxIcons)
-	local iconSizePx = privateAuraSettings.iconSize
-	local spacingPx = privateAuraSettings.spacing
+	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
 
 	if not unit or not C_UnitAuras or not C_UnitAuras.AddPrivateAuraAnchor then
 		container:Hide()
@@ -48,9 +57,9 @@ local function EnsurePrivateAuraAnchors(frame, settings)
 
 	RemovePrivateAuraAnchors(frame)
 
-	local iconSize = addon.Utilities:FromPixels(iconSizePx)
+	local iconSize = addon.Utilities:ToUI(iconSizePx)
 
-	for auraIndex = 1, maxIcons do
+	for auraIndex = 1, privateAuraSettings.maxIcons do
 		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
 
 		local ok, anchorID = pcall(C_UnitAuras.AddPrivateAuraAnchor, {
@@ -68,7 +77,7 @@ local function EnsurePrivateAuraAnchors(frame, settings)
 					point = "LEFT",
 					relativeTo = container,
 					relativePoint = "LEFT",
-					offsetX = addon.Utilities:FromPixels(xOffsetPx),
+					offsetX = addon.Utilities:ToUI(xOffsetPx),
 					offsetY = 0,
 				},
 			},
@@ -88,31 +97,27 @@ function PrivateAuras:UpdateSettings(frame, settings)
 		return
 	end
 
-	local privateAuraSettings = GetPrivateAurasSettings(settings) or {}
+	local privateAuraSettings = GetPrivateAurasSettings(settings)
 
-	local maxIcons = math.max(1, privateAuraSettings.maxIcons)
-	local iconSizePx = privateAuraSettings.iconSize
-	local spacingPx = privateAuraSettings.spacing
+	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(privateAuraSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(privateAuraSettings.offsetYPx)
 
-	local anchor = privateAuraSettings.anchor
-	local relativeAnchor = privateAuraSettings.relativeAnchor
-	local offsetXPx = privateAuraSettings.offsetX
-	local offsetYPx = privateAuraSettings.offsetY
-
-	local widthPx = (maxIcons * iconSizePx) + ((maxIcons - 1) * spacingPx)
+	local widthPx = (privateAuraSettings.maxIcons * iconSizePx) + ((privateAuraSettings.maxIcons - 1) * spacingPx)
 	local heightPx = iconSizePx
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		anchor,
+		privateAuraSettings.anchor,
 		container:GetParent(),
-		relativeAnchor,
-		addon.Utilities:FromPixels(offsetXPx),
-		addon.Utilities:FromPixels(offsetYPx)
+		privateAuraSettings.relativeAnchor,
+		addon.Utilities:ToUI(offsetXPx),
+		addon.Utilities:ToUI(offsetYPx)
 	)
-	container:SetSize(addon.Utilities:FromPixels(widthPx), addon.Utilities:FromPixels(heightPx))
+	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	EnsurePrivateAuraAnchors(frame, settings)
+	EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 end
 
 function PrivateAuras:Ensure(frame, settings)

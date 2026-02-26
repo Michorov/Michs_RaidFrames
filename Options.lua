@@ -153,6 +153,32 @@ local options = {
 					order = 10,
 					width = "full",
 				},
+				globalScale = {
+					type = "range",
+					name = "Global Scale",
+					min = 0.5,
+					max = 2.0,
+					step = 0.01,
+					isPercent = true,
+					order = 12,
+					get = function()
+						return addon.Database:GetProfile().core.uiScale or 1
+					end,
+					set = function(_, v)
+						local p = addon.Database:GetProfile()
+						p.core.uiScale = v
+						addon.UpdateScheduler:Notify("layoutChanged")
+						addon.UpdateScheduler:Notify("backgroundSettingsChanged")
+						addon.UpdateScheduler:Notify("healthSettingsChanged")
+						addon.UpdateScheduler:Notify("borderSettingsChanged")
+						addon.UpdateScheduler:Notify("nameSettingsChanged")
+						addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+						addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+						addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+						addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+						addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+					end,
+				},
 				outOfRangeAlpha = {
 					type = "range",
 					name = "Out of Range Alpha",
@@ -183,7 +209,7 @@ local options = {
 				layout = {
 					type = "group",
 					name = "Layout",
-					order = 2,
+					order = 1,
 					args = {
 						partyPosX = {
 							type = "range",
@@ -307,12 +333,12 @@ local options = {
 				frames = {
 					type = "group",
 					name = "Frames",
-					order = 3,
+					order = 2,
 					args = {
 						partyWidth = {
 							type = "range",
 							name = "Width",
-							min = 50,
+							min = 25,
 							max = 300,
 							step = 1,
 							order = 1,
@@ -335,7 +361,7 @@ local options = {
 						partyHeight = {
 							type = "range",
 							name = "Height",
-							min = 50,
+							min = 25,
 							max = 300,
 							step = 1,
 							order = 2,
@@ -492,7 +518,7 @@ local options = {
 				texts = {
 					type = "group",
 					name = "Texts",
-					order = 4,
+					order = 3,
 					childGroups = "tab",
 					args = {
 						name = {
@@ -726,7 +752,7 @@ local options = {
 				icons = {
 					type = "group",
 					name = "Icons",
-					order = 5,
+					order = 4,
 					childGroups = "tab",
 					args = {
 						buffs = {
@@ -1285,6 +1311,68 @@ local options = {
 								},
 							},
 						},
+						absorbs = {
+							type = "group",
+							name = "Shields",
+							order = 1,
+							args = {
+								partyAbsorbsColor = {
+									type = "color",
+									name = "Shield Color",
+									hasAlpha = true,
+									order = 10,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.absorbs = p.party.widgets.bars.absorbs or {}
+										p.party.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 2,
+							args = {
+								partyHealAbsorbsColor = {
+									type = "color",
+									name = "Heal Absorb Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.party or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.healAbsorbs = p.party.widgets.bars.healAbsorbs or {}
+										p.party.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
+									end,
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1301,7 +1389,7 @@ local options = {
 				layout = {
 					type = "group",
 					name = "Layout",
-					order = 2,
+					order = 1,
 					args = {
 						raidPosX = {
 							type = "range",
@@ -1672,12 +1760,12 @@ local options = {
 				frames = {
 					type = "group",
 					name = "Frames",
-					order = 3,
+					order = 2,
 					args = {
 						raidWidth = {
 							type = "range",
 							name = "Width",
-							min = 50,
+							min = 25,
 							max = 300,
 							step = 1,
 							order = 1,
@@ -1700,7 +1788,7 @@ local options = {
 						raidHeight = {
 							type = "range",
 							name = "Height",
-							min = 50,
+							min = 25,
 							max = 300,
 							step = 1,
 							order = 2,
@@ -1860,7 +1948,7 @@ local options = {
 				texts = {
 					type = "group",
 					name = "Texts",
-					order = 4,
+					order = 3,
 					childGroups = "tab",
 					args = {
 						name = {
@@ -2093,7 +2181,7 @@ local options = {
 				icons = {
 					type = "group",
 					name = "Icons",
-					order = 5,
+					order = 4,
 					childGroups = "tab",
 					args = {
 						buffs = {
@@ -2648,6 +2736,68 @@ local options = {
 										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
 										p.raid.widgets.indicators.dispels.spacing = v
 										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+									end,
+								},
+							},
+						},
+						absorbs = {
+							type = "group",
+							name = "Shields",
+							order = 1,
+							args = {
+								raidAbsorbsColor = {
+									type = "color",
+									name = "Shields Color",
+									hasAlpha = true,
+									order = 10,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.absorbs = p.raid.widgets.bars.absorbs or {}
+										p.raid.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 2,
+							args = {
+								raidHealAbsorbsColor = {
+									type = "color",
+									name = "Heal Absorb Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.raid or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.healAbsorbs = p.raid.widgets.bars.healAbsorbs or {}
+										p.raid.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
 									end,
 								},
 							},

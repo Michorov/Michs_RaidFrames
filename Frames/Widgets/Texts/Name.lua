@@ -14,11 +14,13 @@ local function GetNameSettings(settings)
 
 	local position = name.position or {}
 	local color = name.color or {}
+	local positionX = addon.Utilities:ToPixels(position.x or 2)
+	local positionY = addon.Utilities:ToPixels(position.y or -2)
 
 	return {
 		anchor = name.anchor or "TOPLEFT",
-		x = position.x or 2,
-		y = position.y or -2,
+		positionX = positionX,
+		positionY = positionY,
 		classColor = name.classColor == true,
 		color = {
 			r = color.r or 0,
@@ -44,14 +46,25 @@ end
 local function ApplyNameSettings(frame, nameText, settings)
 	local nameSettings = GetNameSettings(settings)
 
+	local scaledPositionX = addon.Utilities:Scale(nameSettings.positionX)
+	local scaledPositionY = addon.Utilities:Scale(nameSettings.positionY)
+	local scaledFontSize = addon.Utilities:ScaleFont(nameSettings.size)
+
 	nameText:ClearAllPoints()
-	nameText:SetPoint(nameSettings.anchor, frame, nameSettings.anchor, nameSettings.x, nameSettings.y)
+	nameText:SetPoint(
+		nameSettings.anchor,
+		frame,
+		nameSettings.anchor,
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
+	)
 
 	local fontFlags = nameSettings.outline
 	if fontFlags == "NONE" then
 		fontFlags = ""
 	end
-	nameText:SetFont(nameSettings.font, nameSettings.size, fontFlags)
+
+	nameText:SetFont(nameSettings.font, scaledFontSize, fontFlags)
 
 	local r, g, b, a = GetNameColor(frame, nameSettings)
 	nameText:SetTextColor(r, g, b, a)
