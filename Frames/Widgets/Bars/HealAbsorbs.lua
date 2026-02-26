@@ -123,12 +123,10 @@ function HealAbsorbs:UpdateState(frame)
 		return
 	end
 
-	-- Restrict the heal-absorb bar to the current-health area.
 	bar:ClearAllPoints()
 	bar:SetPoint("TOPLEFT", healthTex, "TOPLEFT", 0, 0)
 	bar:SetPoint("BOTTOMRIGHT", healthTex, "BOTTOMRIGHT", 0, 0)
 
-	-- Clamp to current health (not max health).
 	bar:SetMinMaxValues(0, currentHealth)
 	bar:SetValue(healAbsorbValue)
 	bar:Show()

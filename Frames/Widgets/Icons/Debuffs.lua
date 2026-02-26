@@ -111,13 +111,7 @@ function Debuffs:UpdateSettings(frame, settings)
 		local yPx = (row * stepPx)
 
 		icon:ClearAllPoints()
-		icon:SetPoint(
-			"BOTTOMLEFT",
-			container,
-			"BOTTOMLEFT",
-			addon.Utilities:ToUI(xPx),
-			addon.Utilities:ToUI(yPx)
-		)
+		icon:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", addon.Utilities:ToUI(xPx), addon.Utilities:ToUI(yPx))
 	end
 
 	for i = debuffSettings.maxIcons + 1, #container.icons do
@@ -171,10 +165,8 @@ function Debuffs:UpdateState(frame, settings)
 			if icon and icon.texture then
 				shown = shown + 1
 
-				-- texture
 				icon.texture:SetTexture(aura.icon)
 
-				-- stacks
 				if icon.countText then
 					icon.countText:SetText("")
 					if C_UnitAuras.GetAuraApplicationDisplayCount then
@@ -185,7 +177,6 @@ function Debuffs:UpdateState(frame, settings)
 					end
 				end
 
-				-- expiration / cooldown (secret-safe)
 				local hasExpiration = false
 				if C_UnitAuras.DoesAuraHaveExpirationTime then
 					hasExpiration = C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)

@@ -33,19 +33,16 @@ function Utilities:RefreshPixelGrid()
 	cachedPixelStep = pixelScale / uiScale
 end
 
--- Normalizes Values from Db. Sets scale for Monitor Size
 function Utilities:ToPixels(value)
 	local step = GetPixelStep()
 	return math.floor((value or 0) / step + 0.5)
 end
 
--- Calculates with the Scaling %
 function Utilities:Scale(pixelCount)
 	local scaledPx = (pixelCount or 0) * GetGlobalScale()
 	return RoundToNearestInt(scaledPx)
 end
 
--- Calculates with the Scaling % to even number for frames
 function Utilities:ScaleEven(pixelCount)
 	local px = self:Scale(pixelCount)
 	if (px % 2) ~= 0 then
@@ -54,12 +51,10 @@ function Utilities:ScaleEven(pixelCount)
 	return px
 end
 
--- Calculates the UI Units from Value
 function Utilities:ToUI(pixelCount)
 	return (pixelCount or 0) * GetPixelStep()
 end
 
--- Calculates the Font Scale
 function Utilities:ScaleFont(size)
 	return math.max(1, self:Scale(size))
 end

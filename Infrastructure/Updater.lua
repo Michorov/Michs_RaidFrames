@@ -116,7 +116,6 @@ local function Flush(updateReasons)
 		addon.FrameRegistry:UpdateLayout()
 	end
 
-	-- 1) unit-scoped updates
 	for unit, unitReasons in pairs(updateReasons.units or {}) do
 		local stateUpdater = BuildStateUpdater(unitReasons)
 		local settingsUpdater = BuildSettingsUpdater(unitReasons)
@@ -124,7 +123,6 @@ local function Flush(updateReasons)
 		addon.FrameRegistry:UpdateUnit(unit, stateUpdater, settingsUpdater)
 	end
 
-	-- 2) global updates
 	if hasGlobal then
 		local stateUpdater = BuildStateUpdater(globalReasons)
 		local settingsUpdater = BuildSettingsUpdater(globalReasons)
