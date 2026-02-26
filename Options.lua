@@ -1867,7 +1867,7 @@ local options = {
 						},
 						raidBorderThickness = {
 							type = "range",
-							name = "Border Thickness (px)",
+							name = "Border Thickness",
 							min = 1,
 							max = 6,
 							step = 1,
