@@ -5,25 +5,6 @@ local Frames = addon.Frames
 
 local ARENA_RAID_MAX_UNITS = 3
 
-local function GetLayoutPixels(position, size, spacing, defaultWidth, defaultHeight)
-	local xPx = addon.Utilities:ToPixels((position and position.x) or 0)
-	local yPx = addon.Utilities:ToPixels((position and position.y) or 0)
-
-	local frameWidthPx = addon.Utilities:ToPixels((size and size.width) or defaultWidth)
-	local frameHeightPx = addon.Utilities:ToPixels((size and size.height) or defaultHeight)
-	local spacingXPx = addon.Utilities:ToPixels((spacing and spacing.x) or 0)
-	local spacingYPx = addon.Utilities:ToPixels((spacing and spacing.y) or 0)
-
-	if (frameWidthPx % 2) ~= 0 then
-		frameWidthPx = frameWidthPx + 1
-	end
-	if (frameHeightPx % 2) ~= 0 then
-		frameHeightPx = frameHeightPx + 1
-	end
-
-	return xPx, yPx, frameWidthPx, frameHeightPx, spacingXPx, spacingYPx
-end
-
 local function GetUnitRaidGroup(unit)
 	if type(unit) ~= "string" or unit == "" then
 		return nil
@@ -79,16 +60,40 @@ local function SetFrameWatchEnabled(frame, enabled)
 	end
 end
 
-local function UpdatePartyLayout(group, settings)
+local function GetLayoutSettings(settings, defaultWidth, defaultHeight, defaultDirection)
+	settings = settings or {}
+
 	local position = settings.position or {}
 	local size = settings.size or {}
 	local spacing = settings.spacing or {}
 
-	local direction = settings.direction or "VERTICAL"
+	local direction = settings.direction or defaultDirection
 	local isHorizontal = (direction == "HORIZONTAL")
 
-	local xPx, yPx, frameWidthPx, frameHeightPx, spacingXPx, spacingYPx =
-		GetLayoutPixels(position, size, spacing, 128, 64)
+	return {
+		direction = direction,
+		isHorizontal = isHorizontal,
+		enabled = settings.groups or {},
+		reverse = settings.reverse == true,
+		positionX = addon.Utilities:ToPixels(position.x or 0),
+		positionY = addon.Utilities:ToPixels(position.y or 0),
+		frameWidthPx = addon.Utilities:ToPixels(size.width or defaultWidth),
+		frameHeightPx = addon.Utilities:ToPixels(size.height or defaultHeight),
+		spacingXPx = addon.Utilities:ToPixels(spacing.x or 0),
+		spacingYPx = addon.Utilities:ToPixels(spacing.y or 0),
+	}
+end
+
+local function UpdatePartyLayout(group, settings)
+	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
+	local isHorizontal = layout.isHorizontal
+
+	local positionX = layout.positionX
+	local positionY = layout.positionY
+	local frameWidthPx = layout.frameWidthPx
+	local frameHeightPx = layout.frameHeightPx
+	local spacingXPx = layout.spacingXPx
+	local spacingYPx = layout.spacingYPx
 
 	local frameCount = #group.frames
 
@@ -112,24 +117,49 @@ local function UpdatePartyLayout(group, settings)
 		containerHeightPx = containerHeightPx + 1
 	end
 
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(positionX)
+	local scaledPositionY = addon.Utilities:Scale(positionY)
+
+	local scaledContainerWidthPx = scaledFrameWidthPx
+	local scaledContainerHeightPx = scaledFrameHeightPx
+	if frameCount > 0 then
+		if isHorizontal then
+			scaledContainerWidthPx = (frameCount * scaledFrameWidthPx) + ((frameCount - 1) * scaledSpacingXPx)
+			scaledContainerHeightPx = scaledFrameHeightPx
+		else
+			scaledContainerWidthPx = scaledFrameWidthPx
+			scaledContainerHeightPx = (frameCount * scaledFrameHeightPx) + ((frameCount - 1) * scaledSpacingYPx)
+		end
+	end
+	if (scaledContainerWidthPx % 2) ~= 0 then
+		scaledContainerWidthPx = scaledContainerWidthPx + 1
+	end
+	if (scaledContainerHeightPx % 2) ~= 0 then
+		scaledContainerHeightPx = scaledContainerHeightPx + 1
+	end
+
 	group.container:ClearAllPoints()
 	group.container:SetPoint(
 		"CENTER",
 		UIParent,
 		"CENTER",
-		addon.Utilities:FromPixels(xPx),
-		addon.Utilities:FromPixels(yPx)
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
 	)
-	group.container:SetSize(addon.Utilities:FromPixels(containerWidthPx), addon.Utilities:FromPixels(containerHeightPx))
+	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
 
 	for frameIndex, frame in ipairs(group.frames) do
 		local offsetXPx = 0
 		local offsetYPx = 0
 
 		if isHorizontal then
-			offsetXPx = (frameIndex - 1) * (frameWidthPx + spacingXPx)
+			offsetXPx = (frameIndex - 1) * (scaledFrameWidthPx + scaledSpacingXPx)
 		else
-			offsetYPx = (frameIndex - 1) * (frameHeightPx + spacingYPx)
+			offsetYPx = (frameIndex - 1) * (scaledFrameHeightPx + scaledSpacingYPx)
 		end
 
 		frame:ClearAllPoints()
@@ -137,23 +167,23 @@ local function UpdatePartyLayout(group, settings)
 			"TOPLEFT",
 			group.container,
 			"TOPLEFT",
-			addon.Utilities:FromPixels(offsetXPx),
-			-addon.Utilities:FromPixels(offsetYPx)
+			addon.Utilities:ToUI(offsetXPx),
+			-addon.Utilities:ToUI(offsetYPx)
 		)
-		frame:SetSize(addon.Utilities:FromPixels(frameWidthPx), addon.Utilities:FromPixels(frameHeightPx))
+		frame:SetSize(addon.Utilities:ToUI(scaledFrameWidthPx), addon.Utilities:ToUI(scaledFrameHeightPx))
 	end
 end
 
 local function UpdateRaidLayoutAsPartyInArena(group, settings)
-	local position = settings.position or {}
-	local size = settings.size or {}
-	local spacing = settings.spacing or {}
+	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
+	local isHorizontal = layout.isHorizontal
 
-	local direction = settings.direction or "VERTICAL"
-	local isHorizontal = (direction == "HORIZONTAL")
-
-	local xPx, yPx, frameWidthPx, frameHeightPx, spacingXPx, spacingYPx =
-		GetLayoutPixels(position, size, spacing, 128, 64)
+	local positionX = layout.positionX
+	local positionY = layout.positionY
+	local frameWidthPx = layout.frameWidthPx
+	local frameHeightPx = layout.frameHeightPx
+	local spacingXPx = layout.spacingXPx
+	local spacingYPx = layout.spacingYPx
 
 	local frameCount = math.min(ARENA_RAID_MAX_UNITS, #group.frames)
 
@@ -173,15 +203,38 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 		containerHeightPx = containerHeightPx + 1
 	end
 
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(positionX)
+	local scaledPositionY = addon.Utilities:Scale(positionY)
+
+	local scaledContainerWidthPx
+	local scaledContainerHeightPx
+	if isHorizontal then
+		scaledContainerWidthPx = (frameCount * scaledFrameWidthPx) + ((frameCount - 1) * scaledSpacingXPx)
+		scaledContainerHeightPx = scaledFrameHeightPx
+	else
+		scaledContainerWidthPx = scaledFrameWidthPx
+		scaledContainerHeightPx = (frameCount * scaledFrameHeightPx) + ((frameCount - 1) * scaledSpacingYPx)
+	end
+	if (scaledContainerWidthPx % 2) ~= 0 then
+		scaledContainerWidthPx = scaledContainerWidthPx + 1
+	end
+	if (scaledContainerHeightPx % 2) ~= 0 then
+		scaledContainerHeightPx = scaledContainerHeightPx + 1
+	end
+
 	group.container:ClearAllPoints()
 	group.container:SetPoint(
 		"CENTER",
 		UIParent,
 		"CENTER",
-		addon.Utilities:FromPixels(xPx),
-		addon.Utilities:FromPixels(yPx)
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
 	)
-	group.container:SetSize(addon.Utilities:FromPixels(containerWidthPx), addon.Utilities:FromPixels(containerHeightPx))
+	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
 
 	for i, frame in ipairs(group.frames) do
 		if i <= frameCount then
@@ -189,9 +242,9 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 
 			local offsetXPx, offsetYPx = 0, 0
 			if isHorizontal then
-				offsetXPx = (i - 1) * (frameWidthPx + spacingXPx)
+				offsetXPx = (i - 1) * (scaledFrameWidthPx + scaledSpacingXPx)
 			else
-				offsetYPx = (i - 1) * (frameHeightPx + spacingYPx)
+				offsetYPx = (i - 1) * (scaledFrameHeightPx + scaledSpacingYPx)
 			end
 
 			frame:ClearAllPoints()
@@ -199,10 +252,10 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 				"TOPLEFT",
 				group.container,
 				"TOPLEFT",
-				addon.Utilities:FromPixels(offsetXPx),
-				-addon.Utilities:FromPixels(offsetYPx)
+				addon.Utilities:ToUI(offsetXPx),
+				-addon.Utilities:ToUI(offsetYPx)
 			)
-			frame:SetSize(addon.Utilities:FromPixels(frameWidthPx), addon.Utilities:FromPixels(frameHeightPx))
+			frame:SetSize(addon.Utilities:ToUI(scaledFrameWidthPx), addon.Utilities:ToUI(scaledFrameHeightPx))
 		else
 			SetFrameWatchEnabled(frame, false)
 		end
@@ -210,19 +263,18 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 end
 
 local function UpdateRaidLayoutFromRaidGroups(group, settings)
-	local position = settings.position or {}
-	local size = settings.size or {}
-	local spacing = settings.spacing or {}
+	local layout = GetLayoutSettings(settings, 112, 56, "HORIZONTAL")
 
-	local enabled = settings.groups or {}
-	local direction = settings.direction or "HORIZONTAL"
-	local reverse = settings.reverse == true
+	local enabled = layout.enabled
+	local direction = layout.direction
+	local reverse = layout.reverse
 
-	local xPx, yPx, frameWidthPx, frameHeightPx, spacingXPx, spacingYPx =
-		GetLayoutPixels(position, size, spacing, 112, 56)
-
-	local _, instanceType = IsInInstance()
-	local isArena = (instanceType == "arena")
+	local positionX = layout.positionX
+	local positionY = layout.positionY
+	local frameWidthPx = layout.frameWidthPx
+	local frameHeightPx = layout.frameHeightPx
+	local spacingXPx = layout.spacingXPx
+	local spacingYPx = layout.spacingYPx
 	local maxFrames = 40
 
 	local groupedUnits = BuildRaidGroupMap(group)
@@ -331,15 +383,18 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 	end
 
 	if #orderedGroups == 0 then
+		local scaledPositionX = addon.Utilities:Scale(positionX)
+		local scaledPositionY = addon.Utilities:Scale(positionY)
+		local scaledOnePx = addon.Utilities:ScaleEven(1)
 		group.container:ClearAllPoints()
 		group.container:SetPoint(
 			"CENTER",
 			UIParent,
 			"CENTER",
-			addon.Utilities:FromPixels(xPx),
-			addon.Utilities:FromPixels(yPx)
+			addon.Utilities:ToUI(scaledPositionX),
+			addon.Utilities:ToUI(scaledPositionY)
 		)
-		group.container:SetSize(addon.Utilities:FromPixels(1), addon.Utilities:FromPixels(1))
+		group.container:SetSize(addon.Utilities:ToUI(scaledOnePx), addon.Utilities:ToUI(scaledOnePx))
 		return
 	end
 
@@ -349,14 +404,20 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 	local totalCols = isVertical and 5 or groupCount
 	local totalRows = isVertical and groupCount or 5
 
-	local containerWidthPx = (totalCols * frameWidthPx) + ((totalCols - 1) * spacingXPx)
-	local containerHeightPx = (totalRows * frameHeightPx) + ((totalRows - 1) * spacingYPx)
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(positionX)
+	local scaledPositionY = addon.Utilities:Scale(positionY)
 
-	if (containerWidthPx % 2) ~= 0 then
-		containerWidthPx = containerWidthPx + 1
+	local scaledContainerWidthPx = (totalCols * scaledFrameWidthPx) + ((totalCols - 1) * scaledSpacingXPx)
+	local scaledContainerHeightPx = (totalRows * scaledFrameHeightPx) + ((totalRows - 1) * scaledSpacingYPx)
+	if (scaledContainerWidthPx % 2) ~= 0 then
+		scaledContainerWidthPx = scaledContainerWidthPx + 1
 	end
-	if (containerHeightPx % 2) ~= 0 then
-		containerHeightPx = containerHeightPx + 1
+	if (scaledContainerHeightPx % 2) ~= 0 then
+		scaledContainerHeightPx = scaledContainerHeightPx + 1
 	end
 
 	group.container:ClearAllPoints()
@@ -364,10 +425,10 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 		"CENTER",
 		UIParent,
 		"CENTER",
-		addon.Utilities:FromPixels(xPx),
-		addon.Utilities:FromPixels(yPx)
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
 	)
-	group.container:SetSize(addon.Utilities:FromPixels(containerWidthPx), addon.Utilities:FromPixels(containerHeightPx))
+	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
 
 	for groupPos, subgroup in ipairs(orderedGroups) do
 		for slot = 1, 5 do
@@ -382,18 +443,18 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 					rowIndex = slot - 1
 				end
 
-				local offsetXPx = colIndex * (frameWidthPx + spacingXPx)
-				local offsetYPx = rowIndex * (frameHeightPx + spacingYPx)
+				local offsetXPx = colIndex * (scaledFrameWidthPx + scaledSpacingXPx)
+				local offsetYPx = rowIndex * (scaledFrameHeightPx + scaledSpacingYPx)
 
 				frame:ClearAllPoints()
 				frame:SetPoint(
 					"TOPLEFT",
 					group.container,
 					"TOPLEFT",
-					addon.Utilities:FromPixels(offsetXPx),
-					-addon.Utilities:FromPixels(offsetYPx)
+					addon.Utilities:ToUI(offsetXPx),
+					-addon.Utilities:ToUI(offsetYPx)
 				)
-				frame:SetSize(addon.Utilities:FromPixels(frameWidthPx), addon.Utilities:FromPixels(frameHeightPx))
+				frame:SetSize(addon.Utilities:ToUI(scaledFrameWidthPx), addon.Utilities:ToUI(scaledFrameHeightPx))
 			end
 		end
 	end

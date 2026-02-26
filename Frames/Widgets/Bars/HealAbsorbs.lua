@@ -8,7 +8,19 @@ addon.Frames.Widgets.Bars.HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs or
 local HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs
 
 local function GetHealAbsorbSettings(settings)
-	return settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.healAbsorbs
+	local healAbsorbs = settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.healAbsorbs
+		or {}
+	local color = healAbsorbs.color or {}
+
+	return {
+		texture = healAbsorbs.texture or "Interface\\Buttons\\WHITE8x8",
+		color = {
+			r = color.r or 1,
+			g = color.g or 0,
+			b = color.b or 0,
+			a = color.a or 0.5,
+		},
+	}
 end
 
 local function GetClampedHealAbsorb(frame, unit)
@@ -71,11 +83,13 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 		return
 	end
 
-	local texture = (healAbsorbSettings and healAbsorbSettings.texture) or "Interface\\Buttons\\WHITE8x8"
-	local color = (healAbsorbSettings and healAbsorbSettings.color) or { r = 1, g = 0, b = 0, a = 0.5 }
-
-	bar:SetStatusBarTexture(texture)
-	bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 0.5)
+	bar:SetStatusBarTexture(healAbsorbSettings.texture)
+	bar:SetStatusBarColor(
+		healAbsorbSettings.color.r,
+		healAbsorbSettings.color.g,
+		healAbsorbSettings.color.b,
+		healAbsorbSettings.color.a
+	)
 end
 
 function HealAbsorbs:UpdateState(frame)

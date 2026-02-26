@@ -8,65 +8,90 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
 local function GetBuffSettings(settings)
-	return settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs
+	local buffs = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
+
+	return {
+		anchor = buffs.anchor or "BOTTOMRIGHT",
+		relativeAnchor = buffs.relativeAnchor or "BOTTOMRIGHT",
+		offsetXPx = addon.Utilities:ToPixels(buffs.offsetX or -2),
+		offsetYPx = addon.Utilities:ToPixels(buffs.offsetY or 2),
+		maxIcons = math.max(1, buffs.maxIcons or 6),
+		iconsPerRow = math.max(1, buffs.iconsPerRow or 3),
+		iconSizePx = addon.Utilities:ToPixels(buffs.iconSize or 20),
+		spacingPx = addon.Utilities:ToPixels(buffs.spacing or -1),
+		stacksFontSize = buffs.stacksFontSize or 10,
+		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
+	}
 end
 
 local function UpdateIconSettings(icon, buffSettings)
-	local iconSizePx = buffSettings.iconSize
-	local borderSizePx = buffSettings.borderSizePx
-	local stacksFontSize = buffSettings.stacksFontSize
-
-	local iconSize = addon.Utilities:FromPixels(iconSizePx)
-	local inset = addon.Utilities:FromPixels(borderSizePx)
-
-	icon:SetSize(iconSize, iconSize)
+	local scaledIconPx = addon.Utilities:Scale(buffSettings.iconSizePx)
+	local scaledBorderPx = math.max(1, addon.Utilities:Scale(buffSettings.borderSizePx))
+	icon:SetSize(addon.Utilities:ToUI(scaledIconPx), addon.Utilities:ToUI(scaledIconPx))
 
 	icon.texture:ClearAllPoints()
-	icon.texture:SetPoint("TOPLEFT", icon, "TOPLEFT", inset, -inset)
-	icon.texture:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.texture:SetPoint(
+		"TOPLEFT",
+		icon,
+		"TOPLEFT",
+		addon.Utilities:ToUI(scaledBorderPx),
+		-addon.Utilities:ToUI(scaledBorderPx)
+	)
+	icon.texture:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderPx),
+		addon.Utilities:ToUI(scaledBorderPx)
+	)
 
 	icon.border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:FromPixels(borderSizePx),
+		edgeSize = addon.Utilities:ToUI(scaledBorderPx),
 	})
 	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
 
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", stacksFontSize, "OUTLINE")
+	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(buffSettings.stacksFontSize), "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
-	icon.countText:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -inset, inset)
+	icon.countText:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderPx),
+		addon.Utilities:ToUI(scaledBorderPx)
+	)
 end
 
 function Buffs:UpdateSettings(frame, settings)
 	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
-	if not buffSettings or not container then
+	if not container then
 		return
 	end
 
-	local maxIcons = math.max(1, buffSettings.maxIcons)
-	local iconsPerRow = math.max(1, buffSettings.iconsPerRow)
-	local iconSizePx = buffSettings.iconSize
-	local spacingPx = buffSettings.spacing
-
-	container:ClearAllPoints()
-	container:SetPoint(
-		"BOTTOMRIGHT",
-		container:GetParent(),
-		"BOTTOMRIGHT",
-		addon.Utilities:FromPixels(buffSettings.offsetX),
-		addon.Utilities:FromPixels(buffSettings.offsetY)
-	)
-
-	local visibleCols = math.min(maxIcons, iconsPerRow)
-	local rowCount = math.max(1, math.ceil(maxIcons / iconsPerRow))
+	local iconSizePx = addon.Utilities:Scale(buffSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(buffSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(buffSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(buffSettings.offsetYPx)
+	local stepPx = iconSizePx + spacingPx
+	local visibleCols = math.min(buffSettings.maxIcons, buffSettings.iconsPerRow)
+	local rowCount = math.max(1, math.ceil(buffSettings.maxIcons / buffSettings.iconsPerRow))
 
 	local widthPx = (visibleCols * iconSizePx) + ((visibleCols - 1) * spacingPx)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
-	container:SetSize(addon.Utilities:FromPixels(widthPx), addon.Utilities:FromPixels(heightPx))
+	container:ClearAllPoints()
+	container:SetPoint(
+		buffSettings.anchor,
+		container:GetParent(),
+		buffSettings.relativeAnchor,
+		addon.Utilities:ToUI(offsetXPx),
+		addon.Utilities:ToUI(offsetYPx)
+	)
+	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	for i = 1, maxIcons do
+	for i = 1, buffSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
@@ -76,23 +101,23 @@ function Buffs:UpdateSettings(frame, settings)
 		UpdateIconSettings(icon, buffSettings)
 
 		local idx = i - 1
-		local col = idx % iconsPerRow
-		local row = math.floor(idx / iconsPerRow)
+		local col = idx % buffSettings.iconsPerRow
+		local row = math.floor(idx / buffSettings.iconsPerRow)
 
-		local xPx = -(col * (iconSizePx + spacingPx))
-		local yPx = (row * (iconSizePx + spacingPx))
+		local xPx = -(col * stepPx)
+		local yPx = row * stepPx
 
 		icon:ClearAllPoints()
 		icon:SetPoint(
 			"BOTTOMRIGHT",
 			container,
 			"BOTTOMRIGHT",
-			addon.Utilities:FromPixels(xPx),
-			addon.Utilities:FromPixels(yPx)
+			addon.Utilities:ToUI(xPx),
+			addon.Utilities:ToUI(yPx)
 		)
 	end
 
-	for i = maxIcons + 1, #container.icons do
+	for i = buffSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -103,7 +128,7 @@ end
 function Buffs:UpdateState(frame, settings)
 	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
-	if not buffSettings or not container then
+	if not container then
 		return
 	end
 
@@ -197,7 +222,7 @@ end
 
 function Buffs:Ensure(frame, settings)
 	local buffSettings = GetBuffSettings(settings)
-	if not frame or not buffSettings then
+	if not frame then
 		return
 	end
 

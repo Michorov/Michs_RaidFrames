@@ -10,7 +10,22 @@ local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
 local READY_CHECK_HOLD = 5
 
 local function GetReadyCheckSettings(settings)
-	return settings and settings.widgets and settings.widgets.indicators and settings.widgets.indicators.readyCheck
+	local readyCheck = settings
+			and settings.widgets
+			and settings.widgets.indicators
+			and settings.widgets.indicators.readyCheck
+		or {}
+	local textures = readyCheck.textures or {}
+
+	return {
+		sizePx = addon.Utilities:ToPixels(readyCheck.size or 36),
+		alpha = readyCheck.alpha or 1,
+		anchor = readyCheck.anchor or "CENTER",
+		relativeAnchor = readyCheck.relativeAnchor or "CENTER",
+		offsetXPx = addon.Utilities:ToPixels(readyCheck.offsetX or 0),
+		offsetYPx = addon.Utilities:ToPixels(readyCheck.offsetY or 0),
+		textures = textures,
+	}
 end
 
 local function GetTextureForStatus(status, rcSettings)
@@ -52,24 +67,22 @@ function ReadyCheck:UpdateSettings(frame, settings)
 		return
 	end
 
-	local rcSettings = GetReadyCheckSettings(settings) or {}
-	local sizePx = rcSettings.size or 36
-	local alpha = rcSettings.alpha or 1
-	local anchor = rcSettings.anchor or "CENTER"
-	local relativeAnchor = rcSettings.relativeAnchor or "CENTER"
-	local offsetX = rcSettings.offsetX or 0
-	local offsetY = rcSettings.offsetY or 0
+	local rcSettings = GetReadyCheckSettings(settings)
+
+	local sizePx = addon.Utilities:Scale(rcSettings.sizePx)
+	local offsetX = addon.Utilities:Scale(rcSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(rcSettings.offsetYPx)
 
 	icon:ClearAllPoints()
 	icon:SetPoint(
-		anchor,
+		rcSettings.anchor,
 		icon:GetParent(),
-		relativeAnchor,
-		addon.Utilities:FromPixels(offsetX),
-		addon.Utilities:FromPixels(offsetY)
+		rcSettings.relativeAnchor,
+		addon.Utilities:ToUI(offsetX),
+		addon.Utilities:ToUI(offsetY)
 	)
-	icon:SetSize(addon.Utilities:FromPixels(sizePx), addon.Utilities:FromPixels(sizePx))
-	icon:SetAlpha(alpha)
+	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
+	icon:SetAlpha(rcSettings.alpha)
 end
 
 function ReadyCheck:UpdateState(frame, settings)

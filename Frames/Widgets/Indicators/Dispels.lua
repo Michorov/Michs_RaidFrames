@@ -18,7 +18,21 @@ local ATLAS_BY_TYPE = {
 }
 
 local function GetDispelsSettings(settings)
-	return settings and settings.widgets and settings.widgets.indicators and settings.widgets.indicators.dispels
+	local dispels = settings
+			and settings.widgets
+			and settings.widgets.indicators
+			and settings.widgets.indicators.dispels
+		or {}
+
+	return {
+		anchor = dispels.anchor or "TOPRIGHT",
+		relativeAnchor = dispels.relativeAnchor or "TOPRIGHT",
+		offsetXPx = addon.Utilities:ToPixels(dispels.offsetX or -1),
+		offsetYPx = addon.Utilities:ToPixels(dispels.offsetY or -1),
+		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
+		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 1),
+		alpha = dispels.alpha or 1,
+	}
 end
 
 local function CreateTypeIcon(container, dispelType)
@@ -58,34 +72,32 @@ function Dispels:UpdateSettings(frame, settings)
 		return
 	end
 
-	local dispelSettings = GetDispelsSettings(settings) or {}
-	local anchor = dispelSettings.anchor or "TOPRIGHT"
-	local relativeAnchor = dispelSettings.relativeAnchor or "TOPRIGHT"
-	local offsetX = dispelSettings.offsetX or -1
-	local offsetY = dispelSettings.offsetY or -1
-	local iconSizePx = dispelSettings.iconSize or 14
-	local spacingPx = dispelSettings.spacing or 1
-	local alpha = dispelSettings.alpha or 1
+	local dispelSettings = GetDispelsSettings(settings)
+
+	local offsetX = addon.Utilities:Scale(dispelSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(dispelSettings.offsetYPx)
+	local iconSizePx = addon.Utilities:Scale(dispelSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(dispelSettings.spacingPx)
 
 	local widthPx = (#ORDER * iconSizePx) + ((#ORDER - 1) * spacingPx)
 	local heightPx = iconSizePx
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		anchor,
+		dispelSettings.anchor,
 		container:GetParent(),
-		relativeAnchor,
-		addon.Utilities:FromPixels(offsetX),
-		addon.Utilities:FromPixels(offsetY)
+		dispelSettings.relativeAnchor,
+		addon.Utilities:ToUI(offsetX),
+		addon.Utilities:ToUI(offsetY)
 	)
-	container:SetSize(addon.Utilities:FromPixels(widthPx), addon.Utilities:FromPixels(heightPx))
+	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
 	for i = 1, #ORDER do
 		local dispelType = ORDER[i]
 		local icon = container.typeIcons and container.typeIcons[dispelType]
 		if icon then
-			icon:SetSize(addon.Utilities:FromPixels(iconSizePx), addon.Utilities:FromPixels(iconSizePx))
-			icon:SetAlpha(alpha)
+			icon:SetSize(addon.Utilities:ToUI(iconSizePx), addon.Utilities:ToUI(iconSizePx))
+			icon:SetAlpha(dispelSettings.alpha)
 		end
 	end
 end
@@ -108,9 +120,10 @@ function Dispels:UpdateState(frame, settings)
 		return
 	end
 
-	local dispelSettings = GetDispelsSettings(settings) or {}
-	local iconSizePx = dispelSettings.iconSize or 14
-	local spacingPx = dispelSettings.spacing or 1
+	local dispelSettings = GetDispelsSettings(settings)
+
+	local iconSizePx = addon.Utilities:Scale(dispelSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(dispelSettings.spacingPx)
 
 	local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
 	local dispellable = bucket and bucket.dispellable
@@ -147,7 +160,7 @@ function Dispels:UpdateState(frame, settings)
 			if icon then
 				local xPx = -((shown - 1) * (iconSizePx + spacingPx))
 				icon:ClearAllPoints()
-				icon:SetPoint("TOPRIGHT", container, "TOPRIGHT", addon.Utilities:FromPixels(xPx), 0)
+				icon:SetPoint("TOPRIGHT", container, "TOPRIGHT", addon.Utilities:ToUI(xPx), 0)
 				icon:SetAtlas(atlas, false)
 				icon:Show()
 			end

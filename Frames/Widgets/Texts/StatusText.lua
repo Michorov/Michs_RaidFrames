@@ -17,10 +17,12 @@ function StatusText:Ensure(frame)
 		return
 	end
 
+	local scaledFontSize = addon.Utilities:ScaleFont(16)
+
 	if not frame.statusText then
 		local statusText = textLayer:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 		statusText:SetPoint("CENTER", textLayer, "CENTER", 0, 0)
-		statusText:SetFont("Fonts\\FRIZQT__.TTF", 16, "NONE")
+		statusText:SetFont("Fonts\\FRIZQT__.TTF", scaledFontSize, "NONE")
 		statusText:SetTextColor(0.55, 0.55, 0.55, 1)
 		statusText:SetShadowColor(0, 0, 0, 0.9)
 		statusText:SetShadowOffset(1, -1)

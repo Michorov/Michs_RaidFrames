@@ -12,12 +12,14 @@ local function GetBorderSettings(settings)
 	local color = border.color or {}
 
 	local thicknessPx = border.thicknessPx or 1
+	local thicknessRawPx = addon.Utilities:ToPixels(thicknessPx)
+	local scaledThicknessPx = math.max(1, addon.Utilities:Scale(thicknessRawPx))
 	local r = color.r or 0
 	local g = color.g or 0
 	local b = color.b or 0
 	local a = color.a or 1
 
-	return thicknessPx, r, g, b, a
+	return scaledThicknessPx, r, g, b, a
 end
 
 function Border:Ensure(frame)
@@ -48,28 +50,27 @@ function Border:UpdateSettings(frame, settings)
 	end
 
 	local thicknessPx, r, g, b, a = GetBorderSettings(settings)
-	local tPx = math.max(1, addon.Utilities:ToPixels(thicknessPx))
-	local t = addon.Utilities:FromPixels(tPx)
+	local thicknessUI = addon.Utilities:ToUI(thicknessPx)
 
 	border.left:ClearAllPoints()
 	border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
 	border.left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	border.left:SetWidth(t)
+	border.left:SetWidth(thicknessUI)
 
 	border.right:ClearAllPoints()
 	border.right:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
 	border.right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	border.right:SetWidth(t)
+	border.right:SetWidth(thicknessUI)
 
 	border.top:ClearAllPoints()
 	border.top:SetPoint("TOPLEFT", border.left, "TOPRIGHT", 0, 0)
 	border.top:SetPoint("TOPRIGHT", border.right, "TOPLEFT", 0, 0)
-	border.top:SetHeight(t)
+	border.top:SetHeight(thicknessUI)
 
 	border.bottom:ClearAllPoints()
 	border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
 	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
-	border.bottom:SetHeight(t)
+	border.bottom:SetHeight(thicknessUI)
 
 	border.top:SetColorTexture(r, g, b, a)
 	border.bottom:SetColorTexture(r, g, b, a)

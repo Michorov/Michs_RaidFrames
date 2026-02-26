@@ -8,7 +8,18 @@ addon.Frames.Widgets.Bars.Absorbs = addon.Frames.Widgets.Bars.Absorbs or {}
 local Absorbs = addon.Frames.Widgets.Bars.Absorbs
 
 local function GetAbsorbSettings(settings)
-	return settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.absorbs
+	local absorbs = settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.absorbs or {}
+	local color = absorbs.color or {}
+
+	return {
+		texture = absorbs.texture or "Interface\\Buttons\\WHITE8x8",
+		color = {
+			r = color.r or 0.2,
+			g = color.g or 0.8,
+			b = color.b or 1.0,
+			a = color.a or 0.5,
+		},
+	}
 end
 
 local function GetClampedAbsorb(frame, unit)
@@ -76,13 +87,17 @@ end
 function Absorbs:UpdateSettings(frame, settings)
 	local absorbSettings = GetAbsorbSettings(settings)
 	local bar = frame and frame.absorbBar
-	if not absorbSettings or not bar then
+	if not bar then
 		return
 	end
 
-	bar:SetStatusBarTexture(absorbSettings.texture or "Interface\\Buttons\\WHITE8x8")
-	local c = absorbSettings.color or { r = 0.2, g = 0.8, b = 1.0, a = 0.5 }
-	bar:SetStatusBarColor(c.r, c.g, c.b, c.a or 0.7)
+	bar:SetStatusBarTexture(absorbSettings.texture)
+	bar:SetStatusBarColor(
+		absorbSettings.color.r,
+		absorbSettings.color.g,
+		absorbSettings.color.b,
+		absorbSettings.color.a
+	)
 end
 
 function Absorbs:UpdateState(frame)
