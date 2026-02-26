@@ -168,8 +168,6 @@ function AuraHandler:Ensure()
 	end
 
 	Hook("CompactUnitFrame_UpdateAuras")
-	Hook("CompactUnitFrame_UpdateBuffs")
-	Hook("CompactUnitFrame_UpdateDebuffs")
 
 	if not self._pruneTicker then
 		self._pruneTicker = C_Timer.NewTicker(60, function()
