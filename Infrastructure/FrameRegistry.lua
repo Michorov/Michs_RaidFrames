@@ -71,11 +71,9 @@ local function HideCompactVisualOverlays(frame)
 	SafeHide(frame.selectionHighlight)
 	SafeHide(frame.aggroHighlight)
 
-	-- Ready check
 	SafeHide(frame.readyCheckIcon)
 	SafeHide(frame.readyCheckStatus)
 
-	-- Summon
 	SafeHide(frame.summonStatus)
 	SafeHide(frame.summonIcon)
 	SafeHide(frame.summonFrame)

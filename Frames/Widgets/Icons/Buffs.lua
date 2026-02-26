@@ -108,13 +108,7 @@ function Buffs:UpdateSettings(frame, settings)
 		local yPx = row * stepPx
 
 		icon:ClearAllPoints()
-		icon:SetPoint(
-			"BOTTOMRIGHT",
-			container,
-			"BOTTOMRIGHT",
-			addon.Utilities:ToUI(xPx),
-			addon.Utilities:ToUI(yPx)
-		)
+		icon:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", addon.Utilities:ToUI(xPx), addon.Utilities:ToUI(yPx))
 	end
 
 	for i = buffSettings.maxIcons + 1, #container.icons do
@@ -168,10 +162,8 @@ function Buffs:UpdateState(frame, settings)
 			if icon and icon.texture then
 				shown = shown + 1
 
-				-- Texture
 				icon.texture:SetTexture(aura.icon)
 
-				-- Stacks
 				if icon.countText then
 					icon.countText:SetText("")
 					if C_UnitAuras.GetAuraApplicationDisplayCount then
@@ -182,7 +174,6 @@ function Buffs:UpdateState(frame, settings)
 					end
 				end
 
-				-- Expiration (Duration)
 				local hasExpiration = false
 				if C_UnitAuras.DoesAuraHaveExpirationTime then
 					hasExpiration = C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
