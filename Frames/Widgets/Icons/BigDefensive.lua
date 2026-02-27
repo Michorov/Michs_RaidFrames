@@ -70,7 +70,7 @@ local function UpdateIconSettings(icon, settings)
 	)
 
 	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
-		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown) -- buffSettings/debuffSettings/settings
+		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown)
 	end
 
 	if settings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
@@ -81,7 +81,7 @@ local function UpdateIconSettings(icon, settings)
 			cooldownFont = CreateFont(fontName)
 		end
 		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
-		icon.cooldown:SetCountdownFont(fontName) -- string, not font object
+		icon.cooldown:SetCountdownFont(fontName)
 	end
 end
 

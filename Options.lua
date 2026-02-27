@@ -1024,7 +1024,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks ~= false
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().party.widgets.icons.buffs.showStacks = v
@@ -1039,7 +1040,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks == false
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize
@@ -1062,7 +1064,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown == true
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown = v
@@ -1077,13 +1080,16 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown ~= true
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize or 10
+												return addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize = v
+												addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
 											end,
 										},
@@ -1220,7 +1226,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks ~= false
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks = v
@@ -1235,13 +1242,15 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks == false
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize = v
+												addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize =
+													v
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
@@ -1258,7 +1267,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown == true
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown = v
@@ -1273,13 +1283,16 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown ~= true
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize or 10
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize = v
+												addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
@@ -1348,7 +1361,8 @@ local options = {
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1366,7 +1380,8 @@ local options = {
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1383,13 +1398,15 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks ~= false
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1401,7 +1418,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks == false
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize
@@ -1410,7 +1428,8 @@ local options = {
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1427,13 +1446,15 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown == true
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1445,16 +1466,19 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown ~= true
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize or 10
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize = v
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -1514,7 +1538,8 @@ local options = {
 												return addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize = v
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize =
+													v
 												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 											end,
 										},
@@ -1544,7 +1569,8 @@ local options = {
 												return addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons = v
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons =
+													v
 												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 											end,
 										},
@@ -2813,7 +2839,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks ~= false
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks = v
@@ -2828,7 +2855,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks == false
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize
@@ -2851,7 +2879,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown == true
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown = v
@@ -2866,13 +2895,16 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown ~= true
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize or 10
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize = v
+												addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
 											end,
 										},
@@ -3009,7 +3041,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks ~= false
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks = v
@@ -3024,13 +3057,15 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks == false
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize = v
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize =
+													v
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
@@ -3047,7 +3082,8 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown == true
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown = v
@@ -3062,13 +3098,16 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown ~= true
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize or 10
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
-												addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize = v
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
@@ -3155,7 +3194,8 @@ local options = {
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx = v
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -3172,13 +3212,15 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks ~= false
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks
+													~= false
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks = v
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -3190,7 +3232,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks == false
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks
+													== false
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize
@@ -3199,7 +3242,8 @@ local options = {
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize = v
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -3216,13 +3260,15 @@ local options = {
 											name = "Enabled",
 											order = 1,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown == true
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown
+													== true
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown = v
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
@@ -3234,16 +3280,19 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown ~= true
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown
+													~= true
 											end,
 											get = function()
-												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize or 10
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize
+													or 10
 											end,
 											set = function(_, v)
 												if InCombatLockdown() then
 													return
 												end
-												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize = v
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize =
+													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 											end,
 										},
