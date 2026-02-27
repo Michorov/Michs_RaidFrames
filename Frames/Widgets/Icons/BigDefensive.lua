@@ -8,7 +8,11 @@ addon.Frames.Widgets.Icons.BigDefensive = addon.Frames.Widgets.Icons.BigDefensiv
 local BigDefensive = addon.Frames.Widgets.Icons.BigDefensive
 
 local function GetBigDefensiveSettings(settings)
-	local bigDefensive = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.bigDefensive or {}
+	local bigDefensive = settings
+			and settings.widgets
+			and settings.widgets.icons
+			and settings.widgets.icons.bigDefensive
+		or {}
 
 	return {
 		anchor = bigDefensive.anchor or "CENTER",
@@ -18,7 +22,10 @@ local function GetBigDefensiveSettings(settings)
 		maxIcons = math.max(1, bigDefensive.maxIcons or 1),
 		iconSizePx = addon.Utilities:ToPixels(bigDefensive.iconSize or 32),
 		borderSizePx = addon.Utilities:ToPixels(bigDefensive.borderSizePx or 1),
+		showStacks = bigDefensive.showStacks ~= false,
 		stacksFontSize = bigDefensive.stacksFontSize or 16,
+		showCooldown = bigDefensive.showCooldown == true,
+		cooldownFontSize = bigDefensive.cooldownFontSize or 10,
 	}
 end
 
@@ -53,6 +60,7 @@ local function UpdateIconSettings(icon, settings)
 	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(settings.stacksFontSize), "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
+	icon.countText:SetShown(settings.showStacks)
 	icon.countText:SetPoint(
 		"BOTTOMRIGHT",
 		icon,
@@ -60,6 +68,21 @@ local function UpdateIconSettings(icon, settings)
 		-addon.Utilities:ToUI(borderSizePx),
 		addon.Utilities:ToUI(borderSizePx)
 	)
+
+	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
+		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown) -- buffSettings/debuffSettings/settings
+	end
+
+	if settings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
+		local scaledSize = addon.Utilities:ScaleFont(settings.cooldownFontSize)
+		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
+		local cooldownFont = _G[fontName]
+		if not cooldownFont then
+			cooldownFont = CreateFont(fontName)
+		end
+		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		icon.cooldown:SetCountdownFont(fontName) -- string, not font object
+	end
 end
 
 function BigDefensive:UpdateSettings(frame, settings)
@@ -130,10 +153,12 @@ function BigDefensive:UpdateState(frame, settings)
 
 			if icon.countText then
 				icon.countText:SetText("")
-				if C_UnitAuras.GetAuraApplicationDisplayCount then
-					local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
-					if stackText then
-						icon.countText:SetText(stackText)
+				if bigDefensiveSettings.showStacks then
+					if C_UnitAuras.GetAuraApplicationDisplayCount then
+						local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
+						if stackText then
+							icon.countText:SetText(stackText)
+						end
 					end
 				end
 			end

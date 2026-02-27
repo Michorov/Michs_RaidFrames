@@ -19,7 +19,10 @@ local function GetDebuffSettings(settings)
 		iconsPerRow = math.max(1, debuffs.iconsPerRow or 3),
 		iconSizePx = addon.Utilities:ToPixels(debuffs.iconSize or 20),
 		spacingPx = addon.Utilities:ToPixels(debuffs.spacing or -1),
+		showStacks = debuffs.showStacks ~= false,
 		stacksFontSize = debuffs.stacksFontSize or 10,
+		showCooldown = debuffs.showCooldown == true,
+		cooldownFontSize = debuffs.cooldownFontSize or 10,
 		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
 	}
 end
@@ -55,6 +58,7 @@ local function UpdateIconSettings(icon, debuffSettings)
 	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(debuffSettings.stacksFontSize), "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
+	icon.countText:SetShown(debuffSettings.showStacks)
 	icon.countText:SetPoint(
 		"BOTTOMRIGHT",
 		icon,
@@ -62,6 +66,20 @@ local function UpdateIconSettings(icon, debuffSettings)
 		-addon.Utilities:ToUI(scaledBorderPx),
 		addon.Utilities:ToUI(scaledBorderPx)
 	)
+
+	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
+		icon.cooldown:SetHideCountdownNumbers(not debuffSettings.showCooldown)
+	end
+	if debuffSettings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
+		local scaledSize = addon.Utilities:ScaleFont(debuffSettings.cooldownFontSize)
+		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
+		local cooldownFont = _G[fontName]
+		if not cooldownFont then
+			cooldownFont = CreateFont(fontName)
+		end
+		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		icon.cooldown:SetCountdownFont(fontName)
+	end
 end
 
 function Debuffs:UpdateSettings(frame, settings)
@@ -169,10 +187,12 @@ function Debuffs:UpdateState(frame, settings)
 
 				if icon.countText then
 					icon.countText:SetText("")
-					if C_UnitAuras.GetAuraApplicationDisplayCount then
-						local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
-						if stackText then
-							icon.countText:SetText(stackText)
+					if debuffSettings.showStacks then
+						if C_UnitAuras.GetAuraApplicationDisplayCount then
+							local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
+							if stackText then
+								icon.countText:SetText(stackText)
+							end
 						end
 					end
 				end

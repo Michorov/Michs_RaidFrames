@@ -83,7 +83,12 @@ local DEFAULTS = {
 						iconSize = 16,
 						spacing = -1,
 
+						showStacks = true,
 						stacksFontSize = 10,
+
+						showCooldown = false,
+						cooldownFontSize = 10,
+
 						borderSizePx = 1,
 					},
 					debuffs = {
@@ -97,7 +102,12 @@ local DEFAULTS = {
 						iconSize = 16,
 						spacing = -1,
 
+						showStacks = true,
 						stacksFontSize = 10,
+
+						showCooldown = false,
+						cooldownFontSize = 10,
+
 						borderSizePx = 1,
 					},
 					privateAuras = {
@@ -119,7 +129,12 @@ local DEFAULTS = {
 						maxIcons = 1,
 						iconSize = 32,
 
-						stacksFontSize = 16,
+						showStacks = true,
+						stacksFontSize = 10,
+
+						showCooldown = false,
+						cooldownFontSize = 16,
+
 						borderSizePx = 1,
 					},
 				},
@@ -235,7 +250,12 @@ local DEFAULTS = {
 						iconSize = 16,
 						spacing = -1,
 
+						showStacks = true,
 						stacksFontSize = 10,
+
+						showCooldown = false,
+						cooldownFontSize = 10,
+
 						borderSizePx = 1,
 					},
 					debuffs = {
@@ -249,7 +269,12 @@ local DEFAULTS = {
 						iconSize = 16,
 						spacing = -1,
 
+						showStacks = true,
 						stacksFontSize = 10,
+
+						showCooldown = false,
+						cooldownFontSize = 10,
+
 						borderSizePx = 1,
 					},
 					privateAuras = {
@@ -271,7 +296,12 @@ local DEFAULTS = {
 						maxIcons = 1,
 						iconSize = 28,
 
+						showStacks = true,
 						stacksFontSize = 16,
+
+						showCooldown = false,
+						cooldownFontSize = 16,
+
 						borderSizePx = 1,
 					},
 				},

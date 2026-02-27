@@ -335,189 +335,187 @@ local options = {
 					name = "Frames",
 					order = 2,
 					args = {
-						partyWidth = {
-							type = "range",
-							name = "Width",
-							min = 25,
-							max = 300,
-							step = 1,
+						frame = {
+							type = "group",
+							name = "Frame",
+							inline = true,
 							order = 1,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return (profile.party.size and profile.party.size.width) or 110
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+							args = {
+								partyWidth = {
+									type = "range",
+									name = "Width",
+									min = 25,
+									max = 300,
+									step = 1,
+									order = 1,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return (profile.party.size and profile.party.size.width) or 110
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.party.size = profile.party.size or { width = 128, height = 64 }
-								profile.party.size.width = value
-								addon.UpdateScheduler:Notify("layoutChanged")
-							end,
-						},
-						partyHeight = {
-							type = "range",
-							name = "Height",
-							min = 25,
-							max = 300,
-							step = 1,
-							order = 2,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return (profile.party.size and profile.party.size.height) or 36
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+										local profile = addon.Database:GetProfile()
+										profile.party.size = profile.party.size or { width = 128, height = 64 }
+										profile.party.size.width = value
+										addon.UpdateScheduler:Notify("layoutChanged")
+									end,
+								},
+								partyHeight = {
+									type = "range",
+									name = "Height",
+									min = 25,
+									max = 300,
+									step = 1,
+									order = 2,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return (profile.party.size and profile.party.size.height) or 36
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.party.size = profile.party.size or { width = 128, height = 64 }
-								profile.party.size.height = value
-								addon.UpdateScheduler:Notify("layoutChanged")
-							end,
+										local profile = addon.Database:GetProfile()
+										profile.party.size = profile.party.size or { width = 128, height = 64 }
+										profile.party.size.height = value
+										addon.UpdateScheduler:Notify("layoutChanged")
+									end,
+								},
+								partyBorderThickness = {
+									type = "range",
+									name = "Border Thickness",
+									min = 1,
+									max = 6,
+									step = 1,
+									order = 3,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return ((profile.party or {}).border or {}).thicknessPx or 1
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.party = profile.party or {}
+										profile.party.border = profile.party.border or {}
+										profile.party.border.thicknessPx = value
+										addon.UpdateScheduler:Notify("borderSettingsChanged")
+									end,
+								},
+								rowSpacer1 = {
+									type = "description",
+									name = " ",
+									order = 10,
+									width = "full",
+								},
+								partyBackgroundColor = {
+									type = "color",
+									name = "Background Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.party or {}).background or {}).color
+											or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.party = profile.party or {}
+										profile.party.background = profile.party.background or {}
+										profile.party.background.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("backgroundSettingsChanged")
+									end,
+								},
+								partyBorderColor = {
+									type = "color",
+									name = "Border Color",
+									hasAlpha = true,
+									order = 12,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.party or {}).border or {}).color
+											or { r = 0, g = 0, b = 0, a = 1 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.party = profile.party or {}
+										profile.party.border = profile.party.border or {}
+										profile.party.border.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("borderSettingsChanged")
+									end,
+								},
+							},
 						},
-						rowSpacer1 = {
-							type = "description",
-							name = " ",
-							order = 10,
-							width = "full",
-						},
-						partyHealthUseClassColor = {
-							type = "toggle",
-							name = "Use Class Color",
-							order = 11,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return ((profile.party or {}).health or {}).classColor == true
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.party = profile.party or {}
-								profile.party.health = profile.party.health or {}
-								profile.party.health.classColor = value
-								addon.UpdateScheduler:Notify("healthSettingsChanged")
-							end,
-						},
-						partyHealthColor = {
-							type = "color",
-							name = "Health Color",
-							hasAlpha = true,
-							order = 12,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.party or {}).health or {}).color
-									or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+						health = {
+							type = "group",
+							name = "Health",
+							inline = true,
+							order = 100,
+							args = {
+								partyHealthUseClassColor = {
+									type = "toggle",
+									name = "Use Class Color",
+									order = 11,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return ((profile.party or {}).health or {}).classColor == true
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.party = profile.party or {}
+										profile.party.health = profile.party.health or {}
+										profile.party.health.classColor = value
+										addon.UpdateScheduler:Notify("healthSettingsChanged")
+									end,
+								},
+								partyHealthColor = {
+									type = "color",
+									name = "Health Color",
+									hasAlpha = true,
+									order = 12,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.party or {}).health or {}).color
+											or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.party = profile.party or {}
-								profile.party.health = profile.party.health or {}
-								profile.party.health.color = { r = r, g = g, b = b, a = a }
+										local profile = addon.Database:GetProfile()
+										profile.party = profile.party or {}
+										profile.party.health = profile.party.health or {}
+										profile.party.health.color = { r = r, g = g, b = b, a = a }
 
-								addon.UpdateScheduler:Notify("healthSettingsChanged")
-							end,
-						},
-						rowSpacer2 = {
-							type = "description",
-							name = " ",
-							order = 20,
-							width = "full",
-						},
-						partyBorderThickness = {
-							type = "range",
-							name = "Border Thickness",
-							min = 1,
-							max = 6,
-							step = 1,
-							order = 21,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return ((profile.party or {}).border or {}).thicknessPx or 1
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.party = profile.party or {}
-								profile.party.border = profile.party.border or {}
-								profile.party.border.thicknessPx = value
-								addon.UpdateScheduler:Notify("borderSettingsChanged")
-							end,
-						},
-						partyBorderColor = {
-							type = "color",
-							name = "Border Color",
-							hasAlpha = true,
-							order = 22,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.party or {}).border or {}).color or { r = 0, g = 0, b = 0, a = 1 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.party = profile.party or {}
-								profile.party.border = profile.party.border or {}
-								profile.party.border.color = { r = r, g = g, b = b, a = a }
-								addon.UpdateScheduler:Notify("borderSettingsChanged")
-							end,
-						},
-						rowSpacer3 = {
-							type = "description",
-							name = " ",
-							order = 30,
-							width = "full",
-						},
-						partyBackgroundColor = {
-							type = "color",
-							name = "Background Color",
-							hasAlpha = true,
-							order = 31,
-							width = "full",
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.party or {}).background or {}).color
-									or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.party = profile.party or {}
-								profile.party.background = profile.party.background or {}
-								profile.party.background.color = { r = r, g = g, b = b, a = a }
-								addon.UpdateScheduler:Notify("backgroundSettingsChanged")
-							end,
-						},
-						rowSpacer4 = {
-							type = "description",
-							name = " ",
-							order = 40,
-							width = "full",
+										addon.UpdateScheduler:Notify("healthSettingsChanged")
+									end,
+								},
+							},
 						},
 						powerBarGroup = {
 							type = "group",
@@ -902,125 +900,194 @@ local options = {
 							name = "Buffs",
 							order = 1,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.offsetX = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.offsetY = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.iconSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = -10,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.spacing = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.maxIcons = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										iconsPerRow = {
+											type = "range",
+											name = "Icons Per Row",
+											order = 6,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.iconsPerRow
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.iconsPerRow = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size (px)",
+											order = 7,
+											min = 1,
+											max = 4,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.borderSizePx
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.borderSizePx = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
+									order = 2,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks ~= false
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.showStacks = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.offsetX = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 4,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.offsetY = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 5,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.iconSize = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 6,
-									min = -10,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.spacing = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 7,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.maxIcons = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								iconsPerRow = {
-									type = "range",
-									name = "Icons Per Row",
-									order = 8,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.iconsPerRow
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.iconsPerRow = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 9,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size (px)",
-									order = 10,
-									min = 1,
-									max = 4,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.borderSizePx
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.buffs.borderSizePx = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown == true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -1029,125 +1096,194 @@ local options = {
 							name = "Debuffs",
 							order = 2,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.offsetX = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.offsetY = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.iconSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = -10,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.spacing = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.maxIcons = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										iconsPerRow = {
+											type = "range",
+											name = "Icons Per Row",
+											order = 6,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.iconsPerRow
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.iconsPerRow = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size (px)",
+											order = 7,
+											min = 1,
+											max = 4,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.borderSizePx
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.borderSizePx = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
+									order = 2,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks ~= false
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.offsetX = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 4,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.offsetY = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 5,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.iconSize = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 6,
-									min = -10,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.spacing = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 7,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.maxIcons = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								iconsPerRow = {
-									type = "range",
-									name = "Icons Per Row",
-									order = 8,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.iconsPerRow
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.iconsPerRow = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 9,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size (px)",
-									order = 10,
-									min = 1,
-									max = 4,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.debuffs.borderSizePx
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.debuffs.borderSizePx = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown == true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -1156,96 +1292,173 @@ local options = {
 							name = "Big Defensive",
 							order = 3,
 							args = {
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetX
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetX = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetY
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetY = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 128,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size",
+											order = 4,
+											min = 0,
+											max = 6,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
 									order = 2,
-									min = 8,
-									max = 128,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().party.widgets.icons.bigDefensive.iconSize = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
 								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size",
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = 0,
-									max = 6,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().party.widgets.icons.bigDefensive.borderSizePx = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 4,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().party.widgets.icons.bigDefensive.stacksFontSize = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-
-								offsetX = {
-									type = "range",
-									name = "Offset X",
-									order = 7,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetX
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetX = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 8,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetY
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().party.widgets.icons.bigDefensive.offsetY = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.bigDefensive.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -1254,80 +1467,88 @@ local options = {
 							name = "Private Auras",
 							order = 4,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
 									order = 1,
-									min = -200,
-									max = 200,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetX = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 2,
-									min = -200,
-									max = 200,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetY = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 5,
-									min = 1,
-									max = 10,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 3,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 4,
-									min = 0,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().party.widgets.icons.privateAuras.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().party.widgets.icons.privateAuras.spacing = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetX = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.offsetY = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.iconSize = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = 0,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.privateAuras.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.spacing = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 10,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.privateAuras.maxIcons = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -1904,192 +2125,187 @@ local options = {
 					name = "Frames",
 					order = 2,
 					args = {
-						raidWidth = {
-							type = "range",
-							name = "Width",
-							min = 25,
-							max = 300,
-							step = 1,
+						frame = {
+							type = "group",
+							name = "Frame",
+							inline = true,
 							order = 1,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return (profile.raid.size and profile.raid.size.width) or 112
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+							args = {
+								raidWidth = {
+									type = "range",
+									name = "Width",
+									min = 25,
+									max = 300,
+									step = 1,
+									order = 1,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return (profile.raid.size and profile.raid.size.width) or 112
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.raid.size = profile.raid.size or { width = 112, height = 56 }
-								profile.raid.size.width = value
-								addon.UpdateScheduler:Notify("layoutChanged")
-							end,
-						},
-						raidHeight = {
-							type = "range",
-							name = "Height",
-							min = 25,
-							max = 300,
-							step = 1,
-							order = 2,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return (profile.raid.size and profile.raid.size.height) or 56
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+										local profile = addon.Database:GetProfile()
+										profile.raid.size = profile.raid.size or { width = 112, height = 56 }
+										profile.raid.size.width = value
+										addon.UpdateScheduler:Notify("layoutChanged")
+									end,
+								},
+								raidHeight = {
+									type = "range",
+									name = "Height",
+									min = 25,
+									max = 300,
+									step = 1,
+									order = 2,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return (profile.raid.size and profile.raid.size.height) or 56
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.raid.size = profile.raid.size or { width = 112, height = 56 }
-								profile.raid.size.height = value
-								addon.UpdateScheduler:Notify("layoutChanged")
-							end,
+										local profile = addon.Database:GetProfile()
+										profile.raid.size = profile.raid.size or { width = 112, height = 56 }
+										profile.raid.size.height = value
+										addon.UpdateScheduler:Notify("layoutChanged")
+									end,
+								},
+								raidBorderThickness = {
+									type = "range",
+									name = "Border Thickness",
+									min = 1,
+									max = 6,
+									step = 1,
+									order = 3,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return ((profile.raid or {}).border or {}).thicknessPx or 1
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.raid = profile.raid or {}
+										profile.raid.border = profile.raid.border or {}
+										profile.raid.border.thicknessPx = value
+										addon.UpdateScheduler:Notify("borderSettingsChanged")
+									end,
+								},
+								rowSpacer1 = {
+									type = "description",
+									name = " ",
+									order = 10,
+									width = "full",
+								},
+								raidBackgroundColor = {
+									type = "color",
+									name = "Background Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.raid or {}).background or {}).color
+											or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.raid = profile.raid or {}
+										profile.raid.background = profile.raid.background or {}
+										profile.raid.background.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("backgroundSettingsChanged")
+									end,
+								},
+								raidBorderColor = {
+									type = "color",
+									name = "Border Color",
+									hasAlpha = true,
+									order = 12,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.raid or {}).border or {}).color
+											or { r = 0, g = 0, b = 0, a = 1 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.raid = profile.raid or {}
+										profile.raid.border = profile.raid.border or {}
+										profile.raid.border.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("borderSettingsChanged")
+									end,
+								},
+							},
 						},
-						rowSpacer1 = {
-							type = "description",
-							name = " ",
-							order = 10,
-							width = "full",
-						},
-						raidHealthUseClassColor = {
-							type = "toggle",
-							name = "Use Class Color",
-							order = 11,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return ((profile.raid or {}).health or {}).classColor == true
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.raid = profile.raid or {}
-								profile.raid.health = profile.raid.health or {}
-								profile.raid.health.classColor = value
-								addon.UpdateScheduler:Notify("healthSettingsChanged")
-							end,
-						},
-						raidHealthColor = {
-							type = "color",
-							name = "Health Color",
-							hasAlpha = true,
-							order = 12,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.raid or {}).health or {}).color
-									or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
+						health = {
+							type = "group",
+							name = "Health",
+							inline = true,
+							order = 100,
+							args = {
+								raidHealthUseClassColor = {
+									type = "toggle",
+									name = "Use Class Color",
+									order = 11,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										return ((profile.raid or {}).health or {}).classColor == true
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local profile = addon.Database:GetProfile()
+										profile.raid = profile.raid or {}
+										profile.raid.health = profile.raid.health or {}
+										profile.raid.health.classColor = value
+										addon.UpdateScheduler:Notify("healthSettingsChanged")
+									end,
+								},
+								raidHealthColor = {
+									type = "color",
+									name = "Health Color",
+									hasAlpha = true,
+									order = 12,
+									get = function()
+										local profile = addon.Database:GetProfile()
+										local c = ((profile.raid or {}).health or {}).color
+											or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
 
-								local profile = addon.Database:GetProfile()
-								profile.raid = profile.raid or {}
-								profile.raid.health = profile.raid.health or {}
-								profile.raid.health.color = { r = r, g = g, b = b, a = a }
+										local profile = addon.Database:GetProfile()
+										profile.raid = profile.raid or {}
+										profile.raid.health = profile.raid.health or {}
+										profile.raid.health.color = { r = r, g = g, b = b, a = a }
 
-								addon.UpdateScheduler:Notify("healthSettingsChanged")
-							end,
-						},
-						rowSpacer2 = {
-							type = "description",
-							name = " ",
-							order = 20,
-							width = "full",
-						},
-						raidBorderThickness = {
-							type = "range",
-							name = "Border Thickness",
-							min = 1,
-							max = 6,
-							step = 1,
-							order = 21,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								return ((profile.raid or {}).border or {}).thicknessPx or 1
-							end,
-							set = function(_, value)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-
-								local profile = addon.Database:GetProfile()
-								profile.raid = profile.raid or {}
-								profile.raid.border = profile.raid.border or {}
-								profile.raid.border.thicknessPx = value
-
-								addon.UpdateScheduler:Notify("borderSettingsChanged")
-							end,
-						},
-						raidBorderColor = {
-							type = "color",
-							name = "Border Color",
-							hasAlpha = true,
-							order = 22,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.raid or {}).border or {}).color or { r = 0, g = 0, b = 0, a = 1 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-
-								local profile = addon.Database:GetProfile()
-								profile.raid = profile.raid or {}
-								profile.raid.border = profile.raid.border or {}
-								profile.raid.border.color = { r = r, g = g, b = b, a = a }
-
-								addon.UpdateScheduler:Notify("borderSettingsChanged")
-							end,
-						},
-						rowSpacer3 = {
-							type = "description",
-							name = " ",
-							order = 30,
-							width = "full",
-						},
-						raidBackgroundColor = {
-							type = "color",
-							name = "Background Color",
-							hasAlpha = true,
-							order = 31,
-							get = function()
-								local profile = addon.Database:GetProfile()
-								local c = ((profile.raid or {}).background or {}).color
-									or { r = 0.12, g = 0.12, b = 0.12, a = 1.0 }
-								return c.r, c.g, c.b, c.a
-							end,
-							set = function(_, r, g, b, a)
-								if InCombatLockdown() then
-									ShowCombatLockMessage()
-									return
-								end
-								local profile = addon.Database:GetProfile()
-								profile.raid = profile.raid or {}
-								profile.raid.background = profile.raid.background or {}
-								profile.raid.background.color = { r = r, g = g, b = b, a = a }
-								addon.UpdateScheduler:Notify("backgroundSettingsChanged")
-							end,
-						},
-						rowSpacer4 = {
-							type = "description",
-							name = " ",
-							order = 40,
-							width = "full",
+										addon.UpdateScheduler:Notify("healthSettingsChanged")
+									end,
+								},
+							},
 						},
 						powerBarGroup = {
 							type = "group",
@@ -2473,125 +2689,194 @@ local options = {
 							name = "Buffs",
 							order = 1,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.offsetX = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.offsetY = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.iconSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = -10,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.spacing = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.maxIcons = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										iconsPerRow = {
+											type = "range",
+											name = "Icons Per Row",
+											order = 6,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.iconsPerRow
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.iconsPerRow = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size (px)",
+											order = 7,
+											min = 1,
+											max = 4,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.borderSizePx
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.borderSizePx = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
+									order = 2,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks ~= false
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.offsetX = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 4,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.offsetY = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 5,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.iconSize = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 6,
-									min = -10,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.spacing = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 7,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.maxIcons = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								iconsPerRow = {
-									type = "range",
-									name = "Icons Per Row",
-									order = 8,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.iconsPerRow
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.iconsPerRow = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 9,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
-								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size (px)",
-									order = 10,
-									min = 1,
-									max = 4,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.borderSizePx
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.buffs.borderSizePx = v
-										addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown == true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -2600,125 +2885,194 @@ local options = {
 							name = "Debuffs",
 							order = 2,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetX = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetY = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.iconSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = -10,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.spacing = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.maxIcons = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										iconsPerRow = {
+											type = "range",
+											name = "Icons Per Row",
+											order = 6,
+											min = 1,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.iconsPerRow
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.iconsPerRow = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size (px)",
+											order = 7,
+											min = 1,
+											max = 4,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.borderSizePx
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.borderSizePx = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
+									order = 2,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks ~= false
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetX = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 4,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.offsetY = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 5,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.iconSize = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 6,
-									min = -10,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.spacing = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 7,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.maxIcons = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								iconsPerRow = {
-									type = "range",
-									name = "Icons Per Row",
-									order = 8,
-									min = 1,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.iconsPerRow
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.iconsPerRow = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 9,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
-								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size (px)",
-									order = 10,
-									min = 1,
-									max = 4,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.debuffs.borderSizePx
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.debuffs.borderSizePx = v
-										addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown == true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -2727,96 +3081,173 @@ local options = {
 							name = "Big Defensive",
 							order = 3,
 							args = {
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetX
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetX = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetY
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetY = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 128,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.iconSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.iconSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size",
+											order = 4,
+											min = 0,
+											max = 6,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+								stacks = {
+									type = "group",
+									name = "Stacks",
+									inline = true,
 									order = 2,
-									min = 8,
-									max = 128,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.iconSize
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().raid.widgets.icons.bigDefensive.iconSize = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
+									args = {
+										showStacks = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										stacksFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showStacks == false
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
 								},
-								borderSizePx = {
-									type = "range",
-									name = "Border Size",
+								duration = {
+									type = "group",
+									name = "Duration",
+									inline = true,
 									order = 3,
-									min = 0,
-									max = 6,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().raid.widgets.icons.bigDefensive.borderSizePx = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-								stacksFontSize = {
-									type = "range",
-									name = "Stacks Font Size",
-									order = 4,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().raid.widgets.icons.bigDefensive.stacksFontSize = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-
-								offsetX = {
-									type = "range",
-									name = "Offset X",
-									order = 7,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetX
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetX = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 8,
-									min = -300,
-									max = 300,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetY
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											return
-										end
-										addon.Database:GetProfile().raid.widgets.icons.bigDefensive.offsetY = v
-										addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-									end,
+									args = {
+										showCooldown = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+										cooldownFontSize = {
+											type = "range",
+											name = "Font Size",
+											order = 2,
+											min = 6,
+											max = 32,
+											step = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.showCooldown ~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize or 10
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize = v
+												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -2825,80 +3256,88 @@ local options = {
 							name = "Private Auras",
 							order = 4,
 							args = {
-								offsetX = {
-									type = "range",
-									name = "Offset X",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
 									order = 1,
-									min = -200,
-									max = 200,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetX
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetX = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								offsetY = {
-									type = "range",
-									name = "Offset Y",
-									order = 2,
-									min = -200,
-									max = 200,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetY
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetY = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								maxIcons = {
-									type = "range",
-									name = "Max Icons",
-									order = 5,
-									min = 1,
-									max = 10,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.privateAuras.maxIcons
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.privateAuras.maxIcons = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								iconSize = {
-									type = "range",
-									name = "Icon Size",
-									order = 3,
-									min = 8,
-									max = 64,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.privateAuras.iconSize
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.privateAuras.iconSize = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
-								},
-								spacing = {
-									type = "range",
-									name = "Spacing",
-									order = 4,
-									min = 0,
-									max = 20,
-									step = 1,
-									get = function()
-										return addon.Database:GetProfile().raid.widgets.icons.privateAuras.spacing
-									end,
-									set = function(_, v)
-										addon.Database:GetProfile().raid.widgets.icons.privateAuras.spacing = v
-										addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-									end,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetX
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetX = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetY
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.privateAuras.offsetY = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 3,
+											min = 8,
+											max = 64,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.privateAuras.iconSize
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.privateAuras.iconSize = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										spacing = {
+											type = "range",
+											name = "Spacing",
+											order = 4,
+											min = 0,
+											max = 20,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.privateAuras.spacing
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.privateAuras.spacing = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+										maxIcons = {
+											type = "range",
+											name = "Max Icons",
+											order = 5,
+											min = 1,
+											max = 10,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.privateAuras.maxIcons
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.privateAuras.maxIcons = v
+												addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
