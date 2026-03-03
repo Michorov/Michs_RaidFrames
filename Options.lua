@@ -108,6 +108,74 @@ local function PrintProfileMsg(msg)
 	print("|cffff9900Mich's RaidFrames:|r " .. msg)
 end
 
+local function GetPlayerClassFileName()
+	local _, classFileName = UnitClass("player")
+	return classFileName
+end
+
+local function GetCustomBuffListOptions(layoutKey)
+	local classFileName = GetPlayerClassFileName()
+	local profile = addon.Database:GetProfile()
+	local section = profile[layoutKey]
+	local buffSettings = (((section or {}).widgets or {}).icons or {}).buffs or {}
+	local customAuraValues = buffSettings.customAuraValues or {}
+	local classAuras = customAuraValues[classFileName] or {}
+
+	local args = {}
+
+	local entries = {}
+
+	for spellId, auraData in pairs(classAuras) do
+		table.insert(entries, {
+			spellId = spellId,
+			name = auraData.name or ("Spell " .. tostring(spellId)),
+		})
+	end
+
+	table.sort(entries, function(a, b)
+		return a.name < b.name
+	end)
+
+	local order = 10
+	for _, entry in ipairs(entries) do
+		local spellId = entry.spellId
+		local label = entry.name
+
+		args["spell_" .. spellId] = {
+			type = "toggle",
+			name = label,
+			order = order,
+			width = "full",
+			disabled = function()
+				return (((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs.useCustomBuffFilter
+					~= true
+			end,
+			get = function()
+				local values = (
+					(((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs or {}
+				).customAuraValues or {}
+				local classValues = values[classFileName] or {}
+				local aura = classValues[spellId] or {}
+				return aura.enabled == true
+			end,
+			set = function(_, v)
+				local buffs = addon.Database:GetProfile()[layoutKey].widgets.icons.buffs
+				buffs.customAuraValues = buffs.customAuraValues or {}
+				buffs.customAuraValues[classFileName] = buffs.customAuraValues[classFileName] or {}
+				buffs.customAuraValues[classFileName][spellId] = buffs.customAuraValues[classFileName][spellId] or {}
+				buffs.customAuraValues[classFileName][spellId].enabled = v
+
+				addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+				addon.UpdateScheduler:Notify("aurasStateChanged")
+			end,
+		}
+
+		order = order + 1
+	end
+
+	return args
+end
+
 local options = {
 	type = "group",
 	name = "Mich's RaidFrames",
@@ -301,6 +369,12 @@ local options = {
 								addon.UpdateScheduler:Notify("layoutChanged")
 							end,
 							order = 6,
+						},
+						rowSpacer1 = {
+							type = "description",
+							name = " ",
+							order = 6.01,
+							width = "full",
 						},
 						partyDirection = {
 							type = "select",
@@ -659,7 +733,7 @@ local options = {
 					type = "group",
 					name = "Texts",
 					order = 3,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						name = {
 							type = "group",
@@ -893,18 +967,22 @@ local options = {
 					type = "group",
 					name = "Icons",
 					order = 4,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						buffs = {
 							type = "group",
 							name = "Buffs",
 							order = 1,
+							childGroups = "tree",
 							args = {
 								layout = {
 									type = "group",
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -1018,6 +1096,9 @@ local options = {
 									name = "Stacks",
 									inline = true,
 									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										showStacks = {
 											type = "toggle",
@@ -1040,8 +1121,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showStacks
-													== false
+												local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.showStacks == false
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.stacksFontSize
@@ -1058,6 +1139,9 @@ local options = {
 									name = "Duration",
 									inline = true,
 									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										showCooldown = {
 											type = "toggle",
@@ -1080,8 +1164,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.buffs.showCooldown
-													~= true
+												local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.showCooldown ~= true
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.cooldownFontSize
@@ -1095,6 +1179,78 @@ local options = {
 										},
 									},
 								},
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											width = 0.9,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.enabled
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.enabled = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+										useCustomBuffFilter = {
+											type = "toggle",
+											name = "Custom Buffs",
+											order = 2,
+											width = 0.9,
+											disabled = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.enabled
+													~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.buffs.useCustomBuffFilter
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.buffs.useCustomBuffFilter =
+													v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+										openCustomBuffs = {
+											type = "execute",
+											name = "Custom Buffs",
+											order = 3,
+											width = 0.9,
+											disabled = function()
+												local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
+											end,
+											func = function()
+												AceConfigDialog:SelectGroup(
+													APP_NAME,
+													"party",
+													"icons",
+													"buffs",
+													"customBuffs"
+												)
+											end,
+										},
+									},
+								},
+								customBuffs = {
+									type = "group",
+									name = "Custom Buffs",
+									order = 100,
+									disabled = function()
+										local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
+										return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
+									end,
+									args = {},
+								},
 							},
 						},
 						debuffs = {
@@ -1107,6 +1263,9 @@ local options = {
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -1220,6 +1379,9 @@ local options = {
 									name = "Stacks",
 									inline = true,
 									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled == false
+									end,
 									args = {
 										showStacks = {
 											type = "toggle",
@@ -1261,6 +1423,9 @@ local options = {
 									name = "Duration",
 									inline = true,
 									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled == false
+									end,
 									args = {
 										showCooldown = {
 											type = "toggle",
@@ -1310,6 +1475,9 @@ local options = {
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -1392,6 +1560,9 @@ local options = {
 									name = "Stacks",
 									inline = true,
 									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										showStacks = {
 											type = "toggle",
@@ -1496,6 +1667,9 @@ local options = {
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -1584,7 +1758,7 @@ local options = {
 					type = "group",
 					name = "Indicators",
 					order = 6,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						dispels = {
 							type = "group",
@@ -1872,6 +2046,12 @@ local options = {
 								addon.UpdateScheduler:Notify("layoutChanged")
 							end,
 						},
+						rowSpacer1 = {
+							type = "description",
+							name = " ",
+							order = 6.01,
+							width = "full",
+						},
 						raidGroupDirection = {
 							type = "select",
 							name = "Group Direction",
@@ -1898,11 +2078,17 @@ local options = {
 								addon.UpdateScheduler:Notify("layoutChanged")
 							end,
 						},
-
+						rowSpacer2 = {
+							type = "description",
+							name = " ",
+							order = 7.01,
+							width = "full",
+						},
 						raidGroupReverse = {
 							type = "toggle",
 							name = "Reverse Group Order",
 							order = 8,
+							width = "full",
 							get = function()
 								local profile = addon.Database:GetProfile()
 								local raid = profile.raid or {}
@@ -1921,14 +2107,12 @@ local options = {
 								addon.UpdateScheduler:Notify("layoutChanged")
 							end,
 						},
-
-						raidGroupFilterHeader = {
+						rowSpacer3 = {
 							type = "description",
-							name = "Enabled Groups",
-							order = 9,
+							name = " ",
+							order = 8.01,
 							width = "full",
 						},
-
 						raidGroup1 = {
 							type = "toggle",
 							name = "Group 1",
@@ -2475,7 +2659,7 @@ local options = {
 					type = "group",
 					name = "Texts",
 					order = 3,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						name = {
 							type = "group",
@@ -2708,18 +2892,22 @@ local options = {
 					type = "group",
 					name = "Icons",
 					order = 4,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						buffs = {
 							type = "group",
 							name = "Buffs",
 							order = 1,
+							childGroups = "tree",
 							args = {
 								layout = {
 									type = "group",
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -2833,11 +3021,18 @@ local options = {
 									name = "Stacks",
 									inline = true,
 									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										showStacks = {
 											type = "toggle",
 											name = "Enabled",
 											order = 1,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled
+													~= true
+											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks
 													~= false
@@ -2855,8 +3050,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showStacks
-													== false
+												local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.showStacks == false
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.stacksFontSize
@@ -2873,6 +3068,9 @@ local options = {
 									name = "Duration",
 									inline = true,
 									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+									end,
 									args = {
 										showCooldown = {
 											type = "toggle",
@@ -2895,8 +3093,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.buffs.showCooldown
-													~= true
+												local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.showCooldown ~= true
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.cooldownFontSize
@@ -2909,6 +3107,78 @@ local options = {
 											end,
 										},
 									},
+								},
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											width = 0.9,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.enabled = v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+										useCustomBuffFilter = {
+											type = "toggle",
+											name = "Custom Buffs",
+											order = 2,
+											width = 0.9,
+											disabled = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled
+													~= true
+											end,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.buffs.useCustomBuffFilter
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.buffs.useCustomBuffFilter =
+													v
+												addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+										openCustomBuffs = {
+											type = "execute",
+											name = "Custom Buffs",
+											order = 3,
+											width = 0.9,
+											disabled = function()
+												local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
+												return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
+											end,
+											func = function()
+												AceConfigDialog:SelectGroup(
+													APP_NAME,
+													"raid",
+													"icons",
+													"buffs",
+													"customBuffs"
+												)
+											end,
+										},
+									},
+								},
+								customBuffs = {
+									type = "group",
+									name = "Custom Buffs",
+									order = 100,
+									disabled = function()
+										local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
+										return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
+									end,
+									args = {},
 								},
 							},
 						},
@@ -3396,7 +3666,7 @@ local options = {
 					type = "group",
 					name = "Indicators",
 					order = 6,
-					childGroups = "tab",
+					childGroups = "tree",
 					args = {
 						dispels = {
 							type = "group",
@@ -3808,6 +4078,10 @@ AddPageHeader(options.args.raid.args, 0)
 AddPageHeader(options.args.profiles.args, 0)
 
 function addon:RegisterOptions()
+	options.args.party.args.icons.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("party")
+
+	options.args.raid.args.icons.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("raid")
+
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
 	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 740)
 

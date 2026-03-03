@@ -7,10 +7,46 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
+local function HideIcons(container, maxIcons)
+	for i = 1, maxIcons do
+		local icon = container.icons[i]
+		if icon then
+			icon:Hide()
+		end
+	end
+	container:SetShown(false)
+end
+
+local function GetPlayerClassFileName()
+	local _, classFileName = UnitClass("player")
+	return classFileName
+end
+
+local function GetCustomBuffFilterEntry(settings, aura)
+	if not settings or not aura then
+		return nil
+	end
+
+	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
+	local customAuraValues = buffs.customAuraValues or {}
+	local classAuras = customAuraValues[GetPlayerClassFileName() or ""] or {}
+
+	local ok, customBuff = pcall(function()
+		return classAuras[aura.spellId]
+	end)
+
+	if ok then
+		return customBuff
+	end
+
+	return nil
+end
+
 local function GetBuffSettings(settings)
 	local buffs = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
 
 	return {
+		enabled = buffs.enabled ~= false,
 		anchor = buffs.anchor or "BOTTOMRIGHT",
 		relativeAnchor = buffs.relativeAnchor or "BOTTOMRIGHT",
 		offsetXPx = addon.Utilities:ToPixels(buffs.offsetX or -2),
@@ -23,6 +59,7 @@ local function GetBuffSettings(settings)
 		stacksFontSize = buffs.stacksFontSize or 10,
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
+		useCustomBuffFilter = buffs.useCustomBuffFilter == true,
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
 	}
 end
@@ -150,17 +187,19 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
-	local approved = bucket and bucket.buffs
-	if not approved or not next(approved) then
-		for i = 1, buffSettings.maxIcons do
-			local icon = container.icons[i]
-			if icon then
-				icon:Hide()
-			end
-		end
-		container:SetShown(false)
+	if not buffSettings.enabled then
+		HideIcons(container, buffSettings.maxIcons)
 		return
+	end
+
+	local approved
+	if not buffSettings.useCustomBuffFilter then
+		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
+		approved = bucket and bucket.buffs
+		if not approved or not next(approved) then
+			HideIcons(container, buffSettings.maxIcons)
+			return
+		end
 	end
 
 	local maxIcons = buffSettings.maxIcons
@@ -175,7 +214,16 @@ function Buffs:UpdateState(frame, settings)
 		auraIndex = auraIndex + 1
 
 		local auraInstanceID = aura.auraInstanceID
-		if auraInstanceID and approved[auraInstanceID] and aura.icon then
+		local shouldShowAura = false
+
+		if buffSettings.useCustomBuffFilter then
+			local customBuff = GetCustomBuffFilterEntry(settings, aura)
+			shouldShowAura = customBuff ~= nil and customBuff.enabled == true and aura.sourceUnit == "player"
+		else
+			shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
+		end
+
+		if shouldShowAura and aura.icon then
 			local icon = container.icons[shown + 1]
 			if icon and icon.texture then
 				shown = shown + 1
