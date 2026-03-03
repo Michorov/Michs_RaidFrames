@@ -7,6 +7,126 @@ local AceDB = LibStub("AceDB-3.0")
 
 local initialized = false
 
+local CUSTOM_AURA_DEFAULTS = {
+	EVOKER = {
+		[355941] = { enabled = true, name = "Dream Breath" },
+		[363502] = { enabled = true, name = "Dream Flight" },
+		[364343] = { enabled = true, name = "Echo" },
+		[366155] = { enabled = true, name = "Reversion" },
+		[367364] = { enabled = true, name = "Echo Reversion" },
+		[373267] = { enabled = true, name = "Lifebind" },
+		[376788] = { enabled = true, name = "Echo Dream Breath" },
+
+		[360827] = { enabled = true, name = "Blistering Scales" },
+		[395152] = { enabled = true, name = "Ebon Might" },
+		[410089] = { enabled = true, name = "Prescience" },
+		[410263] = { enabled = true, name = "Inferno's Blessing" },
+		[410686] = { enabled = true, name = "Symbiotic Bloom" },
+		[413984] = { enabled = true, name = "Shifting Sands" },
+	},
+
+	DRUID = {
+		[774] = { enabled = true, name = "Rejuvenation" },
+		[8936] = { enabled = true, name = "Regrowth" },
+		[33763] = { enabled = true, name = "Lifebloom" },
+		[48438] = { enabled = true, name = "Wild Growth" },
+		[155777] = { enabled = true, name = "Germination" },
+	},
+
+	PRIEST = {
+		[17] = { enabled = true, name = "Power Word: Shield" },
+		[194384] = { enabled = true, name = "Atonement" },
+		[1253593] = { enabled = true, name = "Void Shield" },
+
+		[139] = { enabled = true, name = "Renew" },
+		[41635] = { enabled = true, name = "Prayer of Mending" },
+		[77489] = { enabled = true, name = "Echo of Light" },
+	},
+
+	MONK = {
+		[115175] = { enabled = true, name = "Soothing Mist" },
+		[119611] = { enabled = true, name = "Renewing Mist" },
+		[124682] = { enabled = true, name = "Enveloping Mist" },
+		[450769] = { enabled = true, name = "Aspect of Harmony" },
+	},
+
+	SHAMAN = {
+		[974] = { enabled = true, name = "Earth Shield" },
+		[383648] = { enabled = true, name = "Earth Shield" },
+		[61295] = { enabled = true, name = "Riptide" },
+	},
+
+	PALADIN = {
+		[53563] = { enabled = true, name = "Beacon of Light" },
+		[156322] = { enabled = true, name = "Eternal Flame" },
+		[156910] = { enabled = true, name = "Beacon of Faith" },
+		[1244893] = { enabled = true, name = "Beacon of the Savior" },
+	},
+}
+
+local function SyncCustomAuraValues(currentValues, defaultValues)
+	currentValues = currentValues or {}
+	defaultValues = defaultValues or {}
+
+	for className in pairs(currentValues) do
+		if defaultValues[className] == nil then
+			currentValues[className] = nil
+		end
+	end
+
+	for className, classDefaults in pairs(defaultValues) do
+		local classValues = currentValues[className]
+		if type(classValues) ~= "table" then
+			classValues = {}
+			currentValues[className] = classValues
+		end
+
+		for spellId in pairs(classValues) do
+			if classDefaults[spellId] == nil then
+				classValues[spellId] = nil
+			end
+		end
+
+		for spellId, defaultEntry in pairs(classDefaults) do
+			local currentEntry = classValues[spellId]
+			if type(currentEntry) ~= "table" then
+				currentEntry = {}
+				classValues[spellId] = currentEntry
+			end
+
+			for key, value in pairs(defaultEntry) do
+				if currentEntry[key] == nil then
+					currentEntry[key] = value
+				end
+			end
+		end
+	end
+
+	return currentValues
+end
+
+local function SyncProfileCustomAuraDefaults(profileSection)
+	if type(profileSection) ~= "table" then
+		return
+	end
+
+	profileSection.widgets = profileSection.widgets or {}
+	profileSection.widgets.icons = profileSection.widgets.icons or {}
+	profileSection.widgets.icons.buffs = profileSection.widgets.icons.buffs or {}
+
+	local buffSettings = profileSection.widgets.icons.buffs
+	buffSettings.customAuraValues = SyncCustomAuraValues(buffSettings.customAuraValues, CUSTOM_AURA_DEFAULTS)
+end
+
+local function SyncAllProfilesCustomAuraDefaults(profile)
+	if type(profile) ~= "table" then
+		return
+	end
+
+	SyncProfileCustomAuraDefaults(profile.party)
+	SyncProfileCustomAuraDefaults(profile.raid)
+end
+
 local DEFAULTS = {
 	profile = {
 		core = {
@@ -73,6 +193,7 @@ local DEFAULTS = {
 				},
 				icons = {
 					buffs = {
+						enabled = true,
 						anchor = "BOTTOMRIGHT",
 						relativeAnchor = "BOTTOMRIGHT",
 						offsetX = -2,
@@ -88,6 +209,9 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+
+						useCustomBuffFilter = false,
+						customAuraValues = {},
 
 						borderSizePx = 1,
 					},
@@ -240,6 +364,7 @@ local DEFAULTS = {
 				},
 				icons = {
 					buffs = {
+						enabled = true,
 						anchor = "BOTTOMRIGHT",
 						relativeAnchor = "BOTTOMRIGHT",
 						offsetX = -2,
@@ -255,6 +380,9 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+
+						useCustomBuffFilter = false,
+						customAuraValues = {},
 
 						borderSizePx = 1,
 					},
@@ -403,8 +531,11 @@ function Database:Initialize()
 	end
 
 	self.db = AceDB:New("Michs_RaidFramesDB", DEFAULTS, true)
+	SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
 	local function OnProfileChanged()
+		SyncAllProfilesCustomAuraDefaults(self.db.profile)
+
 		addon.UpdateScheduler:Notify("layoutChanged")
 		addon.UpdateScheduler:Notify("backgroundSettingsChanged")
 		addon.UpdateScheduler:Notify("healthSettingsChanged")
@@ -417,6 +548,8 @@ function Database:Initialize()
 		addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
 		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 		addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+
+		addon.UpdateScheduler:Notify("aurasStateChanged")
 	end
 
 	self.db:RegisterCallback("OnProfileChanged", OnProfileChanged)
