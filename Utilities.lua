@@ -6,7 +6,13 @@ addon.Utilities = Utilities
 local cachedPixelStep = nil
 
 local function RoundToNearestInt(value)
-	return math.floor((value or 0) + 0.5)
+	value = value or 0
+
+	if value >= 0 then
+		return math.floor(value + 0.5)
+	end
+
+	return math.ceil(value - 0.5)
 end
 
 local function GetGlobalScale()
@@ -35,7 +41,7 @@ end
 
 function Utilities:ToPixels(value)
 	local step = GetPixelStep()
-	return math.floor((value or 0) / step + 0.5)
+	return RoundToNearestInt((value or 0) / step)
 end
 
 function Utilities:Scale(pixelCount)

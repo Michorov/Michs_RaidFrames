@@ -128,3 +128,11 @@ function Absorbs:UpdateState(frame)
 	bar:SetValue(absorbValue)
 	bar:Show()
 end
+
+function Absorbs:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "absorbsSettingsChanged",
+		stateReason = "absorbsStateChanged",
+	})
+end

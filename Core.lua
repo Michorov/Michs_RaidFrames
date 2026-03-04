@@ -1,29 +1,30 @@
 local addonName, addon = ...
 
 local function InitializeAddon()
-    addon.Database:Initialize()
+	addon.Database:Initialize()
 
-    addon.Utilities:RefreshPixelGrid()
+	addon.Utilities:RefreshPixelGrid()
 
-    local flushCallback = addon.Updater:CreateFlushCallback()
-    addon.UpdateScheduler:SetFlushCallback(flushCallback)
+	local flushCallback = addon.Updater:CreateFlushCallback()
+	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
-    addon:RegisterOptions()
+	addon:RegisterOptions()
 
-    addon.EventHandler:Initialize()
+	addon.Modules:Initialize()
+	addon.EventHandler:Initialize()
 end
 
 local core = CreateFrame("Frame")
 core:RegisterEvent("ADDON_LOADED")
 core:SetScript("OnEvent", function(_, event, loadedAddonName)
-    if event ~= "ADDON_LOADED" then
-        return
-    end
+	if event ~= "ADDON_LOADED" then
+		return
+	end
 
-    if loadedAddonName ~= addonName then
-        return
-    end
+	if loadedAddonName ~= addonName then
+		return
+	end
 
-    core:UnregisterEvent("ADDON_LOADED")
-    InitializeAddon()
+	core:UnregisterEvent("ADDON_LOADED")
+	InitializeAddon()
 end)

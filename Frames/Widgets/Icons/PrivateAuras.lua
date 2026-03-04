@@ -134,3 +134,10 @@ function PrivateAuras:Ensure(frame, settings)
 		frame.privateAurasContainer = addon.Frames.Widgets.Icons.Factory:CreateContainer(frame, "privateAurasContainer")
 	end
 end
+
+function PrivateAuras:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "privateAurasSettingsChanged",
+	})
+end

@@ -76,3 +76,11 @@ function Health:UpdateState(frame, settings)
 
 	healthBar:Show()
 end
+
+function Health:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "healthSettingsChanged",
+		stateReason = "healthStateChanged",
+	})
+end

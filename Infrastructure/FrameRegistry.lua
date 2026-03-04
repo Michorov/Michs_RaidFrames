@@ -163,83 +163,6 @@ local function ResolveRaidSettings(profile)
 	return raidSettings
 end
 
-local function EnsureWidgets()
-	local profile = addon.Database:GetProfile()
-	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
-
-	local function EnsureWidgetsForGroup(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, unitFrame in ipairs(group.frames) do
-			addon.Frames.Base.Background:Ensure(unitFrame, settings)
-			addon.Frames.Base.Health:Ensure(unitFrame, settings)
-			addon.Frames.Base.Power:Ensure(unitFrame, settings)
-			addon.Frames.Base.Border:Ensure(unitFrame, settings)
-
-			addon.Frames.Widgets.Overlay:Ensure(unitFrame)
-
-			addon.Frames.Widgets.Indicators.ReadyCheck:Ensure(unitFrame, settings)
-
-			addon.Frames.Widgets.Bars.Absorbs:Ensure(unitFrame)
-			addon.Frames.Widgets.Bars.HealAbsorbs:Ensure(unitFrame)
-
-			addon.Frames.Widgets.Texts.Name:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Texts.StatusText:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Icons.Buffs:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Icons.Debuffs:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Icons.BigDefensive:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Icons.PrivateAuras:Ensure(unitFrame, settings)
-			addon.Frames.Widgets.Indicators.Dispels:Ensure(unitFrame, settings)
-		end
-	end
-
-	EnsureWidgetsForGroup(soloGroup, partySettings)
-	EnsureWidgetsForGroup(partyGroup, partySettings)
-	EnsureWidgetsForGroup(raidGroup, raidSettings)
-end
-
-local function UpdateSettings()
-	if not initialized then
-		error("FrameRegistry is not initialized", 2)
-	end
-
-	local profile = addon.Database:GetProfile()
-	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
-
-	local function UpdateSettingsForGroup(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, unitFrame in ipairs(group.frames) do
-			addon.Frames.Base.Background:UpdateSettings(unitFrame, settings)
-			addon.Frames.Base.Health:UpdateSettings(unitFrame, settings)
-			addon.Frames.Base.Power:UpdateSettings(unitFrame, settings)
-			addon.Frames.Base.Border:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Texts.Name:UpdateSettings(unitFrame, settings)
-
-			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateSettings(unitFrame, settings)
-
-			addon.Frames.Widgets.Bars.Absorbs:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateSettings(unitFrame, settings)
-
-			addon.Frames.Widgets.Icons.Buffs:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Icons.Debuffs:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Icons.BigDefensive:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(unitFrame, settings)
-			addon.Frames.Widgets.Indicators.Dispels:UpdateSettings(unitFrame, settings)
-		end
-	end
-
-	UpdateSettingsForGroup(soloGroup, partySettings)
-	UpdateSettingsForGroup(partyGroup, partySettings)
-	UpdateSettingsForGroup(raidGroup, raidSettings)
-end
-
 function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 	if not initialized then
 		error("FrameRegistry is not initialized", 2)
@@ -368,11 +291,22 @@ function FrameRegistry:Initialize()
 		RegisterStateDriver(soloGroup.container, "visibility", "hide")
 	end
 
-	EnsureWidgets()
+	local function EnsureWidgetsAndUpdateSettings(group, settings)
+		if not group or not group.frames then
+			return
+		end
+
+		for _, unitFrame in ipairs(group.frames) do
+			addon.Modules:EnsureFrame(unitFrame, settings)
+			addon.Modules:UpdateSettingsFrame(unitFrame, settings)
+		end
+	end
+
+	EnsureWidgetsAndUpdateSettings(soloGroup, partySettings)
+	EnsureWidgetsAndUpdateSettings(partyGroup, partySettings)
+	EnsureWidgetsAndUpdateSettings(raidGroup, raidSettings)
 
 	initialized = true
-
-	UpdateSettings()
 
 	addon.Frames:UpdateLayout(soloGroup, partySettings)
 	addon.Frames:UpdateLayout(partyGroup, partySettings)

@@ -30,3 +30,9 @@ function Overlay:Ensure(frame)
 		frame.textLayer = textLayer
 	end
 end
+
+function Overlay:Init()
+	addon.Modules:Register({
+		module = self,
+	})
+end

@@ -9,58 +9,73 @@ local initialized = false
 
 local CUSTOM_AURA_DEFAULTS = {
 	EVOKER = {
-		[355941] = { enabled = true, name = "Dream Breath" },
-		[363502] = { enabled = true, name = "Dream Flight" },
-		[364343] = { enabled = true, name = "Echo" },
-		[366155] = { enabled = true, name = "Reversion" },
-		[367364] = { enabled = true, name = "Echo Reversion" },
-		[373267] = { enabled = true, name = "Lifebind" },
-		[376788] = { enabled = true, name = "Echo Dream Breath" },
-
-		[360827] = { enabled = true, name = "Blistering Scales" },
-		[395152] = { enabled = true, name = "Ebon Might" },
-		[410089] = { enabled = true, name = "Prescience" },
-		[410263] = { enabled = true, name = "Inferno's Blessing" },
-		[410686] = { enabled = true, name = "Symbiotic Bloom" },
-		[413984] = { enabled = true, name = "Shifting Sands" },
+		[1467] = {
+			[355941] = { enabled = true, name = "Dream Breath" },
+			[363502] = { enabled = true, name = "Dream Flight" },
+			[364343] = { enabled = true, name = "Echo" },
+			[366155] = { enabled = true, name = "Reversion" },
+			[367364] = { enabled = true, name = "Echo Reversion" },
+			[373267] = { enabled = true, name = "Lifebind" },
+			[376788] = { enabled = true, name = "Echo Dream Breath" },
+		},
+		[1473] = {
+			[360827] = { enabled = true, name = "Blistering Scales" },
+			[395152] = { enabled = true, name = "Ebon Might" },
+			[410089] = { enabled = true, name = "Prescience" },
+			[410263] = { enabled = true, name = "Inferno's Blessing" },
+			[410686] = { enabled = true, name = "Symbiotic Bloom" },
+			[413984] = { enabled = true, name = "Shifting Sands" },
+		},
 	},
 
 	DRUID = {
-		[774] = { enabled = true, name = "Rejuvenation" },
-		[8936] = { enabled = true, name = "Regrowth" },
-		[33763] = { enabled = true, name = "Lifebloom" },
-		[48438] = { enabled = true, name = "Wild Growth" },
-		[155777] = { enabled = true, name = "Germination" },
+		[105] = {
+			[774] = { enabled = true, name = "Rejuvenation" },
+			[8936] = { enabled = true, name = "Regrowth" },
+			[33763] = { enabled = true, name = "Lifebloom" },
+			[48438] = { enabled = true, name = "Wild Growth" },
+			[155777] = { enabled = true, name = "Germination" },
+		},
 	},
 
 	PRIEST = {
-		[17] = { enabled = true, name = "Power Word: Shield" },
-		[194384] = { enabled = true, name = "Atonement" },
-		[1253593] = { enabled = true, name = "Void Shield" },
-
-		[139] = { enabled = true, name = "Renew" },
-		[41635] = { enabled = true, name = "Prayer of Mending" },
-		[77489] = { enabled = true, name = "Echo of Light" },
+		[256] = {
+			[17] = { enabled = true, name = "Power Word: Shield" },
+			[194384] = { enabled = true, name = "Atonement" },
+			[1253593] = { enabled = true, name = "Void Shield" },
+			[41635] = { enabled = true, name = "Prayer of Mending" },
+		},
+		[257] = {
+			[139] = { enabled = true, name = "Renew" },
+			[41635] = { enabled = true, name = "Prayer of Mending" },
+			[77489] = { enabled = true, name = "Echo of Light" },
+		},
 	},
 
 	MONK = {
-		[115175] = { enabled = true, name = "Soothing Mist" },
-		[119611] = { enabled = true, name = "Renewing Mist" },
-		[124682] = { enabled = true, name = "Enveloping Mist" },
-		[450769] = { enabled = true, name = "Aspect of Harmony" },
+		[270] = {
+			[115175] = { enabled = true, name = "Soothing Mist" },
+			[119611] = { enabled = true, name = "Renewing Mist" },
+			[124682] = { enabled = true, name = "Enveloping Mist" },
+			[450769] = { enabled = true, name = "Aspect of Harmony" },
+		},
 	},
 
 	SHAMAN = {
-		[974] = { enabled = true, name = "Earth Shield" },
-		[383648] = { enabled = true, name = "Earth Shield" },
-		[61295] = { enabled = true, name = "Riptide" },
+		[264] = {
+			[974] = { enabled = true, name = 'Earth Shield "Ally"' },
+			[383648] = { enabled = true, name = 'Earth Shield "Self"' },
+			[61295] = { enabled = true, name = "Riptide" },
+		},
 	},
 
 	PALADIN = {
-		[53563] = { enabled = true, name = "Beacon of Light" },
-		[156322] = { enabled = true, name = "Eternal Flame" },
-		[156910] = { enabled = true, name = "Beacon of Faith" },
-		[1244893] = { enabled = true, name = "Beacon of the Savior" },
+		[65] = {
+			[53563] = { enabled = true, name = "Beacon of Light" },
+			[156322] = { enabled = true, name = "Eternal Flame" },
+			[156910] = { enabled = true, name = "Beacon of Faith" },
+			[1244893] = { enabled = true, name = "Beacon of the Savior" },
+		},
 	},
 }
 
@@ -81,22 +96,36 @@ local function SyncCustomAuraValues(currentValues, defaultValues)
 			currentValues[className] = classValues
 		end
 
-		for spellId in pairs(classValues) do
-			if classDefaults[spellId] == nil then
-				classValues[spellId] = nil
+		for specID in pairs(classValues) do
+			if classDefaults[specID] == nil then
+				classValues[specID] = nil
 			end
 		end
 
-		for spellId, defaultEntry in pairs(classDefaults) do
-			local currentEntry = classValues[spellId]
-			if type(currentEntry) ~= "table" then
-				currentEntry = {}
-				classValues[spellId] = currentEntry
+		for specID, specDefaults in pairs(classDefaults) do
+			local specValues = classValues[specID]
+			if type(specValues) ~= "table" then
+				specValues = {}
+				classValues[specID] = specValues
 			end
 
-			for key, value in pairs(defaultEntry) do
-				if currentEntry[key] == nil then
-					currentEntry[key] = value
+			for spellId in pairs(specValues) do
+				if specDefaults[spellId] == nil then
+					specValues[spellId] = nil
+				end
+			end
+
+			for spellId, defaultEntry in pairs(specDefaults) do
+				local currentEntry = specValues[spellId]
+				if type(currentEntry) ~= "table" then
+					currentEntry = {}
+					specValues[spellId] = currentEntry
+				end
+
+				for key, value in pairs(defaultEntry) do
+					if currentEntry[key] == nil then
+						currentEntry[key] = value
+					end
 				end
 			end
 		end
@@ -125,6 +154,10 @@ local function SyncAllProfilesCustomAuraDefaults(profile)
 
 	SyncProfileCustomAuraDefaults(profile.party)
 	SyncProfileCustomAuraDefaults(profile.raid)
+end
+
+function Database:GetCustomAuraDefaults()
+	return CUSTOM_AURA_DEFAULTS
 end
 
 local DEFAULTS = {
@@ -277,6 +310,52 @@ local DEFAULTS = {
 							g = 0,
 							b = 0,
 							a = 0.5,
+						},
+					},
+					buffOverlays = {
+						overlay1 = {
+							bySpec = {
+								[65] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[105] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[256] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[257] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[264] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[270] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[1467] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[1473] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+							},
 						},
 					},
 				},
@@ -450,6 +529,52 @@ local DEFAULTS = {
 							a = 0.5,
 						},
 					},
+					buffOverlays = {
+						overlay1 = {
+							bySpec = {
+								[65] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[105] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[256] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[257] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[264] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[270] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[1467] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+								[1473] = {
+									enabled = false,
+									spellId = 0,
+									color = { r = 1.0, g = 1.0, b = 1.0 },
+								},
+							},
+						},
+					},
 				},
 				indicators = {
 					readyCheck = {},
@@ -536,20 +661,7 @@ function Database:Initialize()
 	local function OnProfileChanged()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
-		addon.UpdateScheduler:Notify("layoutChanged")
-		addon.UpdateScheduler:Notify("backgroundSettingsChanged")
-		addon.UpdateScheduler:Notify("healthSettingsChanged")
-		addon.UpdateScheduler:Notify("powerSettingsChanged")
-		addon.UpdateScheduler:Notify("powerStateChanged")
-		addon.UpdateScheduler:Notify("borderSettingsChanged")
-		addon.UpdateScheduler:Notify("nameSettingsChanged")
-		addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-		addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-		addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-		addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-
-		addon.UpdateScheduler:Notify("aurasStateChanged")
+		addon.Modules:RequestUpdateAll()
 	end
 
 	self.db:RegisterCallback("OnProfileChanged", OnProfileChanged)

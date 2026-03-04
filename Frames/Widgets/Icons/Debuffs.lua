@@ -257,3 +257,11 @@ function Debuffs:Ensure(frame, settings)
 		end
 	end
 end
+
+function Debuffs:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "debuffAurasSettingsChanged",
+		stateReason = "aurasStateChanged",
+	})
+end

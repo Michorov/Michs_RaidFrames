@@ -37,3 +37,10 @@ function Background:UpdateSettings(frame, settings)
     background:SetColorTexture(r, g, b, a)
     background:Show()
 end
+
+function Background:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "backgroundSettingsChanged",
+	})
+end

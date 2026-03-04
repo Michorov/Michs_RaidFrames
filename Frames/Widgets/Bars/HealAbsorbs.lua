@@ -128,3 +128,11 @@ function HealAbsorbs:UpdateState(frame)
 	bar:SetValue(healAbsorbValue)
 	bar:Show()
 end
+
+function HealAbsorbs:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "healAbsorbsSettingsChanged",
+		stateReason = "healAbsorbsStateChanged",
+	})
+end

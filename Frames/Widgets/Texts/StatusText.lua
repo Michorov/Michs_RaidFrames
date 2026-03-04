@@ -60,3 +60,10 @@ function StatusText:UpdateState(frame)
 		statusText:Hide()
 	end
 end
+
+function StatusText:Init()
+	addon.Modules:Register({
+		module = self,
+		stateReason = "statusStateChanged",
+	})
+end

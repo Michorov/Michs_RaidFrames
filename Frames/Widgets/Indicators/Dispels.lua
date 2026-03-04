@@ -169,3 +169,11 @@ function Dispels:UpdateState(frame, settings)
 
 	container:SetShown(shown > 0)
 end
+
+function Dispels:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "dispelsSettingsChanged",
+		stateReason = "aurasStateChanged",
+	})
+end

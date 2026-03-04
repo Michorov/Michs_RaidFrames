@@ -118,3 +118,11 @@ function ReadyCheck:UpdateState(frame, settings)
 	icon:SetTexture(tex)
 	icon:Show()
 end
+
+function ReadyCheck:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "readyCheckSettingsChanged",
+		stateReason = "readyCheckStateChanged",
+	})
+end

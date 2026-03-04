@@ -51,11 +51,10 @@ local function IsHealerUnit(unit)
 		return true
 	end
 
-	-- Fallback for your own unit when role is NONE (e.g. forms/solo/non-assigned groups)
 	if UnitIsUnit(unit, "player") then
 		local specIndex = GetSpecialization and GetSpecialization()
 		if specIndex then
-			local specRole = select(5, GetSpecializationInfo(specIndex)) -- "HEALER", "DAMAGER", "TANK"
+			local specRole = select(5, GetSpecializationInfo(specIndex))
 			if specRole == "HEALER" then
 				return true
 			end
@@ -199,4 +198,12 @@ function Power:UpdateState(frame, settings)
 
 	powerBar:SetMinMaxValues(0, max)
 	powerBar:SetValue(current)
+end
+
+function Power:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "powerSettingsChanged",
+		stateReason = "powerStateChanged",
+	})
 end
