@@ -453,15 +453,7 @@ local options = {
 						local p = addon.Database:GetProfile()
 						p.core.uiScale = v
 						addon.UpdateScheduler:Notify("layoutChanged")
-						addon.UpdateScheduler:Notify("backgroundSettingsChanged")
-						addon.UpdateScheduler:Notify("healthSettingsChanged")
-						addon.UpdateScheduler:Notify("borderSettingsChanged")
-						addon.UpdateScheduler:Notify("nameSettingsChanged")
-						addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-						addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-						addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
-						addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-						addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+						addon.Modules:RequestUpdateSettings()
 					end,
 				},
 				outOfRangeAlpha = {
