@@ -220,3 +220,11 @@ function BigDefensive:Ensure(frame, settings)
 		end
 	end
 end
+
+function BigDefensive:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "bigDefensiveAurasSettingsChanged",
+		stateReason = "aurasStateChanged",
+	})
+end

@@ -88,53 +88,26 @@ local function UpdatePartyLayout(group, settings)
 	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
 	local isHorizontal = layout.isHorizontal
 
-	local positionX = layout.positionX
-	local positionY = layout.positionY
-	local frameWidthPx = layout.frameWidthPx
-	local frameHeightPx = layout.frameHeightPx
-	local spacingXPx = layout.spacingXPx
-	local spacingYPx = layout.spacingYPx
-
 	local frameCount = #group.frames
 
-	local containerWidthPx = frameWidthPx
-	local containerHeightPx = frameHeightPx
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(layout.frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(layout.frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(layout.spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(layout.spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(layout.positionX)
+	local scaledPositionY = addon.Utilities:Scale(layout.positionY)
 
-	if frameCount > 0 then
-		if isHorizontal then
-			containerWidthPx = (frameCount * frameWidthPx) + ((frameCount - 1) * spacingXPx)
-			containerHeightPx = frameHeightPx
-		else
-			containerWidthPx = frameWidthPx
-			containerHeightPx = (frameCount * frameHeightPx) + ((frameCount - 1) * spacingYPx)
-		end
+	local scaledContainerWidthPx
+	local scaledContainerHeightPx
+
+	if isHorizontal then
+		scaledContainerWidthPx = (frameCount * scaledFrameWidthPx) + ((frameCount - 1) * scaledSpacingXPx)
+		scaledContainerHeightPx = scaledFrameHeightPx
+	else
+		scaledContainerWidthPx = scaledFrameWidthPx
+		scaledContainerHeightPx = (frameCount * scaledFrameHeightPx) + ((frameCount - 1) * scaledSpacingYPx)
 	end
 
-	if (containerWidthPx % 2) ~= 0 then
-		containerWidthPx = containerWidthPx + 1
-	end
-	if (containerHeightPx % 2) ~= 0 then
-		containerHeightPx = containerHeightPx + 1
-	end
-
-	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
-	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
-	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
-	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
-	local scaledPositionX = addon.Utilities:Scale(positionX)
-	local scaledPositionY = addon.Utilities:Scale(positionY)
-
-	local scaledContainerWidthPx = scaledFrameWidthPx
-	local scaledContainerHeightPx = scaledFrameHeightPx
-	if frameCount > 0 then
-		if isHorizontal then
-			scaledContainerWidthPx = (frameCount * scaledFrameWidthPx) + ((frameCount - 1) * scaledSpacingXPx)
-			scaledContainerHeightPx = scaledFrameHeightPx
-		else
-			scaledContainerWidthPx = scaledFrameWidthPx
-			scaledContainerHeightPx = (frameCount * scaledFrameHeightPx) + ((frameCount - 1) * scaledSpacingYPx)
-		end
-	end
 	if (scaledContainerWidthPx % 2) ~= 0 then
 		scaledContainerWidthPx = scaledContainerWidthPx + 1
 	end
@@ -178,40 +151,18 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
 	local isHorizontal = layout.isHorizontal
 
-	local positionX = layout.positionX
-	local positionY = layout.positionY
-	local frameWidthPx = layout.frameWidthPx
-	local frameHeightPx = layout.frameHeightPx
-	local spacingXPx = layout.spacingXPx
-	local spacingYPx = layout.spacingYPx
-
 	local frameCount = math.min(ARENA_RAID_MAX_UNITS, #group.frames)
 
-	local containerWidthPx, containerHeightPx
-	if isHorizontal then
-		containerWidthPx = (frameCount * frameWidthPx) + ((frameCount - 1) * spacingXPx)
-		containerHeightPx = frameHeightPx
-	else
-		containerWidthPx = frameWidthPx
-		containerHeightPx = (frameCount * frameHeightPx) + ((frameCount - 1) * spacingYPx)
-	end
-
-	if (containerWidthPx % 2) ~= 0 then
-		containerWidthPx = containerWidthPx + 1
-	end
-	if (containerHeightPx % 2) ~= 0 then
-		containerHeightPx = containerHeightPx + 1
-	end
-
-	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
-	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
-	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
-	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
-	local scaledPositionX = addon.Utilities:Scale(positionX)
-	local scaledPositionY = addon.Utilities:Scale(positionY)
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(layout.frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(layout.frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(layout.spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(layout.spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(layout.positionX)
+	local scaledPositionY = addon.Utilities:Scale(layout.positionY)
 
 	local scaledContainerWidthPx
 	local scaledContainerHeightPx
+
 	if isHorizontal then
 		scaledContainerWidthPx = (frameCount * scaledFrameWidthPx) + ((frameCount - 1) * scaledSpacingXPx)
 		scaledContainerHeightPx = scaledFrameHeightPx
@@ -219,6 +170,7 @@ local function UpdateRaidLayoutAsPartyInArena(group, settings)
 		scaledContainerWidthPx = scaledFrameWidthPx
 		scaledContainerHeightPx = (frameCount * scaledFrameHeightPx) + ((frameCount - 1) * scaledSpacingYPx)
 	end
+
 	if (scaledContainerWidthPx % 2) ~= 0 then
 		scaledContainerWidthPx = scaledContainerWidthPx + 1
 	end
@@ -413,6 +365,7 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 
 	local scaledContainerWidthPx = (totalCols * scaledFrameWidthPx) + ((totalCols - 1) * scaledSpacingXPx)
 	local scaledContainerHeightPx = (totalRows * scaledFrameHeightPx) + ((totalRows - 1) * scaledSpacingYPx)
+
 	if (scaledContainerWidthPx % 2) ~= 0 then
 		scaledContainerWidthPx = scaledContainerWidthPx + 1
 	end

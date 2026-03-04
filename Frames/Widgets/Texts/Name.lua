@@ -115,3 +115,11 @@ function Name:UpdateState(frame, settings)
 	local r, g, b, a = GetNameColor(frame, nameSettings)
 	nameText:SetTextColor(r, g, b, a)
 end
+
+function Name:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "nameSettingsChanged",
+		stateReason = "nameStateChanged",
+	})
+end

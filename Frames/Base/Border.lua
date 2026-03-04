@@ -88,3 +88,10 @@ function Border:UpdateSettings(frame, settings)
 
 	border:Show()
 end
+
+function Border:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "borderSettingsChanged",
+	})
+end

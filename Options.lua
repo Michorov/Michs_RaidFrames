@@ -122,52 +122,269 @@ local function GetCustomBuffListOptions(layoutKey)
 	local classAuras = customAuraValues[classFileName] or {}
 
 	local args = {}
+	local order = 10
 
-	local entries = {}
-
-	for spellId, auraData in pairs(classAuras) do
-		table.insert(entries, {
-			spellId = spellId,
-			name = auraData.name or ("Spell " .. tostring(spellId)),
+	local specEntries = {}
+	for specID, specAuras in pairs(classAuras) do
+		local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
+		table.insert(specEntries, {
+			specID = specID,
+			name = specName,
+			auras = specAuras,
 		})
 	end
 
-	table.sort(entries, function(a, b)
+	table.sort(specEntries, function(a, b)
+		return a.name < b.name
+	end)
+
+	for _, specEntry in ipairs(specEntries) do
+		local specID = specEntry.specID
+		local auraEntries = {}
+
+		for spellId, auraData in pairs(specEntry.auras or {}) do
+			table.insert(auraEntries, {
+				spellId = spellId,
+				name = auraData.name or ("Spell " .. tostring(spellId)),
+			})
+		end
+
+		table.sort(auraEntries, function(a, b)
+			return a.name < b.name
+		end)
+
+		local specArgs = {}
+		local specOrder = 1
+
+		for _, auraEntry in ipairs(auraEntries) do
+			local spellId = auraEntry.spellId
+			local label = auraEntry.name
+
+			specArgs["spell_" .. specID .. "_" .. spellId] = {
+				type = "toggle",
+				name = label,
+				order = specOrder,
+				width = "full",
+				disabled = function()
+					return (((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs.useCustomBuffFilter
+						~= true
+				end,
+				get = function()
+					local values = (
+						(((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs or {}
+					).customAuraValues or {}
+					local classValues = values[classFileName] or {}
+					local specValues = classValues[specID] or {}
+					local aura = specValues[spellId] or {}
+					return aura.enabled == true
+				end,
+				set = function(_, v)
+					local buffs = addon.Database:GetProfile()[layoutKey].widgets.icons.buffs
+					buffs.customAuraValues = buffs.customAuraValues or {}
+					buffs.customAuraValues[classFileName] = buffs.customAuraValues[classFileName] or {}
+					buffs.customAuraValues[classFileName][specID] = buffs.customAuraValues[classFileName][specID] or {}
+					buffs.customAuraValues[classFileName][specID][spellId] = buffs.customAuraValues[classFileName][specID][spellId]
+						or {}
+					buffs.customAuraValues[classFileName][specID][spellId].enabled = v
+
+					addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+					addon.UpdateScheduler:Notify("aurasStateChanged")
+				end,
+			}
+
+			specOrder = specOrder + 1
+		end
+
+		args["spec_" .. specID] = {
+			type = "group",
+			name = specEntry.name,
+			order = order,
+			inline = true,
+			args = specArgs,
+		}
+
+		order = order + 1
+	end
+
+	return args
+end
+
+local function GetBuffOverlayOptions(layoutKey)
+	local classFileName = GetPlayerClassFileName()
+	local profile = addon.Database:GetProfile()
+	local section = profile[layoutKey] or {}
+	local widgets = section.widgets or {}
+	local bars = widgets.bars or {}
+	local buffOverlays = bars.buffOverlays or {}
+	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
+	local classAuras = defaultAuraValues[classFileName] or {}
+
+	local args = {}
+
+	local overlayKeys = {}
+	for overlayKey in pairs(buffOverlays) do
+		table.insert(overlayKeys, overlayKey)
+	end
+
+	table.sort(overlayKeys)
+
+	local specEntries = {}
+	for specID, specAuras in pairs(classAuras) do
+		local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
+		table.insert(specEntries, {
+			specID = specID,
+			name = specName,
+			auras = specAuras,
+		})
+	end
+
+	table.sort(specEntries, function(a, b)
 		return a.name < b.name
 	end)
 
 	local order = 10
-	for _, entry in ipairs(entries) do
-		local spellId = entry.spellId
-		local label = entry.name
+	for _, specEntry in ipairs(specEntries) do
+		local specID = specEntry.specID
+		local spellValues = {
+			[0] = "None",
+		}
 
-		args["spell_" .. spellId] = {
-			type = "toggle",
-			name = label,
+		local spellSorting = { 0 }
+
+		local spellEntries = {}
+		for spellId, auraData in pairs(specEntry.auras or {}) do
+			table.insert(spellEntries, {
+				spellId = spellId,
+				name = auraData.name or ("Spell " .. tostring(spellId)),
+			})
+		end
+
+		table.sort(spellEntries, function(a, b)
+			return a.name < b.name
+		end)
+
+		for _, entry in ipairs(spellEntries) do
+			spellValues[entry.spellId] = entry.name
+			table.insert(spellSorting, entry.spellId)
+		end
+
+		local specArgs = {}
+		local specOrder = 1
+
+		for _, overlayKey in ipairs(overlayKeys) do
+			local label = "Enable"
+
+			specArgs["enabled_" .. specID .. "_" .. overlayKey] = {
+				type = "toggle",
+				name = label,
+				order = specOrder,
+				width = 0.9,
+				disabled = function()
+					return addon.Database:GetProfile()[layoutKey].widgets.icons.buffs.enabled ~= true
+				end,
+				get = function()
+					local overlay = (
+						((((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).bars or {}).buffOverlays or {})[overlayKey]
+						or {}
+					)
+					local bySpec = overlay.bySpec or {}
+					local specSettings = bySpec[specID] or {}
+					return specSettings.enabled == true
+				end,
+				set = function(_, v)
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					overlay.bySpec = overlay.bySpec or {}
+					overlay.bySpec[specID] = overlay.bySpec[specID]
+						or {
+							enabled = false,
+							spellId = 0,
+							color = { r = 1, g = 1, b = 1 },
+						}
+					overlay.bySpec[specID].enabled = v
+					addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
+					addon.UpdateScheduler:Notify("aurasStateChanged")
+				end,
+			}
+
+			specArgs["spell_" .. specID .. "_" .. overlayKey] = {
+				type = "select",
+				name = "",
+				order = specOrder + 0.1,
+				width = 1.1,
+				values = spellValues,
+				sorting = spellSorting,
+				disabled = function()
+					local profileBuffs = addon.Database:GetProfile()[layoutKey].widgets.icons.buffs
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					local bySpec = overlay.bySpec or {}
+					local specSettings = bySpec[specID] or {}
+					return profileBuffs.enabled ~= true or specSettings.enabled ~= true
+				end,
+				get = function()
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					local bySpec = overlay.bySpec or {}
+					local specSettings = bySpec[specID] or {}
+					return specSettings.spellId or 0
+				end,
+				set = function(_, v)
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					overlay.bySpec = overlay.bySpec or {}
+					overlay.bySpec[specID] = overlay.bySpec[specID]
+						or {
+							enabled = false,
+							spellId = 0,
+							color = { r = 1, g = 1, b = 1 },
+						}
+					overlay.bySpec[specID].spellId = v
+					addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
+					addon.UpdateScheduler:Notify("aurasStateChanged")
+				end,
+			}
+
+			specArgs["color_" .. specID .. "_" .. overlayKey] = {
+				type = "color",
+				name = "",
+				order = specOrder + 0.2,
+				width = 0.5,
+				hasAlpha = false,
+				disabled = function()
+					local profileBuffs = addon.Database:GetProfile()[layoutKey].widgets.icons.buffs
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					local bySpec = overlay.bySpec or {}
+					local specSettings = bySpec[specID] or {}
+					return profileBuffs.enabled ~= true or specSettings.enabled ~= true
+				end,
+				get = function()
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					local bySpec = overlay.bySpec or {}
+					local specSettings = bySpec[specID] or {}
+					local color = specSettings.color or {}
+					return color.r or 1, color.g or 1, color.b or 1
+				end,
+				set = function(_, r, g, b)
+					local overlay = addon.Database:GetProfile()[layoutKey].widgets.bars.buffOverlays[overlayKey]
+					overlay.bySpec = overlay.bySpec or {}
+					overlay.bySpec[specID] = overlay.bySpec[specID]
+						or {
+							enabled = false,
+							spellId = 0,
+							color = { r = 1, g = 1, b = 1 },
+						}
+					overlay.bySpec[specID].color = { r = r, g = g, b = b }
+					addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
+					addon.UpdateScheduler:Notify("aurasStateChanged")
+				end,
+			}
+
+			specOrder = specOrder + 1
+		end
+
+		args["spec_" .. specID] = {
+			type = "group",
+			name = specEntry.name,
 			order = order,
-			width = "full",
-			disabled = function()
-				return (((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs.useCustomBuffFilter
-					~= true
-			end,
-			get = function()
-				local values = (
-					(((addon.Database:GetProfile()[layoutKey] or {}).widgets or {}).icons or {}).buffs or {}
-				).customAuraValues or {}
-				local classValues = values[classFileName] or {}
-				local aura = classValues[spellId] or {}
-				return aura.enabled == true
-			end,
-			set = function(_, v)
-				local buffs = addon.Database:GetProfile()[layoutKey].widgets.icons.buffs
-				buffs.customAuraValues = buffs.customAuraValues or {}
-				buffs.customAuraValues[classFileName] = buffs.customAuraValues[classFileName] or {}
-				buffs.customAuraValues[classFileName][spellId] = buffs.customAuraValues[classFileName][spellId] or {}
-				buffs.customAuraValues[classFileName][spellId].enabled = v
-
-				addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-				addon.UpdateScheduler:Notify("aurasStateChanged")
-			end,
+			inline = true,
+			args = specArgs,
 		}
 
 		order = order + 1
@@ -963,9 +1180,9 @@ local options = {
 						},
 					},
 				},
-				icons = {
+				auras = {
 					type = "group",
-					name = "Icons",
+					name = "Auras",
 					order = 4,
 					childGroups = "tree",
 					args = {
@@ -1202,7 +1419,7 @@ local options = {
 										},
 										useCustomBuffFilter = {
 											type = "toggle",
-											name = "Custom Buffs",
+											name = "Custom Filter",
 											order = 2,
 											width = 0.9,
 											disabled = function()
@@ -1222,7 +1439,7 @@ local options = {
 										},
 										openCustomBuffs = {
 											type = "execute",
-											name = "Custom Buffs",
+											name = "Custom Filter",
 											order = 3,
 											width = 0.9,
 											disabled = function()
@@ -1233,7 +1450,7 @@ local options = {
 												AceConfigDialog:SelectGroup(
 													APP_NAME,
 													"party",
-													"icons",
+													"auras",
 													"buffs",
 													"customBuffs"
 												)
@@ -1243,7 +1460,7 @@ local options = {
 								},
 								customBuffs = {
 									type = "group",
-									name = "Custom Buffs",
+									name = "Custom Filter",
 									order = 100,
 									disabled = function()
 										local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
@@ -1252,6 +1469,12 @@ local options = {
 									args = {},
 								},
 							},
+						},
+						buffOverlays = {
+							type = "group",
+							name = "Buff Overlays",
+							order = 2,
+							args = {},
 						},
 						debuffs = {
 							type = "group",
@@ -1264,7 +1487,7 @@ local options = {
 									inline = true,
 									order = 1,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
 									end,
 									args = {
 										offsetX = {
@@ -1380,7 +1603,7 @@ local options = {
 									inline = true,
 									order = 2,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled == false
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled == false
 									end,
 									args = {
 										showStacks = {
@@ -1424,7 +1647,7 @@ local options = {
 									inline = true,
 									order = 3,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled == false
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled == false
 									end,
 									args = {
 										showCooldown = {
@@ -1476,7 +1699,7 @@ local options = {
 									inline = true,
 									order = 1,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
 									end,
 									args = {
 										offsetX = {
@@ -1561,7 +1784,7 @@ local options = {
 									inline = true,
 									order = 2,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
 									end,
 									args = {
 										showStacks = {
@@ -1668,7 +1891,7 @@ local options = {
 									inline = true,
 									order = 1,
 									disabled = function()
-										return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
 									end,
 									args = {
 										offsetX = {
@@ -2888,9 +3111,9 @@ local options = {
 						},
 					},
 				},
-				icons = {
+				auras = {
 					type = "group",
-					name = "Icons",
+					name = "Auras",
 					order = 4,
 					childGroups = "tree",
 					args = {
@@ -3131,7 +3354,7 @@ local options = {
 										},
 										useCustomBuffFilter = {
 											type = "toggle",
-											name = "Custom Buffs",
+											name = "Custom Filter",
 											order = 2,
 											width = 0.9,
 											disabled = function()
@@ -3151,7 +3374,7 @@ local options = {
 										},
 										openCustomBuffs = {
 											type = "execute",
-											name = "Custom Buffs",
+											name = "Custom Filter",
 											order = 3,
 											width = 0.9,
 											disabled = function()
@@ -3162,7 +3385,7 @@ local options = {
 												AceConfigDialog:SelectGroup(
 													APP_NAME,
 													"raid",
-													"icons",
+													"auras",
 													"buffs",
 													"customBuffs"
 												)
@@ -3172,7 +3395,7 @@ local options = {
 								},
 								customBuffs = {
 									type = "group",
-									name = "Custom Buffs",
+									name = "Custom Filter",
 									order = 100,
 									disabled = function()
 										local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
@@ -3181,6 +3404,15 @@ local options = {
 									args = {},
 								},
 							},
+						},
+						buffOverlays = {
+							type = "group",
+							name = "Buff Overlays",
+							order = 2,
+							disabled = function()
+								return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled ~= true
+							end,
+							args = {},
 						},
 						debuffs = {
 							type = "group",
@@ -4078,9 +4310,11 @@ AddPageHeader(options.args.raid.args, 0)
 AddPageHeader(options.args.profiles.args, 0)
 
 function addon:RegisterOptions()
-	options.args.party.args.icons.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("party")
+	options.args.party.args.auras.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("party")
+	options.args.party.args.auras.args.buffOverlays.args = GetBuffOverlayOptions("party")
 
-	options.args.raid.args.icons.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("raid")
+	options.args.raid.args.auras.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("raid")
+	options.args.raid.args.auras.args.buffOverlays.args = GetBuffOverlayOptions("raid")
 
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
 	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 740)

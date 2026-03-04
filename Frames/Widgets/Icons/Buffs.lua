@@ -22,6 +22,15 @@ local function GetPlayerClassFileName()
 	return classFileName
 end
 
+local function GetPlayerSpecID()
+	local specIndex = GetSpecialization and GetSpecialization()
+	if not specIndex then
+		return nil
+	end
+
+	return select(1, GetSpecializationInfo(specIndex))
+end
+
 local function GetCustomBuffFilterEntry(settings, aura)
 	if not settings or not aura then
 		return nil
@@ -30,9 +39,10 @@ local function GetCustomBuffFilterEntry(settings, aura)
 	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[GetPlayerClassFileName() or ""] or {}
+	local specAuras = classAuras[GetPlayerSpecID() or 0] or {}
 
 	local ok, customBuff = pcall(function()
-		return classAuras[aura.spellId]
+		return specAuras[aura.spellId]
 	end)
 
 	if ok then
@@ -296,4 +306,12 @@ function Buffs:Ensure(frame, settings)
 			container.icons[i] = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
 		end
 	end
+end
+
+function Buffs:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "buffAurasSettingsChanged",
+		stateReason = "aurasStateChanged",
+	})
 end

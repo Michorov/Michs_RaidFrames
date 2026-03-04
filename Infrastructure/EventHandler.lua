@@ -33,7 +33,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
 
 	self:RegisterEvent("UNIT_AURA")
-	self:RegisterEvent("CVAR_UPDATE")
+	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_CONNECTION")
 
@@ -179,17 +179,21 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
 end
 
-function EventHandler:CVAR_UPDATE(cvarName, cvarValue)
-	-- TODO: optional CVar guard logic
-	-- print("CVAR_UPDATE", cvarName, cvarValue)
+function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
+	if unit ~= "player" then
+		return
+	end
+
+	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
+	addon.UpdateScheduler:Notify("aurasStateChanged")
 end
 
 function EventHandler:UI_SCALE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
-	addon.UpdateScheduler:Notify("layoutChanged")
+	addon.Modules:RequestUpdateAll()
 end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
-	addon.UpdateScheduler:Notify("layoutChanged")
+	addon.Modules:RequestUpdateAll()
 end

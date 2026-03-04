@@ -1,0 +1,114 @@
+local _, addon = ...
+
+local Modules = {}
+addon.Modules = Modules
+
+local registeredModules = {}
+local registeredModulesByRef = {}
+local initialized = false
+
+function Modules:Register(definition)
+	if type(definition) ~= "table" then
+		error("Modules:Register requires a definition table", 2)
+	end
+
+	if type(definition.module) ~= "table" then
+		error("Modules:Register requires definition.module", 2)
+	end
+
+	if registeredModulesByRef[definition.module] then
+		return
+	end
+
+	table.insert(registeredModules, definition)
+	registeredModulesByRef[definition.module] = true
+end
+
+function Modules:Initialize()
+	if initialized then
+		return
+	end
+
+	local modulesToInit = {
+		addon.Frames.Base.Background,
+		addon.Frames.Base.Health,
+		addon.Frames.Base.Power,
+		addon.Frames.Base.Border,
+		addon.Frames.Widgets.Overlay,
+		addon.Frames.Widgets.Indicators.ReadyCheck,
+		addon.Frames.Widgets.Indicators.Dispels,
+		addon.Frames.Widgets.Bars.Absorbs,
+		addon.Frames.Widgets.Bars.HealAbsorbs,
+		addon.Frames.Widgets.Texts.Name,
+		addon.Frames.Widgets.Texts.StatusText,
+		addon.Frames.Widgets.Icons.Buffs,
+		addon.Frames.Widgets.Icons.Debuffs,
+		addon.Frames.Widgets.Icons.BigDefensive,
+		addon.Frames.Widgets.Icons.PrivateAuras,
+		addon.Frames.Widgets.Icons.BuffOverlay,
+	}
+
+	for _, module in ipairs(modulesToInit) do
+		if module and type(module.Init) == "function" then
+			module:Init()
+		end
+	end
+
+	initialized = true
+end
+
+function Modules:EnsureFrame(frame, settings)
+	if not frame then
+		return
+	end
+
+	for _, definition in ipairs(registeredModules) do
+		local module = definition.module
+		if type(module.Ensure) == "function" then
+			module:Ensure(frame, settings)
+		end
+	end
+end
+
+function Modules:UpdateSettingsFrame(frame, settings)
+	if not frame then
+		return
+	end
+
+	for _, definition in ipairs(registeredModules) do
+		local module = definition.module
+		if type(module.UpdateSettings) == "function" then
+			module:UpdateSettings(frame, settings)
+		end
+	end
+end
+
+function Modules:RequestUpdateSettings()
+	local notifiedReasons = {}
+
+	for _, definition in ipairs(registeredModules) do
+		local reason = definition.settingsReason
+		if reason and not notifiedReasons[reason] then
+			notifiedReasons[reason] = true
+			addon.UpdateScheduler:Notify(reason)
+		end
+	end
+end
+
+function Modules:RequestUpdateState()
+	local notifiedReasons = {}
+
+	for _, definition in ipairs(registeredModules) do
+		local reason = definition.stateReason
+		if reason and not notifiedReasons[reason] then
+			notifiedReasons[reason] = true
+			addon.UpdateScheduler:Notify(reason)
+		end
+	end
+end
+
+function Modules:RequestUpdateAll()
+	addon.UpdateScheduler:Notify("layoutChanged")
+	self:RequestUpdateSettings()
+	self:RequestUpdateState()
+end
