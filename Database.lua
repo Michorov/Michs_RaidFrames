@@ -661,6 +661,7 @@ function Database:Initialize()
 	local function OnProfileChanged()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
+		addon.Frames.RangeChecker:UpdateSettings()
 		addon.Modules:RequestUpdateAll()
 	end
 
