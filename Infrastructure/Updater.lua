@@ -48,7 +48,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.buffOverlaySettingsChanged then
-			addon.Frames.Widgets.Icons.BuffOverlay:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Bars.BuffOverlay:UpdateSettings(frame, settings)
 		end
 
 		if updateReasons.debuffAurasSettingsChanged then
@@ -104,7 +104,7 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 			addon.Frames.Widgets.Indicators.Dispels:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.BuffOverlay:UpdateState(frame, settings)
+			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 		end
 
 		if updateReasons.outOfRangeAlphaStateChanged or updateReasons.outOfRangeAlphaSettingChanged then

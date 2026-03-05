@@ -617,11 +617,11 @@ local options = {
 					type = "group",
 					name = "Frames",
 					order = 2,
+					childGroups = "tree",
 					args = {
 						frame = {
 							type = "group",
 							name = "Frame",
-							inline = true,
 							order = 1,
 							args = {
 								partyWidth = {
@@ -750,8 +750,7 @@ local options = {
 						health = {
 							type = "group",
 							name = "Health",
-							inline = true,
-							order = 100,
+							order = 2,
 							args = {
 								partyHealthUseClassColor = {
 									type = "toggle",
@@ -803,8 +802,7 @@ local options = {
 						powerBarGroup = {
 							type = "group",
 							name = "Power Bar",
-							inline = true,
-							order = 200,
+							order = 3,
 							args = {
 								enabled = {
 									type = "toggle",
@@ -932,6 +930,68 @@ local options = {
 										p.party.power = p.party.power or {}
 										p.party.power.borderThicknessPx = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
+									end,
+								},
+							},
+						},
+						absorbs = {
+							type = "group",
+							name = "Absorbs",
+							order = 4,
+							args = {
+								partyAbsorbsColor = {
+									type = "color",
+									name = "Shield Color",
+									hasAlpha = true,
+									order = 10,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.absorbs = p.party.widgets.bars.absorbs or {}
+										p.party.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 5,
+							args = {
+								partyHealAbsorbsColor = {
+									type = "color",
+									name = "Heal Absorb Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.party or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.healAbsorbs = p.party.widgets.bars.healAbsorbs or {}
+										p.party.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
 									end,
 								},
 							},
@@ -1980,174 +2040,429 @@ local options = {
 							name = "Dispels",
 							order = 1,
 							args = {
-								dispelOffsetX = {
-									type = "range",
-									name = "Offset X",
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
 									order = 1,
-									min = -100,
-									max = 100,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.party or {}).widgets or {}).indicators or {}).dispels or {}).offsetX
-											or -1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.indicators = p.party.widgets.indicators or {}
-										p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels or {}
-										p.party.widgets.indicators.dispels.offsetX = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).anchor or "TOPRIGHT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.anchor = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										relativeAnchor = {
+											type = "select",
+											name = "To Frame's",
+											order = 2,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).relativeAnchor or "TOPRIGHT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.relativeAnchor = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelOffsetY = {
-									type = "range",
-									name = "Offset Y",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
 									order = 2,
-									min = -100,
-									max = 100,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.party or {}).widgets or {}).indicators or {}).dispels or {}).offsetY
-											or -1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.indicators = p.party.widgets.indicators or {}
-										p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels or {}
-										p.party.widgets.indicators.dispels.offsetY = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										growDirection = {
+											type = "select",
+											name = "Grow Direction",
+											order = 1,
+											values = {
+												LEFT = "Left",
+												RIGHT = "Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).growDirection or "LEFT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.growDirection = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										dispelSpacing = {
+											type = "range",
+											name = "Spacing",
+											order = 2,
+											min = 0,
+											max = 12,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).spacing or 1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party = p.party or {}
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.spacing = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelIconSize = {
-									type = "range",
-									name = "Icon Size (px)",
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
 									order = 3,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.party or {}).widgets or {}).indicators or {}).dispels or {}).iconSize
-											or 14
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.indicators = p.party.widgets.indicators or {}
-										p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels or {}
-										p.party.widgets.indicators.dispels.iconSize = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										dispelOffsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).offsetX or -1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party = p.party or {}
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.offsetX = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										dispelOffsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).offsetY or -1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party = p.party or {}
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.offsetY = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelSpacing = {
-									type = "range",
-									name = "Spacing (px)",
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
 									order = 4,
-									min = 0,
-									max = 12,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.party or {}).widgets or {}).indicators or {}).dispels or {}).spacing
-											or 1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.indicators = p.party.widgets.indicators or {}
-										p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels or {}
-										p.party.widgets.indicators.dispels.spacing = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										dispelIconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 6,
+											min = 6,
+											max = 32,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).dispels or {}
+												).iconSize or 14
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party = p.party or {}
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.dispels = p.party.widgets.indicators.dispels
+													or {}
+												p.party.widgets.indicators.dispels.iconSize = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
-						absorbs = {
+						readyCheck = {
 							type = "group",
-							name = "Shields",
-							order = 1,
-							args = {
-								partyAbsorbsColor = {
-									type = "color",
-									name = "Shield Color",
-									hasAlpha = true,
-									order = 10,
-									get = function()
-										local p = addon.Database:GetProfile()
-										local c = ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).color
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.bars = p.party.widgets.bars or {}
-										p.party.widgets.bars.absorbs = p.party.widgets.bars.absorbs or {}
-										p.party.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
-									end,
-								},
-							},
-						},
-						healAbsorbs = {
-							type = "group",
-							name = "Heal Absorbs",
+							name = "Ready Check",
 							order = 2,
 							args = {
-								partyHealAbsorbsColor = {
-									type = "color",
-									name = "Heal Absorb Color",
-									hasAlpha = true,
-									order = 11,
-									get = function()
-										local p = addon.Database:GetProfile()
-										local c = ((((p.party or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.party = p.party or {}
-										p.party.widgets = p.party.widgets or {}
-										p.party.widgets.bars = p.party.widgets.bars or {}
-										p.party.widgets.bars.healAbsorbs = p.party.widgets.bars.healAbsorbs or {}
-										p.party.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
-									end,
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).anchor or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
+												p.party.widgets.indicators.readyCheck.anchor = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+										relativeAnchor = {
+											type = "select",
+											name = "To Frame's",
+											order = 2,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).relativeAnchor or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
+												p.party.widgets.indicators.readyCheck.relativeAnchor = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 1,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
+												p.party.widgets.indicators.readyCheck.offsetX = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
+												p.party.widgets.indicators.readyCheck.offsetY = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 2,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).size or 36
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
+												p.party.widgets.indicators.readyCheck.size = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -2549,11 +2864,11 @@ local options = {
 					type = "group",
 					name = "Frames",
 					order = 2,
+					childGroups = "tree",
 					args = {
 						frame = {
 							type = "group",
 							name = "Frame",
-							inline = true,
 							order = 1,
 							args = {
 								raidWidth = {
@@ -2682,8 +2997,7 @@ local options = {
 						health = {
 							type = "group",
 							name = "Health",
-							inline = true,
-							order = 100,
+							order = 2,
 							args = {
 								raidHealthUseClassColor = {
 									type = "toggle",
@@ -2732,11 +3046,10 @@ local options = {
 								},
 							},
 						},
-						powerBarGroup = {
+						powerBar = {
 							type = "group",
-							name = "Power Bar",
-							inline = true,
-							order = 200,
+							name = "Power",
+							order = 3,
 							args = {
 								enabled = {
 									type = "toggle",
@@ -2864,6 +3177,68 @@ local options = {
 										p.raid.power = p.raid.power or {}
 										p.raid.power.borderThicknessPx = v
 										addon.UpdateScheduler:Notify("powerSettingsChanged")
+									end,
+								},
+							},
+						},
+						absorbs = {
+							type = "group",
+							name = "Absorbs",
+							order = 4,
+							args = {
+								raidAbsorbsColor = {
+									type = "color",
+									name = "Shields Color",
+									hasAlpha = true,
+									order = 10,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.absorbs = p.raid.widgets.bars.absorbs or {}
+										p.raid.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 5,
+							args = {
+								raidHealAbsorbsColor = {
+									type = "color",
+									name = "Heal Absorb Color",
+									hasAlpha = true,
+									order = 11,
+									get = function()
+										local p = addon.Database:GetProfile()
+										local c = ((((p.raid or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
+										return c.r, c.g, c.b, c.a
+									end,
+									set = function(_, r, g, b, a)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.healAbsorbs = p.raid.widgets.bars.healAbsorbs or {}
+										p.raid.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
 									end,
 								},
 							},
@@ -4002,68 +4377,6 @@ local options = {
 										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
 										p.raid.widgets.indicators.dispels.spacing = v
 										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
-								},
-							},
-						},
-						absorbs = {
-							type = "group",
-							name = "Shields",
-							order = 1,
-							args = {
-								raidAbsorbsColor = {
-									type = "color",
-									name = "Shields Color",
-									hasAlpha = true,
-									order = 10,
-									get = function()
-										local p = addon.Database:GetProfile()
-										local c = ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).color
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.bars = p.raid.widgets.bars or {}
-										p.raid.widgets.bars.absorbs = p.raid.widgets.bars.absorbs or {}
-										p.raid.widgets.bars.absorbs.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
-									end,
-								},
-							},
-						},
-						healAbsorbs = {
-							type = "group",
-							name = "Heal Absorbs",
-							order = 2,
-							args = {
-								raidHealAbsorbsColor = {
-									type = "color",
-									name = "Heal Absorb Color",
-									hasAlpha = true,
-									order = 11,
-									get = function()
-										local p = addon.Database:GetProfile()
-										local c = ((((p.raid or {}).widgets or {}).bars or {}).healAbsorbs or {}).color
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.bars = p.raid.widgets.bars or {}
-										p.raid.widgets.bars.healAbsorbs = p.raid.widgets.bars.healAbsorbs or {}
-										p.raid.widgets.bars.healAbsorbs.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
 									end,
 								},
 							},

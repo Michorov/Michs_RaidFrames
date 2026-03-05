@@ -27,6 +27,7 @@ local function GetDispelsSettings(settings)
 	return {
 		anchor = dispels.anchor or "TOPRIGHT",
 		relativeAnchor = dispels.relativeAnchor or "TOPRIGHT",
+		growDirection = dispels.growDirection or "LEFT",
 		offsetXPx = addon.Utilities:ToPixels(dispels.offsetX or -1),
 		offsetYPx = addon.Utilities:ToPixels(dispels.offsetY or -1),
 		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
@@ -158,9 +159,23 @@ function Dispels:UpdateState(frame, settings)
 			shown = shown + 1
 			local icon = container.typeIcons[ORDER[shown]]
 			if icon then
-				local xPx = -((shown - 1) * (iconSizePx + spacingPx))
+				local stepPx = iconSizePx + spacingPx
+				local xPx
+				if dispelSettings.growDirection == "RIGHT" then
+					xPx = (shown - 1) * stepPx
+				else
+					xPx = -((shown - 1) * stepPx)
+				end
+
+				local point, relativePoint
+				if dispelSettings.growDirection == "RIGHT" then
+					point, relativePoint = "TOPLEFT", "TOPLEFT"
+				else
+					point, relativePoint = "TOPRIGHT", "TOPRIGHT"
+				end
+
 				icon:ClearAllPoints()
-				icon:SetPoint("TOPRIGHT", container, "TOPRIGHT", addon.Utilities:ToUI(xPx), 0)
+				icon:SetPoint(point, container, relativePoint, addon.Utilities:ToUI(xPx), 0)
 				icon:SetAtlas(atlas, false)
 				icon:Show()
 			end

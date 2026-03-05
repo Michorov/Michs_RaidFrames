@@ -2,10 +2,10 @@ local _, addon = ...
 
 addon.Frames = addon.Frames or {}
 addon.Frames.Widgets = addon.Frames.Widgets or {}
-addon.Frames.Widgets.Icons = addon.Frames.Widgets.Icons or {}
-addon.Frames.Widgets.Icons.BuffOverlay = addon.Frames.Widgets.Icons.BuffOverlay or {}
+addon.Frames.Widgets.Bars = addon.Frames.Widgets.Bars or {}
+addon.Frames.Widgets.Bars.BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay or {}
 
-local BuffOverlay = addon.Frames.Widgets.Icons.BuffOverlay
+local BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay
 
 local function GetBuffOverlaySettings(settings)
 	local bars = settings and settings.widgets and settings.widgets.bars or {}

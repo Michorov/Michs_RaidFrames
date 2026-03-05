@@ -364,6 +364,7 @@ local DEFAULTS = {
 					dispels = {
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
+						growDirection = "LEFT",
 						offsetX = -2,
 						offsetY = -2,
 
@@ -581,6 +582,7 @@ local DEFAULTS = {
 					dispels = {
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
+						growDirection = "LEFT",
 						offsetX = -2,
 						offsetY = -2,
 
