@@ -2371,7 +2371,7 @@ local options = {
 									type = "group",
 									name = "Position",
 									inline = true,
-									order = 1,
+									order = 2,
 									args = {
 										offsetX = {
 											type = "range",
@@ -2433,7 +2433,7 @@ local options = {
 									type = "group",
 									name = "Indicator",
 									inline = true,
-									order = 2,
+									order = 3,
 									args = {
 										size = {
 											type = "range",
@@ -4272,112 +4272,422 @@ local options = {
 							name = "Dispels",
 							order = 1,
 							args = {
-								dispelOffsetX = {
-									type = "range",
-									name = "Offset X",
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
 									order = 1,
-									min = -100,
-									max = 100,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).offsetX
-											or -1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
-										p.raid.widgets.indicators.dispels.offsetX = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).anchor
+													or "TOPRIGHT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.anchor = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										relativeAnchor = {
+											type = "select",
+											name = "To Frame's",
+											order = 2,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).relativeAnchor
+													or "TOPRIGHT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.relativeAnchor = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelOffsetY = {
-									type = "range",
-									name = "Offset Y",
+								layout = {
+									type = "group",
+									name = "Layout",
+									inline = true,
 									order = 2,
-									min = -100,
-									max = 100,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).offsetY
-											or -1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
-										p.raid.widgets.indicators.dispels.offsetY = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										growDirection = {
+											type = "select",
+											name = "Grow Direction",
+											order = 1,
+											values = {
+												LEFT = "Left",
+												RIGHT = "Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).growDirection
+													or "LEFT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.growDirection = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										dispelSpacing = {
+											type = "range",
+											name = "Spacing",
+											order = 2,
+											min = 0,
+											max = 12,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).spacing
+													or 1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid = p.raid or {}
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.spacing = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelIconSize = {
-									type = "range",
-									name = "Icon Size (px)",
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
 									order = 3,
-									min = 6,
-									max = 32,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).iconSize
-											or 14
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
-										p.raid.widgets.indicators.dispels.iconSize = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										dispelOffsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).offsetX
+													or -1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid = p.raid or {}
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.offsetX = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+										dispelOffsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).offsetY
+													or -1
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid = p.raid or {}
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.offsetY = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
 								},
-
-								dispelSpacing = {
-									type = "range",
-									name = "Spacing (px)",
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
 									order = 4,
-									min = 0,
-									max = 12,
-									step = 1,
-									get = function()
-										local p = addon.Database:GetProfile()
-										return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).spacing
-											or 1
-									end,
-									set = function(_, v)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local p = addon.Database:GetProfile()
-										p.raid = p.raid or {}
-										p.raid.widgets = p.raid.widgets or {}
-										p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-										p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels or {}
-										p.raid.widgets.indicators.dispels.spacing = v
-										addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-									end,
+									args = {
+										dispelIconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 6,
+											min = 6,
+											max = 32,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).indicators or {}).dispels or {}).iconSize
+													or 14
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid = p.raid or {}
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.dispels = p.raid.widgets.indicators.dispels
+													or {}
+												p.raid.widgets.indicators.dispels.iconSize = v
+												addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
+						readyCheck = {
+							type = "group",
+							name = "Ready Check",
+							order = 2,
+							args = {
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).anchor or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
+												p.raid.widgets.indicators.readyCheck.anchor = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+										relativeAnchor = {
+											type = "select",
+											name = "To Frame's",
+											order = 2,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).relativeAnchor or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
+												p.raid.widgets.indicators.readyCheck.relativeAnchor = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
+												p.raid.widgets.indicators.readyCheck.offsetX = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
+												p.raid.widgets.indicators.readyCheck.offsetY = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).size or 36
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
+												p.raid.widgets.indicators.readyCheck.size = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
