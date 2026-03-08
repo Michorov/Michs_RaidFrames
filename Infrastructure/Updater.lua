@@ -10,6 +10,10 @@ local function BuildSettingsUpdater(updateReasons)
 		addon.Frames.RangeChecker:UpdateSettings()
 	end
 
+	if updateReasons.soloFrameChanged then
+		addon.FrameRegistry:UpdateStateDrivers()
+	end
+
 	return function(frame, settings)
 		if updateReasons.backgroundSettingsChanged then
 			addon.Frames.Base.Background:UpdateSettings(frame, settings)
@@ -45,6 +49,7 @@ local function BuildSettingsUpdater(updateReasons)
 
 		if updateReasons.buffAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.Buffs:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 		end
 
 		if updateReasons.buffOverlaySettingsChanged then
@@ -53,10 +58,12 @@ local function BuildSettingsUpdater(updateReasons)
 
 		if updateReasons.debuffAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.Debuffs:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 		end
 
 		if updateReasons.bigDefensiveAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end
 
 		if updateReasons.privateAurasSettingsChanged then
@@ -75,7 +82,7 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Base.Health:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.powerStateChanged then
+		if updateReasons.rosterChanged or updateReasons.powerStateChanged or updateReasons.powerSettingsChanged then
 			addon.Frames.Base.Power:UpdateState(frame, settings)
 		end
 
