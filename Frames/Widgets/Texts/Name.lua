@@ -36,7 +36,10 @@ end
 
 local function GetNameColor(frame, nameSettings)
 	if nameSettings.classColor then
-		return addon.Utilities:GetUnitClassColor(frame and frame.unit, nameSettings.color)
+		local provider = frame and frame.dataProvider
+		if provider and type(provider.GetClassColor) == "function" then
+			return provider:GetClassColor(frame, nameSettings.color)
+		end
 	end
 
 	local c = nameSettings.color
@@ -104,13 +107,14 @@ function Name:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame and frame.dataProvider
+	if not provider or type(provider.GetName) ~= "function" then
 		nameText:SetText("")
 		return
 	end
 
-	nameText:SetText(UnitName(unit) or "")
+	local name = provider:GetName(frame) or ""
+	nameText:SetText(name)
 
 	local r, g, b, a = GetNameColor(frame, nameSettings)
 	nameText:SetTextColor(r, g, b, a)

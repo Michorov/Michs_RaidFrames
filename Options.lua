@@ -4,6 +4,11 @@ local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local APP_NAME = "Michs_RaidFrames"
+local FOOTER_BUTTON_WIDTH = 90
+local FOOTER_BUTTON_HEIGHT = 22
+local FOOTER_BUTTON_FONT_SIZE = 12
+local FOOTER_BUTTON_SPACING = 2
+local FOOTER_CLOSE_RIGHT_INSET = 17
 
 local function AddPageHeader(args, orderStart)
 	args.pageTopSpacer = {
@@ -39,6 +44,167 @@ local function AddPageHeader(args, orderStart)
 	}
 end
 
+local function FindCloseButton(frame)
+	if not frame or not frame.GetChildren then
+		return nil
+	end
+
+	local direct = {
+		frame.closebutton,
+		frame.closeButton,
+		frame.close,
+	}
+	for _, button in ipairs(direct) do
+		if button and button.GetText and button:GetText() == CLOSE then
+			return button
+		end
+	end
+
+	for _, child in ipairs({ frame:GetChildren() }) do
+		if child and child.GetObjectType and child:GetObjectType() == "Button" then
+			local text = child.GetText and child:GetText()
+			if text == CLOSE then
+				return child
+			end
+		end
+	end
+
+	return nil
+end
+
+local function FindStatusBar(frame, window, closeButton)
+	if not frame or not frame.GetChildren then
+		return nil
+	end
+
+	for _, child in ipairs({ frame:GetChildren() }) do
+		if
+			child
+			and child ~= closeButton
+			and child.GetObjectType
+			and child:GetObjectType() == "Button"
+			and child.obj == window
+		then
+			return child
+		end
+	end
+
+	return nil
+end
+
+local function EnsureFooterTestButtons()
+	local openFrames = AceConfigDialog and AceConfigDialog.OpenFrames
+	local window = openFrames and openFrames[APP_NAME]
+	if not window then
+		return
+	end
+
+	local frame = window.frame or window
+	if not frame then
+		return
+	end
+
+	local closeButton = FindCloseButton(frame)
+	if not closeButton then
+		return
+	end
+
+	closeButton:ClearAllPoints()
+	closeButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -FOOTER_CLOSE_RIGHT_INSET, 17)
+	closeButton:SetSize(FOOTER_BUTTON_WIDTH, FOOTER_BUTTON_HEIGHT)
+
+	local statusBg = frame.statusbg or window.statusbg or FindStatusBar(frame, window, closeButton)
+	if statusBg then
+		local reservedRightWidth = (3 * FOOTER_BUTTON_WIDTH) + (3 * FOOTER_BUTTON_SPACING) + FOOTER_CLOSE_RIGHT_INSET
+		statusBg:ClearAllPoints()
+		statusBg:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 17, 15)
+		statusBg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -reservedRightWidth, 15)
+
+		if statusBg.SetHeight then
+			statusBg:SetHeight(FOOTER_BUTTON_HEIGHT + 2)
+		end
+	end
+
+	local statusText = frame.statustext or window.statustext
+	if statusText and statusText.Hide then
+		statusText:Hide()
+	end
+
+	if not frame.mrfPartyTestButton then
+		local parent = closeButton:GetParent() or frame
+
+		frame.mrfPartyTestButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+		frame.mrfPartyTestButton:SetSize(FOOTER_BUTTON_WIDTH, FOOTER_BUTTON_HEIGHT)
+		frame.mrfPartyTestButton:SetText("Party Test")
+
+		frame.mrfPartyTestButton:SetScript("OnClick", function()
+			addon.FrameRegistry:ToggleTestMode("party")
+		end)
+
+		frame.mrfRaidTestButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+		frame.mrfRaidTestButton:SetSize(FOOTER_BUTTON_WIDTH, FOOTER_BUTTON_HEIGHT)
+		frame.mrfRaidTestButton:SetText("Raid Test")
+		frame.mrfRaidTestButton:SetScript("OnClick", function()
+			addon.FrameRegistry:ToggleTestMode("raid")
+		end)
+	end
+
+	frame.mrfPartyTestButton:SetWidth(FOOTER_BUTTON_WIDTH)
+	frame.mrfRaidTestButton:SetWidth(FOOTER_BUTTON_WIDTH)
+
+	local closeHeight = closeButton:GetHeight() or 20
+	frame.mrfPartyTestButton:SetHeight(closeHeight)
+	frame.mrfRaidTestButton:SetHeight(closeHeight)
+
+	local normalFont = closeButton:GetNormalFontObject()
+	local highlightFont = closeButton:GetHighlightFontObject()
+	local disabledFont = closeButton:GetDisabledFontObject()
+	if normalFont then
+		frame.mrfPartyTestButton:SetNormalFontObject(normalFont)
+		frame.mrfRaidTestButton:SetNormalFontObject(normalFont)
+	end
+	if highlightFont then
+		frame.mrfPartyTestButton:SetHighlightFontObject(highlightFont)
+		frame.mrfRaidTestButton:SetHighlightFontObject(highlightFont)
+	end
+	if disabledFont then
+		frame.mrfPartyTestButton:SetDisabledFontObject(disabledFont)
+		frame.mrfRaidTestButton:SetDisabledFontObject(disabledFont)
+	end
+
+	local fontPath, _, fontFlags
+	local closeText = closeButton:GetFontString()
+	if closeText and closeText.GetFont then
+		fontPath, _, fontFlags = closeText:GetFont()
+	end
+	fontPath = fontPath or STANDARD_TEXT_FONT
+	fontFlags = fontFlags or ""
+
+	local function ApplyFooterButtonFontSize(button)
+		local text = button and button:GetFontString()
+		if text then
+			text:SetFont(fontPath, FOOTER_BUTTON_FONT_SIZE, fontFlags)
+		end
+	end
+
+	ApplyFooterButtonFontSize(closeButton)
+	ApplyFooterButtonFontSize(frame.mrfPartyTestButton)
+	ApplyFooterButtonFontSize(frame.mrfRaidTestButton)
+
+	local strata = closeButton:GetFrameStrata()
+	local level = closeButton:GetFrameLevel() + 3
+	frame.mrfPartyTestButton:SetFrameStrata(strata)
+	frame.mrfRaidTestButton:SetFrameStrata(strata)
+	frame.mrfPartyTestButton:SetFrameLevel(level)
+	frame.mrfRaidTestButton:SetFrameLevel(level)
+
+	frame.mrfRaidTestButton:ClearAllPoints()
+	frame.mrfRaidTestButton:SetPoint("RIGHT", closeButton, "LEFT", -FOOTER_BUTTON_SPACING, 0)
+
+	frame.mrfPartyTestButton:ClearAllPoints()
+	frame.mrfPartyTestButton:SetPoint("RIGHT", frame.mrfRaidTestButton, "LEFT", -FOOTER_BUTTON_SPACING, 0)
+end
+
 function addon:IsOptionsOpen()
 	local openFrames = AceConfigDialog and AceConfigDialog.OpenFrames
 	return openFrames and openFrames[APP_NAME] ~= nil
@@ -59,6 +225,19 @@ function addon:OpenOptions()
 
 	addon.optionsDeferredOpen = false
 	AceConfigDialog:Open(APP_NAME)
+	C_Timer.After(0, EnsureFooterTestButtons)
+
+	local openFrames = AceConfigDialog and AceConfigDialog.OpenFrames
+	local window = openFrames and openFrames[APP_NAME]
+	local frame = window and (window.frame or window)
+
+	if frame and not frame.mrfOnHideHooked then
+		frame:HookScript("OnHide", function()
+			addon.FrameRegistry:DisableTestMode()
+		end)
+		frame.mrfOnHideHooked = true
+	end
+
 	return true
 end
 
@@ -414,7 +593,7 @@ local options = {
 					set = function(_, value)
 						local profile = addon.Database:GetProfile()
 						profile.core.showSoloPartyFrame = value
-						addon.UpdateScheduler:Notify("layoutChanged")
+						addon.UpdateScheduler:Notify("soloFrameChanged")
 					end,
 				},
 				hideBlizzardRaidFrames = {
@@ -1318,7 +1497,7 @@ local options = {
 											name = "Max Icons",
 											order = 5,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.maxIcons
@@ -1333,7 +1512,7 @@ local options = {
 											name = "Icons Per Row",
 											order = 6,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.iconsPerRow
@@ -1458,7 +1637,7 @@ local options = {
 											type = "toggle",
 											name = "Enabled",
 											order = 1,
-											width = 0.9,
+											width = 1,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.enabled
 													== true
@@ -1473,7 +1652,7 @@ local options = {
 											type = "toggle",
 											name = "Custom Filter",
 											order = 2,
-											width = 0.9,
+											width = 1,
 											disabled = function()
 												return addon.Database:GetProfile().party.widgets.icons.buffs.enabled
 													~= true
@@ -1493,7 +1672,7 @@ local options = {
 											type = "execute",
 											name = "Custom Filter",
 											order = 3,
-											width = 0.9,
+											width = 1,
 											disabled = function()
 												local buffs = addon.Database:GetProfile().party.widgets.icons.buffs
 												return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
@@ -1607,7 +1786,7 @@ local options = {
 											name = "Max Icons",
 											order = 5,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.debuffs.maxIcons
@@ -1622,7 +1801,7 @@ local options = {
 											name = "Icons Per Row",
 											order = 6,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.debuffs.iconsPerRow
@@ -3564,7 +3743,7 @@ local options = {
 											name = "Max Icons",
 											order = 5,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.maxIcons
@@ -3579,7 +3758,7 @@ local options = {
 											name = "Icons Per Row",
 											order = 6,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.iconsPerRow
@@ -3708,7 +3887,7 @@ local options = {
 											type = "toggle",
 											name = "Enabled",
 											order = 1,
-											width = 0.9,
+											width = 1,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled
 													== true
@@ -3723,7 +3902,7 @@ local options = {
 											type = "toggle",
 											name = "Custom Filter",
 											order = 2,
-											width = 0.9,
+											width = 1,
 											disabled = function()
 												return addon.Database:GetProfile().raid.widgets.icons.buffs.enabled
 													~= true
@@ -3743,7 +3922,7 @@ local options = {
 											type = "execute",
 											name = "Custom Filter",
 											order = 3,
-											width = 0.9,
+											width = 1,
 											disabled = function()
 												local buffs = addon.Database:GetProfile().raid.widgets.icons.buffs
 												return buffs.enabled ~= true or buffs.useCustomBuffFilter ~= true
@@ -3857,7 +4036,7 @@ local options = {
 											name = "Max Icons",
 											order = 5,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.debuffs.maxIcons
@@ -3872,7 +4051,7 @@ local options = {
 											name = "Icons Per Row",
 											order = 6,
 											min = 1,
-											max = 20,
+											max = 10,
 											step = 1,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.debuffs.iconsPerRow
