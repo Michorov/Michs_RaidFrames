@@ -66,6 +66,9 @@ local CUSTOM_AURA_DEFAULTS = {
 			[974] = { enabled = true, name = 'Earth Shield "Ally"' },
 			[383648] = { enabled = true, name = 'Earth Shield "Self"' },
 			[61295] = { enabled = true, name = "Riptide" },
+			[207400] = { enabled = true, name = "Ancestral Vigor" },
+			[382024] = { enabled = true, name = "Earthliving Weapon" },
+			[444490] = { enabled = true, name = "Hydrobubble" },
 		},
 	},
 
@@ -123,7 +126,9 @@ local function SyncCustomAuraValues(currentValues, defaultValues)
 				end
 
 				for key, value in pairs(defaultEntry) do
-					if currentEntry[key] == nil then
+					if key == "name" then
+						currentEntry[key] = value
+					elseif currentEntry[key] == nil then
 						currentEntry[key] = value
 					end
 				end
