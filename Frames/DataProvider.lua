@@ -1,0 +1,695 @@
+local _, addon = ...
+
+addon.Frames = addon.Frames or {}
+local Frames = addon.Frames
+
+Frames.DataProvider = Frames.DataProvider or {}
+
+local DataProvider = Frames.DataProvider
+
+DataProvider.Live = {}
+DataProvider.Test = {}
+
+local CLASS_SAMPLES = {
+	"WARRIOR",
+	"PALADIN",
+	"HUNTER",
+	"ROGUE",
+	"PRIEST",
+	"DEATHKNIGHT",
+	"SHAMAN",
+	"MAGE",
+	"WARLOCK",
+	"MONK",
+	"DRUID",
+	"DEMONHUNTER",
+	"EVOKER",
+}
+
+local function GetPlayerClassFileName()
+	local _, classFileName = UnitClass("player")
+	return classFileName
+end
+
+local function GetPlayerSpecID()
+	local specIndex = GetSpecialization and GetSpecialization()
+	if not specIndex then
+		return nil
+	end
+
+	return select(1, GetSpecializationInfo(specIndex))
+end
+
+local function BuildCustomHelpfulTestAuras()
+	local defaults = addon.Database:GetCustomAuraDefaults()
+	local classFileName = GetPlayerClassFileName()
+	local specID = GetPlayerSpecID()
+
+	local specAuras = defaults
+		and classFileName
+		and specID
+		and defaults[classFileName]
+		and defaults[classFileName][specID]
+
+	if type(specAuras) ~= "table" then
+		return {}
+	end
+
+	local auras = {}
+
+	for spellId, entry in pairs(specAuras) do
+		local icon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spellId)
+
+		table.insert(auras, {
+			name = entry and entry.name or ("Spell " .. tostring(spellId)),
+			icon = icon,
+			applications = 2,
+			dispelName = nil,
+			duration = 12,
+			expirationTime = GetTime() + 10,
+			sourceUnit = "player",
+			spellId = spellId,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = true,
+			isHelpful = true,
+			isHarmful = false,
+			points = {},
+		})
+	end
+
+	table.sort(auras, function(a, b)
+		return (a.name or "") < (b.name or "")
+	end)
+
+	return auras
+end
+
+function DataProvider.Live:GetHealth(frame)
+	if not frame or not frame.unit or not UnitExists(frame.unit) then
+		return 0, 1
+	end
+
+	return UnitHealth(frame.unit), UnitHealthMax(frame.unit)
+end
+
+function DataProvider.Test:GetHealth(frame)
+	local healthSamples = {
+		{ current = 100000, max = 100000 },
+		{ current = 87300, max = 100000 },
+		{ current = 74200, max = 100000 },
+		{ current = 61500, max = 100000 },
+		{ current = 48800, max = 100000 },
+		{ current = 35100, max = 100000 },
+		{ current = 52645, max = 100000 },
+		{ current = 6300, max = 100000 },
+	}
+
+	local healthIndex = frame and frame.testHealthIndex or 1
+	healthIndex = ((healthIndex - 1) % #healthSamples) + 1
+
+	local sample = healthSamples[healthIndex]
+	return sample.current, sample.max
+end
+
+function DataProvider.Live:GetClassColor(frame, fallbackColor)
+	return addon.Utilities:GetUnitClassColor(frame and frame.unit, fallbackColor)
+end
+
+function DataProvider.Test:GetClassColor(frame, fallbackColor)
+	local index = frame and frame.testClassIndex or 1
+	index = ((index - 1) % #CLASS_SAMPLES) + 1
+
+	local classToken = CLASS_SAMPLES[index]
+	local color = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
+
+	if color then
+		return color.r, color.g, color.b, 1
+	end
+
+	return fallbackColor.r or 1, fallbackColor.g or 1, fallbackColor.b or 1, fallbackColor.a or 1
+end
+
+function DataProvider.Live:GetName(frame)
+	if not frame or not frame.unit or not UnitExists(frame.unit) then
+		return ""
+	end
+
+	return GetUnitName(frame.unit, false) or ""
+end
+
+function DataProvider.Test:GetName(frame)
+	local names = {
+		"Aelrin",
+		"Brakka",
+		"Caelynn",
+		"Dorun",
+		"Elyra",
+		"Faelor",
+		"Garrik",
+		"Halyra",
+		"Irven",
+		"Jorik",
+		"Kaelis",
+		"Lunara",
+		"Morven",
+		"Nyra",
+		"Orin",
+		"Pyrel",
+		"Quorin",
+		"Rhyssa",
+		"Selric",
+		"Thalen",
+		"Vaelor",
+		"Wrenna",
+		"Xalor",
+		"Yselle",
+		"Zorik",
+		"Ashara",
+		"Belric",
+		"Corven",
+		"Daelis",
+		"Elthor",
+		"Fenra",
+		"Galric",
+		"Helra",
+		"Ilyndra",
+		"Jareth",
+		"Kelza",
+		"Lorven",
+		"Myrra",
+		"Nareth",
+		"Olyra",
+		"Perin",
+		"Quella",
+		"Raelor",
+		"Syra",
+		"Torven",
+		"Ulric",
+		"Velyra",
+		"Wystan",
+		"Xyra",
+		"Yorik",
+		"Zelra",
+		"Althor",
+		"Brynna",
+		"Cerik",
+		"Draven",
+		"Esmira",
+		"Falkor",
+		"Glynn",
+		"Heron",
+		"Isolde",
+		"Jandor",
+		"Kyrra",
+		"Lethan",
+		"Maelis",
+		"Nymor",
+		"Orla",
+		"Praxis",
+		"Quenra",
+		"Rovan",
+		"Seris",
+		"Tyral",
+		"Ulnar",
+		"Vaelis",
+		"Wyra",
+		"Xandor",
+		"Ysara",
+		"Zarek",
+	}
+
+	local index = frame and frame.testIndex or 1
+	index = ((index - 1) % #names) + 1
+
+	return names[index]
+end
+
+function DataProvider.Live:IsHealer(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return false
+	end
+
+	local role = UnitGroupRolesAssigned(unit)
+	if role == "HEALER" then
+		return true
+	end
+
+	if UnitIsUnit(unit, "player") then
+		local specIndex = GetSpecialization and GetSpecialization()
+		if specIndex then
+			local specRole = select(5, GetSpecializationInfo(specIndex))
+			if specRole == "HEALER" then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+function DataProvider.Test:IsHealer(frame)
+	local healerClasses = {
+		DRUID = true,
+		EVOKER = true,
+		MONK = true,
+		PALADIN = true,
+		PRIEST = true,
+		SHAMAN = true,
+	}
+
+	local classIndex = frame and frame.testClassIndex or 1
+	classIndex = ((classIndex - 1) % #CLASS_SAMPLES) + 1
+
+	local classToken = CLASS_SAMPLES[classIndex]
+	if healerClasses[classToken] ~= true then
+		return false
+	end
+
+	local index = frame and frame.testIndex or 1
+
+	if index == 2 or index == 7 or index == 14 or index == 19 then
+		return true
+	end
+
+	return false
+end
+
+function DataProvider.Live:GetPower(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil, nil, nil
+	end
+
+	if self:IsHealer(frame) then
+		local manaType = Enum.PowerType and Enum.PowerType.Mana or 0
+		return UnitPower(unit, manaType), UnitPowerMax(unit, manaType), "MANA"
+	end
+
+	local _, token = UnitPowerType(unit)
+	return UnitPower(unit), UnitPowerMax(unit), token
+end
+
+function DataProvider.Test:GetPower(frame)
+	local powerSamples = {
+		{ current = 100, max = 100 },
+		{ current = 80, max = 100 },
+		{ current = 60, max = 100 },
+		{ current = 45, max = 100 },
+		{ current = 30, max = 100 },
+		{ current = 90, max = 100 },
+		{ current = 25, max = 100 },
+		{ current = 70, max = 100 },
+	}
+
+	local classToPowerType = {
+		WARRIOR = "RAGE",
+		PALADIN = "MANA",
+		HUNTER = "FOCUS",
+		ROGUE = "ENERGY",
+		PRIEST = "MANA",
+		DEATHKNIGHT = "RUNIC_POWER",
+		SHAMAN = "MANA",
+		MAGE = "MANA",
+		WARLOCK = "MANA",
+		MONK = "ENERGY",
+		DRUID = "MANA",
+		DEMONHUNTER = "FURY",
+		EVOKER = "ESSENCE",
+	}
+
+	local healthIndex = frame and frame.testHealthIndex or 1
+	healthIndex = ((healthIndex - 1) % #powerSamples) + 1
+
+	local sample = powerSamples[healthIndex]
+	if self:IsHealer(frame) then
+		return sample.current, sample.max, "MANA"
+	end
+
+	local classIndex = frame and frame.testClassIndex or 1
+	classIndex = ((classIndex - 1) % #CLASS_SAMPLES) + 1
+
+	local classToken = CLASS_SAMPLES[classIndex]
+	local powerType = classToPowerType[classToken] or "MANA"
+
+	return sample.current, sample.max, powerType
+end
+
+function DataProvider.Live:GetAbsorbs(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return nil, nil
+	end
+
+	if not UnitExists(unit) or UnitCanAttack("player", unit) then
+		return nil, nil
+	end
+
+	local maxHealth = UnitHealthMax(unit)
+	if not maxHealth or maxHealth <= 0 then
+		return nil, nil
+	end
+
+	local absorbValue = nil
+
+	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
+		frame.absorbCalculator = frame.absorbCalculator or CreateUnitHealPredictionCalculator()
+		local calc = frame.absorbCalculator
+
+		if calc.SetAbsorbClampMode then
+			pcall(calc.SetAbsorbClampMode, calc, 0)
+		end
+
+		UnitGetDetailedHealPrediction(unit, nil, calc)
+
+		if calc.GetAbsorbs then
+			local ok, value = pcall(calc.GetAbsorbs, calc)
+			if ok then
+				absorbValue = value
+			end
+		end
+
+		if absorbValue == nil and calc.GetTotalAbsorbs then
+			local ok, value = pcall(calc.GetTotalAbsorbs, calc)
+			if ok then
+				absorbValue = value
+			end
+		end
+	end
+
+	if absorbValue == nil and UnitGetTotalAbsorbs then
+		absorbValue = UnitGetTotalAbsorbs(unit)
+	end
+
+	if absorbValue == nil then
+		return nil, nil
+	end
+
+	return absorbValue, maxHealth
+end
+
+function DataProvider.Test:GetAbsorbs(frame)
+	local absorbSamples = {
+		0,
+		0,
+		6000,
+		0,
+		11000,
+		0,
+		17777,
+		25000,
+	}
+
+	local maxHealth = 100000
+	local index = frame and frame.testAbsorbIndex or 1
+	index = ((index - 1) % #absorbSamples) + 1
+
+	return absorbSamples[index], maxHealth
+end
+
+function DataProvider.Live:GetHealAbsorbs(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return nil, nil
+	end
+
+	if not UnitExists(unit) or UnitCanAttack("player", unit) then
+		return nil, nil
+	end
+
+	local currentHealth = UnitHealth(unit)
+	if currentHealth == nil then
+		return nil, nil
+	end
+
+	local healAbsorbValue = nil
+
+	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
+		frame.healAbsorbCalculator = frame.healAbsorbCalculator or CreateUnitHealPredictionCalculator()
+		local calc = frame.healAbsorbCalculator
+
+		if calc.SetHealAbsorbClampMode then
+			pcall(calc.SetHealAbsorbClampMode, calc, 0)
+		end
+
+		UnitGetDetailedHealPrediction(unit, nil, calc)
+
+		if calc.GetHealAbsorbs then
+			local ok, value = pcall(calc.GetHealAbsorbs, calc)
+			if ok then
+				healAbsorbValue = value
+			end
+		end
+	end
+
+	if healAbsorbValue == nil and UnitGetTotalHealAbsorbs then
+		healAbsorbValue = UnitGetTotalHealAbsorbs(unit)
+	end
+
+	if healAbsorbValue == nil then
+		return nil, nil
+	end
+
+	return healAbsorbValue, currentHealth
+end
+
+function DataProvider.Test:GetHealAbsorbs(frame)
+	local healAbsorbSamples = {
+		0,
+		0,
+		0,
+		0,
+		0,
+		4000,
+		15000,
+		23000,
+	}
+
+	local currentHealth = self:GetHealth(frame)
+	local index = frame and frame.testHealAbsorbIndex or 1
+	index = ((index - 1) % #healAbsorbSamples) + 1
+
+	return healAbsorbSamples[index], currentHealth
+end
+
+function DataProvider.Live:GetRole(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return nil
+	end
+
+	local role = UnitGroupRolesAssigned(unit)
+	if role == "TANK" or role == "HEALER" or role == "DAMAGER" then
+		return role
+	end
+
+	return nil
+end
+
+function DataProvider.Live:GetAuraDataByIndex(frame, auraIndex, filter)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraDataByIndex(unit, auraIndex, filter)
+end
+
+function DataProvider.Test:GetAuraDataByIndex(frame, auraIndex, filter)
+	local helpfulAuras = BuildCustomHelpfulTestAuras()
+
+	if #helpfulAuras == 0 then
+		helpfulAuras = {
+			{
+				name = "Renew",
+				icon = 135953,
+				applications = 0,
+				dispelName = nil,
+				duration = 12,
+				expirationTime = GetTime() + 10,
+				sourceUnit = "player",
+				spellId = 139,
+				canApplyAura = false,
+				isBossAura = false,
+				isFromPlayerOrPlayerPet = true,
+				isHelpful = true,
+				isHarmful = false,
+				points = {},
+			},
+			{
+				name = "Power Word: Shield",
+				icon = 135940,
+				applications = 0,
+				dispelName = nil,
+				duration = 15,
+				expirationTime = GetTime() + 13,
+				sourceUnit = "player",
+				spellId = 17,
+				canApplyAura = false,
+				isBossAura = false,
+				isFromPlayerOrPlayerPet = true,
+				isHelpful = true,
+				isHarmful = false,
+				points = {},
+			},
+		}
+	end
+
+	local harmfulAuras = {
+		{
+			name = "Shadow Word: Pain",
+			icon = 136207,
+			applications = 0,
+			dispelName = "Magic",
+			duration = 14,
+			expirationTime = GetTime() + 9,
+			sourceUnit = "target",
+			spellId = 589,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Serpent Sting",
+			icon = 132204,
+			applications = 0,
+			dispelName = "Poison",
+			duration = 12,
+			expirationTime = GetTime() + 6,
+			sourceUnit = "target",
+			spellId = 271788,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Mortal Wound",
+			icon = 132090,
+			applications = 3,
+			dispelName = nil,
+			duration = 12,
+			expirationTime = GetTime() + 6,
+			sourceUnit = "target",
+			spellId = 115804,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+	}
+
+	local auras
+	if filter == "HELPFUL" then
+		auras = helpfulAuras
+	elseif filter == "HARMFUL" then
+		auras = harmfulAuras
+	else
+		auras = helpfulAuras
+	end
+
+	if #auras == 0 then
+		return nil
+	end
+
+	local template = auras[((auraIndex - 1) % #auras) + 1]
+	return template
+end
+
+function DataProvider.Live:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return nil
+	end
+
+	if not C_UnitAuras.GetAuraDataByAuraInstanceID then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID)
+end
+
+function DataProvider.Test:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
+	return {
+		name = "Pain Suppression",
+		icon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(33206),
+		applications = 2,
+		dispelName = nil,
+		duration = 8,
+		expirationTime = GetTime() + 6,
+		sourceUnit = "player",
+		spellId = 33206,
+		auraInstanceID = auraInstanceID or 1,
+		canApplyAura = false,
+		isBossAura = false,
+		isFromPlayerOrPlayerPet = true,
+		isHelpful = true,
+		isHarmful = false,
+		points = {},
+	}
+end
+
+function DataProvider.Live:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return nil
+	end
+
+	if not C_UnitAuras.GetAuraApplicationDisplayCount then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, minCount, maxCount)
+end
+
+function DataProvider.Test:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
+	local applications = aura and aura.applications
+	if type(applications) ~= "number" or applications <= 0 then
+		return nil
+	end
+
+	minCount = minCount or 1
+	maxCount = maxCount or applications
+
+	if applications < minCount or applications > maxCount then
+		return nil
+	end
+
+	return tostring(applications)
+end
+
+function DataProvider.Live:DoesAuraHaveExpirationTime(frame, aura)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return false
+	end
+
+	if not C_UnitAuras.DoesAuraHaveExpirationTime then
+		return false
+	end
+
+	return C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
+end
+
+function DataProvider.Test:DoesAuraHaveExpirationTime(frame, aura)
+	if not aura then
+		return false
+	end
+
+	return type(aura.duration) == "number"
+		and aura.duration > 0
+		and type(aura.expirationTime) == "number"
+		and aura.expirationTime > 0
+end

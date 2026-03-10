@@ -101,6 +101,10 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 			end
 		end)
 	end
+
+	if addon.FrameRegistry:ShouldRestoreLiveDriversAfterCombat() then
+		addon.FrameRegistry:UpdateStateDrivers()
+	end
 end
 
 function EventHandler:PLAYER_REGEN_DISABLED()

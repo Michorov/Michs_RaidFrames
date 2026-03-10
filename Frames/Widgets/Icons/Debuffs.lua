@@ -63,8 +63,8 @@ local function UpdateIconSettings(icon, debuffSettings)
 		"BOTTOMRIGHT",
 		icon,
 		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx),
-		addon.Utilities:ToUI(scaledBorderPx)
+		-addon.Utilities:ToUI(scaledBorderPx - 2),
+		addon.Utilities:ToUI(scaledBorderPx - 2)
 	)
 
 	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
@@ -148,37 +148,63 @@ function Debuffs:UpdateState(frame, settings)
 	end
 
 	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame and frame.dataProvider
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
+
+	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		container:Hide()
 		return
 	end
 
-	local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
-	local approved = bucket and bucket.debuffs
-	if not approved or not next(approved) then
-		for i = 1, debuffSettings.maxIcons do
-			local icon = container.icons[i]
-			if icon then
-				icon:Hide()
+	local approved
+	if not isTestProvider then
+		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
+		approved = bucket and bucket.debuffs
+		if not approved or not next(approved) then
+			for i = 1, debuffSettings.maxIcons do
+				local icon = container.icons[i]
+				if icon then
+					icon:Hide()
+				end
 			end
+			container:SetShown(false)
+			return
 		end
-		container:SetShown(false)
-		return
 	end
 
 	local maxIcons = debuffSettings.maxIcons
 	local shown, auraIndex = 0, 1
 	local filter = "HARMFUL"
+	local maxScan = isTestProvider and (maxIcons * 10) or math.huge
 
-	while shown < maxIcons do
-		local aura = C_UnitAuras.GetAuraDataByIndex(unit, auraIndex, filter)
+	while shown < maxIcons and auraIndex <= maxScan do
+		if not provider or type(provider.GetAuraDataByIndex) ~= "function" then
+			for i = 1, debuffSettings.maxIcons do
+				local icon = container.icons[i]
+				if icon then
+					icon:Hide()
+				end
+			end
+			container:SetShown(false)
+			return
+		end
+
+		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
 		if not aura then
 			break
 		end
 		auraIndex = auraIndex + 1
 
 		local auraInstanceID = aura.auraInstanceID
-		if auraInstanceID and approved[auraInstanceID] and aura.icon then
+		local shouldShowAura = false
+
+		if isTestProvider then
+			shouldShowAura = true
+		else
+			shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
+		end
+
+		if shouldShowAura and aura.icon then
 			local icon = container.icons[shown + 1]
 			if icon and icon.texture then
 				shown = shown + 1
@@ -188,18 +214,19 @@ function Debuffs:UpdateState(frame, settings)
 				if icon.countText then
 					icon.countText:SetText("")
 					if debuffSettings.showStacks then
-						if C_UnitAuras.GetAuraApplicationDisplayCount then
-							local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
-							if stackText then
-								icon.countText:SetText(stackText)
-							end
+						local stackText = nil
+						if provider and type(provider.GetAuraApplicationDisplayCount) == "function" then
+							stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+						end
+						if stackText then
+							icon.countText:SetText(stackText)
 						end
 					end
 				end
 
 				local hasExpiration = false
-				if C_UnitAuras.DoesAuraHaveExpirationTime then
-					hasExpiration = C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
+				if provider and type(provider.DoesAuraHaveExpirationTime) == "function" then
+					hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 				end
 
 				if icon.cooldown then

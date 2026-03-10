@@ -22,42 +22,6 @@ local function GetAbsorbSettings(settings)
 	}
 end
 
-local function GetClampedAbsorb(frame, unit)
-	if not frame or not unit then
-		return nil
-	end
-
-	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
-		frame.absorbCalculator = frame.absorbCalculator or CreateUnitHealPredictionCalculator()
-		local calc = frame.absorbCalculator
-
-		if calc.SetAbsorbClampMode then
-			pcall(calc.SetAbsorbClampMode, calc, 0)
-		end
-
-		UnitGetDetailedHealPrediction(unit, nil, calc)
-
-		if calc.GetAbsorbs then
-			local ok, value = pcall(calc.GetAbsorbs, calc)
-			if ok then
-				return value
-			end
-		end
-		if calc.GetTotalAbsorbs then
-			local ok, value = pcall(calc.GetTotalAbsorbs, calc)
-			if ok then
-				return value
-			end
-		end
-	end
-
-	if UnitGetTotalAbsorbs then
-		return UnitGetTotalAbsorbs(unit)
-	end
-
-	return nil
-end
-
 function Absorbs:Ensure(frame)
 	if not frame then
 		return
@@ -106,20 +70,14 @@ function Absorbs:UpdateState(frame)
 		return
 	end
 
-	local unit = frame.unit
-	if not UnitExists(unit) or UnitCanAttack("player", unit) then
+	local provider = frame and frame.dataProvider
+	if not provider or type(provider.GetAbsorbs) ~= "function" then
 		bar:Hide()
 		return
 	end
 
-	local maxHealth = UnitHealthMax(unit)
-	if not maxHealth or maxHealth <= 0 then
-		bar:Hide()
-		return
-	end
-
-	local absorbValue = GetClampedAbsorb(frame, unit)
-	if absorbValue == nil then
+	local absorbValue, maxHealth = provider:GetAbsorbs(frame)
+	if absorbValue == nil or maxHealth == nil then
 		bar:Hide()
 		return
 	end

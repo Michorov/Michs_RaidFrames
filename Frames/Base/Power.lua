@@ -45,39 +45,6 @@ local function GetPowerSettings(settings)
 	}
 end
 
-local function IsHealerUnit(unit)
-	local role = UnitGroupRolesAssigned(unit)
-	if role == "HEALER" then
-		return true
-	end
-
-	if UnitIsUnit(unit, "player") then
-		local specIndex = GetSpecialization and GetSpecialization()
-		if specIndex then
-			local specRole = select(5, GetSpecializationInfo(specIndex))
-			if specRole == "HEALER" then
-				return true
-			end
-		end
-	end
-
-	return false
-end
-
-local function GetDisplayedPower(unit, powerSettings)
-	if powerSettings.healerOnly and not IsHealerUnit(unit) then
-		return nil, nil, nil
-	end
-
-	if IsHealerUnit(unit) then
-		local manaType = Enum.PowerType and Enum.PowerType.Mana or 0
-		return UnitPower(unit, manaType), UnitPowerMax(unit, manaType), "MANA"
-	end
-
-	local _, token = UnitPowerType(unit)
-	return UnitPower(unit), UnitPowerMax(unit), token
-end
-
 function Power:Ensure(frame)
 	if not frame then
 		return
@@ -158,11 +125,15 @@ function Power:UpdateSettings(frame, settings)
 		end
 	end
 
-	local unit = frame.unit
 	local showBar = powerSettings.enabled
 
+	local provider = frame and frame.dataProvider
 	if showBar and powerSettings.healerOnly then
-		showBar = IsHealerUnit(unit)
+		if provider and type(provider.IsHealer) == "function" then
+			showBar = provider:IsHealer(frame)
+		else
+			showBar = false
+		end
 	end
 
 	if showBar then
@@ -183,17 +154,22 @@ function Power:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame and frame.dataProvider
+	if not provider or type(provider.GetPower) ~= "function" then
 		return
 	end
 
-	local current, max, token = GetDisplayedPower(unit, powerSettings)
-	if not current or not max or max <= 0 then
+	local current, max, powerToken = provider:GetPower(frame)
+	if current == nil or max == nil or powerToken == nil then
+		powerBar:Hide()
 		return
 	end
 
-	local c = POWER_COLORS[token] or POWER_COLORS.MANA
+	if type(powerToken) == "string" then
+		powerToken = powerToken:gsub("^POWER_TYPE_", "")
+	end
+
+	local c = POWER_COLORS[powerToken] or POWER_COLORS.MANA
 	powerBar:SetStatusBarColor(c.r, c.g, c.b, c.a)
 
 	powerBar:SetMinMaxValues(0, max)
