@@ -55,14 +55,6 @@ function UpdateScheduler:Notify(updateReason, unit)
 	ScheduleFlush()
 end
 
-function UpdateScheduler:RequestFlush()
-	if not initialized then
-		error("Update Scheduler not initialized", 2)
-	end
-
-	ScheduleFlush()
-end
-
 function UpdateScheduler:SetFlushCallback(callback)
 	if initialized then
 		error("Update Scheduler already initialized", 2)
