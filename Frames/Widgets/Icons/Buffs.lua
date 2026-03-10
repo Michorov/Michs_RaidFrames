@@ -228,7 +228,11 @@ function Buffs:UpdateState(frame, settings)
 
 		if buffSettings.useCustomBuffFilter then
 			local customBuff = GetCustomBuffFilterEntry(settings, aura)
-			shouldShowAura = customBuff ~= nil and customBuff.enabled == true and aura.sourceUnit == "player"
+
+			local isPlayerSource = aura.sourceUnit == "player"
+			local allowMissingSource = aura.spellId == 444490
+
+			shouldShowAura = customBuff ~= nil and customBuff.enabled == true and (isPlayerSource or allowMissingSource)
 		else
 			shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
 		end
