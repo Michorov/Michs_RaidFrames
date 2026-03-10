@@ -135,64 +135,70 @@ function BigDefensive:UpdateState(frame, settings)
 	end
 
 	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame and frame.dataProvider
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
+
+	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		container:Hide()
 		return
 	end
 
 	local maxIcons = bigDefensiveSettings.maxIcons
 	local shown = 0
+	local icon = container.icons[1]
 
-	local auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
-	if auraInstanceID then
-		local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID)
-		local icon = container.icons[1]
+	if not provider or type(provider.GetAuraDataByAuraInstanceID) ~= "function" then
+		container:Hide()
+		return
+	end
 
-		if aura and aura.icon and icon then
-			icon.texture:SetTexture(aura.icon)
+	local auraInstanceID = nil
+	if unit then
+		auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
+	end
 
-			if icon.countText then
-				icon.countText:SetText("")
-				if bigDefensiveSettings.showStacks then
-					if C_UnitAuras.GetAuraApplicationDisplayCount then
-						local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
-						if stackText then
-							icon.countText:SetText(stackText)
-						end
-					end
+	local aura = provider:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
+
+	if aura and aura.icon and icon then
+		icon.texture:SetTexture(aura.icon)
+
+		if icon.countText then
+			icon.countText:SetText("")
+			if bigDefensiveSettings.showStacks then
+				local stackText = nil
+				if type(provider.GetAuraApplicationDisplayCount) == "function" then
+					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+				end
+				if stackText then
+					icon.countText:SetText(stackText)
 				end
 			end
-
-			local hasExpiration = false
-			if C_UnitAuras.DoesAuraHaveExpirationTime then
-				hasExpiration = C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
-			end
-
-			if icon.cooldown then
-				if icon.cooldown.SetCooldownFromExpirationTime then
-					pcall(
-						icon.cooldown.SetCooldownFromExpirationTime,
-						icon.cooldown,
-						aura.expirationTime,
-						aura.duration
-					)
-				end
-				if icon.cooldown.SetShownFromBoolean then
-					icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
-				else
-					icon.cooldown:Show()
-				end
-			end
-
-			icon:Show()
-			shown = 1
 		end
+
+		local hasExpiration = false
+		if type(provider.DoesAuraHaveExpirationTime) == "function" then
+			hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
+		end
+
+		if icon.cooldown then
+			if icon.cooldown.SetCooldownFromExpirationTime then
+				pcall(icon.cooldown.SetCooldownFromExpirationTime, icon.cooldown, aura.expirationTime, aura.duration)
+			end
+			if icon.cooldown.SetShownFromBoolean then
+				icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
+			else
+				icon.cooldown:Show()
+			end
+		end
+
+		icon:Show()
+		shown = 1
 	end
 
 	for i = shown + 1, maxIcons do
-		local icon = container.icons[i]
-		if icon then
-			icon:Hide()
+		local extraIcon = container.icons[i]
+		if extraIcon then
+			extraIcon:Hide()
 		end
 	end
 

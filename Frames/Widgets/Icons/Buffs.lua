@@ -109,8 +109,8 @@ local function UpdateIconSettings(icon, buffSettings)
 		"BOTTOMRIGHT",
 		icon,
 		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx),
-		addon.Utilities:ToUI(scaledBorderPx)
+		-addon.Utilities:ToUI(scaledBorderPx - 2),
+		addon.Utilities:ToUI(scaledBorderPx - 2)
 	)
 
 	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
@@ -192,7 +192,10 @@ function Buffs:UpdateState(frame, settings)
 	end
 
 	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame and frame.dataProvider
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
+
+	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		container:Hide()
 		return
 	end
@@ -203,7 +206,7 @@ function Buffs:UpdateState(frame, settings)
 	end
 
 	local approved
-	if not buffSettings.useCustomBuffFilter then
+	if not buffSettings.useCustomBuffFilter and not isTestProvider then
 		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
 		approved = bucket and bucket.buffs
 		if not approved or not next(approved) then
@@ -216,8 +219,15 @@ function Buffs:UpdateState(frame, settings)
 	local shown, auraIndex = 0, 1
 	local filter = "HELPFUL"
 
-	while shown < maxIcons do
-		local aura = C_UnitAuras.GetAuraDataByIndex(unit, auraIndex, filter)
+	local maxScan = isTestProvider and (maxIcons * 3) or math.huge
+
+	while shown < maxIcons and auraIndex <= maxScan do
+		if not provider or type(provider.GetAuraDataByIndex) ~= "function" then
+			HideIcons(container, buffSettings.maxIcons)
+			return
+		end
+
+		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
 		if not aura then
 			break
 		end
@@ -230,7 +240,11 @@ function Buffs:UpdateState(frame, settings)
 			local customBuff = GetCustomBuffFilterEntry(settings, aura)
 			shouldShowAura = customBuff ~= nil and customBuff.enabled == true and aura.sourceUnit == "player"
 		else
-			shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
+			if isTestProvider then
+				shouldShowAura = true
+			else
+				shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
+			end
 		end
 
 		if shouldShowAura and aura.icon then
@@ -243,18 +257,19 @@ function Buffs:UpdateState(frame, settings)
 				if icon.countText then
 					icon.countText:SetText("")
 					if buffSettings.showStacks then
-						if C_UnitAuras.GetAuraApplicationDisplayCount then
-							local stackText = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, 2, 99)
-							if stackText then
-								icon.countText:SetText(stackText)
-							end
+						local stackText = nil
+						if provider and type(provider.GetAuraApplicationDisplayCount) == "function" then
+							stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+						end
+						if stackText then
+							icon.countText:SetText(stackText)
 						end
 					end
 				end
 
 				local hasExpiration = false
-				if C_UnitAuras.DoesAuraHaveExpirationTime then
-					hasExpiration = C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
+				if provider and type(provider.DoesAuraHaveExpirationTime) == "function" then
+					hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 				end
 
 				if icon.cooldown then

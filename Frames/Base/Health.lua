@@ -11,7 +11,10 @@ local function GetHealthColor(frame, settings)
 	local color = health.color or {}
 
 	if health.classColor then
-		return addon.Utilities:GetUnitClassColor(frame and frame.unit, color)
+		local provider = frame and frame.dataProvider
+		if provider and type(provider.GetClassColor) == "function" then
+			return provider:GetClassColor(frame, color)
+		end
 	end
 
 	return color.r or 0.10, color.g or 0.80, color.b or 0.10, color.a or 1.0
@@ -59,17 +62,15 @@ function Health:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if not UnitExists(unit) then
-		healthBar:Hide()
+	local provider = frame.dataProvider
+	if not provider or type(provider.GetHealth) ~= "function" then
 		return
 	end
 
-	local maxHealth = UnitHealthMax(unit)
-	local currentHealth = UnitHealth(unit)
+	local current, max = provider:GetHealth(frame)
 
-	healthBar:SetMinMaxValues(0, maxHealth)
-	healthBar:SetValue(currentHealth)
+	healthBar:SetMinMaxValues(0, max)
+	healthBar:SetValue(current)
 
 	local r, g, b, a = GetHealthColor(frame, settings)
 	healthBar:SetStatusBarColor(r, g, b, a)

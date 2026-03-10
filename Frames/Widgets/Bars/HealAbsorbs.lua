@@ -106,20 +106,14 @@ function HealAbsorbs:UpdateState(frame)
 		return
 	end
 
-	local unit = frame.unit
-	if not UnitExists(unit) or UnitCanAttack("player", unit) then
+	local provider = frame and frame.dataProvider
+	if not provider or type(provider.GetHealAbsorbs) ~= "function" then
 		bar:Hide()
 		return
 	end
 
-	local currentHealth = UnitHealth(unit)
-	if currentHealth == nil then
-		bar:Hide()
-		return
-	end
-
-	local healAbsorbValue = GetClampedHealAbsorb(frame, unit)
-	if healAbsorbValue == nil then
+	local healAbsorbValue, currentHealth = provider:GetHealAbsorbs(frame)
+	if healAbsorbValue == nil or currentHealth == nil then
 		bar:Hide()
 		return
 	end

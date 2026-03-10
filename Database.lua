@@ -9,7 +9,7 @@ local initialized = false
 
 local CUSTOM_AURA_DEFAULTS = {
 	EVOKER = {
-		[1467] = {
+		[1468] = {
 			[355941] = { enabled = true, name = "Dream Breath" },
 			[363502] = { enabled = true, name = "Dream Flight" },
 			[364343] = { enabled = true, name = "Echo" },

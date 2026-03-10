@@ -5,6 +5,57 @@ local Frames = addon.Frames
 
 local ARENA_RAID_MAX_UNITS = 3
 
+local function BuildOrderedPartyFrames(group)
+	if not group or not group.frames then
+		return {}
+	end
+
+	local tanks = {}
+	local healers = {}
+	local damagers = {}
+	local unassigned = {}
+
+	for _, frame in ipairs(group.frames) do
+		local provider = frame and frame.dataProvider
+		local role = provider and type(provider.GetRole) == "function" and provider:GetRole(frame) or nil
+
+		if role == "TANK" then
+			table.insert(tanks, frame)
+		elseif role == "HEALER" then
+			table.insert(healers, frame)
+		elseif role == "DAMAGER" then
+			table.insert(damagers, frame)
+		else
+			table.insert(unassigned, frame)
+		end
+	end
+
+	local ordered = {}
+
+	for _, frame in ipairs(tanks) do
+		table.insert(ordered, frame)
+	end
+	for _, frame in ipairs(healers) do
+		table.insert(ordered, frame)
+	end
+	for _, frame in ipairs(damagers) do
+		table.insert(ordered, frame)
+	end
+
+	if #ordered == 0 then
+		for _, frame in ipairs(group.frames) do
+			table.insert(ordered, frame)
+		end
+		return ordered
+	end
+
+	for _, frame in ipairs(unassigned) do
+		table.insert(ordered, frame)
+	end
+
+	return ordered
+end
+
 local function GetUnitRaidGroup(unit)
 	if type(unit) ~= "string" or unit == "" then
 		return nil
@@ -88,7 +139,8 @@ local function UpdatePartyLayout(group, settings)
 	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
 	local isHorizontal = layout.isHorizontal
 
-	local frameCount = #group.frames
+	local orderedFrames = BuildOrderedPartyFrames(group)
+	local frameCount = #orderedFrames
 
 	local scaledFrameWidthPx = addon.Utilities:ScaleEven(layout.frameWidthPx)
 	local scaledFrameHeightPx = addon.Utilities:ScaleEven(layout.frameHeightPx)
@@ -125,7 +177,7 @@ local function UpdatePartyLayout(group, settings)
 	)
 	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
 
-	for frameIndex, frame in ipairs(group.frames) do
+	for frameIndex, frame in ipairs(orderedFrames) do
 		local offsetXPx = 0
 		local offsetYPx = 0
 
@@ -413,7 +465,166 @@ local function UpdateRaidLayoutFromRaidGroups(group, settings)
 	end
 end
 
+local function UpdateTestRaidLayout(group, settings)
+	local layout = GetLayoutSettings(settings, 112, 56, "HORIZONTAL")
+
+	local enabled = layout.enabled
+	local direction = layout.direction
+	local reverse = layout.reverse
+
+	local positionX = layout.positionX
+	local positionY = layout.positionY
+	local frameWidthPx = layout.frameWidthPx
+	local frameHeightPx = layout.frameHeightPx
+	local spacingXPx = layout.spacingXPx
+	local spacingYPx = layout.spacingYPx
+
+	local slotMap = {}
+	local frameIndex = 1
+
+	for subgroup = 1, 8 do
+		slotMap[subgroup] = {}
+		for slot = 1, 5 do
+			slotMap[subgroup][slot] = group.frames[frameIndex]
+			frameIndex = frameIndex + 1
+		end
+	end
+
+	local orderedGroups = {}
+	for subgroup = 1, 8 do
+		local isEnabled = enabled[subgroup]
+		if isEnabled == nil then
+			isEnabled = true
+		end
+
+		if isEnabled then
+			table.insert(orderedGroups, subgroup)
+		end
+	end
+
+	if reverse then
+		local i, j = 1, #orderedGroups
+		while i < j do
+			orderedGroups[i], orderedGroups[j] = orderedGroups[j], orderedGroups[i]
+			i = i + 1
+			j = j - 1
+		end
+	end
+
+	if #orderedGroups == 0 then
+		local scaledPositionX = addon.Utilities:Scale(positionX)
+		local scaledPositionY = addon.Utilities:Scale(positionY)
+		local scaledOnePx = addon.Utilities:ScaleEven(1)
+
+		group.container:ClearAllPoints()
+		group.container:SetPoint(
+			"CENTER",
+			UIParent,
+			"CENTER",
+			addon.Utilities:ToUI(scaledPositionX),
+			addon.Utilities:ToUI(scaledPositionY)
+		)
+		group.container:SetSize(addon.Utilities:ToUI(scaledOnePx), addon.Utilities:ToUI(scaledOnePx))
+
+		for _, frame in ipairs(group.frames) do
+			if frame then
+				frame:Hide()
+			end
+		end
+
+		return
+	end
+
+	local enabledSet = {}
+	for _, subgroup in ipairs(orderedGroups) do
+		enabledSet[subgroup] = true
+	end
+
+	for subgroup = 1, 8 do
+		local isGroupEnabled = enabledSet[subgroup] == true
+		for slot = 1, 5 do
+			local frame = slotMap[subgroup][slot]
+			if frame then
+				if isGroupEnabled then
+					frame:Show()
+				else
+					frame:Hide()
+				end
+			end
+		end
+	end
+
+	local isVertical = (direction == "VERTICAL")
+	local groupCount = #orderedGroups
+
+	local totalCols = isVertical and 5 or groupCount
+	local totalRows = isVertical and groupCount or 5
+
+	local scaledFrameWidthPx = addon.Utilities:ScaleEven(frameWidthPx)
+	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
+	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
+	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
+	local scaledPositionX = addon.Utilities:Scale(positionX)
+	local scaledPositionY = addon.Utilities:Scale(positionY)
+
+	local scaledContainerWidthPx = (totalCols * scaledFrameWidthPx) + ((totalCols - 1) * scaledSpacingXPx)
+	local scaledContainerHeightPx = (totalRows * scaledFrameHeightPx) + ((totalRows - 1) * scaledSpacingYPx)
+
+	if (scaledContainerWidthPx % 2) ~= 0 then
+		scaledContainerWidthPx = scaledContainerWidthPx + 1
+	end
+	if (scaledContainerHeightPx % 2) ~= 0 then
+		scaledContainerHeightPx = scaledContainerHeightPx + 1
+	end
+
+	group.container:ClearAllPoints()
+	group.container:SetPoint(
+		"CENTER",
+		UIParent,
+		"CENTER",
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
+	)
+	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
+
+	for groupPos, subgroup in ipairs(orderedGroups) do
+		for slot = 1, 5 do
+			local frame = slotMap[subgroup][slot]
+			if frame then
+				local colIndex
+				local rowIndex
+
+				if isVertical then
+					colIndex = slot - 1
+					rowIndex = groupPos - 1
+				else
+					colIndex = groupPos - 1
+					rowIndex = slot - 1
+				end
+
+				local offsetXPx = colIndex * (scaledFrameWidthPx + scaledSpacingXPx)
+				local offsetYPx = rowIndex * (scaledFrameHeightPx + scaledSpacingYPx)
+
+				frame:ClearAllPoints()
+				frame:SetPoint(
+					"TOPLEFT",
+					group.container,
+					"TOPLEFT",
+					addon.Utilities:ToUI(offsetXPx),
+					-addon.Utilities:ToUI(offsetYPx)
+				)
+				frame:SetSize(addon.Utilities:ToUI(scaledFrameWidthPx), addon.Utilities:ToUI(scaledFrameHeightPx))
+				frame:Show()
+			end
+		end
+	end
+end
+
 local function UpdateRaidLayout(group, settings)
+	if group.isTestGroup then
+		return UpdateTestRaidLayout(group, settings)
+	end
+
 	local _, instanceType = IsInInstance()
 	if instanceType == "arena" then
 		return UpdateRaidLayoutAsPartyInArena(group, settings)
