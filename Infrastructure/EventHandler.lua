@@ -7,6 +7,10 @@ LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
 
+local function IsSupportedUnit(unit)
+	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
+end
+
 function EventHandler:Initialize()
 	if initialized then
 		error("EventHandler already initialized", 2)
@@ -138,18 +142,34 @@ function EventHandler:READY_CHECK_FINISHED()
 end
 
 function EventHandler:UNIT_ABSORB_AMOUNT_CHANGED(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
 end
 
 function EventHandler:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
 end
 
 function EventHandler:UNIT_NAME_UPDATE(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("nameStateChanged", unit)
 end
 
 function EventHandler:UNIT_HEALTH(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("healthStateChanged", unit)
 	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
@@ -157,6 +177,10 @@ function EventHandler:UNIT_HEALTH(event, unit)
 end
 
 function EventHandler:UNIT_MAXHEALTH(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("healthStateChanged", unit)
 	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
@@ -164,22 +188,42 @@ function EventHandler:UNIT_MAXHEALTH(event, unit)
 end
 
 function EventHandler:UNIT_POWER_UPDATE(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
 function EventHandler:UNIT_MAXPOWER(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
 function EventHandler:UNIT_DISPLAYPOWER(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
 function EventHandler:UNIT_AURA(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 end
 
 function EventHandler:UNIT_CONNECTION(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
 end
 

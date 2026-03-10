@@ -35,6 +35,8 @@ local testRaidGroup = {
 	frames = {},
 }
 
+local unitFrameMap = {}
+
 function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	local profile = addon.Database:GetProfile()
 	local showSoloPartyFrame = profile and profile.core and profile.core.showSoloPartyFrame == true
@@ -249,28 +251,25 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 	local partySettings = profile.party or {}
 	local raidSettings = ResolveRaidSettings(profile)
 
-	local function UpdateGroup(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, frame in ipairs(group.frames) do
-			if frame and frame.unit == unit then
-				if (not inCombat) and type(settingsCallback) == "function" then
-					settingsCallback(frame, settings)
-				end
-
-				if type(stateCallback) == "function" then
-					stateCallback(frame, settings)
-				end
-
-				return
-			end
-		end
+	local frame = unitFrameMap[unit]
+	if not frame then
+		return
 	end
 
-	UpdateGroup(partyGroup, partySettings)
-	UpdateGroup(raidGroup, raidSettings)
+	local settings
+	if frame.unit == "player" or frame.unit:match("^party%d$") then
+		settings = partySettings
+	else
+		settings = raidSettings
+	end
+
+	if (not inCombat) and type(settingsCallback) == "function" then
+		settingsCallback(frame, settings)
+	end
+
+	if type(stateCallback) == "function" then
+		stateCallback(frame, settings)
+	end
 end
 
 function FrameRegistry:UpdateLayout()
@@ -316,6 +315,7 @@ function FrameRegistry:Initialize()
 		for unitIndex, unit in ipairs(units) do
 			local frame = addon.Frames:CreateFrame(group.container, unit, unitIndex)
 			group.frames[unitIndex] = frame
+			unitFrameMap[unit] = frame
 		end
 	end
 

@@ -68,7 +68,7 @@ local CUSTOM_AURA_DEFAULTS = {
 			[61295] = { enabled = true, name = "Riptide" },
 			[207400] = { enabled = true, name = "Ancestral Vigor" },
 			[382024] = { enabled = true, name = "Earthliving Weapon" },
-			[444490] = { enabled = true, name = "Hydrobubble" },
+			[444490] = { enabled = true, name = "Hydrobubble", allowMissingSource = true },
 		},
 	},
 
