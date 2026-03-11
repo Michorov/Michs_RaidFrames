@@ -8,11 +8,9 @@ addon.Frames.Widgets.Indicators.PendingSummon = addon.Frames.Widgets.Indicators.
 local PendingSummon = addon.Frames.Widgets.Indicators.PendingSummon
 
 local function GetPendingSummonSettings(settings)
-	local pendingSummon = settings
-			and settings.widgets
-			and settings.widgets.indicators
-			and settings.widgets.indicators.pendingSummon
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local indicators = widgets.indicators or {}
+	local pendingSummon = indicators.pendingSummon or {}
 
 	return {
 		sizePx = addon.Utilities:ToPixels(pendingSummon.size or 36),

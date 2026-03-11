@@ -8,8 +8,9 @@ addon.Frames.Widgets.Bars.HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs or
 local HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs
 
 local function GetHealAbsorbSettings(settings)
-	local healAbsorbs = settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.healAbsorbs
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local bars = widgets.bars or {}
+	local healAbsorbs = bars.healAbsorbs or {}
 	local color = healAbsorbs.color or {}
 
 	return {
@@ -21,38 +22,6 @@ local function GetHealAbsorbSettings(settings)
 			a = color.a or 0.5,
 		},
 	}
-end
-
-local function GetClampedHealAbsorb(frame, unit)
-	if not frame or not unit then
-		return nil
-	end
-
-	-- Preferred path: prediction calculator (secret-safe)
-	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
-		frame.healAbsorbCalculator = frame.healAbsorbCalculator or CreateUnitHealPredictionCalculator()
-		local calc = frame.healAbsorbCalculator
-
-		if calc.SetHealAbsorbClampMode then
-			pcall(calc.SetHealAbsorbClampMode, calc, 0)
-		end
-
-		UnitGetDetailedHealPrediction(unit, nil, calc)
-
-		if calc.GetHealAbsorbs then
-			local ok, value = pcall(calc.GetHealAbsorbs, calc)
-			if ok then
-				return value
-			end
-		end
-	end
-
-	-- Fallback
-	if UnitGetTotalHealAbsorbs then
-		return UnitGetTotalHealAbsorbs(unit)
-	end
-
-	return nil
 end
 
 function HealAbsorbs:Ensure(frame)

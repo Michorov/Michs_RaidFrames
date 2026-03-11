@@ -337,7 +337,7 @@ function DataProvider.Live:GetAbsorbs(frame)
 		return nil, nil
 	end
 
-	local absorbValue = nil
+	local absorbValue
 
 	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
 		frame.absorbCalculator = frame.absorbCalculator or CreateUnitHealPredictionCalculator()
@@ -409,7 +409,7 @@ function DataProvider.Live:GetHealAbsorbs(frame)
 		return nil, nil
 	end
 
-	local healAbsorbValue = nil
+	local healAbsorbValue
 
 	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
 		frame.healAbsorbCalculator = frame.healAbsorbCalculator or CreateUnitHealPredictionCalculator()

@@ -3,7 +3,7 @@ local _, addon = ...
 local Utilities = {}
 addon.Utilities = Utilities
 
-local cachedPixelStep = nil
+local cachedPixelStep
 
 local function RoundToNearestInt(value)
 	value = value or 0

@@ -8,11 +8,9 @@ addon.Frames.Widgets.Icons.BigDefensive = addon.Frames.Widgets.Icons.BigDefensiv
 local BigDefensive = addon.Frames.Widgets.Icons.BigDefensive
 
 local function GetBigDefensiveSettings(settings)
-	local bigDefensive = settings
-			and settings.widgets
-			and settings.widgets.icons
-			and settings.widgets.icons.bigDefensive
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local bigDefensive = icons.bigDefensive or {}
 
 	return {
 		anchor = bigDefensive.anchor or "CENTER",
@@ -147,7 +145,7 @@ function BigDefensive:UpdateState(frame, settings)
 	local shown = 0
 	local icon = container.icons[1]
 
-	local auraInstanceID = nil
+	local auraInstanceID
 	if unit then
 		auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
 	end

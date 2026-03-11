@@ -22,9 +22,12 @@ local function GetCustomBuffFilterEntry(settings, aura)
 		return nil
 	end
 
-	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
+	local widgets = settings.widgets or {}
+	local icons = widgets.icons or {}
+	local buffs = icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
+	local specID = addon.Utilities:GetPlayerSpecID()
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
 
 	local ok, customBuff = pcall(function()
@@ -39,7 +42,9 @@ local function GetCustomBuffFilterEntry(settings, aura)
 end
 
 local function GetBuffSettings(settings)
-	local buffs = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local buffs = icons.buffs or {}
 
 	return {
 		enabled = buffs.enabled ~= false,

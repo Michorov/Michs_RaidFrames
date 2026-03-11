@@ -8,7 +8,9 @@ addon.Frames.Widgets.Icons.Debuffs = addon.Frames.Widgets.Icons.Debuffs or {}
 local Debuffs = addon.Frames.Widgets.Icons.Debuffs
 
 local function GetDebuffSettings(settings)
-	local debuffs = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.debuffs or {}
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local debuffs = icons.debuffs or {}
 
 	return {
 		anchor = debuffs.anchor or "BOTTOMLEFT",
