@@ -76,10 +76,6 @@ function HealAbsorbs:UpdateState(frame)
 	end
 
 	local provider = frame and frame.dataProvider
-	if not provider or type(provider.GetHealAbsorbs) ~= "function" then
-		bar:Hide()
-		return
-	end
 
 	local healAbsorbValue, currentHealth = provider:GetHealAbsorbs(frame)
 	if healAbsorbValue == nil or currentHealth == nil then

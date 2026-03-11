@@ -37,9 +37,7 @@ end
 local function GetNameColor(frame, nameSettings)
 	if nameSettings.classColor then
 		local provider = frame and frame.dataProvider
-		if provider and type(provider.GetClassColor) == "function" then
-			return provider:GetClassColor(frame, nameSettings.color)
-		end
+		return provider:GetClassColor(frame, nameSettings.color)
 	end
 
 	local c = nameSettings.color
@@ -108,10 +106,6 @@ function Name:UpdateState(frame, settings)
 	end
 
 	local provider = frame and frame.dataProvider
-	if not provider or type(provider.GetName) ~= "function" then
-		nameText:SetText("")
-		return
-	end
 
 	local name = provider:GetName(frame) or ""
 	nameText:SetText(name)

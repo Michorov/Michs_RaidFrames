@@ -73,10 +73,6 @@ function Absorbs:UpdateState(frame)
 	end
 
 	local provider = frame and frame.dataProvider
-	if not provider or type(provider.GetAbsorbs) ~= "function" then
-		bar:Hide()
-		return
-	end
 
 	local absorbValue, maxHealth = provider:GetAbsorbs(frame)
 	if absorbValue == nil or maxHealth == nil then
