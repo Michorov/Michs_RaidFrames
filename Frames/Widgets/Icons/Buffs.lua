@@ -17,20 +17,6 @@ local function HideIcons(container, maxIcons)
 	container:SetShown(false)
 end
 
-local function GetPlayerClassFileName()
-	local _, classFileName = UnitClass("player")
-	return classFileName
-end
-
-local function GetPlayerSpecID()
-	local specIndex = GetSpecialization and GetSpecialization()
-	if not specIndex then
-		return nil
-	end
-
-	return select(1, GetSpecializationInfo(specIndex))
-end
-
 local function GetCustomBuffFilterEntry(settings, aura)
 	if not settings or not aura then
 		return nil
@@ -38,8 +24,8 @@ local function GetCustomBuffFilterEntry(settings, aura)
 
 	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
-	local classAuras = customAuraValues[GetPlayerClassFileName() or ""] or {}
-	local specAuras = classAuras[GetPlayerSpecID() or 0] or {}
+	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
+	local specAuras = classAuras[GetPlayeaddon.Utilities:GetPlayerSpecIDrSpecID() or 0] or {}
 
 	local ok, customBuff = pcall(function()
 		return specAuras[aura.spellId]
@@ -222,11 +208,6 @@ function Buffs:UpdateState(frame, settings)
 	local maxScan = isTestProvider and (maxIcons * 3) or math.huge
 
 	while shown < maxIcons and auraIndex <= maxScan do
-		if not provider or type(provider.GetAuraDataByIndex) ~= "function" then
-			HideIcons(container, buffSettings.maxIcons)
-			return
-		end
-
 		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
 		if not aura then
 			break
@@ -262,9 +243,7 @@ function Buffs:UpdateState(frame, settings)
 					icon.countText:SetText("")
 					if buffSettings.showStacks then
 						local stackText = nil
-						if provider and type(provider.GetAuraApplicationDisplayCount) == "function" then
-							stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
-						end
+						stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 						if stackText then
 							icon.countText:SetText(stackText)
 						end
@@ -272,9 +251,7 @@ function Buffs:UpdateState(frame, settings)
 				end
 
 				local hasExpiration = false
-				if provider and type(provider.DoesAuraHaveExpirationTime) == "function" then
-					hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
-				end
+				hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
 				if icon.cooldown then
 					if icon.cooldown.SetCooldownFromExpirationTime then
