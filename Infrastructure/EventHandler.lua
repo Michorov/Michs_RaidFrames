@@ -27,6 +27,8 @@ function EventHandler:Initialize()
 	self:RegisterEvent("READY_CHECK_CONFIRM")
 	self:RegisterEvent("READY_CHECK_FINISHED")
 
+	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
+
 	self:RegisterEvent("UNIT_MAXHEALTH")
 	self:RegisterEvent("UNIT_HEALTH")
 	self:RegisterEvent("UNIT_POWER_UPDATE")
@@ -139,6 +141,14 @@ function EventHandler:READY_CHECK_FINISHED()
 	end)
 
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
+end
+
+function EventHandler:INCOMING_SUMMON_CHANGED(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.UpdateScheduler:Notify("pendingSummonStateChanged", unit)
 end
 
 function EventHandler:UNIT_ABSORB_AMOUNT_CHANGED(event, unit)

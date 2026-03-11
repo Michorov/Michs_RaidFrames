@@ -35,6 +35,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.pendingSummonSettingsChanged then
+			addon.Frames.Widgets.Indicators.PendingSummon:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.nameSettingsChanged then
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(frame, settings)
 		end
@@ -92,6 +96,10 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.rosterChanged or updateReasons.readyCheckStateChanged then
 			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
+		end
+
+		if updateReasons.rosterChanged or updateReasons.pendingSummonStateChanged then
+			addon.Frames.Widgets.Indicators.PendingSummon:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.absorbsStateChanged then
