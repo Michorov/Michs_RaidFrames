@@ -25,7 +25,7 @@ local function GetCustomBuffFilterEntry(settings, aura)
 	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
-	local specAuras = classAuras[GetPlayeaddon.Utilities:GetPlayerSpecIDrSpecID() or 0] or {}
+	local specAuras = classAuras[addon.Utilities:GetPlayerSpecID() or 0] or {}
 
 	local ok, customBuff = pcall(function()
 		return specAuras[aura.spellId]
