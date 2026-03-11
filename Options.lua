@@ -287,13 +287,8 @@ local function PrintProfileMsg(msg)
 	print("|cffff9900Mich's RaidFrames:|r " .. msg)
 end
 
-local function GetPlayerClassFileName()
-	local _, classFileName = UnitClass("player")
-	return classFileName
-end
-
 local function GetCustomBuffListOptions(layoutKey)
-	local classFileName = GetPlayerClassFileName()
+	local classFileName = addon.Utilities:GetPlayerClassFileName()
 	local profile = addon.Database:GetProfile()
 	local section = profile[layoutKey]
 	local buffSettings = (((section or {}).widgets or {}).icons or {}).buffs or {}
@@ -389,7 +384,7 @@ local function GetCustomBuffListOptions(layoutKey)
 end
 
 local function GetBuffOverlayOptions(layoutKey)
-	local classFileName = GetPlayerClassFileName()
+	local classFileName = addon.Utilities:GetPlayerClassFileName()
 	local profile = addon.Database:GetProfile()
 	local section = profile[layoutKey] or {}
 	local widgets = section.widgets or {}

@@ -23,27 +23,13 @@ local function GetBuffOverlaySettings(settings)
 	return normalized
 end
 
-local function GetPlayerSpecID()
-	local specIndex = GetSpecialization and GetSpecialization()
-	if not specIndex then
-		return nil
-	end
-
-	return select(1, GetSpecializationInfo(specIndex))
-end
-
-local function GetPlayerClassFileName()
-	local _, classFileName = UnitClass("player")
-	return classFileName
-end
-
 local function IsAllowedSpecAura(specID, spellId)
 	if not specID or not spellId or spellId == 0 then
 		return nil
 	end
 
 	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
-	local classAuras = defaultAuraValues[GetPlayerClassFileName() or ""] or {}
+	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
 	local specAuras = classAuras[specID] or {}
 
 	local ok, hasAura = pcall(function()
@@ -134,7 +120,7 @@ function BuffOverlay:UpdateSettings(frame, settings)
 	end
 
 	local buffOverlaySettings = GetBuffOverlaySettings(settings)
-	local specID = GetPlayerSpecID()
+	local specID = addon.Utilities:GetPlayerSpecID()
 
 	for index = 1, #buffOverlaySettings.overlayKeys do
 		local overlayKey = buffOverlaySettings.overlayKeys[index]
@@ -165,7 +151,7 @@ function BuffOverlay:UpdateState(frame, settings)
 	end
 
 	local buffOverlaySettings = GetBuffOverlaySettings(settings)
-	local specID = GetPlayerSpecID()
+	local specID = addon.Utilities:GetPlayerSpecID()
 
 	for index = 1, #buffOverlaySettings.overlayKeys do
 		local overlayKey = buffOverlaySettings.overlayKeys[index]

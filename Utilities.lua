@@ -88,3 +88,17 @@ function Utilities:GetUnitClassColor(unit, fallbackColor)
 
 	return classColor.r or fr, classColor.g or fg, classColor.b or fb, fa
 end
+
+function Utilities:GetPlayerClassFileName()
+	local _, classFileName = UnitClass("player")
+	return classFileName
+end
+
+function Utilities:GetPlayerSpecID()
+	local specIndex = GetSpecialization and GetSpecialization()
+	if not specIndex then
+		return nil
+	end
+
+	return select(1, GetSpecializationInfo(specIndex))
+end

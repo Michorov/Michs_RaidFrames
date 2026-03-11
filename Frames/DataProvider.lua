@@ -26,24 +26,10 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
-local function GetPlayerClassFileName()
-	local _, classFileName = UnitClass("player")
-	return classFileName
-end
-
-local function GetPlayerSpecID()
-	local specIndex = GetSpecialization and GetSpecialization()
-	if not specIndex then
-		return nil
-	end
-
-	return select(1, GetSpecializationInfo(specIndex))
-end
-
 local function BuildCustomHelpfulTestAuras()
 	local defaults = addon.Database:GetCustomAuraDefaults()
-	local classFileName = GetPlayerClassFileName()
-	local specID = GetPlayerSpecID()
+	local classFileName = addon.Utilities:GetPlayerClassFileName()
+	local specID = addon.Utilities:GetPlayerSpecID()
 
 	local specAuras = defaults
 		and classFileName
