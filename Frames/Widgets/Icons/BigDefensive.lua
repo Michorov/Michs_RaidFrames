@@ -147,11 +147,6 @@ function BigDefensive:UpdateState(frame, settings)
 	local shown = 0
 	local icon = container.icons[1]
 
-	if not provider or type(provider.GetAuraDataByAuraInstanceID) ~= "function" then
-		container:Hide()
-		return
-	end
-
 	local auraInstanceID = nil
 	if unit then
 		auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
@@ -165,20 +160,14 @@ function BigDefensive:UpdateState(frame, settings)
 		if icon.countText then
 			icon.countText:SetText("")
 			if bigDefensiveSettings.showStacks then
-				local stackText = nil
-				if type(provider.GetAuraApplicationDisplayCount) == "function" then
-					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
-				end
+				local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 				if stackText then
 					icon.countText:SetText(stackText)
 				end
 			end
 		end
 
-		local hasExpiration = false
-		if type(provider.DoesAuraHaveExpirationTime) == "function" then
-			hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
-		end
+		local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
 		if icon.cooldown then
 			if icon.cooldown.SetCooldownFromExpirationTime then
