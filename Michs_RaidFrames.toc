@@ -28,6 +28,7 @@ Frames/Widgets/Texts/StatusText.lua
 
 # Widgets Indicators
 Frames/Widgets/Indicators/ReadyCheck.lua
+Frames/Widgets/Indicators/PendingSummon.lua
 Frames/Widgets/Indicators/Dispels.lua
 
 # Widgets Icons
