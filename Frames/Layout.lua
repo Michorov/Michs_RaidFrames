@@ -17,7 +17,7 @@ local function BuildOrderedPartyFrames(group)
 
 	for _, frame in ipairs(group.frames) do
 		local provider = frame and frame.dataProvider
-		local role = provider and type(provider.GetRole) == "function" and provider:GetRole(frame) or nil
+		local role = provider:GetRole(frame)
 
 		if role == "TANK" then
 			table.insert(tanks, frame)

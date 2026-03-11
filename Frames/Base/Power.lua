@@ -129,11 +129,7 @@ function Power:UpdateSettings(frame, settings)
 
 	local provider = frame and frame.dataProvider
 	if showBar and powerSettings.healerOnly then
-		if provider and type(provider.IsHealer) == "function" then
-			showBar = provider:IsHealer(frame)
-		else
-			showBar = false
-		end
+		showBar = provider:IsHealer(frame)
 	end
 
 	if showBar then
@@ -151,13 +147,11 @@ function Power:UpdateState(frame, settings)
 
 	local powerSettings = GetPowerSettings(settings)
 	if not powerSettings.enabled then
+		powerBar:Hide()
 		return
 	end
 
 	local provider = frame and frame.dataProvider
-	if not provider or type(provider.GetPower) ~= "function" then
-		return
-	end
 
 	local current, max, powerToken = provider:GetPower(frame)
 	if current == nil or max == nil or powerToken == nil then

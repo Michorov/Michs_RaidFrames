@@ -12,9 +12,7 @@ local function GetHealthColor(frame, settings)
 
 	if health.classColor then
 		local provider = frame and frame.dataProvider
-		if provider and type(provider.GetClassColor) == "function" then
-			return provider:GetClassColor(frame, color)
-		end
+		return provider:GetClassColor(frame, color)
 	end
 
 	return color.r or 0.10, color.g or 0.80, color.b or 0.10, color.a or 1.0
@@ -63,9 +61,6 @@ function Health:UpdateState(frame, settings)
 	end
 
 	local provider = frame.dataProvider
-	if not provider or type(provider.GetHealth) ~= "function" then
-		return
-	end
 
 	local current, max = provider:GetHealth(frame)
 
