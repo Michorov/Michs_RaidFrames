@@ -8,8 +8,9 @@ addon.Frames.Widgets.Icons.PrivateAuras = addon.Frames.Widgets.Icons.PrivateAura
 local PrivateAuras = addon.Frames.Widgets.Icons.PrivateAuras
 
 local function GetPrivateAurasSettings(settings)
-	local privateAuras = settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.privateAuras
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local privateAuras = icons.privateAuras or {}
 
 	return {
 		anchor = privateAuras.anchor or "LEFT",

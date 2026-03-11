@@ -10,11 +10,9 @@ local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
 local READY_CHECK_HOLD = 5
 
 local function GetReadyCheckSettings(settings)
-	local readyCheck = settings
-			and settings.widgets
-			and settings.widgets.indicators
-			and settings.widgets.indicators.readyCheck
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local indicators = widgets.indicators or {}
+	local readyCheck = indicators.readyCheck or {}
 	local textures = readyCheck.textures or {}
 
 	return {
@@ -24,20 +22,21 @@ local function GetReadyCheckSettings(settings)
 		relativeAnchor = readyCheck.relativeAnchor or "CENTER",
 		offsetXPx = addon.Utilities:ToPixels(readyCheck.offsetX or 0),
 		offsetYPx = addon.Utilities:ToPixels(readyCheck.offsetY or 0),
-		textures = textures,
+		readyTexture = textures.ready or "Interface\\RaidFrame\\ReadyCheck-Ready",
+		notReadyTexture = textures.notReady or "Interface\\RaidFrame\\ReadyCheck-NotReady",
+		waitingTexture = textures.waiting or "Interface\\RaidFrame\\ReadyCheck-Waiting",
 	}
 end
 
-local function GetTextureForStatus(status, rcSettings)
-	local textures = (rcSettings and rcSettings.textures) or {}
+local function GetTextureForStatus(status, settings)
 	if status == "ready" then
-		return textures.ready or "Interface\\RaidFrame\\ReadyCheck-Ready"
+		return settings.readyTexture
 	end
 	if status == "notready" then
-		return textures.notReady or "Interface\\RaidFrame\\ReadyCheck-NotReady"
+		return settings.notReadyTexture
 	end
 	if status == "waiting" then
-		return textures.waiting or "Interface\\RaidFrame\\ReadyCheck-Waiting"
+		return settings.waitingTexture
 	end
 	return nil
 end

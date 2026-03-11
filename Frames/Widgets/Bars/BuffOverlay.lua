@@ -8,7 +8,8 @@ addon.Frames.Widgets.Bars.BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay or
 local BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay
 
 local function GetBuffOverlaySettings(settings)
-	local bars = settings and settings.widgets and settings.widgets.bars or {}
+	local widgets = (settings and settings.widgets) or {}
+	local bars = widgets.bars or {}
 	local buffOverlays = bars.buffOverlays or {}
 	local normalized = {
 		overlayKeys = {},
@@ -62,7 +63,7 @@ local function UnitHasPlayerBuffBySpellID(unit, spellId)
 			matchesSpell = aura.spellId == spellId
 		end)
 
-		if ok and matchesSpell and aura.sourceUnit == "player" then
+		if ok and matchesSpell and aura.isFromPlayerOrPlayerPet then
 			return true
 		end
 	end
@@ -120,15 +121,12 @@ function BuffOverlay:UpdateSettings(frame, settings)
 	end
 
 	local buffOverlaySettings = GetBuffOverlaySettings(settings)
-	local specID = addon.Utilities:GetPlayerSpecID()
 
 	for index = 1, #buffOverlaySettings.overlayKeys do
 		local overlayKey = buffOverlaySettings.overlayKeys[index]
 		local overlay = buffOverlays[overlayKey]
-		local overlaySettings = buffOverlaySettings[overlayKey]
 
 		if overlay then
-			local specSettings = overlaySettings and overlaySettings.bySpec and overlaySettings.bySpec[specID] or nil
 			overlay:SetFrameLevel(healthBar:GetFrameLevel() + index)
 			overlay:ClearAllPoints()
 			overlay:SetPoint("TOPLEFT", healthTexture, "TOPLEFT", 0, 0)

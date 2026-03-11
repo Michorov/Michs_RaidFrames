@@ -18,11 +18,9 @@ local ATLAS_BY_TYPE = {
 }
 
 local function GetDispelsSettings(settings)
-	local dispels = settings
-			and settings.widgets
-			and settings.widgets.indicators
-			and settings.widgets.indicators.dispels
-		or {}
+	local widgets = (settings and settings.widgets) or {}
+	local indicators = widgets.indicators or {}
+	local dispels = indicators.dispels or {}
 
 	return {
 		anchor = dispels.anchor or "TOPRIGHT",

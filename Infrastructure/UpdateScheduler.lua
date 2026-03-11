@@ -8,9 +8,9 @@ local updateReasons = {
 	units = {},
 }
 
-local flushScheduled = false
-local flushCallback = nil
+local flushCallback
 local initialized = false
+local flushScheduled = false
 
 local function ScheduleFlush()
 	if flushCallback == nil then

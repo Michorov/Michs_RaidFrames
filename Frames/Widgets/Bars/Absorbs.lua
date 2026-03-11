@@ -8,7 +8,9 @@ addon.Frames.Widgets.Bars.Absorbs = addon.Frames.Widgets.Bars.Absorbs or {}
 local Absorbs = addon.Frames.Widgets.Bars.Absorbs
 
 local function GetAbsorbSettings(settings)
-	local absorbs = settings and settings.widgets and settings.widgets.bars and settings.widgets.bars.absorbs or {}
+	local widgets = (settings and settings.widgets) or {}
+	local bars = widgets.bars or {}
+	local absorbs = bars.absorbs or {}
 	local color = absorbs.color or {}
 
 	return {
