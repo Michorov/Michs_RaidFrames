@@ -300,12 +300,14 @@ local function GetCustomBuffListOptions(layoutKey)
 
 	local specEntries = {}
 	for specID, specAuras in pairs(classAuras) do
-		local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
-		table.insert(specEntries, {
-			specID = specID,
-			name = specName,
-			auras = specAuras,
-		})
+		if specID ~= -1 then
+			local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
+			table.insert(specEntries, {
+				specID = specID,
+				name = specName,
+				auras = specAuras,
+			})
+		end
 	end
 
 	table.sort(specEntries, function(a, b)
@@ -404,12 +406,14 @@ local function GetBuffOverlayOptions(layoutKey)
 
 	local specEntries = {}
 	for specID, specAuras in pairs(classAuras) do
-		local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
-		table.insert(specEntries, {
-			specID = specID,
-			name = specName,
-			auras = specAuras,
-		})
+		if specID ~= -1 then
+			local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
+			table.insert(specEntries, {
+				specID = specID,
+				name = specName,
+				auras = specAuras,
+			})
+		end
 	end
 
 	table.sort(specEntries, function(a, b)

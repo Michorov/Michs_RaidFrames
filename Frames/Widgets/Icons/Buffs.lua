@@ -25,7 +25,7 @@ local function GetCustomBuffFilterEntry(settings, aura)
 	local buffs = settings.widgets and settings.widgets.icons and settings.widgets.icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
-	local specAuras = classAuras[addon.Utilities:GetPlayerSpecID() or 0] or {}
+	local specAuras = classAuras[specID] or classAuras[-1] or {}
 
 	local ok, customBuff = pcall(function()
 		return specAuras[aura.spellId]
@@ -242,16 +242,14 @@ function Buffs:UpdateState(frame, settings)
 				if icon.countText then
 					icon.countText:SetText("")
 					if buffSettings.showStacks then
-						local stackText = nil
-						stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+						local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 						if stackText then
 							icon.countText:SetText(stackText)
 						end
 					end
 				end
 
-				local hasExpiration = false
-				hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
+				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
 				if icon.cooldown then
 					if icon.cooldown.SetCooldownFromExpirationTime then

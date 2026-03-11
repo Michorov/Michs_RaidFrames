@@ -178,17 +178,6 @@ function Debuffs:UpdateState(frame, settings)
 	local maxScan = isTestProvider and (maxIcons * 10) or math.huge
 
 	while shown < maxIcons and auraIndex <= maxScan do
-		if not provider or type(provider.GetAuraDataByIndex) ~= "function" then
-			for i = 1, debuffSettings.maxIcons do
-				local icon = container.icons[i]
-				if icon then
-					icon:Hide()
-				end
-			end
-			container:SetShown(false)
-			return
-		end
-
 		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
 		if not aura then
 			break
@@ -214,20 +203,14 @@ function Debuffs:UpdateState(frame, settings)
 				if icon.countText then
 					icon.countText:SetText("")
 					if debuffSettings.showStacks then
-						local stackText = nil
-						if provider and type(provider.GetAuraApplicationDisplayCount) == "function" then
-							stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
-						end
+						local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 						if stackText then
 							icon.countText:SetText(stackText)
 						end
 					end
 				end
 
-				local hasExpiration = false
-				if provider and type(provider.DoesAuraHaveExpirationTime) == "function" then
-					hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
-				end
+				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
 				if icon.cooldown then
 					if icon.cooldown.SetCooldownFromExpirationTime then
