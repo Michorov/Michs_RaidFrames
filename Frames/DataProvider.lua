@@ -473,6 +473,10 @@ function DataProvider.Live:GetRole(frame)
 	return nil
 end
 
+function DataProvider.Test:GetRole(frame)
+	return nil
+end
+
 function DataProvider.Live:GetAuraDataByIndex(frame, auraIndex, filter)
 	local unit = frame and frame.unit
 	if type(unit) ~= "string" or unit == "" then
