@@ -1,0 +1,181 @@
+local _, addon = ...
+
+addon.Frames = addon.Frames or {}
+addon.Frames.Managers = addon.Frames.Managers or {}
+addon.Frames.Managers.IconManager = addon.Frames.Managers.IconManager or {}
+
+local IconManager = addon.Frames.Managers.IconManager
+
+local function ToSuffixFromKey(key)
+	return (key:gsub("^%l", string.upper))
+end
+
+function IconManager:CreateContainer(frame, key, frameLevelDelta)
+	if not frame or not key then
+		return nil
+	end
+
+	if frame[key] then
+		return frame[key]
+	end
+
+	local widgetsOverlay = frame.widgetsOverlay
+	if not widgetsOverlay then
+		return nil
+	end
+
+	local frameName
+	if frame.GetName and frame:GetName() then
+		frameName = frame:GetName() .. "_" .. ToSuffixFromKey(key)
+	end
+
+	local container = CreateFrame("Frame", frameName, widgetsOverlay)
+	container:SetFrameStrata(widgetsOverlay:GetFrameStrata())
+	container:SetFrameLevel(widgetsOverlay:GetFrameLevel() + (frameLevelDelta or 15))
+	container.icons = container.icons or {}
+
+	return container
+end
+
+function IconManager:CreateIcon(container, iconFrameLevelDelta)
+	if not container then
+		return nil
+	end
+
+	local icon = CreateFrame("Frame", nil, container)
+	icon:EnableMouse(false)
+	icon:SetFrameStrata(container:GetFrameStrata())
+	icon:SetFrameLevel(container:GetFrameLevel() + (iconFrameLevelDelta or 1))
+
+	icon.texture = icon:CreateTexture(nil, "ARTWORK")
+	icon.texture:SetAllPoints(icon)
+	icon.texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+	icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+	icon.cooldown:SetAllPoints(icon)
+	icon.cooldown:SetReverse(true)
+	icon.cooldown:SetHideCountdownNumbers(true)
+	icon.cooldown:SetFrameStrata(container:GetFrameStrata())
+	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
+
+	icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
+	icon.border:SetAllPoints(icon)
+	icon.border:SetFrameStrata(container:GetFrameStrata())
+	icon.border:SetFrameLevel(icon:GetFrameLevel() + 3)
+
+	icon.textLayer = CreateFrame("Frame", nil, icon)
+	icon.textLayer:SetAllPoints(icon)
+	icon.textLayer:SetFrameStrata(container:GetFrameStrata())
+	icon.textLayer:SetFrameLevel(icon:GetFrameLevel() + 20)
+
+	icon.countText = icon:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+	icon.countText:SetText("")
+	icon.countText:SetParent(icon.textLayer)
+	icon.countText:SetDrawLayer("OVERLAY", 7)
+
+	icon:Hide()
+	return icon
+end
+
+local function ApplyTextureInsets(icon, settings)
+	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+
+	icon.texture:ClearAllPoints()
+	icon.texture:SetPoint(
+		"TOPLEFT",
+		icon,
+		"TOPLEFT",
+		addon.Utilities:ToUI(scaledBorderSizePx),
+		-addon.Utilities:ToUI(scaledBorderSizePx)
+	)
+	icon.texture:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderSizePx),
+		addon.Utilities:ToUI(scaledBorderSizePx)
+	)
+end
+
+function IconManager:ApplyIconSizeSettings(icon, settings)
+	local scaledIconSizePx = addon.Utilities:Scale(settings.iconSizePx)
+	icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
+end
+
+function IconManager:ApplyEvenIconSizeSettings(icon, settings)
+	local scaledIconSizePx = addon.Utilities:ScaleEven(settings.iconSizePx)
+	icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
+end
+
+function IconManager:ApplyBorderSettings(icon, settings)
+	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+
+	ApplyTextureInsets(icon, settings)
+
+	icon.border:SetBackdrop({
+		edgeFile = "Interface\\Buttons\\WHITE8x8",
+		edgeSize = addon.Utilities:ToUI(scaledBorderSizePx),
+	})
+	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
+end
+
+function IconManager:ApplyCountSettings(icon, settings)
+	local scaledFontSize = addon.Utilities:ScaleFont(settings.stacksFontSize)
+	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+
+	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", scaledFontSize, "OUTLINE")
+	icon.countText:ClearAllPoints()
+	icon.countText:SetTextColor(1, 1, 1, 1)
+	icon.countText:SetShown(settings.showStacks)
+	icon.countText:SetPoint(
+		"BOTTOMRIGHT",
+		icon,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(scaledBorderSizePx - 2),
+		addon.Utilities:ToUI(scaledBorderSizePx - 2)
+	)
+end
+
+function IconManager:ApplyCooldownSettings(icon, settings)
+	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
+		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown)
+	end
+	if settings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
+		local scaledSize = addon.Utilities:ScaleFont(settings.cooldownFontSize)
+		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
+		local cooldownFont = _G[fontName]
+		if not cooldownFont then
+			cooldownFont = CreateFont(fontName)
+		end
+		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		icon.cooldown:SetCountdownFont(fontName)
+	end
+end
+
+function IconManager:ApplyIconState(icon, state)
+	if not icon then
+		return
+	end
+
+	if icon.texture then
+		icon.texture:SetTexture(state.texture)
+	end
+
+	if icon.countText then
+		icon.countText:SetText(state.countText or "")
+	end
+
+	if icon.cooldown then
+		if icon.cooldown.SetCooldownFromExpirationTime then
+			pcall(icon.cooldown.SetCooldownFromExpirationTime, icon.cooldown, state.expirationTime, state.duration)
+		end
+
+		if icon.cooldown.SetShownFromBoolean then
+			icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
+		else
+			icon.cooldown:Show()
+		end
+	end
+
+	icon:Show()
+end

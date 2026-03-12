@@ -19,6 +19,9 @@ Database.lua
 AuraHandler.lua
 Modules.lua
 
+# Frame Managers
+Frames/Managers/IconManager.lua
+
 # Widgets
 Frames/Widgets/WidgetsOverlay.lua
 
@@ -32,8 +35,6 @@ Frames/Widgets/Indicators/PendingSummon.lua
 Frames/Widgets/Indicators/Dispels.lua
 
 # Widgets Icons
-Frames/Widgets/Icons/Factory.lua
-
 Frames/Widgets/Icons/Buffs.lua
 Frames/Widgets/Icons/Debuffs.lua
 Frames/Widgets/Icons/BigDefensive.lua

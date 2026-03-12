@@ -29,61 +29,6 @@ local function GetDebuffSettings(settings)
 	}
 end
 
-local function UpdateIconSettings(icon, debuffSettings)
-	local scaledIconPx = addon.Utilities:Scale(debuffSettings.iconSizePx)
-	local scaledBorderPx = math.max(1, addon.Utilities:Scale(debuffSettings.borderSizePx))
-
-	icon:SetSize(addon.Utilities:ToUI(scaledIconPx), addon.Utilities:ToUI(scaledIconPx))
-
-	icon.texture:ClearAllPoints()
-	icon.texture:SetPoint(
-		"TOPLEFT",
-		icon,
-		"TOPLEFT",
-		addon.Utilities:ToUI(scaledBorderPx),
-		-addon.Utilities:ToUI(scaledBorderPx)
-	)
-	icon.texture:SetPoint(
-		"BOTTOMRIGHT",
-		icon,
-		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx),
-		addon.Utilities:ToUI(scaledBorderPx)
-	)
-
-	icon.border:SetBackdrop({
-		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:ToUI(scaledBorderPx),
-	})
-	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
-
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(debuffSettings.stacksFontSize), "OUTLINE")
-	icon.countText:ClearAllPoints()
-	icon.countText:SetTextColor(1, 1, 1, 1)
-	icon.countText:SetShown(debuffSettings.showStacks)
-	icon.countText:SetPoint(
-		"BOTTOMRIGHT",
-		icon,
-		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx - 2),
-		addon.Utilities:ToUI(scaledBorderPx - 2)
-	)
-
-	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
-		icon.cooldown:SetHideCountdownNumbers(not debuffSettings.showCooldown)
-	end
-	if debuffSettings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
-		local scaledSize = addon.Utilities:ScaleFont(debuffSettings.cooldownFontSize)
-		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
-		local cooldownFont = _G[fontName]
-		if not cooldownFont then
-			cooldownFont = CreateFont(fontName)
-		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
-		icon.cooldown:SetCountdownFont(fontName)
-	end
-end
-
 function Debuffs:UpdateSettings(frame, settings)
 	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
@@ -116,11 +61,14 @@ function Debuffs:UpdateSettings(frame, settings)
 	for i = 1, debuffSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
-			icon = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
+			icon = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 			container.icons[i] = icon
 		end
 
-		UpdateIconSettings(icon, debuffSettings)
+		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, debuffSettings)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, debuffSettings)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, debuffSettings)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, debuffSettings)
 
 		local idx = i - 1
 		local col = idx % debuffSettings.iconsPerRow
@@ -200,38 +148,20 @@ function Debuffs:UpdateState(frame, settings)
 			if icon and icon.texture then
 				shown = shown + 1
 
-				icon.texture:SetTexture(aura.icon)
-
-				if icon.countText then
-					icon.countText:SetText("")
-					if debuffSettings.showStacks then
-						local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
-						if stackText then
-							icon.countText:SetText(stackText)
-						end
-					end
+				local stackText
+				if debuffSettings.showStacks then
+					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 				end
 
 				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
-				if icon.cooldown then
-					if icon.cooldown.SetCooldownFromExpirationTime then
-						pcall(
-							icon.cooldown.SetCooldownFromExpirationTime,
-							icon.cooldown,
-							aura.expirationTime,
-							aura.duration
-						)
-					end
-
-					if icon.cooldown.SetShownFromBoolean then
-						icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
-					else
-						icon.cooldown:Show()
-					end
-				end
-
-				icon:Show()
+				addon.Frames.Managers.IconManager:ApplyIconState(icon, {
+					texture = aura.icon,
+					countText = stackText,
+					expirationTime = aura.expirationTime,
+					duration = aura.duration,
+					hasExpiration = hasExpiration,
+				})
 			end
 		end
 	end
@@ -258,14 +188,14 @@ function Debuffs:Ensure(frame, settings)
 	end
 
 	if not frame.debuffsContainer then
-		frame.debuffsContainer = addon.Frames.Widgets.Icons.Factory:CreateContainer(frame, "debuffsContainer")
+		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer")
 	end
 
 	local container = frame.debuffsContainer
 
 	for i = 1, debuffSettings.maxIcons do
 		if not container.icons[i] then
-			container.icons[i] = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
+			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end
 	end
 end

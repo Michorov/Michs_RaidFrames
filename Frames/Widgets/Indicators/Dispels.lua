@@ -47,7 +47,7 @@ function Dispels:Ensure(frame)
 	end
 
 	if not frame.dispelsContainer then
-		frame.dispelsContainer = addon.Frames.Widgets.Icons.Factory:CreateContainer(frame, "dispelsContainer")
+		frame.dispelsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "dispelsContainer")
 	end
 
 	local container = frame.dispelsContainer
