@@ -132,7 +132,7 @@ function PrivateAuras:Ensure(frame, settings)
 	end
 
 	if not frame.privateAurasContainer then
-		frame.privateAurasContainer = addon.Frames.Widgets.Icons.Factory:CreateContainer(frame, "privateAurasContainer")
+		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer")
 	end
 end
 

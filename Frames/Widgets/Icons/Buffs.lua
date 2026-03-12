@@ -65,60 +65,6 @@ local function GetBuffSettings(settings)
 	}
 end
 
-local function UpdateIconSettings(icon, buffSettings)
-	local scaledIconPx = addon.Utilities:Scale(buffSettings.iconSizePx)
-	local scaledBorderPx = math.max(1, addon.Utilities:Scale(buffSettings.borderSizePx))
-	icon:SetSize(addon.Utilities:ToUI(scaledIconPx), addon.Utilities:ToUI(scaledIconPx))
-
-	icon.texture:ClearAllPoints()
-	icon.texture:SetPoint(
-		"TOPLEFT",
-		icon,
-		"TOPLEFT",
-		addon.Utilities:ToUI(scaledBorderPx),
-		-addon.Utilities:ToUI(scaledBorderPx)
-	)
-	icon.texture:SetPoint(
-		"BOTTOMRIGHT",
-		icon,
-		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx),
-		addon.Utilities:ToUI(scaledBorderPx)
-	)
-
-	icon.border:SetBackdrop({
-		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:ToUI(scaledBorderPx),
-	})
-	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
-
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(buffSettings.stacksFontSize), "OUTLINE")
-	icon.countText:ClearAllPoints()
-	icon.countText:SetTextColor(1, 1, 1, 1)
-	icon.countText:SetShown(buffSettings.showStacks)
-	icon.countText:SetPoint(
-		"BOTTOMRIGHT",
-		icon,
-		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderPx - 2),
-		addon.Utilities:ToUI(scaledBorderPx - 2)
-	)
-
-	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
-		icon.cooldown:SetHideCountdownNumbers(not buffSettings.showCooldown)
-	end
-	if buffSettings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
-		local scaledSize = addon.Utilities:ScaleFont(buffSettings.cooldownFontSize)
-		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
-		local cooldownFont = _G[fontName]
-		if not cooldownFont then
-			cooldownFont = CreateFont(fontName)
-		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
-		icon.cooldown:SetCountdownFont(fontName)
-	end
-end
-
 function Buffs:UpdateSettings(frame, settings)
 	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
@@ -150,11 +96,14 @@ function Buffs:UpdateSettings(frame, settings)
 	for i = 1, buffSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
-			icon = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
+			icon = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 			container.icons[i] = icon
 		end
 
-		UpdateIconSettings(icon, buffSettings)
+		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, buffSettings)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, buffSettings)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, buffSettings)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, buffSettings)
 
 		local idx = i - 1
 		local col = idx % buffSettings.iconsPerRow
@@ -242,38 +191,20 @@ function Buffs:UpdateState(frame, settings)
 			if icon and icon.texture then
 				shown = shown + 1
 
-				icon.texture:SetTexture(aura.icon)
-
-				if icon.countText then
-					icon.countText:SetText("")
-					if buffSettings.showStacks then
-						local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
-						if stackText then
-							icon.countText:SetText(stackText)
-						end
-					end
+				local stackText
+				if buffSettings.showStacks then
+					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 				end
 
 				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 
-				if icon.cooldown then
-					if icon.cooldown.SetCooldownFromExpirationTime then
-						pcall(
-							icon.cooldown.SetCooldownFromExpirationTime,
-							icon.cooldown,
-							aura.expirationTime,
-							aura.duration
-						)
-					end
-
-					if icon.cooldown.SetShownFromBoolean then
-						icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
-					else
-						icon.cooldown:Show()
-					end
-				end
-
-				icon:Show()
+				addon.Frames.Managers.IconManager:ApplyIconState(icon, {
+					texture = aura.icon,
+					countText = stackText,
+					expirationTime = aura.expirationTime,
+					duration = aura.duration,
+					hasExpiration = hasExpiration,
+				})
 			end
 		end
 	end
@@ -295,14 +226,14 @@ function Buffs:Ensure(frame, settings)
 	end
 
 	if not frame.buffsContainer then
-		frame.buffsContainer = addon.Frames.Widgets.Icons.Factory:CreateContainer(frame, "buffsContainer")
+		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
 	end
 
 	local container = frame.buffsContainer
 
 	for i = 1, buffSettings.maxIcons do
 		if not container.icons[i] then
-			container.icons[i] = addon.Frames.Widgets.Icons.Factory:CreateIcon(container, 1)
+			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end
 	end
 end
