@@ -93,17 +93,17 @@ local function IsRaidPartyCompactUnit(frame)
 	return unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$")
 end
 
-local function SafeHide(obj)
-	if obj and obj.Hide then
-		pcall(function()
-			obj:Hide()
-		end)
-	end
-end
-
 local function HideCompactVisualOverlays(frame)
 	if not frame or not IsRaidPartyCompactUnit(frame) then
 		return
+	end
+
+	local function SafeHide(obj)
+		if obj and obj.Hide then
+			pcall(function()
+				obj:Hide()
+			end)
+		end
 	end
 
 	SafeHide(frame.selectionHighlight)
