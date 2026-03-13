@@ -304,6 +304,7 @@ local DEFAULTS = {
 						borderSizePx = 1,
 					},
 					debuffs = {
+						enabled = true,
 						anchor = "BOTTOMLEFT",
 						relativeAnchor = "BOTTOMLEFT",
 						offsetX = 2,
@@ -321,6 +322,7 @@ local DEFAULTS = {
 						cooldownFontSize = 10,
 
 						borderSizePx = 1,
+						borderColorByDebuffType = false,
 					},
 					privateAuras = {
 						anchor = "LEFT",
@@ -522,6 +524,7 @@ local DEFAULTS = {
 						borderSizePx = 1,
 					},
 					debuffs = {
+						enabled = true,
 						anchor = "BOTTOMLEFT",
 						relativeAnchor = "BOTTOMLEFT",
 						offsetX = 2,
@@ -539,6 +542,7 @@ local DEFAULTS = {
 						cooldownFontSize = 10,
 
 						borderSizePx = 1,
+						borderColorByDebuffType = false,
 					},
 					privateAuras = {
 						anchor = "LEFT",

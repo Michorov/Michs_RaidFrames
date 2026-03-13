@@ -7,16 +7,6 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
-local function HideIcons(container, maxIcons)
-	for i = 1, maxIcons do
-		local icon = container.icons[i]
-		if icon then
-			icon:Hide()
-		end
-	end
-	container:SetShown(false)
-end
-
 local function GetCustomBuffFilterEntry(settings, aura)
 	if not settings or not aura then
 		return nil
@@ -135,13 +125,13 @@ function Buffs:UpdateState(frame, settings)
 	local provider = frame and frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
-	if not isTestProvider and (not unit or not UnitExists(unit)) then
-		container:Hide()
+	if not buffSettings.enabled then
+		addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
 		return
 	end
 
-	if not buffSettings.enabled then
-		HideIcons(container, buffSettings.maxIcons)
+	if not isTestProvider and (not unit or not UnitExists(unit)) then
+		container:Hide()
 		return
 	end
 
@@ -150,7 +140,7 @@ function Buffs:UpdateState(frame, settings)
 		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
 		approved = bucket and bucket.buffs
 		if not approved or not next(approved) then
-			HideIcons(container, buffSettings.maxIcons)
+			addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
 			return
 		end
 	end
