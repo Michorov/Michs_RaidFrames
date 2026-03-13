@@ -7,12 +7,67 @@ addon.Frames.Widgets.Icons.Debuffs = addon.Frames.Widgets.Icons.Debuffs or {}
 
 local Debuffs = addon.Frames.Widgets.Icons.Debuffs
 
+local issecretvalue = issecretvalue
+
+local DEBUFF_BLACKLIST = {
+	[57723] = true, -- Exhaustion
+	[57724] = true, -- Sated
+	[80354] = true, -- Temporal Displacement
+	[95809] = true, -- Hunter Pet Insanity
+	[160455] = true, -- Hunter Pet Fatigued
+	[264689] = true, -- Hunter Pet Fatigued
+	[390435] = true, -- Exhaustion
+
+	[26013] = true, -- BG Deserter
+	[71041] = true, -- Dungeon Deserter
+
+	[427490] = true, -- Ride Along Available
+	[447959] = true, -- Ride Along Active
+	[447960] = true, -- Ride Along Inactive
+}
+
+local DISPEL_CURVE_DEFAULTS = {
+	None = { 0, DEBUFF_TYPE_NONE_COLOR },
+	Magic = { 1, DEBUFF_TYPE_MAGIC_COLOR },
+	Curse = { 2, DEBUFF_TYPE_CURSE_COLOR },
+	Disease = { 3, DEBUFF_TYPE_DISEASE_COLOR },
+	Poison = { 4, DEBUFF_TYPE_POISON_COLOR },
+	Enrage = { 9, DEBUFF_TYPE_BLEED_COLOR },
+	Bleed = { 11, DEBUFF_TYPE_BLEED_COLOR },
+}
+
+local dispelCurve = C_CurveUtil.CreateColorCurve()
+dispelCurve:SetType(Enum.LuaCurveType.Step)
+
+for _, data in pairs(DISPEL_CURVE_DEFAULTS) do
+	dispelCurve:AddPoint(data[1], data[2])
+end
+
+local function IsBlacklistedAura(aura)
+	if not aura then
+		return false
+	end
+
+	local spellId = aura.spellId
+	if spellId == nil then
+		return false
+	end
+
+	if issecretvalue and issecretvalue(spellId) then
+		return false
+	end
+
+	return DEBUFF_BLACKLIST[spellId] == true
+end
+
 local function GetDebuffSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local debuffs = icons.debuffs or {}
 
 	return {
+		enabled = debuffs.enabled ~= false,
+		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		anchor = debuffs.anchor or "BOTTOMLEFT",
 		relativeAnchor = debuffs.relativeAnchor or "BOTTOMLEFT",
 		offsetXPx = addon.Utilities:ToPixels(debuffs.offsetX or 2),
@@ -97,55 +152,45 @@ function Debuffs:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
+	local unit = frame and frame.unit
 	local provider = frame and frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
+
+	if not debuffSettings.enabled then
+		addon.Frames.Managers.IconManager:HideIcons(container, debuffSettings.maxIcons)
+		return
+	end
 
 	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		container:Hide()
 		return
 	end
 
-	local approved
-	if not isTestProvider then
-		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
-		approved = bucket and bucket.debuffs
-		if not approved or not next(approved) then
-			for i = 1, debuffSettings.maxIcons do
-				local icon = container.icons[i]
-				if icon then
-					icon:Hide()
-				end
+	local shown = 0
+	local maxIcons = debuffSettings.maxIcons
+	local auras
+
+	if isTestProvider then
+		auras = {}
+		for auraIndex = 1, maxIcons * 10 do
+			local aura = provider:GetAuraDataByIndex(frame, auraIndex, "HARMFUL")
+			if not aura then
+				break
 			end
-			container:SetShown(false)
-			return
+			auras[#auras + 1] = aura
 		end
+	else
+		auras = C_UnitAuras.GetUnitAuras(unit, "HARMFUL") or {}
 	end
 
-	local maxIcons = debuffSettings.maxIcons
-	local shown, auraIndex = 0, 1
-	local filter = "HARMFUL"
-	local maxScan = isTestProvider and (maxIcons * 10) or math.huge
-
-	while shown < maxIcons and auraIndex <= maxScan do
-		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
-		if not aura then
+	for _, aura in ipairs(auras) do
+		if shown >= maxIcons then
 			break
 		end
-		auraIndex = auraIndex + 1
 
-		local auraInstanceID = aura.auraInstanceID
-		local shouldShowAura = false
-
-		if isTestProvider then
-			shouldShowAura = true
-		else
-			shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
-		end
-
-		if shouldShowAura and aura.icon then
+		if aura.icon and not IsBlacklistedAura(aura) then
 			local icon = container.icons[shown + 1]
-			if icon and icon.texture then
+			if icon then
 				shown = shown + 1
 
 				local stackText
@@ -162,6 +207,17 @@ function Debuffs:UpdateState(frame, settings)
 					duration = aura.duration,
 					hasExpiration = hasExpiration,
 				})
+
+				if debuffSettings.borderColorByDebuffType then
+					local color = provider:GetAuraDispelTypeColor(frame, aura, dispelCurve)
+					if color then
+						addon.Frames.Managers.IconManager:ApplyBorderColor(icon, color)
+					else
+						addon.Frames.Managers.IconManager:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
+					end
+				else
+					addon.Frames.Managers.IconManager:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
+				end
 			end
 		end
 	end

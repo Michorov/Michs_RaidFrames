@@ -37,6 +37,21 @@ function IconManager:CreateContainer(frame, key, frameLevelDelta)
 	return container
 end
 
+function IconManager:HideIcons(container, maxIcons)
+	if not container or not container.icons then
+		return
+	end
+
+	for i = 1, maxIcons do
+		local icon = container.icons[i]
+		if icon then
+			icon:Hide()
+		end
+	end
+
+	container:SetShown(false)
+end
+
 function IconManager:CreateIcon(container, iconFrameLevelDelta)
 	if not container then
 		return nil
@@ -107,6 +122,14 @@ function IconManager:ApplyEvenIconSizeSettings(icon, settings)
 	icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 end
 
+function IconManager:ApplyBorderColor(icon, color)
+	if not icon or not icon.border or not color then
+		return
+	end
+
+	icon.border:SetBackdropBorderColor(color.r, color.g, color.b, color.a or 1)
+end
+
 function IconManager:ApplyBorderSettings(icon, settings)
 	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
 
@@ -116,7 +139,8 @@ function IconManager:ApplyBorderSettings(icon, settings)
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
 		edgeSize = addon.Utilities:ToUI(scaledBorderSizePx),
 	})
-	icon.border:SetBackdropBorderColor(0, 0, 0, 1)
+
+	self:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
 end
 
 function IconManager:ApplyCountSettings(icon, settings)
@@ -171,7 +195,7 @@ function IconManager:ApplyIconState(icon, state)
 		end
 
 		if icon.cooldown.SetShownFromBoolean then
-			icon.cooldown:SetShownFromBoolean(hasExpiration, true, false)
+			icon.cooldown:SetShownFromBoolean(state.hasExpiration, true, false)
 		else
 			icon.cooldown:Show()
 		end

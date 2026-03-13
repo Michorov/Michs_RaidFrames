@@ -31,11 +31,8 @@ local function BuildCustomHelpfulTestAuras()
 	local classFileName = addon.Utilities:GetPlayerClassFileName()
 	local specID = addon.Utilities:GetPlayerSpecID()
 
-	local specAuras = defaults
-		and classFileName
-		and specID
-		and defaults[classFileName]
-		and defaults[classFileName][specID]
+	local classAuras = defaults and classFileName and defaults[classFileName]
+	local specAuras = classAuras and ((specID and classAuras[specID]) or classAuras[-1])
 
 	if type(specAuras) ~= "table" then
 		return {}
@@ -682,4 +679,36 @@ function DataProvider.Test:DoesAuraHaveExpirationTime(frame, aura)
 		and aura.duration > 0
 		and type(aura.expirationTime) == "number"
 		and aura.expirationTime > 0
+end
+
+function DataProvider.Live:GetAuraDispelTypeColor(frame, aura, curve)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return nil
+	end
+
+	if not C_UnitAuras.GetAuraDispelTypeColor then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraDispelTypeColor(unit, auraInstanceID, curve)
+end
+
+function DataProvider.Test:GetAuraDispelTypeColor(frame, aura, curve)
+	local dispelName = aura and aura.dispelName
+	if dispelName == "Magic" then
+		return DEBUFF_TYPE_MAGIC_COLOR
+	elseif dispelName == "Curse" then
+		return DEBUFF_TYPE_CURSE_COLOR
+	elseif dispelName == "Disease" then
+		return DEBUFF_TYPE_DISEASE_COLOR
+	elseif dispelName == "Poison" then
+		return DEBUFF_TYPE_POISON_COLOR
+	elseif dispelName == "Enrage" or dispelName == "Bleed" then
+		return DEBUFF_TYPE_BLEED_COLOR
+	end
+
+	return DEBUFF_TYPE_NONE_COLOR
 end

@@ -1464,7 +1464,7 @@ local options = {
 										iconSize = {
 											type = "range",
 											name = "Icon Size",
-											order = 3,
+											order = 4,
 											min = 8,
 											max = 64,
 											step = 1,
@@ -1479,7 +1479,7 @@ local options = {
 										spacing = {
 											type = "range",
 											name = "Spacing",
-											order = 4,
+											order = 3,
 											min = -10,
 											max = 20,
 											step = 1,
@@ -1711,13 +1711,36 @@ local options = {
 							name = "Debuffs",
 							order = 2,
 							args = {
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											width = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.enabled
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.enabled = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+									},
+								},
 								layout = {
 									type = "group",
 									name = "Layout",
 									inline = true,
 									order = 1,
 									disabled = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled ~= true
+										return addon.Database:GetProfile().party.widgets.icons.debuffs.enabled ~= true
 									end,
 									args = {
 										offsetX = {
@@ -1753,7 +1776,7 @@ local options = {
 										iconSize = {
 											type = "range",
 											name = "Icon Size",
-											order = 3,
+											order = 4,
 											min = 8,
 											max = 64,
 											step = 1,
@@ -1768,7 +1791,7 @@ local options = {
 										spacing = {
 											type = "range",
 											name = "Spacing",
-											order = 4,
+											order = 3,
 											min = -10,
 											max = 20,
 											step = 1,
@@ -1810,10 +1833,36 @@ local options = {
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
+									},
+								},
+								border = {
+									type = "group",
+									name = "Border",
+									inline = true,
+									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.debuffs.enabled ~= true
+									end,
+									args = {
+										borderColorByDebuffType = {
+											type = "toggle",
+											name = "Color By Debuff Type",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.debuffs.borderColorByDebuffType
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().party.widgets.icons.debuffs.borderColorByDebuffType =
+													v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
 										borderSizePx = {
 											type = "range",
 											name = "Border Size (px)",
-											order = 7,
+											order = 2,
 											min = 1,
 											max = 4,
 											step = 1,
@@ -1831,9 +1880,9 @@ local options = {
 									type = "group",
 									name = "Stacks",
 									inline = true,
-									order = 2,
+									order = 3,
 									disabled = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled == false
+										return addon.Database:GetProfile().party.widgets.icons.debuffs.enabled ~= true
 									end,
 									args = {
 										showStacks = {
@@ -1857,8 +1906,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showStacks
-													== false
+												local debuffs = addon.Database:GetProfile().party.widgets.icons.debuffs
+												return debuffs.enabled ~= true or debuffs.showStacks == false
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.debuffs.stacksFontSize
@@ -1875,9 +1924,9 @@ local options = {
 									type = "group",
 									name = "Duration",
 									inline = true,
-									order = 3,
+									order = 4,
 									disabled = function()
-										return addon.Database:GetProfile().party.widgets.icons.buffs.enabled == false
+										return addon.Database:GetProfile().party.widgets.icons.debuffs.enabled ~= true
 									end,
 									args = {
 										showCooldown = {
@@ -1901,8 +1950,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().party.widgets.icons.debuffs.showCooldown
-													~= true
+												local debuffs = addon.Database:GetProfile().party.widgets.icons.debuffs
+												return debuffs.enabled ~= true or debuffs.showCooldown ~= true
 											end,
 											get = function()
 												return addon.Database:GetProfile().party.widgets.icons.debuffs.cooldownFontSize
@@ -2157,7 +2206,7 @@ local options = {
 										iconSize = {
 											type = "range",
 											name = "Icon Size",
-											order = 3,
+											order = 4,
 											min = 8,
 											max = 64,
 											step = 1,
@@ -3725,7 +3774,7 @@ local options = {
 										spacing = {
 											type = "range",
 											name = "Spacing",
-											order = 4,
+											order = 3,
 											min = -10,
 											max = 20,
 											step = 1,
@@ -3964,11 +4013,37 @@ local options = {
 							name = "Debuffs",
 							order = 2,
 							args = {
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											width = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled = v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
+									},
+								},
 								layout = {
 									type = "group",
 									name = "Layout",
 									inline = true,
 									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled ~= true
+									end,
 									args = {
 										offsetX = {
 											type = "range",
@@ -4003,7 +4078,7 @@ local options = {
 										iconSize = {
 											type = "range",
 											name = "Icon Size",
-											order = 3,
+											order = 4,
 											min = 8,
 											max = 64,
 											step = 1,
@@ -4018,7 +4093,7 @@ local options = {
 										spacing = {
 											type = "range",
 											name = "Spacing",
-											order = 4,
+											order = 3,
 											min = -10,
 											max = 20,
 											step = 1,
@@ -4060,10 +4135,36 @@ local options = {
 												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
 											end,
 										},
+									},
+								},
+								border = {
+									type = "group",
+									name = "Border",
+									inline = true,
+									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled ~= true
+									end,
+									args = {
+										borderColorByDebuffType = {
+											type = "toggle",
+											name = "Color By Debuff Type",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.debuffs.borderColorByDebuffType
+													== true
+											end,
+											set = function(_, v)
+												addon.Database:GetProfile().raid.widgets.icons.debuffs.borderColorByDebuffType =
+													v
+												addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+												addon.UpdateScheduler:Notify("aurasStateChanged")
+											end,
+										},
 										borderSizePx = {
 											type = "range",
 											name = "Border Size (px)",
-											order = 7,
+											order = 2,
 											min = 1,
 											max = 4,
 											step = 1,
@@ -4081,7 +4182,10 @@ local options = {
 									type = "group",
 									name = "Stacks",
 									inline = true,
-									order = 2,
+									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled ~= true
+									end,
 									args = {
 										showStacks = {
 											type = "toggle",
@@ -4104,8 +4208,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showStacks
-													== false
+												local debuffs = addon.Database:GetProfile().raid.widgets.icons.debuffs
+												return debuffs.enabled ~= true or debuffs.showStacks == false
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.debuffs.stacksFontSize
@@ -4122,7 +4226,10 @@ local options = {
 									type = "group",
 									name = "Duration",
 									inline = true,
-									order = 3,
+									order = 4,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.debuffs.enabled ~= true
+									end,
 									args = {
 										showCooldown = {
 											type = "toggle",
@@ -4145,8 +4252,8 @@ local options = {
 											max = 32,
 											step = 1,
 											disabled = function()
-												return addon.Database:GetProfile().raid.widgets.icons.debuffs.showCooldown
-													~= true
+												local debuffs = addon.Database:GetProfile().raid.widgets.icons.debuffs
+												return debuffs.enabled ~= true or debuffs.showCooldown ~= true
 											end,
 											get = function()
 												return addon.Database:GetProfile().raid.widgets.icons.debuffs.cooldownFontSize
@@ -5110,7 +5217,7 @@ function addon:RegisterOptions()
 	options.args.raid.args.auras.args.buffOverlays.args = GetBuffOverlayOptions("raid")
 
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
-	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 740)
+	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 764)
 
 	if not addon.optionsSlashRegistered then
 		SLASH_MRF1 = "/mrf"
