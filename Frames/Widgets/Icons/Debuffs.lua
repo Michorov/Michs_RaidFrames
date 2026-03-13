@@ -84,6 +84,30 @@ local function GetDebuffSettings(settings)
 	}
 end
 
+function Debuffs:Ensure(frame, settings)
+	local debuffSettings = GetDebuffSettings(settings)
+	if not frame then
+		return
+	end
+
+	local widgetsOverlay = frame.widgetsOverlay
+	if not widgetsOverlay then
+		return
+	end
+
+	if not frame.debuffsContainer then
+		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer")
+	end
+
+	local container = frame.debuffsContainer
+
+	for i = 1, debuffSettings.maxIcons do
+		if not container.icons[i] then
+			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
+		end
+	end
+end
+
 function Debuffs:UpdateSettings(frame, settings)
 	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
@@ -230,30 +254,6 @@ function Debuffs:UpdateState(frame, settings)
 	end
 
 	container:SetShown(shown > 0)
-end
-
-function Debuffs:Ensure(frame, settings)
-	local debuffSettings = GetDebuffSettings(settings)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
-	if not frame.debuffsContainer then
-		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer")
-	end
-
-	local container = frame.debuffsContainer
-
-	for i = 1, debuffSettings.maxIcons do
-		if not container.icons[i] then
-			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
-		end
-	end
 end
 
 function Debuffs:Init()

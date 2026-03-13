@@ -27,6 +27,28 @@ local function GetBigDefensiveSettings(settings)
 	}
 end
 
+function BigDefensive:Ensure(frame, settings)
+	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
+	if not frame then
+		return
+	end
+
+	if not frame.bigDefensiveContainer then
+		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer")
+	end
+
+	local container = frame.bigDefensiveContainer
+	if not container then
+		return
+	end
+
+	for i = 1, bigDefensiveSettings.maxIcons do
+		if not container.icons[i] then
+			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 15)
+		end
+	end
+end
+
 function BigDefensive:UpdateSettings(frame, settings)
 	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	local container = frame and frame.bigDefensiveContainer
@@ -127,28 +149,6 @@ function BigDefensive:UpdateState(frame, settings)
 	end
 
 	container:SetShown(shown > 0)
-end
-
-function BigDefensive:Ensure(frame, settings)
-	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
-	if not frame then
-		return
-	end
-
-	if not frame.bigDefensiveContainer then
-		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer")
-	end
-
-	local container = frame.bigDefensiveContainer
-	if not container then
-		return
-	end
-
-	for i = 1, bigDefensiveSettings.maxIcons do
-		if not container.icons[i] then
-			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 15)
-		end
-	end
 end
 
 function BigDefensive:Init()

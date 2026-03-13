@@ -55,6 +55,25 @@ local function GetBuffSettings(settings)
 	}
 end
 
+function Buffs:Ensure(frame, settings)
+	local buffSettings = GetBuffSettings(settings)
+	if not frame then
+		return
+	end
+
+	if not frame.buffsContainer then
+		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
+	end
+
+	local container = frame.buffsContainer
+
+	for i = 1, buffSettings.maxIcons do
+		if not container.icons[i] then
+			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
+		end
+	end
+end
+
 function Buffs:UpdateSettings(frame, settings)
 	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
@@ -207,25 +226,6 @@ function Buffs:UpdateState(frame, settings)
 	end
 
 	container:SetShown(shown > 0)
-end
-
-function Buffs:Ensure(frame, settings)
-	local buffSettings = GetBuffSettings(settings)
-	if not frame then
-		return
-	end
-
-	if not frame.buffsContainer then
-		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
-	end
-
-	local container = frame.buffsContainer
-
-	for i = 1, buffSettings.maxIcons do
-		if not container.icons[i] then
-			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
-		end
-	end
 end
 
 function Buffs:Init()
