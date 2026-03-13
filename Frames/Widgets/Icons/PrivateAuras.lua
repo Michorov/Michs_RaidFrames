@@ -92,6 +92,21 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	container:SetShown(#frame.privateAurasAnchorIDs > 0)
 end
 
+function PrivateAuras:Ensure(frame, settings)
+	if not frame then
+		return
+	end
+
+	local widgetsOverlay = frame.widgetsOverlay
+	if not widgetsOverlay then
+		return
+	end
+
+	if not frame.privateAurasContainer then
+		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer")
+	end
+end
+
 function PrivateAuras:UpdateSettings(frame, settings)
 	local container = frame and frame.privateAurasContainer
 	if not container then
@@ -119,21 +134,6 @@ function PrivateAuras:UpdateSettings(frame, settings)
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
 	EnsurePrivateAuraAnchors(frame, privateAuraSettings)
-end
-
-function PrivateAuras:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
-	if not frame.privateAurasContainer then
-		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer")
-	end
 end
 
 function PrivateAuras:Init()
