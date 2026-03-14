@@ -106,21 +106,22 @@ function BigDefensive:UpdateState(frame, settings)
 	local provider = frame and frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
-	if not isTestProvider and (not unit or not UnitExists(unit)) then
+	if not isTestProvider and (not unit or not UnitExists(unit) or not UnitIsVisible(unit)) then
 		container:Hide()
 		return
 	end
 
 	local maxIcons = bigDefensiveSettings.maxIcons
 	local shown = 0
-	local icon = container.icons[1]
 
-	local auraInstanceID
-	if unit then
-		auraInstanceID = addon.AuraHandler and addon.AuraHandler:GetDefensiveAuraInstanceID(unit)
+	local icon = container.icons[1]
+	if not icon then
+		container:Hide()
+		return
 	end
 
-	local aura = provider:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
+	local auras = provider:GetUnitAuras(frame, "helpfulBigDefensive")
+	local aura = auras and auras[1]
 
 	if aura and aura.icon and icon then
 		local stackText

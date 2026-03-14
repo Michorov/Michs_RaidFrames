@@ -75,7 +75,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.dispelsSettingsChanged then
-			addon.Frames.Widgets.Indicators.Dispels:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
 end
@@ -114,11 +114,15 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
 		end
 
+		if updateReasons.rosterChanged or updateReasons.unitAurasChanged then
+			addon.AuraHandler:UpdateAurasForUnit(frame.unit)
+		end
+
 		if updateReasons.rosterChanged or updateReasons.aurasStateChanged then
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
-			addon.Frames.Widgets.Indicators.Dispels:UpdateState(frame, settings)
+			addon.Frames.Widgets.Icons.Dispels:UpdateState(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 		end
 

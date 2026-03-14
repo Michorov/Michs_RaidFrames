@@ -104,7 +104,8 @@ local CUSTOM_AURA_DEFAULTS = {
 			[61295] = { enabled = true, name = "Riptide" },
 			[207400] = { enabled = true, name = "Ancestral Vigor" },
 			[382024] = { enabled = true, name = "Earthliving Weapon" },
-			[444490] = { enabled = true, name = "Hydrobubble", allowMissingSource = true },
+			-- [444490] = { enabled = true, name = "Hydrobubble", allowMissingSource = true },
+			-- Some issues with filtering Hydrobubble because source is not player but ancestors so can't be filtered by HELPFUL|PLAYER
 		},
 		[-1] = {
 			[974] = { enabled = true, name = 'Earth Shield "Ally"' },
@@ -112,7 +113,8 @@ local CUSTOM_AURA_DEFAULTS = {
 			[61295] = { enabled = true, name = "Riptide" },
 			[207400] = { enabled = true, name = "Ancestral Vigor" },
 			[382024] = { enabled = true, name = "Earthliving Weapon" },
-			[444490] = { enabled = true, name = "Hydrobubble", allowMissingSource = true },
+			-- [444490] = { enabled = true, name = "Hydrobubble", allowMissingSource = true },
+			-- Some issues with filtering Hydrobubble because source is not player but ancestors so can't be filtered by HELPFUL|PLAYER
 		},
 	},
 
@@ -299,6 +301,7 @@ local DEFAULTS = {
 						cooldownFontSize = 10,
 
 						useCustomBuffFilter = false,
+						showExternals = false,
 						customAuraValues = {},
 
 						borderSizePx = 1,
@@ -350,6 +353,19 @@ local DEFAULTS = {
 						cooldownFontSize = 16,
 
 						borderSizePx = 1,
+					},
+					dispels = {
+						enabled = true,
+						anchor = "TOPRIGHT",
+						relativeAnchor = "TOPRIGHT",
+						growDirection = "LEFT",
+						offsetX = -2,
+						offsetY = -2,
+						maxIcons = 4,
+
+						iconSize = 12,
+						spacing = 1,
+						alpha = 1.0,
 					},
 				},
 				bars = {
@@ -418,17 +434,6 @@ local DEFAULTS = {
 				},
 				indicators = {
 					readyCheck = {},
-					dispels = {
-						anchor = "TOPRIGHT",
-						relativeAnchor = "TOPRIGHT",
-						growDirection = "LEFT",
-						offsetX = -2,
-						offsetY = -2,
-
-						iconSize = 16,
-						spacing = 2,
-						alpha = 1.0,
-					},
 				},
 			},
 		},
@@ -519,6 +524,7 @@ local DEFAULTS = {
 						cooldownFontSize = 10,
 
 						useCustomBuffFilter = false,
+						showExternals = false,
 						customAuraValues = {},
 
 						borderSizePx = 1,
@@ -570,6 +576,19 @@ local DEFAULTS = {
 						cooldownFontSize = 16,
 
 						borderSizePx = 1,
+					},
+					dispels = {
+						enabled = true,
+						anchor = "TOPRIGHT",
+						relativeAnchor = "TOPRIGHT",
+						growDirection = "LEFT",
+						offsetX = -2,
+						offsetY = -2,
+						maxIcons = 4,
+
+						iconSize = 12,
+						spacing = 1,
+						alpha = 1.0,
 					},
 				},
 				bars = {
@@ -638,17 +657,6 @@ local DEFAULTS = {
 				},
 				indicators = {
 					readyCheck = {},
-					dispels = {
-						anchor = "TOPRIGHT",
-						relativeAnchor = "TOPRIGHT",
-						growDirection = "LEFT",
-						offsetX = -2,
-						offsetY = -2,
-
-						iconSize = 12,
-						spacing = 2,
-						alpha = 1.0,
-					},
 				},
 			},
 		},

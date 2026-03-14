@@ -474,16 +474,105 @@ function DataProvider.Test:GetRole(frame)
 	return nil
 end
 
-function DataProvider.Live:GetAuraDataByIndex(frame, auraIndex, filter)
+function DataProvider.Live:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
 	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" then
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
 		return nil
 	end
 
-	return C_UnitAuras.GetAuraDataByIndex(unit, auraIndex, filter)
+	if not C_UnitAuras.GetAuraApplicationDisplayCount then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, minCount, maxCount)
 end
 
-function DataProvider.Test:GetAuraDataByIndex(frame, auraIndex, filter)
+function DataProvider.Test:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
+	local applications = aura and aura.applications
+	if type(applications) ~= "number" or applications <= 0 then
+		return nil
+	end
+
+	minCount = minCount or 1
+	maxCount = maxCount or applications
+
+	if applications < minCount or applications > maxCount then
+		return nil
+	end
+
+	return tostring(applications)
+end
+
+function DataProvider.Live:DoesAuraHaveExpirationTime(frame, aura)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return false
+	end
+
+	if not C_UnitAuras.DoesAuraHaveExpirationTime then
+		return false
+	end
+
+	return C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
+end
+
+function DataProvider.Test:DoesAuraHaveExpirationTime(frame, aura)
+	if not aura then
+		return false
+	end
+
+	return type(aura.duration) == "number"
+		and aura.duration > 0
+		and type(aura.expirationTime) == "number"
+		and aura.expirationTime > 0
+end
+
+function DataProvider.Live:GetAuraDispelTypeColor(frame, aura, curve)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+
+	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
+		return nil
+	end
+
+	if not C_UnitAuras.GetAuraDispelTypeColor then
+		return nil
+	end
+
+	return C_UnitAuras.GetAuraDispelTypeColor(unit, auraInstanceID, curve)
+end
+
+function DataProvider.Test:GetAuraDispelTypeColor(frame, aura, curve)
+	local dispelName = aura and aura.dispelName
+	if dispelName == "Magic" then
+		return DEBUFF_TYPE_MAGIC_COLOR
+	elseif dispelName == "Curse" then
+		return DEBUFF_TYPE_CURSE_COLOR
+	elseif dispelName == "Disease" then
+		return DEBUFF_TYPE_DISEASE_COLOR
+	elseif dispelName == "Poison" then
+		return DEBUFF_TYPE_POISON_COLOR
+	elseif dispelName == "Enrage" or dispelName == "Bleed" then
+		return DEBUFF_TYPE_BLEED_COLOR
+	end
+
+	return DEBUFF_TYPE_NONE_COLOR
+end
+
+function DataProvider.Live:GetUnitAuras(frame, collectionKey)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" then
+		return {}
+	end
+
+	return addon.AuraHandler:GetUnitAuras(unit, collectionKey)
+end
+
+function DataProvider.Test:GetUnitAuras(frame, filter)
 	local helpfulAuras = BuildCustomHelpfulTestAuras()
 
 	if #helpfulAuras == 0 then
@@ -574,141 +663,163 @@ function DataProvider.Test:GetAuraDataByIndex(frame, auraIndex, filter)
 		},
 	}
 
-	local auras
-	if filter == "HELPFUL" then
-		auras = helpfulAuras
-	elseif filter == "HARMFUL" then
-		auras = harmfulAuras
-	else
-		auras = helpfulAuras
-	end
-
-	if #auras == 0 then
-		return nil
-	end
-
-	local template = auras[((auraIndex - 1) % #auras) + 1]
-	return template
-end
-
-function DataProvider.Live:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
-	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
-		return nil
-	end
-
-	if not C_UnitAuras.GetAuraDataByAuraInstanceID then
-		return nil
-	end
-
-	return C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraInstanceID)
-end
-
-function DataProvider.Test:GetAuraDataByAuraInstanceID(frame, auraInstanceID)
-	return {
-		name = "Pain Suppression",
-		icon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(33206),
-		applications = 2,
-		dispelName = nil,
-		duration = 8,
-		expirationTime = GetTime() + 6,
-		sourceUnit = "player",
-		spellId = 33206,
-		auraInstanceID = auraInstanceID or 1,
-		canApplyAura = false,
-		isBossAura = false,
-		isFromPlayerOrPlayerPet = true,
-		isHelpful = true,
-		isHarmful = false,
-		points = {},
+	local helpfulBigDefensiveAuras = {
+		{
+			name = "Pain Suppression",
+			icon = 135936,
+			applications = 0,
+			dispelName = nil,
+			duration = 8,
+			expirationTime = GetTime() + 6,
+			sourceUnit = "party1",
+			spellId = 33206,
+			auraInstanceID = 2001,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = true,
+			isHarmful = false,
+			points = {},
+		},
 	}
+
+	local dispellableHarmfulAuras = {
+		{
+			name = "Unstable Affliction",
+			icon = 136228,
+			applications = 0,
+			dispelName = "Magic",
+			duration = 14,
+			expirationTime = GetTime() + 11,
+			sourceUnit = "target",
+			spellId = 30108,
+			auraInstanceID = 1001,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Unstable Affliction",
+			icon = 136228,
+			applications = 0,
+			dispelName = "Magic",
+			duration = 14,
+			expirationTime = GetTime() + 11,
+			sourceUnit = "target",
+			spellId = 30108,
+			auraInstanceID = 1001,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Hex",
+			icon = 237579,
+			applications = 0,
+			dispelName = "Curse",
+			duration = 30,
+			expirationTime = GetTime() + 18,
+			sourceUnit = "target",
+			spellId = 51514,
+			auraInstanceID = 1003,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Virulent Plague",
+			icon = 136181,
+			applications = 0,
+			dispelName = "Disease",
+			duration = 21,
+			expirationTime = GetTime() + 16,
+			sourceUnit = "target",
+			spellId = 191587,
+			auraInstanceID = 1005,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Serpent Sting",
+			icon = 132204,
+			applications = 0,
+			dispelName = "Poison",
+			duration = 12,
+			expirationTime = GetTime() + 7,
+			sourceUnit = "target",
+			spellId = 271788,
+			auraInstanceID = 1007,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+		{
+			name = "Deadly Poison",
+			icon = 132290,
+			applications = 2,
+			dispelName = "Poison",
+			duration = 12,
+			expirationTime = GetTime() + 10,
+			sourceUnit = "target",
+			spellId = 2818,
+			auraInstanceID = 1008,
+			canApplyAura = false,
+			isBossAura = false,
+			isFromPlayerOrPlayerPet = false,
+			isHelpful = false,
+			isHarmful = true,
+			points = {},
+		},
+	}
+
+	if filter == "helpfulBigDefensive" then
+		return helpfulBigDefensiveAuras
+	elseif filter == "harmfulRaidPlayerDispellable" then
+		return dispellableHarmfulAuras
+	elseif filter == "harmful" or filter == "HARMFUL" then
+		return harmfulAuras
+	elseif filter == "helpfulPlayer" or filter == "HELPFUL" then
+		return helpfulAuras
+	end
+
+	return {}
 end
 
-function DataProvider.Live:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
+function DataProvider.Live:GetUnitAuraInstanceIDs(frame, filterKey)
 	local unit = frame and frame.unit
-	local auraInstanceID = aura and aura.auraInstanceID
-
-	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
-		return nil
+	if type(unit) ~= "string" or unit == "" then
+		return {}
 	end
 
-	if not C_UnitAuras.GetAuraApplicationDisplayCount then
-		return nil
-	end
-
-	return C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraInstanceID, minCount, maxCount)
+	return addon.AuraHandler:GetUnitAuraInstanceIDs(unit, filterKey)
 end
 
-function DataProvider.Test:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
-	local applications = aura and aura.applications
-	if type(applications) ~= "number" or applications <= 0 then
-		return nil
+function DataProvider.Test:GetUnitAuraInstanceIDs(frame, filterKey)
+	local auraInstanceIDs = {}
+	local auras = self:GetUnitAuras(frame, filterKey)
+
+	for _, aura in ipairs(auras) do
+		local auraInstanceID = aura and aura.auraInstanceID
+		if auraInstanceID then
+			auraInstanceIDs[auraInstanceID] = true
+		end
 	end
 
-	minCount = minCount or 1
-	maxCount = maxCount or applications
-
-	if applications < minCount or applications > maxCount then
-		return nil
-	end
-
-	return tostring(applications)
-end
-
-function DataProvider.Live:DoesAuraHaveExpirationTime(frame, aura)
-	local unit = frame and frame.unit
-	local auraInstanceID = aura and aura.auraInstanceID
-
-	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
-		return false
-	end
-
-	if not C_UnitAuras.DoesAuraHaveExpirationTime then
-		return false
-	end
-
-	return C_UnitAuras.DoesAuraHaveExpirationTime(unit, auraInstanceID)
-end
-
-function DataProvider.Test:DoesAuraHaveExpirationTime(frame, aura)
-	if not aura then
-		return false
-	end
-
-	return type(aura.duration) == "number"
-		and aura.duration > 0
-		and type(aura.expirationTime) == "number"
-		and aura.expirationTime > 0
-end
-
-function DataProvider.Live:GetAuraDispelTypeColor(frame, aura, curve)
-	local unit = frame and frame.unit
-	local auraInstanceID = aura and aura.auraInstanceID
-
-	if type(unit) ~= "string" or unit == "" or auraInstanceID == nil then
-		return nil
-	end
-
-	if not C_UnitAuras.GetAuraDispelTypeColor then
-		return nil
-	end
-
-	return C_UnitAuras.GetAuraDispelTypeColor(unit, auraInstanceID, curve)
-end
-
-function DataProvider.Test:GetAuraDispelTypeColor(frame, aura, curve)
-	local dispelName = aura and aura.dispelName
-	if dispelName == "Magic" then
-		return DEBUFF_TYPE_MAGIC_COLOR
-	elseif dispelName == "Curse" then
-		return DEBUFF_TYPE_CURSE_COLOR
-	elseif dispelName == "Disease" then
-		return DEBUFF_TYPE_DISEASE_COLOR
-	elseif dispelName == "Poison" then
-		return DEBUFF_TYPE_POISON_COLOR
-	elseif dispelName == "Enrage" or dispelName == "Bleed" then
-		return DEBUFF_TYPE_BLEED_COLOR
-	end
-
-	return DEBUFF_TYPE_NONE_COLOR
+	return auraInstanceIDs
 end
