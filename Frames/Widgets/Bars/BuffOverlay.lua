@@ -44,33 +44,6 @@ local function IsAllowedSpecAura(specID, spellId)
 	return false
 end
 
-local function UnitHasPlayerBuffBySpellID(unit, spellId)
-	if not unit or not spellId or spellId == 0 then
-		return false
-	end
-
-	local auraIndex = 1
-	while true do
-		local aura = C_UnitAuras.GetAuraDataByIndex(unit, auraIndex, "HELPFUL")
-		if not aura then
-			break
-		end
-
-		auraIndex = auraIndex + 1
-
-		local matchesSpell = false
-		local ok = pcall(function()
-			matchesSpell = aura.spellId == spellId
-		end)
-
-		if ok and matchesSpell and aura.isFromPlayerOrPlayerPet then
-			return true
-		end
-	end
-
-	return false
-end
-
 function BuffOverlay:Ensure(frame, settings)
 	if not frame then
 		return
@@ -170,7 +143,21 @@ function BuffOverlay:UpdateState(frame, settings)
 			if not enabled or spellId == 0 or not color or not isAllowedAura then
 				overlay:Hide()
 			else
-				local hasBuff = UnitHasPlayerBuffBySpellID(unit, spellId)
+				local hasBuff = false
+				local provider = frame and frame.dataProvider
+				local auras = provider and provider:GetUnitAuras(frame, "helpfulPlayer") or {}
+
+				for _, aura in ipairs(auras) do
+					local matchesSpell = false
+					local ok = pcall(function()
+						matchesSpell = aura.spellId == spellId
+					end)
+
+					if ok and matchesSpell then
+						hasBuff = true
+						break
+					end
+				end
 
 				if hasBuff then
 					overlay.texture:SetColorTexture(color.r or 1, color.g or 1, color.b or 1, 1)

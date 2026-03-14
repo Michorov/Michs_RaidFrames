@@ -226,7 +226,7 @@ function EventHandler:UNIT_AURA(event, unit)
 		return
 	end
 
-	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
+	addon.UpdateScheduler:Notify("unitAurasChanged", unit)
 end
 
 function EventHandler:UNIT_CONNECTION(event, unit)

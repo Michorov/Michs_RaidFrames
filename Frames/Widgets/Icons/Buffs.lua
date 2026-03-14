@@ -51,6 +51,7 @@ local function GetBuffSettings(settings)
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
 		useCustomBuffFilter = buffs.useCustomBuffFilter == true,
+		showExternals = buffs.showExternals == true,
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
 	}
 end
@@ -140,65 +141,53 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	local provider = frame and frame.dataProvider
-	local isTestProvider = provider == addon.Frames.DataProvider.Test
-
 	if not buffSettings.enabled then
 		addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
 		return
 	end
+
+	local unit = frame and frame.unit
+	local provider = frame and frame.dataProvider
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		container:Hide()
 		return
 	end
 
-	local approved
-	if not buffSettings.useCustomBuffFilter and not isTestProvider then
-		local bucket = addon.AuraHandler and addon.AuraHandler:GetBucketForUnit(unit)
-		approved = bucket and bucket.buffs
-		if not approved or not next(approved) then
-			addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
-			return
+	local maxIcons = buffSettings.maxIcons
+	local shown = 0
+	local shownAuraInstanceIDs = {}
+
+	if buffSettings.showExternals then
+		local bigDefensive = provider:GetUnitAuraInstanceIDs(frame, "helpfulBigDefensive")
+		for auraInstanceID in pairs(bigDefensive) do
+			shownAuraInstanceIDs[auraInstanceID] = true
 		end
 	end
 
-	local maxIcons = buffSettings.maxIcons
-	local shown, auraIndex = 0, 1
-	local filter = "HELPFUL"
+	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 
-	local maxScan = isTestProvider and (maxIcons * 3) or math.huge
-
-	while shown < maxIcons and auraIndex <= maxScan do
-		local aura = provider:GetAuraDataByIndex(frame, auraIndex, filter)
-		if not aura then
+	for _, aura in ipairs(auras) do
+		if shown >= maxIcons then
 			break
 		end
-		auraIndex = auraIndex + 1
+
+		local customBuff = GetCustomBuffFilterEntry(settings, aura)
 
 		local auraInstanceID = aura.auraInstanceID
-		local shouldShowAura = false
 
-		if buffSettings.useCustomBuffFilter then
-			local customBuff = GetCustomBuffFilterEntry(settings, aura)
-			local isMine = aura.isFromPlayerOrPlayerPet
+		local alreadyShown = auraInstanceID and shownAuraInstanceIDs[auraInstanceID] == true
+		local shouldShowAura = customBuff ~= nil and customBuff.enabled == true
 
-			shouldShowAura = customBuff ~= nil
-				and customBuff.enabled == true
-				and (isMine or customBuff.allowMissingSource == true)
-		else
-			if isTestProvider then
-				shouldShowAura = true
-			else
-				shouldShowAura = auraInstanceID ~= nil and approved[auraInstanceID] == true
-			end
-		end
-
-		if shouldShowAura and aura.icon then
+		if shouldShowAura and not alreadyShown and aura.icon then
 			local icon = container.icons[shown + 1]
 			if icon and icon.texture then
 				shown = shown + 1
+
+				if aura.auraInstanceID then
+					shownAuraInstanceIDs[aura.auraInstanceID] = true
+				end
 
 				local stackText
 				if buffSettings.showStacks then
@@ -214,6 +203,45 @@ function Buffs:UpdateState(frame, settings)
 					duration = aura.duration,
 					hasExpiration = hasExpiration,
 				})
+			end
+		end
+	end
+
+	if buffSettings.showExternals and shown < maxIcons then
+		local externals = provider:GetUnitAuras(frame, "helpfulExternalDefensive")
+
+		for _, aura in ipairs(externals) do
+			if shown >= maxIcons then
+				break
+			end
+
+			local auraInstanceID = aura.auraInstanceID
+			local alreadyShown = auraInstanceID and shownAuraInstanceIDs[auraInstanceID] == true
+
+			if not alreadyShown and aura.icon then
+				local icon = container.icons[shown + 1]
+				if icon and icon.texture then
+					shown = shown + 1
+
+					if auraInstanceID then
+						shownAuraInstanceIDs[auraInstanceID] = true
+					end
+
+					local stackText
+					if buffSettings.showStacks then
+						stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+					end
+
+					local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
+
+					addon.Frames.Managers.IconManager:ApplyIconState(icon, {
+						texture = aura.icon,
+						countText = stackText,
+						expirationTime = aura.expirationTime,
+						duration = aura.duration,
+						hasExpiration = hasExpiration,
+					})
+				end
 			end
 		end
 	end

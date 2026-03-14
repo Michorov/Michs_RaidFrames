@@ -192,20 +192,7 @@ function Debuffs:UpdateState(frame, settings)
 
 	local shown = 0
 	local maxIcons = debuffSettings.maxIcons
-	local auras
-
-	if isTestProvider then
-		auras = {}
-		for auraIndex = 1, maxIcons * 10 do
-			local aura = provider:GetAuraDataByIndex(frame, auraIndex, "HARMFUL")
-			if not aura then
-				break
-			end
-			auras[#auras + 1] = aura
-		end
-	else
-		auras = C_UnitAuras.GetUnitAuras(unit, "HARMFUL") or {}
-	end
+	local auras = provider:GetUnitAuras(frame, "harmful")
 
 	for _, aura in ipairs(auras) do
 		if shown >= maxIcons then

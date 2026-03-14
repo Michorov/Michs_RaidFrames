@@ -393,6 +393,7 @@ function FrameRegistry:CreateTestGroup(groupType)
 		addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 		addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 		addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
+		addon.Frames.Widgets.Icons.Dispels:UpdateState(frame, settings)
 	end
 
 	addon.Frames:UpdateLayout(group, settings)
@@ -436,6 +437,7 @@ function FrameRegistry:EnableTestMode(groupType)
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
+			addon.Frames.Widgets.Icons.Dispels:UpdateState(frame, settings)
 		end
 
 		addon.Frames:UpdateLayout(group, settings)
