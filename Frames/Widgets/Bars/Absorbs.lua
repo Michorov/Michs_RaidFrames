@@ -7,6 +7,23 @@ addon.Frames.Widgets.Bars.Absorbs = addon.Frames.Widgets.Bars.Absorbs or {}
 
 local Absorbs = addon.Frames.Widgets.Bars.Absorbs
 
+local ABSORB_TEXTURES = {
+	Flat = "Interface\\Buttons\\WHITE8x8",
+	Striped = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\Absorb",
+}
+
+local function ResolveAbsorbTexture(textureKey)
+	if type(textureKey) == "string" and ABSORB_TEXTURES[textureKey] then
+		return ABSORB_TEXTURES[textureKey]
+	end
+
+	if type(textureKey) == "string" and textureKey ~= "" then
+		return textureKey
+	end
+
+	return ABSORB_TEXTURES.Striped
+end
+
 local function GetAbsorbSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
@@ -14,7 +31,7 @@ local function GetAbsorbSettings(settings)
 	local color = absorbs.color or {}
 
 	return {
-		texture = absorbs.texture or "Interface\\Buttons\\WHITE8x8",
+		texture = ResolveAbsorbTexture(absorbs.texture),
 		color = {
 			r = color.r or 0.2,
 			g = color.g or 0.8,
@@ -41,6 +58,15 @@ function Absorbs:Ensure(frame)
 		bar:SetOrientation("HORIZONTAL")
 		bar:SetReverseFill(true)
 		bar:Hide()
+
+		local tex = bar:CreateTexture(nil, "ARTWORK")
+		tex:SetTexture("Interface\\Buttons\\WHITE8x8", "REPEAT", "REPEAT")
+		tex:SetHorizTile(true)
+		tex:SetVertTile(true)
+
+		bar:SetStatusBarTexture(tex)
+		bar:SetStatusBarColor(1, 1, 1, 1)
+
 		frame.absorbBar = bar
 	end
 
@@ -57,7 +83,13 @@ function Absorbs:UpdateSettings(frame, settings)
 		return
 	end
 
-	bar:SetStatusBarTexture(absorbSettings.texture)
+	local tex = bar:GetStatusBarTexture()
+	if tex then
+		tex:SetTexture(absorbSettings.texture, "REPEAT", "REPEAT")
+		tex:SetHorizTile(true)
+		tex:SetVertTile(true)
+	end
+
 	bar:SetStatusBarColor(
 		absorbSettings.color.r,
 		absorbSettings.color.g,

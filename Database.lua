@@ -370,6 +370,7 @@ local DEFAULTS = {
 				},
 				bars = {
 					absorbs = {
+						texture = "Flat",
 						color = {
 							r = 0.2,
 							g = 0.8,
@@ -593,6 +594,7 @@ local DEFAULTS = {
 				},
 				bars = {
 					absorbs = {
+						texture = "Flat",
 						color = {
 							r = 0.2,
 							g = 0.8,
