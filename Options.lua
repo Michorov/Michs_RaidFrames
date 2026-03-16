@@ -1117,11 +1117,41 @@ local options = {
 							name = "Absorbs",
 							order = 4,
 							args = {
+								partyAbsorbsTexture = {
+									type = "select",
+									name = "Shield Texture",
+									order = 9,
+									values = {
+										Flat = "Flat",
+										Striped = "Striped",
+									},
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).texture
+											or "Striped"
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.absorbs = p.party.widgets.bars.absorbs or {}
+										p.party.widgets.bars.absorbs.texture = value
+
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
 								partyAbsorbsColor = {
 									type = "color",
 									name = "Shield Color",
 									hasAlpha = true,
 									order = 10,
+									width = "full",
 									get = function()
 										local p = addon.Database:GetProfile()
 										local c = ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).color
@@ -3463,11 +3493,41 @@ local options = {
 							name = "Absorbs",
 							order = 4,
 							args = {
+								raidAbsorbsTexture = {
+									type = "select",
+									name = "Shield Texture",
+									order = 9,
+									values = {
+										Flat = "Flat",
+										Striped = "Striped",
+									},
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).texture
+											or "Striped"
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.absorbs = p.raid.widgets.bars.absorbs or {}
+										p.raid.widgets.bars.absorbs.texture = value
+
+										addon.UpdateScheduler:Notify("absorbsSettingsChanged")
+									end,
+								},
 								raidAbsorbsColor = {
 									type = "color",
 									name = "Shields Color",
 									hasAlpha = true,
 									order = 10,
+									width = "full",
 									get = function()
 										local p = addon.Database:GetProfile()
 										local c = ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).color
