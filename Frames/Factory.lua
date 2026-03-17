@@ -51,11 +51,15 @@ function Frames:CreateFrame(group, unit, unitIndex)
 		GameTooltip:Hide()
 	end)
 
+	-- Register Frame for Targeted Spells Addon
+	-- https://www.curseforge.com/wow/addons/targetedspells
 	local targetedSpellsApi = _G.TargetedSpellsAPI
 	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName and frameName then
 		targetedSpellsApi.RegisterFrameByName(frameName)
 	end
 
+	-- Register Frames for Clique Addon
+	-- https://www.curseforge.com/wow/addons/clique
 	if _G.ClickCastFrames then
 		_G.ClickCastFrames[frame] = true
 	end
