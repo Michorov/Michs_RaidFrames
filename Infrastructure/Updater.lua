@@ -39,6 +39,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.rosterChanged or updateReasons.raidMarkerSettingsChanged then
+			addon.Frames.Widgets.Indicators.RaidMarker:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.nameSettingsChanged then
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(frame, settings)
 		end
@@ -100,6 +104,14 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.rosterChanged or updateReasons.pendingSummonStateChanged then
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateState(frame, settings)
+		end
+
+		if
+			updateReasons.rosterChanged
+			or updateReasons.raidMarkerStateChanged
+			or updateReasons.raidMarkerSettingsChanged
+		then
+			addon.Frames.Widgets.Indicators.RaidMarker:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.absorbsStateChanged then
