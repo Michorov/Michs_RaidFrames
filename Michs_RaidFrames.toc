@@ -33,6 +33,7 @@ Frames/Widgets/Texts/StatusText.lua
 Frames/Widgets/Indicators/ReadyCheck.lua
 Frames/Widgets/Indicators/PendingSummon.lua
 Frames/Widgets/Indicators/RaidMarker.lua
+Frames/Widgets/Indicators/RoleIcon.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua

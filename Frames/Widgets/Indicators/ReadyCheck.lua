@@ -16,10 +16,9 @@ local function GetReadyCheckSettings(settings)
 	local textures = readyCheck.textures or {}
 
 	return {
+		enabled = readyCheck.enabled ~= false,
 		sizePx = addon.Utilities:ToPixels(readyCheck.size or 36),
-		alpha = readyCheck.alpha or 1,
 		anchor = readyCheck.anchor or "CENTER",
-		relativeAnchor = readyCheck.relativeAnchor or "CENTER",
 		offsetXPx = addon.Utilities:ToPixels(readyCheck.offsetX or 0),
 		offsetYPx = addon.Utilities:ToPixels(readyCheck.offsetY or 0),
 		readyTexture = textures.ready or "Interface\\RaidFrame\\ReadyCheck-Ready",
@@ -67,6 +66,10 @@ function ReadyCheck:UpdateSettings(frame, settings)
 	end
 
 	local rcSettings = GetReadyCheckSettings(settings)
+	if not rcSettings.enabled then
+		icon:Hide()
+		return
+	end
 
 	local sizePx = addon.Utilities:Scale(rcSettings.sizePx)
 	local offsetX = addon.Utilities:Scale(rcSettings.offsetXPx)
@@ -76,17 +79,23 @@ function ReadyCheck:UpdateSettings(frame, settings)
 	icon:SetPoint(
 		rcSettings.anchor,
 		icon:GetParent(),
-		rcSettings.relativeAnchor,
+		rcSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
 	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
-	icon:SetAlpha(rcSettings.alpha)
+	icon:SetAlpha(1)
 end
 
 function ReadyCheck:UpdateState(frame, settings)
 	local icon = frame and frame.readyCheckIcon
 	if not icon then
+		return
+	end
+
+	local rcSettings = GetReadyCheckSettings(settings)
+	if not rcSettings.enabled then
+		icon:Hide()
 		return
 	end
 
@@ -107,7 +116,6 @@ function ReadyCheck:UpdateState(frame, settings)
 		return
 	end
 
-	local rcSettings = GetReadyCheckSettings(settings)
 	local tex = GetTextureForStatus(status, rcSettings)
 	if not tex then
 		icon:Hide()

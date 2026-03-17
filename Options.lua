@@ -2596,6 +2596,37 @@ local options = {
 							name = "Ready Check",
 							order = 2,
 							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showReadyCheck = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck or {}
+												p.party.widgets.indicators.readyCheck.enabled = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
 								anchors = {
 									type = "group",
 									name = "Anchors",
@@ -2634,41 +2665,6 @@ local options = {
 												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
 													or {}
 												p.party.widgets.indicators.readyCheck.anchor = v
-												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
-											end,
-										},
-										relativeAnchor = {
-											type = "select",
-											name = "To Frame's",
-											order = 2,
-											values = {
-												TOPLEFT = "Top Left",
-												TOP = "Top",
-												TOPRIGHT = "Top Right",
-												LEFT = "Left",
-												CENTER = "Center",
-												RIGHT = "Right",
-												BOTTOMLEFT = "Bottom Left",
-												BOTTOM = "Bottom",
-												BOTTOMRIGHT = "Bottom Right",
-											},
-											get = function()
-												local p = addon.Database:GetProfile()
-												return (
-													(((p.party or {}).widgets or {}).indicators or {}).readyCheck or {}
-												).relativeAnchor or "CENTER"
-											end,
-											set = function(_, v)
-												if InCombatLockdown() then
-													ShowCombatLockMessage()
-													return
-												end
-												local p = addon.Database:GetProfile()
-												p.party.widgets = p.party.widgets or {}
-												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
-													or {}
-												p.party.widgets.indicators.readyCheck.relativeAnchor = v
 												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
 											end,
 										},
@@ -2946,6 +2942,180 @@ local options = {
 													or {}
 												p.party.widgets.indicators.raidMarker.size = v
 												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
+						roleIcon = {
+							type = "group",
+							name = "Role Icon",
+							order = 4,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showRoleIcon = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon.enabled = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).anchor or "TOPLEFT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon.anchor = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon.offsetX = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon.offsetY = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).size or 16
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon.size = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
 										},
 									},
@@ -5145,6 +5315,37 @@ local options = {
 							name = "Ready Check",
 							order = 2,
 							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showReadyCheck = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck or {}
+												p.raid.widgets.indicators.readyCheck.enabled = v
+												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
 								anchors = {
 									type = "group",
 									name = "Anchors",
@@ -5183,41 +5384,6 @@ local options = {
 												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
 													or {}
 												p.raid.widgets.indicators.readyCheck.anchor = v
-												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
-											end,
-										},
-										relativeAnchor = {
-											type = "select",
-											name = "To Frame's",
-											order = 2,
-											values = {
-												TOPLEFT = "Top Left",
-												TOP = "Top",
-												TOPRIGHT = "Top Right",
-												LEFT = "Left",
-												CENTER = "Center",
-												RIGHT = "Right",
-												BOTTOMLEFT = "Bottom Left",
-												BOTTOM = "Bottom",
-												BOTTOMRIGHT = "Bottom Right",
-											},
-											get = function()
-												local p = addon.Database:GetProfile()
-												return (
-													(((p.raid or {}).widgets or {}).indicators or {}).readyCheck or {}
-												).relativeAnchor or "CENTER"
-											end,
-											set = function(_, v)
-												if InCombatLockdown() then
-													ShowCombatLockMessage()
-													return
-												end
-												local p = addon.Database:GetProfile()
-												p.raid.widgets = p.raid.widgets or {}
-												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
-													or {}
-												p.raid.widgets.indicators.readyCheck.relativeAnchor = v
 												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
 											end,
 										},
@@ -5495,6 +5661,180 @@ local options = {
 													or {}
 												p.raid.widgets.indicators.raidMarker.size = v
 												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
+						roleIcon = {
+							type = "group",
+							name = "Role Icon",
+							order = 4,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showRoleIcon = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon.enabled = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).anchor or "TOPLEFT"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon.anchor = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon.offsetX = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon.offsetY = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).roleIcon or {}
+												).size or 16
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon.size = v
+												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
 										},
 									},
