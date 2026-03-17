@@ -28,6 +28,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("READY_CHECK_FINISHED")
 	self:RegisterEvent("RAID_TARGET_UPDATE")
 	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
+	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 
 	self:RegisterEvent("UNIT_MAXHEALTH")
 	self:RegisterEvent("UNIT_HEALTH")
@@ -258,4 +259,8 @@ end
 
 function EventHandler:RAID_TARGET_UPDATE()
 	addon.UpdateScheduler:Notify("raidMarkerStateChanged")
+end
+
+function EventHandler:PLAYER_ROLES_ASSIGNED()
+	addon.UpdateScheduler:Notify("roleIconStateChanged")
 end
