@@ -79,7 +79,7 @@ function RaidMarker:UpdateState(frame, settings)
 	end
 
 	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+	if not unit or not UnitExists(unit) then
 		icon:Hide()
 		return
 	end
