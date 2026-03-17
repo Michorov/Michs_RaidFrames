@@ -33,6 +33,7 @@ function RaidMarker:Ensure(frame)
 
 	if not frame.raidMarker then
 		local icon = topWidgetsOverlay:CreateTexture(nil, "OVERLAY", nil, 7)
+		icon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 		icon:Hide()
 		frame.raidMarker = icon
 	end
@@ -89,7 +90,6 @@ function RaidMarker:UpdateState(frame, settings)
 		return
 	end
 
-	icon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 	icon:SetSpriteSheetCell(raidTargetIndex, 4, 4, 64, 64)
 	icon:Show()
 end
