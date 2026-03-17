@@ -51,6 +51,11 @@ function Frames:CreateFrame(group, unit, unitIndex)
 		GameTooltip:Hide()
 	end)
 
+	local targetedSpellsApi = _G.TargetedSpellsAPI
+	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName and frameName then
+		targetedSpellsApi.RegisterFrameByName(frameName)
+	end
+
 	frame:SetSize(1, 1)
 
 	RegisterUnitWatch(frame)
