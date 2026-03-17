@@ -56,6 +56,10 @@ function Frames:CreateFrame(group, unit, unitIndex)
 		targetedSpellsApi.RegisterFrameByName(frameName)
 	end
 
+	if _G.ClickCastFrames then
+		_G.ClickCastFrames[frame] = true
+	end
+
 	frame:SetSize(1, 1)
 
 	RegisterUnitWatch(frame)
