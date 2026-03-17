@@ -37,6 +37,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Overlay,
 		addon.Frames.Widgets.Indicators.ReadyCheck,
 		addon.Frames.Widgets.Indicators.PendingSummon,
+		addon.Frames.Widgets.Indicators.RaidMarker,
 		addon.Frames.Widgets.Bars.Absorbs,
 		addon.Frames.Widgets.Bars.HealAbsorbs,
 		addon.Frames.Widgets.Texts.Name,

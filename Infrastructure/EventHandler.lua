@@ -26,7 +26,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("READY_CHECK")
 	self:RegisterEvent("READY_CHECK_CONFIRM")
 	self:RegisterEvent("READY_CHECK_FINISHED")
-
+	self:RegisterEvent("RAID_TARGET_UPDATE")
 	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
 
 	self:RegisterEvent("UNIT_MAXHEALTH")
@@ -254,4 +254,8 @@ end
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
+end
+
+function EventHandler:RAID_TARGET_UPDATE()
+	addon.UpdateScheduler:Notify("raidMarkerStateChanged")
 end

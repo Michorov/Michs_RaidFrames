@@ -2773,6 +2773,185 @@ local options = {
 								},
 							},
 						},
+						raidMarker = {
+							type = "group",
+							name = "Raid Marker",
+							order = 3,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showRaidMarker = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.raidMarker = p.party.widgets.indicators.raidMarker
+													or {}
+												p.party.widgets.indicators.raidMarker.enabled = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).anchor or "TOP"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.raidMarker = p.party.widgets.indicators.raidMarker
+													or {}
+												p.party.widgets.indicators.raidMarker.anchor = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.raidMarker = p.party.widgets.indicators.raidMarker
+													or {}
+												p.party.widgets.indicators.raidMarker.offsetX = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.raidMarker = p.party.widgets.indicators.raidMarker
+													or {}
+												p.party.widgets.indicators.raidMarker.offsetY = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.party or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).size or 18
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.indicators = p.party.widgets.indicators or {}
+												p.party.widgets.indicators.raidMarker = p.party.widgets.indicators.raidMarker
+													or {}
+												p.party.widgets.indicators.raidMarker.size = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -5137,6 +5316,185 @@ local options = {
 													or {}
 												p.raid.widgets.indicators.readyCheck.size = v
 												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
+						raidMarker = {
+							type = "group",
+							name = "Raid Marker",
+							order = 3,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										showRaidMarker = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).enabled == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.raidMarker = p.raid.widgets.indicators.raidMarker
+													or {}
+												p.raid.widgets.indicators.raidMarker.enabled = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).anchor or "TOP"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.raidMarker = p.raid.widgets.indicators.raidMarker
+													or {}
+												p.raid.widgets.indicators.raidMarker.anchor = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).offsetX or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.raidMarker = p.raid.widgets.indicators.raidMarker
+													or {}
+												p.raid.widgets.indicators.raidMarker.offsetX = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -200,
+											max = 200,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).offsetY or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.raidMarker = p.raid.widgets.indicators.raidMarker
+													or {}
+												p.raid.widgets.indicators.raidMarker.offsetY = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
+											end,
+										},
+									},
+								},
+								indicator = {
+									type = "group",
+									name = "Indicator",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Size",
+											order = 1,
+											min = 8,
+											max = 96,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													(((p.raid or {}).widgets or {}).indicators or {}).raidMarker or {}
+												).size or 18
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
+												p.raid.widgets.indicators.raidMarker = p.raid.widgets.indicators.raidMarker
+													or {}
+												p.raid.widgets.indicators.raidMarker.size = v
+												addon.UpdateScheduler:Notify("raidMarkerSettingsChanged")
 											end,
 										},
 									},

@@ -435,6 +435,13 @@ local DEFAULTS = {
 				},
 				indicators = {
 					readyCheck = {},
+					raidMarker = {
+						enabled = true,
+						anchor = "TOP",
+						offsetX = 0,
+						offsetY = 0,
+						size = 18,
+					},
 				},
 			},
 		},
@@ -659,6 +666,13 @@ local DEFAULTS = {
 				},
 				indicators = {
 					readyCheck = {},
+					raidMarker = {
+						enabled = true,
+						anchor = "TOP",
+						offsetX = 0,
+						offsetY = 0,
+						size = 18,
+					},
 				},
 			},
 		},

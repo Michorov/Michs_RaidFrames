@@ -21,6 +21,16 @@ function Overlay:Ensure(frame)
 		frame.widgetsOverlay = widgetsOverlay
 	end
 
+	if not frame.topWidgetsOverlay then
+		local topWidgetsOverlay = CreateFrame("Frame", nil, frame)
+		topWidgetsOverlay:SetAllPoints(frame)
+		topWidgetsOverlay:SetFrameStrata(frame:GetFrameStrata())
+		topWidgetsOverlay:SetFrameLevel(frame:GetFrameLevel() + 50)
+		topWidgetsOverlay:EnableMouse(false)
+
+		frame.topWidgetsOverlay = topWidgetsOverlay
+	end
+
 	local widgetsOverlay = frame.widgetsOverlay
 	if not frame.textLayer then
 		local textLayer = CreateFrame("Frame", nil, widgetsOverlay)
