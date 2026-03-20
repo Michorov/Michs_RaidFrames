@@ -3,9 +3,9 @@ local _, addon = ...
 addon.Frames = addon.Frames or {}
 addon.Frames.Widgets = addon.Frames.Widgets or {}
 addon.Frames.Widgets.Icons = addon.Frames.Widgets.Icons or {}
-addon.Frames.Widgets.Icons.CustomIcons = addon.Frames.Widgets.Icons.CustomIcons or {}
+addon.Frames.Widgets.Icons.CustomBuffs = addon.Frames.Widgets.Icons.CustomBuffs or {}
 
-local CustomIcons = addon.Frames.Widgets.Icons.CustomIcons
+local CustomBuffs = addon.Frames.Widgets.Icons.CustomBuffs
 
 local function GetCustomIconSettings(iconSettings)
 	local icon = iconSettings or {}
@@ -32,13 +32,13 @@ local function GetSpecAuras(settings)
 	return classAuras[specID] or classAuras[-1] or {}
 end
 
-function CustomIcons:Ensure(frame, settings)
+function CustomBuffs:Ensure(frame, settings)
 	if not frame then
 		return
 	end
 
-	if not frame.customIcons then
-		frame.customIcons = {}
+	if not frame.customBuffs then
+		frame.customBuffs = {}
 	end
 
 	local widgetsOverlay = frame.widgetsOverlay
@@ -49,28 +49,28 @@ function CustomIcons:Ensure(frame, settings)
 	local specAuras = GetSpecAuras(settings)
 
 	for spellId, iconSettings in pairs(specAuras) do
-		if iconSettings.enabled and not frame.customIcons[spellId] then
-			frame.customIcons[spellId] = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
+		if iconSettings.enabled and not frame.customBuffs[spellId] then
+			frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
 		end
 	end
 end
 
-function CustomIcons:UpdateSettings(frame, settings)
+function CustomBuffs:UpdateSettings(frame, settings)
 	local widgetsOverlay = frame and frame.widgetsOverlay
-	local customIcons = frame and frame.customIcons
-	if not widgetsOverlay or not customIcons then
+	local customBuffs = frame and frame.customBuffs
+	if not widgetsOverlay or not customBuffs then
 		return
 	end
 
 	local specAuras = GetSpecAuras(settings)
 
 	for spellId, iconSettings in pairs(specAuras) do
-		local icon = customIcons[spellId]
+		local icon = customBuffs[spellId]
 
 		if iconSettings.enabled then
 			if not icon then
 				icon = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
-				customIcons[spellId] = icon
+				customBuffs[spellId] = icon
 			end
 
 			local s = GetCustomIconSettings(iconSettings)
@@ -97,9 +97,9 @@ function CustomIcons:UpdateSettings(frame, settings)
 	end
 end
 
-function CustomIcons:UpdateState(frame, settings)
-	local customIcons = frame and frame.customIcons
-	if not customIcons then
+function CustomBuffs:UpdateState(frame, settings)
+	local customBuffs = frame and frame.customBuffs
+	if not customBuffs then
 		return
 	end
 
@@ -108,7 +108,7 @@ function CustomIcons:UpdateState(frame, settings)
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit)) then
-		for _, icon in pairs(customIcons) do
+		for _, icon in pairs(customBuffs) do
 			icon:Hide()
 		end
 		return
@@ -123,7 +123,7 @@ function CustomIcons:UpdateState(frame, settings)
 		end
 	end
 
-	for _, icon in pairs(customIcons) do
+	for _, icon in pairs(customBuffs) do
 		icon:Hide()
 	end
 
@@ -131,7 +131,7 @@ function CustomIcons:UpdateState(frame, settings)
 	for _, aura in ipairs(auras) do
 		local spellOk, isEnabled = pcall(function() return aura.spellId and enabledSpells[aura.spellId] end)
 		if spellOk and isEnabled then
-			local icon = customIcons[aura.spellId]
+			local icon = customBuffs[aura.spellId]
 			if icon and aura.icon then
 				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 				local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
@@ -147,7 +147,7 @@ function CustomIcons:UpdateState(frame, settings)
 	end
 end
 
-function CustomIcons:Init()
+function CustomBuffs:Init()
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "customBuffSettingsChanged",

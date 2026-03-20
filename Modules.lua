@@ -44,7 +44,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Texts.Name,
 		addon.Frames.Widgets.Texts.StatusText,
 		addon.Frames.Widgets.Icons.Buffs,
-		addon.Frames.Widgets.Icons.CustomIcons,
+		addon.Frames.Widgets.Icons.CustomBuffs,
 		addon.Frames.Widgets.Icons.Debuffs,
 		addon.Frames.Widgets.Icons.BigDefensive,
 		addon.Frames.Widgets.Icons.PrivateAuras,
