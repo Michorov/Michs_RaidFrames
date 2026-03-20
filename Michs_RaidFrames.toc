@@ -2,7 +2,7 @@
 ## Title: Mich's RaidFrames
 ## Notes: Addon that manages custom Party/Raid frames
 ## Author: Mich
-## Version: 1.3.5
+## Version: 1.4.0
 ## SavedVariables: Michs_RaidFramesDB
 
 # Ace3
@@ -37,6 +37,7 @@ Frames/Widgets/Indicators/RoleIcon.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua
+Frames/Widgets/Icons/CustomIcons.lua
 Frames/Widgets/Icons/Debuffs.lua
 Frames/Widgets/Icons/BigDefensive.lua
 Frames/Widgets/Icons/PrivateAuras.lua

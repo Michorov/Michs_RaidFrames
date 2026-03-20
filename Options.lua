@@ -385,6 +385,311 @@ local function GetCustomBuffListOptions(layoutKey)
 	return args
 end
 
+local ANCHOR_VALUES = {
+	CENTER = "Center",
+	TOPLEFT = "Top Left",
+	TOP = "Top",
+	TOPRIGHT = "Top Right",
+	LEFT = "Left",
+	RIGHT = "Right",
+	BOTTOMLEFT = "Bottom Left",
+	BOTTOM = "Bottom",
+	BOTTOMRIGHT = "Bottom Right",
+}
+
+local function GetCustomBuffsOptions(layoutKey)
+	local classFileName = addon.Utilities:GetPlayerClassFileName()
+	local profile = addon.Database:GetProfile()
+	local section = profile[layoutKey]
+	local customBuffs = (((section or {}).widgets or {}).icons or {}).customBuffs or {}
+	local classAuras = customBuffs[classFileName] or {}
+
+	local args = {}
+	local order = 10
+
+	local specEntries = {}
+	for specID, specAuras in pairs(classAuras) do
+		if specID ~= -1 then
+			local specName = select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))
+			table.insert(specEntries, {
+				specID = specID,
+				name = specName,
+				auras = specAuras,
+			})
+		end
+	end
+
+	table.sort(specEntries, function(a, b)
+		return a.name < b.name
+	end)
+
+	for _, specEntry in ipairs(specEntries) do
+		local specID = specEntry.specID
+		local auraEntries = {}
+
+		for spellId, auraData in pairs(specEntry.auras or {}) do
+			table.insert(auraEntries, {
+				spellId = spellId,
+				name = auraData.name or ("Spell " .. tostring(spellId)),
+			})
+		end
+
+		table.sort(auraEntries, function(a, b)
+			return a.name < b.name
+		end)
+
+		local specArgs = {}
+		local specOrder = 1
+
+		for _, auraEntry in ipairs(auraEntries) do
+			local spellId = auraEntry.spellId
+			local label = auraEntry.name
+			specArgs["spell_" .. specID .. "_" .. spellId] = {
+				type = "group",
+				name = label,
+				order = specOrder,
+				args = {
+					general = {
+						type = "group",
+						name = "",
+						inline = true,
+						order = 1,
+						args = {
+							enabled = {
+								type = "toggle",
+								name = "Enabled",
+								order = 1,
+								width = 0.8,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).enabled == true
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].enabled = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+									addon.UpdateScheduler:Notify("aurasStateChanged")
+								end,
+							},
+						},
+					},
+					position = {
+						type = "group",
+						name = "Position",
+						inline = true,
+						order = 2,
+						args = {
+							anchor = {
+								type = "select",
+								name = "Anchor",
+								order = 1,
+								width = 0.8,
+								values = ANCHOR_VALUES,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).anchor or "CENTER"
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].anchor = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+							iconSize = {
+								type = "range",
+								name = "Icon Size",
+								order = 2,
+								width = 0.8,
+								min = 8,
+								max = 64,
+								step = 1,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).iconSize or 16
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].iconSize = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+							offsetX = {
+								type = "range",
+								name = "Offset X",
+								order = 3,
+								width = 0.8,
+								min = -300,
+								max = 300,
+								step = 1,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).offsetX or 0
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].offsetX = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+							offsetY = {
+								type = "range",
+								name = "Offset Y",
+								order = 4,
+								width = 0.8,
+								min = -300,
+								max = 300,
+								step = 1,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).offsetY or 0
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].offsetY = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+						},
+					},
+				stacks = {
+					type = "group",
+					name = "Stacks",
+					inline = true,
+					order = 3,
+					args = {
+						showStacks = {
+							type = "toggle",
+							name = "Enabled",
+							order = 1,
+							width = 0.8,
+							get = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showStacks == true
+							end,
+							set = function(_, v)
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								cb[classFileName] = cb[classFileName] or {}
+								cb[classFileName][specID] = cb[classFileName][specID] or {}
+								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+								cb[classFileName][specID][spellId].showStacks = v
+								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+							end,
+						},
+						stacksFontSize = {
+							type = "range",
+							name = "Font Size",
+							order = 2,
+							width = 0.8,
+							min = 6,
+							max = 32,
+							step = 1,
+							disabled = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
+								return s.enabled ~= true or s.showStacks ~= true
+							end,
+							get = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).stacksFontSize or 10
+							end,
+							set = function(_, v)
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								cb[classFileName] = cb[classFileName] or {}
+								cb[classFileName][specID] = cb[classFileName][specID] or {}
+								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+								cb[classFileName][specID][spellId].stacksFontSize = v
+								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+							end,
+						},
+					},
+				},
+				duration = {
+					type = "group",
+					name = "Duration",
+					inline = true,
+					order = 4,
+					args = {
+						showCooldown = {
+							type = "toggle",
+							name = "Enabled",
+							order = 1,
+							width = 0.8,
+							get = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showCooldown == true
+							end,
+							set = function(_, v)
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								cb[classFileName] = cb[classFileName] or {}
+								cb[classFileName][specID] = cb[classFileName][specID] or {}
+								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+								cb[classFileName][specID][spellId].showCooldown = v
+								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+							end,
+						},
+						cooldownFontSize = {
+							type = "range",
+							name = "Font Size",
+							order = 2,
+							width = 0.8,
+							min = 6,
+							max = 32,
+							step = 1,
+							disabled = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
+								return s.enabled ~= true or s.showCooldown ~= true
+							end,
+							get = function()
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).cooldownFontSize or 10
+							end,
+							set = function(_, v)
+								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+								cb[classFileName] = cb[classFileName] or {}
+								cb[classFileName][specID] = cb[classFileName][specID] or {}
+								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+								cb[classFileName][specID][spellId].cooldownFontSize = v
+								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+							end,
+						},
+					},
+				},
+				},
+			}
+
+			specOrder = specOrder + 1
+		end
+
+		args["spec_" .. specID] = {
+			type = "group",
+			name = specEntry.name,
+			childGroups = "tree",
+			order = order,
+			args = specArgs,
+		}
+
+		order = order + 1
+	end
+
+	return args
+end
+
 local function GetBuffOverlayOptions(layoutKey)
 	local classFileName = addon.Utilities:GetPlayerClassFileName()
 	local profile = addon.Database:GetProfile()
@@ -986,7 +1291,7 @@ local options = {
 									type = "toggle",
 									name = "Enabled",
 									order = 1,
-									width = 1.0,
+									width = 1,
 									get = function()
 										local p = addon.Database:GetProfile()
 										return ((p.party or {}).power or {}).enabled == true
@@ -1007,7 +1312,7 @@ local options = {
 									type = "toggle",
 									name = "Healers Only",
 									order = 2,
-									width = 1.0,
+									width = 1,
 									disabled = function()
 										local p = addon.Database:GetProfile()
 										return ((p.party or {}).power or {}).enabled ~= true
@@ -1032,7 +1337,7 @@ local options = {
 									type = "range",
 									name = "Height",
 									order = 3,
-									width = 1.0,
+									width = 1,
 									min = 1,
 									max = 20,
 									step = 1,
@@ -1085,7 +1390,7 @@ local options = {
 									type = "range",
 									name = "Border Thickness",
 									order = 5,
-									width = 1.0,
+									width = 1,
 									min = 1,
 									max = 6,
 									step = 1,
@@ -1728,6 +2033,13 @@ local options = {
 									args = {},
 								},
 							},
+						},
+						customBuffIcons = {
+							type = "group",
+							name = "Custom Buffs",
+							order = 1.5,
+							childGroups = "tab",
+							args = {},
 						},
 						buffOverlays = {
 							type = "group",
@@ -3711,7 +4023,7 @@ local options = {
 									type = "toggle",
 									name = "Enabled",
 									order = 1,
-									width = 1.0,
+									width = 1,
 									get = function()
 										local p = addon.Database:GetProfile()
 										return ((p.raid or {}).power or {}).enabled == true
@@ -3732,7 +4044,7 @@ local options = {
 									type = "toggle",
 									name = "Healers Only",
 									order = 2,
-									width = 1.0,
+									width = 1,
 									disabled = function()
 										local p = addon.Database:GetProfile()
 										return ((p.raid or {}).power or {}).enabled ~= true
@@ -3757,7 +4069,7 @@ local options = {
 									type = "range",
 									name = "Height",
 									order = 3,
-									width = 1.0,
+									width = 1,
 									min = 1,
 									max = 20,
 									step = 1,
@@ -3810,7 +4122,7 @@ local options = {
 									type = "range",
 									name = "Border Thickness",
 									order = 5,
-									width = 1.0,
+									width = 1,
 									min = 1,
 									max = 6,
 									step = 1,
@@ -4456,6 +4768,13 @@ local options = {
 									args = {},
 								},
 							},
+						},
+						customBuffIcons = {
+							type = "group",
+							name = "Custom Buffs",
+							order = 1.5,
+							childGroups = "tab",
+							args = {},
 						},
 						buffOverlays = {
 							type = "group",
@@ -5906,7 +6225,7 @@ local options = {
 							type = "execute",
 							name = "Create & Switch",
 							order = 2,
-							width = 1.0,
+							width = 1,
 							func = function()
 								if InCombatLockdown() then
 									ShowCombatLockMessage()
@@ -5942,7 +6261,7 @@ local options = {
 							type = "select",
 							name = "Copy From",
 							order = 1,
-							width = 1.0,
+							width = 1,
 							values = function()
 								return GetProfileValues(true)
 							end,
@@ -6077,9 +6396,11 @@ AddPageHeader(options.args.profiles.args, 0)
 function addon:RegisterOptions()
 	options.args.party.args.auras.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("party")
 	options.args.party.args.auras.args.buffOverlays.args = GetBuffOverlayOptions("party")
+	options.args.party.args.auras.args.customBuffIcons.args = GetCustomBuffsOptions("party")
 
 	options.args.raid.args.auras.args.buffs.args.customBuffs.args = GetCustomBuffListOptions("raid")
 	options.args.raid.args.auras.args.buffOverlays.args = GetBuffOverlayOptions("raid")
+	options.args.raid.args.auras.args.customBuffIcons.args = GetCustomBuffsOptions("raid")
 
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
 	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 764)
