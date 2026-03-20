@@ -37,7 +37,7 @@ Frames/Widgets/Indicators/RoleIcon.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua
-Frames/Widgets/Icons/CustomIcons.lua
+Frames/Widgets/Icons/CustomBuffs.lua
 Frames/Widgets/Icons/Debuffs.lua
 Frames/Widgets/Icons/BigDefensive.lua
 Frames/Widgets/Icons/PrivateAuras.lua
