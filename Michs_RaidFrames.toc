@@ -2,7 +2,7 @@
 ## Title: Mich's RaidFrames
 ## Notes: Addon that manages custom Party/Raid frames
 ## Author: Mich
-## Version: 1.4.1
+## Version: 1.4.2
 ## SavedVariables: Michs_RaidFramesDB
 
 # Ace3

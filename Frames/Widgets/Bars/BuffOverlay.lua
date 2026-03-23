@@ -24,26 +24,6 @@ local function GetBuffOverlaySettings(settings)
 	return normalized
 end
 
-local function IsAllowedSpecAura(specID, spellId)
-	if not specID or not spellId or spellId == 0 then
-		return nil
-	end
-
-	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
-	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
-	local specAuras = classAuras[specID] or {}
-
-	local ok, hasAura = pcall(function()
-		return specAuras[spellId] ~= nil
-	end)
-
-	if ok then
-		return hasAura == true
-	end
-
-	return false
-end
-
 function BuffOverlay:Ensure(frame, settings)
 	if not frame then
 		return
@@ -123,6 +103,12 @@ function BuffOverlay:UpdateState(frame, settings)
 
 	local buffOverlaySettings = GetBuffOverlaySettings(settings)
 	local specID = addon.Utilities:GetPlayerSpecID()
+	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
+	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
+	local specAuras = classAuras[specID] or {}
+
+	local provider = frame.dataProvider
+	local auras = provider and provider:GetUnitAuras(frame, "helpfulPlayer") or {}
 
 	for index = 1, #buffOverlaySettings.overlayKeys do
 		local overlayKey = buffOverlaySettings.overlayKeys[index]
@@ -138,14 +124,18 @@ function BuffOverlay:UpdateState(frame, settings)
 			local enabled = specSettings and specSettings.enabled == true
 			local spellId = specSettings and specSettings.spellId or 0
 			local color = specSettings and specSettings.color or nil
-			local isAllowedAura = IsAllowedSpecAura(specID, spellId)
+
+			local ok, isAllowedAura = pcall(function()
+				return specAuras[spellId] ~= nil
+			end)
+			if not ok then
+				isAllowedAura = false
+			end
 
 			if not enabled or spellId == 0 or not color or not isAllowedAura then
 				overlay:Hide()
 			else
 				local hasBuff = false
-				local provider = frame and frame.dataProvider
-				local auras = provider and provider:GetUnitAuras(frame, "helpfulPlayer") or {}
 
 				for _, aura in ipairs(auras) do
 					local matchesSpell = false

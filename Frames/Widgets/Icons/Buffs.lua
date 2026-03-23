@@ -7,34 +7,14 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
-local function GetCustomBuffFilterEntry(settings, aura)
-	if not settings or not aura then
-		return nil
-	end
-
-	local widgets = settings.widgets or {}
+local function GetBuffSettings(settings)
+	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local buffs = icons.buffs or {}
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
-
-	local ok, customBuff = pcall(function()
-		return specAuras[aura.spellId]
-	end)
-
-	if ok then
-		return customBuff
-	end
-
-	return nil
-end
-
-local function GetBuffSettings(settings)
-	local widgets = (settings and settings.widgets) or {}
-	local icons = widgets.icons or {}
-	local buffs = icons.buffs or {}
 
 	return {
 		enabled = buffs.enabled ~= false,
@@ -50,17 +30,18 @@ local function GetBuffSettings(settings)
 		stacksFontSize = buffs.stacksFontSize or 10,
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
-		useCustomBuffFilter = buffs.useCustomBuffFilter == true,
 		showExternals = buffs.showExternals == true,
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
+		specAuras = specAuras,
 	}
 end
 
 function Buffs:Ensure(frame, settings)
-	local buffSettings = GetBuffSettings(settings)
 	if not frame then
 		return
 	end
+
+	local buffSettings = GetBuffSettings(settings)
 
 	if not frame.buffsContainer then
 		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
@@ -76,11 +57,12 @@ function Buffs:Ensure(frame, settings)
 end
 
 function Buffs:UpdateSettings(frame, settings)
-	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
 	if not container then
 		return
 	end
+
+	local buffSettings = GetBuffSettings(settings)
 
 	local iconSizePx = addon.Utilities:Scale(buffSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(buffSettings.spacingPx)
@@ -135,11 +117,12 @@ function Buffs:UpdateSettings(frame, settings)
 end
 
 function Buffs:UpdateState(frame, settings)
-	local buffSettings = GetBuffSettings(settings)
 	local container = frame and frame.buffsContainer
 	if not container then
 		return
 	end
+
+	local buffSettings = GetBuffSettings(settings)
 
 	if not buffSettings.enabled then
 		addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
@@ -173,20 +156,25 @@ function Buffs:UpdateState(frame, settings)
 			break
 		end
 
-		local customBuff = GetCustomBuffFilterEntry(settings, aura)
+		local ok, customAuraSettings = pcall(function()
+			return buffSettings.specAuras[aura.spellId]
+		end)
+		if not ok then
+			customAuraSettings = nil
+		end
 
 		local auraInstanceID = aura.auraInstanceID
 
 		local alreadyShown = auraInstanceID and shownAuraInstanceIDs[auraInstanceID] == true
-		local shouldShowAura = customBuff ~= nil and customBuff.enabled == true
+		local shouldShowAura = customAuraSettings ~= nil and customAuraSettings.enabled == true
 
 		if shouldShowAura and not alreadyShown and aura.icon then
 			local icon = container.icons[shown + 1]
 			if icon and icon.texture then
 				shown = shown + 1
 
-				if aura.auraInstanceID then
-					shownAuraInstanceIDs[aura.auraInstanceID] = true
+				if auraInstanceID then
+					shownAuraInstanceIDs[auraInstanceID] = true
 				end
 
 				local stackText
