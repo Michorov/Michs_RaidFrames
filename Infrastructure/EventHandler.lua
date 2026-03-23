@@ -35,11 +35,10 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UNIT_POWER_UPDATE")
 	self:RegisterEvent("UNIT_MAXPOWER")
 	self:RegisterEvent("UNIT_DISPLAYPOWER")
-
 	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
 	self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
-
 	self:RegisterEvent("UNIT_AURA")
+
 	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_CONNECTION")
@@ -69,11 +68,6 @@ local function QueueLateRosterRefresh()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
-	if addon.AuraHandler and addon.AuraHandler.Ensure then
-		addon.AuraHandler:Ensure()
-		addon.AuraHandler:Prime()
-	end
-
 	addon.FrameRegistry:Initialize()
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
@@ -174,6 +168,10 @@ function EventHandler:UNIT_NAME_UPDATE(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("nameStateChanged", unit)
+
+	C_Timer.After(1, function()
+		addon.UpdateScheduler:Notify("nameStateChanged", unit)
+	end)
 end
 
 function EventHandler:UNIT_HEALTH(event, unit)
