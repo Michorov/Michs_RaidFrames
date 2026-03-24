@@ -214,8 +214,7 @@ function Debuffs:UpdateState(frame, settings)
 				addon.Frames.Managers.IconManager:ApplyIconState(icon, {
 					texture = aura.icon,
 					countText = stackText,
-					expirationTime = aura.expirationTime,
-					duration = aura.duration,
+					durationObject = provider:GetAuraDuration(frame, aura),
 					hasExpiration = hasExpiration,
 				})
 

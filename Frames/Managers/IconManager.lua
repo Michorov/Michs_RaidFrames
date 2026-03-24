@@ -190,8 +190,8 @@ function IconManager:ApplyIconState(icon, state)
 	end
 
 	if icon.cooldown then
-		if icon.cooldown.SetCooldownFromExpirationTime then
-			pcall(icon.cooldown.SetCooldownFromExpirationTime, icon.cooldown, state.expirationTime, state.duration)
+		if state.durationObject and icon.cooldown.SetCooldownFromDurationObject then
+			icon.cooldown:SetCooldownFromDurationObject(state.durationObject)
 		end
 
 		if icon.cooldown.SetShownFromBoolean then
