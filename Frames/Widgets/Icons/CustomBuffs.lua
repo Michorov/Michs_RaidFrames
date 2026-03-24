@@ -129,7 +129,9 @@ function CustomBuffs:UpdateState(frame, settings)
 
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 	for _, aura in ipairs(auras) do
-		local spellOk, isEnabled = pcall(function() return aura.spellId and enabledSpells[aura.spellId] end)
+		local spellOk, isEnabled = pcall(function()
+			return aura.spellId and enabledSpells[aura.spellId]
+		end)
 		if spellOk and isEnabled then
 			local icon = customBuffs[aura.spellId]
 			if icon and aura.icon then
@@ -138,8 +140,7 @@ function CustomBuffs:UpdateState(frame, settings)
 				addon.Frames.Managers.IconManager:ApplyIconState(icon, {
 					texture = aura.icon,
 					countText = stackText,
-					expirationTime = aura.expirationTime,
-					duration = aura.duration,
+					durationObject = provider:GetAuraDuration(frame, aura),
 					hasExpiration = hasExpiration,
 				})
 			end

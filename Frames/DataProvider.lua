@@ -823,3 +823,28 @@ function DataProvider.Test:GetUnitAuraInstanceIDs(frame, filterKey)
 
 	return auraInstanceIDs
 end
+
+function DataProvider.Live:GetAuraDuration(frame, aura)
+	local unit = frame and frame.unit
+	local auraInstanceID = aura and aura.auraInstanceID
+	if not unit or not auraInstanceID or not C_UnitAuras.GetAuraDuration then
+		return nil
+	end
+	return C_UnitAuras.GetAuraDuration(unit, auraInstanceID)
+end
+
+function DataProvider.Test:GetAuraDuration(frame, aura)
+	if not aura or not C_DurationUtil or not C_DurationUtil.CreateDuration then
+		return nil
+	end
+	local duration = type(aura.duration) == "number" and aura.duration or 0
+	local expirationTime = type(aura.expirationTime) == "number" and aura.expirationTime or 0
+	if duration <= 0 or expirationTime <= 0 then
+		return nil
+	end
+	local durationObj = C_DurationUtil.CreateDuration()
+	if durationObj and durationObj.SetTimeFromEnd then
+		durationObj:SetTimeFromEnd(expirationTime, duration, 1)
+	end
+	return durationObj
+end
