@@ -6,6 +6,8 @@ addon.Frames.Base.Power = addon.Frames.Base.Power or {}
 
 local Power = addon.Frames.Base.Power
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
 local POWER_COLORS = {
 	MANA = { r = 0.00, g = 0.45, b = 1.00, a = 1.0 },
 	RAGE = { r = 0.90, g = 0.20, b = 0.20, a = 1.0 },
@@ -23,19 +25,18 @@ local POWER_COLORS = {
 	ESSENCE = { r = 0.00, g = 0.80, b = 0.85, a = 1.0 },
 }
 
-local function GetPowerSettings(settings)
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local power = (settings and settings.power) or {}
 	local backgroundColor = power.backgroundColor or {}
 
-	return {
+	local result = {
 		enabled = power.enabled == true,
 		healerOnly = power.healerOnly == true,
 		texture = power.texture or "Interface\\Buttons\\WHITE8x8",
-
 		heightPx = addon.Utilities:ToPixels(power.height or 4),
 		borderEnabled = power.borderEnabled ~= false,
 		borderThicknessPx = addon.Utilities:ToPixels(power.borderThicknessPx or 1),
-
 		backgroundColor = {
 			r = backgroundColor.r or 0,
 			g = backgroundColor.g or 0,
@@ -43,6 +44,8 @@ local function GetPowerSettings(settings)
 			a = backgroundColor.a or 0.5,
 		},
 	}
+
+	settingsCache[settings] = result
 end
 
 function Power:Ensure(frame)
@@ -85,12 +88,13 @@ function Power:UpdateSettings(frame, settings)
 		return
 	end
 
-	local powerSettings = GetPowerSettings(settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	local scaledHeightPx = math.max(1, addon.Utilities:Scale(powerSettings.heightPx))
-	local scaledBorderPx = math.max(1, addon.Utilities:Scale(powerSettings.borderThicknessPx))
+	local scaledHeightPx = math.max(1, addon.Utilities:Scale(cachedSettings.heightPx))
+	local scaledBorderPx = math.max(1, addon.Utilities:Scale(cachedSettings.borderThicknessPx))
 
-	powerBar:SetStatusBarTexture(powerSettings.texture)
+	powerBar:SetStatusBarTexture(cachedSettings.texture)
 
 	if frame.border and frame.border.GetFrameLevel then
 		powerBar:SetFrameLevel(frame.border:GetFrameLevel() - 1)
@@ -104,14 +108,14 @@ function Power:UpdateSettings(frame, settings)
 	powerBar:SetHeight(addon.Utilities:ToUI(scaledHeightPx))
 
 	if powerBar.background then
-		local c = powerSettings.backgroundColor
+		local c = cachedSettings.backgroundColor
 		powerBar.background:SetAllPoints(powerBar)
 		powerBar.background:SetColorTexture(c.r, c.g, c.b, c.a)
 		powerBar.background:Show()
 	end
 
 	if powerBar.border then
-		if powerSettings.borderEnabled then
+		if cachedSettings.borderEnabled then
 			powerBar.border:ClearAllPoints()
 			powerBar.border:SetAllPoints(powerBar)
 			powerBar.border:SetBackdrop({
@@ -125,10 +129,10 @@ function Power:UpdateSettings(frame, settings)
 		end
 	end
 
-	local showBar = powerSettings.enabled
+	local showBar = cachedSettings.enabled
 
 	local provider = frame and frame.dataProvider
-	if showBar and powerSettings.healerOnly then
+	if showBar and cachedSettings.healerOnly then
 		showBar = provider:IsHealer(frame)
 	end
 
@@ -145,8 +149,12 @@ function Power:UpdateState(frame, settings)
 		return
 	end
 
-	local powerSettings = GetPowerSettings(settings)
-	if not powerSettings.enabled then
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		powerBar:Hide()
 		return
 	end

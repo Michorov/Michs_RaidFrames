@@ -7,18 +7,23 @@ addon.Frames.Widgets.Indicators.RoleIcon = addon.Frames.Widgets.Indicators.RoleI
 
 local RoleIcon = addon.Frames.Widgets.Indicators.RoleIcon
 
-local function GetRoleIconSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.indicators or {}
 	local roleIcon = indicators.roleIcon or {}
 
-	return {
+	local result = {
 		enabled = roleIcon.enabled == true,
 		anchor = roleIcon.anchor or "TOPLEFT",
 		sizePx = addon.Utilities:ToPixels(roleIcon.size or 16),
 		offsetXPx = addon.Utilities:ToPixels(roleIcon.offsetX or 0),
 		offsetYPx = addon.Utilities:ToPixels(roleIcon.offsetY or 0),
 	}
+
+	settingsCache[settings] = result
 end
 
 local function ApplyRoleAtlas(icon, role)
@@ -58,21 +63,23 @@ function RoleIcon:UpdateSettings(frame, settings)
 		return
 	end
 
-	local roleSettings = GetRoleIconSettings(settings)
-	if not roleSettings.enabled then
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
 
-	local sizePx = addon.Utilities:Scale(roleSettings.sizePx)
-	local offsetX = addon.Utilities:Scale(roleSettings.offsetXPx)
-	local offsetY = addon.Utilities:Scale(roleSettings.offsetYPx)
+	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
+	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
 	icon:ClearAllPoints()
 	icon:SetPoint(
-		roleSettings.anchor,
+		cachedSettings.anchor,
 		icon:GetParent(),
-		roleSettings.anchor,
+		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
@@ -85,8 +92,12 @@ function RoleIcon:UpdateState(frame, settings)
 		return
 	end
 
-	local roleSettings = GetRoleIconSettings(settings)
-	if not roleSettings.enabled then
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
