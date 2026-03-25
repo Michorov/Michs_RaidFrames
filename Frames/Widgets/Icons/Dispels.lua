@@ -7,6 +7,8 @@ addon.Frames.Widgets.Icons.Dispels = addon.Frames.Widgets.Icons.Dispels or {}
 
 local Dispels = addon.Frames.Widgets.Icons.Dispels
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
 local DISPEL_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\DispelIconFill"
 local DISPEL_BORDER_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\DispelIconBorder"
 
@@ -27,12 +29,13 @@ for _, data in pairs(DISPEL_CURVE_DEFAULTS) do
 	dispelCurve:AddPoint(data[1], data[2])
 end
 
-local function GetDispelsSettings(settings)
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.icons or {}
 	local dispels = indicators.dispels or {}
 
-	return {
+	local result = {
 		enabled = dispels.enabled ~= false,
 		anchor = dispels.anchor or "TOPRIGHT",
 		relativeAnchor = dispels.relativeAnchor or "TOPRIGHT",
@@ -44,6 +47,8 @@ local function GetDispelsSettings(settings)
 		alpha = dispels.alpha or 1,
 		maxIcons = math.max(1, dispels.maxIcons or 4),
 	}
+
+	settingsCache[settings] = result
 end
 
 local function GetGrowthOffsets(growDirection, stepPx)
@@ -59,7 +64,6 @@ local function GetGrowthOffsets(growDirection, stepPx)
 end
 
 function Dispels:Ensure(frame, settings)
-	local dispelSettings = GetDispelsSettings(settings)
 	if not frame then
 		return
 	end
@@ -68,10 +72,15 @@ function Dispels:Ensure(frame, settings)
 		frame.dispelsContainer = CreateFrame("Frame", nil, frame.widgetsOverlay)
 	end
 
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
 	local container = frame.dispelsContainer
 	container.icons = container.icons or {}
 
-	for i = 1, dispelSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = CreateFrame("Frame", nil, container)
@@ -92,42 +101,44 @@ function Dispels:Ensure(frame, settings)
 end
 
 function Dispels:UpdateSettings(frame, settings)
-	local dispelSettings = GetDispelsSettings(settings)
 	local container = frame and frame.dispelsContainer
 	if not container then
 		return
 	end
 
-	local iconSizePx = addon.Utilities:ScaleEven(dispelSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(dispelSettings.spacingPx)
-	local offsetXPx = addon.Utilities:Scale(dispelSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(dispelSettings.offsetYPx)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local iconSizePx = addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
 	local stepPx = iconSizePx + spacingPx
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		dispelSettings.anchor,
+		cachedSettings.anchor,
 		container:GetParent(),
-		dispelSettings.relativeAnchor,
+		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
 	)
 
 	local widthPx
 	local heightPx
-	if dispelSettings.growDirection == "UP" or dispelSettings.growDirection == "DOWN" then
+	if cachedSettings.growDirection == "UP" or cachedSettings.growDirection == "DOWN" then
 		widthPx = iconSizePx
-		heightPx = (dispelSettings.maxIcons * iconSizePx) + ((dispelSettings.maxIcons - 1) * spacingPx)
+		heightPx = (cachedSettings.maxIcons * iconSizePx) + ((cachedSettings.maxIcons - 1) * spacingPx)
 	else
-		widthPx = (dispelSettings.maxIcons * iconSizePx) + ((dispelSettings.maxIcons - 1) * spacingPx)
+		widthPx = (cachedSettings.maxIcons * iconSizePx) + ((cachedSettings.maxIcons - 1) * spacingPx)
 		heightPx = iconSizePx
 	end
 
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	local dx, dy = GetGrowthOffsets(dispelSettings.growDirection, stepPx)
+	local dx, dy = GetGrowthOffsets(cachedSettings.growDirection, stepPx)
 
-	for i = 1, dispelSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = CreateFrame("Frame", nil, container)
@@ -146,22 +157,22 @@ function Dispels:UpdateSettings(frame, settings)
 		end
 
 		icon:SetSize(addon.Utilities:ToUI(iconSizePx), addon.Utilities:ToUI(iconSizePx))
-		icon:SetAlpha(dispelSettings.alpha)
+		icon:SetAlpha(cachedSettings.alpha)
 
 		local xPx = dx * (i - 1)
 		local yPx = dy * (i - 1)
 
 		icon:ClearAllPoints()
 		icon:SetPoint(
-			dispelSettings.anchor,
+			cachedSettings.anchor,
 			container,
-			dispelSettings.anchor,
+			cachedSettings.anchor,
 			addon.Utilities:ToUI(xPx),
 			addon.Utilities:ToUI(yPx)
 		)
 	end
 
-	for i = dispelSettings.maxIcons + 1, #(container.icons or {}) do
+	for i = cachedSettings.maxIcons + 1, #(container.icons or {}) do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -170,14 +181,18 @@ function Dispels:UpdateSettings(frame, settings)
 end
 
 function Dispels:UpdateState(frame, settings)
-	local dispelSettings = GetDispelsSettings(settings)
 	local container = frame and frame.dispelsContainer
 	if not container then
 		return
 	end
 
-	if not dispelSettings.enabled then
-		for i = 1, dispelSettings.maxIcons do
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
+		for i = 1, cachedSettings.maxIcons do
 			local icon = container.icons[i]
 			if icon then
 				icon:Hide()
@@ -197,7 +212,7 @@ function Dispels:UpdateState(frame, settings)
 	end
 
 	local shown = 0
-	local maxIcons = dispelSettings.maxIcons
+	local maxIcons = cachedSettings.maxIcons
 	local auras = provider:GetUnitAuras(frame, "harmfulRaidPlayerDispellable")
 
 	for _, aura in ipairs(auras) do
@@ -211,8 +226,8 @@ function Dispels:UpdateState(frame, settings)
 			if icon and icon.texture then
 				shown = shown + 1
 				icon.texture:SetTexture(DISPEL_TEXTURE)
-				icon.texture:SetVertexColor(color.r, color.g, color.b, dispelSettings.alpha or 1)
-				icon:SetAlpha(dispelSettings.alpha or 1)
+				icon.texture:SetVertexColor(color.r, color.g, color.b, cachedSettings.alpha or 1)
+				icon:SetAlpha(cachedSettings.alpha or 1)
 				icon:Show()
 			end
 		end

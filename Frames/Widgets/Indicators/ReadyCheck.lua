@@ -7,15 +7,18 @@ addon.Frames.Widgets.Indicators.ReadyCheck = addon.Frames.Widgets.Indicators.Rea
 
 local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
 local READY_CHECK_HOLD = 5
 
-local function GetReadyCheckSettings(settings)
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.indicators or {}
 	local readyCheck = indicators.readyCheck or {}
 	local textures = readyCheck.textures or {}
 
-	return {
+	local result = {
 		enabled = readyCheck.enabled ~= false,
 		sizePx = addon.Utilities:ToPixels(readyCheck.size or 36),
 		anchor = readyCheck.anchor or "CENTER",
@@ -25,6 +28,8 @@ local function GetReadyCheckSettings(settings)
 		notReadyTexture = textures.notReady or "Interface\\RaidFrame\\ReadyCheck-NotReady",
 		waitingTexture = textures.waiting or "Interface\\RaidFrame\\ReadyCheck-Waiting",
 	}
+
+	settingsCache[settings] = result
 end
 
 local function GetTextureForStatus(status, settings)
@@ -65,21 +70,23 @@ function ReadyCheck:UpdateSettings(frame, settings)
 		return
 	end
 
-	local rcSettings = GetReadyCheckSettings(settings)
-	if not rcSettings.enabled then
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
 
-	local sizePx = addon.Utilities:Scale(rcSettings.sizePx)
-	local offsetX = addon.Utilities:Scale(rcSettings.offsetXPx)
-	local offsetY = addon.Utilities:Scale(rcSettings.offsetYPx)
+	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
+	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
 	icon:ClearAllPoints()
 	icon:SetPoint(
-		rcSettings.anchor,
+		cachedSettings.anchor,
 		icon:GetParent(),
-		rcSettings.anchor,
+		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
@@ -93,8 +100,12 @@ function ReadyCheck:UpdateState(frame, settings)
 		return
 	end
 
-	local rcSettings = GetReadyCheckSettings(settings)
-	if not rcSettings.enabled then
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
@@ -116,7 +127,7 @@ function ReadyCheck:UpdateState(frame, settings)
 		return
 	end
 
-	local tex = GetTextureForStatus(status, rcSettings)
+	local tex = GetTextureForStatus(status, cachedSettings)
 	if not tex then
 		icon:Hide()
 		return

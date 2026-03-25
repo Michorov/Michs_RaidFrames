@@ -7,29 +7,40 @@ addon.Frames.Widgets.Icons.CustomBuffs = addon.Frames.Widgets.Icons.CustomBuffs 
 
 local CustomBuffs = addon.Frames.Widgets.Icons.CustomBuffs
 
-local function GetCustomIconSettings(iconSettings)
-	local icon = iconSettings or {}
+local settingsCache = setmetatable({}, { __mode = "k" })
 
-	return {
-		anchor = icon.anchor or "CENTER",
-		offsetXPx = addon.Utilities:ToPixels(icon.offsetX or 0),
-		offsetYPx = addon.Utilities:ToPixels(icon.offsetY or 0),
-		iconSizePx = addon.Utilities:ToPixels(icon.iconSize or 16),
-		borderSizePx = addon.Utilities:ToPixels(1),
-		showStacks = icon.showStacks == true,
-		stacksFontSize = icon.stacksFontSize or 10,
-		showCooldown = icon.showCooldown == true,
-		cooldownFontSize = icon.cooldownFontSize or 10,
-	}
-end
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 
-local function GetSpecAuras(settings)
 	local classFileName = addon.Utilities:GetPlayerClassFileName()
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local section = (settings and settings.widgets and settings.widgets.icons and settings.widgets.icons.customBuffs)
 		or {}
 	local classAuras = section[classFileName] or {}
-	return classAuras[specID] or classAuras[-1] or {}
+	local specAuras = classAuras[specID] or classAuras[-1] or {}
+
+	local iconSettings = {}
+	for spellId, iconData in pairs(specAuras) do
+		if iconData.enabled then
+			local icon = iconData or {}
+			iconSettings[spellId] = {
+				anchor = icon.anchor or "CENTER",
+				offsetXPx = addon.Utilities:ToPixels(icon.offsetX or 0),
+				offsetYPx = addon.Utilities:ToPixels(icon.offsetY or 0),
+				iconSizePx = addon.Utilities:ToPixels(icon.iconSize or 16),
+				borderSizePx = addon.Utilities:ToPixels(1),
+				showStacks = icon.showStacks == true,
+				stacksFontSize = icon.stacksFontSize or 10,
+				showCooldown = icon.showCooldown == true,
+				cooldownFontSize = icon.cooldownFontSize or 10,
+			}
+		end
+	end
+
+	settingsCache[settings] = {
+		specAuras = specAuras,
+		iconSettings = iconSettings,
+	}
 end
 
 function CustomBuffs:Ensure(frame, settings)
@@ -46,9 +57,12 @@ function CustomBuffs:Ensure(frame, settings)
 		return
 	end
 
-	local specAuras = GetSpecAuras(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
-	for spellId, iconSettings in pairs(specAuras) do
+	for spellId, iconSettings in pairs(cachedSettings.specAuras) do
 		if iconSettings.enabled and not frame.customBuffs[spellId] then
 			frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
 		end
@@ -62,9 +76,10 @@ function CustomBuffs:UpdateSettings(frame, settings)
 		return
 	end
 
-	local specAuras = GetSpecAuras(settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	for spellId, iconSettings in pairs(specAuras) do
+	for spellId, iconSettings in pairs(cachedSettings.specAuras) do
 		local icon = customBuffs[spellId]
 
 		if iconSettings.enabled then
@@ -73,7 +88,7 @@ function CustomBuffs:UpdateSettings(frame, settings)
 				customBuffs[spellId] = icon
 			end
 
-			local s = GetCustomIconSettings(iconSettings)
+			local s = cachedSettings.iconSettings[spellId]
 			local scaledIconSizePx = addon.Utilities:ScaleEven(s.iconSizePx)
 			local scaledOffsetXPx = addon.Utilities:Scale(s.offsetXPx)
 			local scaledOffsetYPx = addon.Utilities:Scale(s.offsetYPx)
@@ -114,14 +129,10 @@ function CustomBuffs:UpdateState(frame, settings)
 		return
 	end
 
-	local specAuras = GetSpecAuras(settings)
-
-	local enabledSpells = {}
-	for spellId, iconSettings in pairs(specAuras) do
-		if iconSettings.enabled then
-			enabledSpells[spellId] = true
-		end
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
 	end
+	local cachedSettings = settingsCache[settings]
 
 	for _, icon in pairs(customBuffs) do
 		icon:Hide()
@@ -130,7 +141,7 @@ function CustomBuffs:UpdateState(frame, settings)
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 	for _, aura in ipairs(auras) do
 		local spellOk, isEnabled = pcall(function()
-			return aura.spellId and enabledSpells[aura.spellId]
+			return aura.spellId and cachedSettings.iconSettings[aura.spellId] ~= nil
 		end)
 		if spellOk and isEnabled then
 			local icon = customBuffs[aura.spellId]

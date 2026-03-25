@@ -7,21 +7,25 @@ addon.Frames.Widgets.Bars.BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay or
 
 local BuffOverlay = addon.Frames.Widgets.Bars.BuffOverlay
 
-local function GetBuffOverlaySettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
 	local buffOverlays = bars.buffOverlays or {}
-	local normalized = {
+
+	local result = {
 		overlayKeys = {},
 	}
 
 	for overlayKey, overlaySettings in pairs(buffOverlays) do
-		table.insert(normalized.overlayKeys, overlayKey)
-		normalized[overlayKey] = overlaySettings
+		table.insert(result.overlayKeys, overlayKey)
+		result[overlayKey] = overlaySettings
 	end
 
-	table.sort(normalized.overlayKeys)
-	return normalized
+	table.sort(result.overlayKeys)
+	settingsCache[settings] = result
 end
 
 function BuffOverlay:Ensure(frame, settings)
@@ -34,12 +38,15 @@ function BuffOverlay:Ensure(frame, settings)
 		return
 	end
 
-	local buffOverlaySettings = GetBuffOverlaySettings(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	frame.buffOverlays = frame.buffOverlays or {}
 
-	for index = 1, #buffOverlaySettings.overlayKeys do
-		local overlayKey = buffOverlaySettings.overlayKeys[index]
+	for index = 1, #cachedSettings.overlayKeys do
+		local overlayKey = cachedSettings.overlayKeys[index]
 		local overlay = frame.buffOverlays[overlayKey]
 
 		if not overlay then
@@ -73,10 +80,11 @@ function BuffOverlay:UpdateSettings(frame, settings)
 		return
 	end
 
-	local buffOverlaySettings = GetBuffOverlaySettings(settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	for index = 1, #buffOverlaySettings.overlayKeys do
-		local overlayKey = buffOverlaySettings.overlayKeys[index]
+	for index = 1, #cachedSettings.overlayKeys do
+		local overlayKey = cachedSettings.overlayKeys[index]
 		local overlay = buffOverlays[overlayKey]
 
 		if overlay then
@@ -101,7 +109,11 @@ function BuffOverlay:UpdateState(frame, settings)
 		return
 	end
 
-	local buffOverlaySettings = GetBuffOverlaySettings(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
 	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
@@ -110,10 +122,10 @@ function BuffOverlay:UpdateState(frame, settings)
 	local provider = frame.dataProvider
 	local auras = provider and provider:GetUnitAuras(frame, "helpfulPlayer") or {}
 
-	for index = 1, #buffOverlaySettings.overlayKeys do
-		local overlayKey = buffOverlaySettings.overlayKeys[index]
+	for index = 1, #cachedSettings.overlayKeys do
+		local overlayKey = cachedSettings.overlayKeys[index]
 		local overlay = frame.buffOverlays[overlayKey]
-		local overlaySettings = buffOverlaySettings[overlayKey]
+		local overlaySettings = cachedSettings[overlayKey]
 
 		if not overlay or not overlaySettings or not specID then
 			if overlay then

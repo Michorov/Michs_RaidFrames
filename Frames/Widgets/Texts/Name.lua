@@ -7,20 +7,20 @@ addon.Frames.Widgets.Texts.Name = addon.Frames.Widgets.Texts.Name or {}
 
 local Name = addon.Frames.Widgets.Texts.Name
 
-local function GetNameSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local texts = widgets.texts or {}
 	local name = texts.name or {}
-
 	local position = name.position or {}
 	local color = name.color or {}
-	local positionX = addon.Utilities:ToPixels(position.x or 2)
-	local positionY = addon.Utilities:ToPixels(position.y or -2)
 
-	return {
+	local result = {
 		anchor = name.anchor or "TOPLEFT",
-		positionX = positionX,
-		positionY = positionY,
+		positionX = addon.Utilities:ToPixels(position.x or 2),
+		positionY = addon.Utilities:ToPixels(position.y or -2),
 		classColor = name.classColor == true,
 		color = {
 			r = color.r or 0,
@@ -32,6 +32,8 @@ local function GetNameSettings(settings)
 		size = name.size or 12,
 		outline = name.outline or "NONE",
 	}
+
+	settingsCache[settings] = result
 end
 
 local function GetNameColor(frame, nameSettings)
@@ -44,30 +46,28 @@ local function GetNameColor(frame, nameSettings)
 	return c.r, c.g, c.b, c.a
 end
 
-local function ApplyNameSettings(frame, nameText, settings)
-	local nameSettings = GetNameSettings(settings)
-
-	local scaledPositionX = addon.Utilities:Scale(nameSettings.positionX)
-	local scaledPositionY = addon.Utilities:Scale(nameSettings.positionY)
-	local scaledFontSize = addon.Utilities:ScaleFont(nameSettings.size)
+local function ApplyNameSettings(frame, nameText, cachedSettings)
+	local scaledPositionX = addon.Utilities:Scale(cachedSettings.positionX)
+	local scaledPositionY = addon.Utilities:Scale(cachedSettings.positionY)
+	local scaledFontSize = addon.Utilities:ScaleFont(cachedSettings.size)
 
 	nameText:ClearAllPoints()
 	nameText:SetPoint(
-		nameSettings.anchor,
+		cachedSettings.anchor,
 		frame,
-		nameSettings.anchor,
+		cachedSettings.anchor,
 		addon.Utilities:ToUI(scaledPositionX),
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	local fontFlags = nameSettings.outline
+	local fontFlags = cachedSettings.outline
 	if fontFlags == "NONE" then
 		fontFlags = ""
 	end
 
-	nameText:SetFont(nameSettings.font, scaledFontSize, fontFlags)
+	nameText:SetFont(cachedSettings.font, scaledFontSize, fontFlags)
 
-	local r, g, b, a = GetNameColor(frame, nameSettings)
+	local r, g, b, a = GetNameColor(frame, cachedSettings)
 	nameText:SetTextColor(r, g, b, a)
 end
 
@@ -85,7 +85,12 @@ function Name:Ensure(frame, settings)
 		frame.nameText = textLayer:CreateFontString(nil, "OVERLAY")
 	end
 
-	ApplyNameSettings(frame, frame.nameText, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	ApplyNameSettings(frame, frame.nameText, cachedSettings)
 end
 
 function Name:UpdateSettings(frame, settings)
@@ -94,23 +99,29 @@ function Name:UpdateSettings(frame, settings)
 		return
 	end
 
-	ApplyNameSettings(frame, nameText, settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	ApplyNameSettings(frame, nameText, cachedSettings)
 end
 
 function Name:UpdateState(frame, settings)
-	local nameSettings = GetNameSettings(settings)
-
 	local nameText = frame and frame.nameText
 	if not nameText then
 		return
 	end
+
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	local provider = frame and frame.dataProvider
 
 	local name = provider:GetName(frame) or ""
 	nameText:SetText(name)
 
-	local r, g, b, a = GetNameColor(frame, nameSettings)
+	local r, g, b, a = GetNameColor(frame, cachedSettings)
 	nameText:SetTextColor(r, g, b, a)
 end
 

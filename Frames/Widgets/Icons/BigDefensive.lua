@@ -7,12 +7,15 @@ addon.Frames.Widgets.Icons.BigDefensive = addon.Frames.Widgets.Icons.BigDefensiv
 
 local BigDefensive = addon.Frames.Widgets.Icons.BigDefensive
 
-local function GetBigDefensiveSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local bigDefensive = icons.bigDefensive or {}
 
-	return {
+	local result = {
 		anchor = bigDefensive.anchor or "CENTER",
 		relativeAnchor = bigDefensive.relativeAnchor or "CENTER",
 		offsetXPx = addon.Utilities:ToPixels(bigDefensive.offsetX or 0),
@@ -25,13 +28,19 @@ local function GetBigDefensiveSettings(settings)
 		showCooldown = bigDefensive.showCooldown == true,
 		cooldownFontSize = bigDefensive.cooldownFontSize or 10,
 	}
+
+	settingsCache[settings] = result
 end
 
 function BigDefensive:Ensure(frame, settings)
-	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	if not frame then
 		return
 	end
+
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	if not frame.bigDefensiveContainer then
 		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer")
@@ -42,7 +51,7 @@ function BigDefensive:Ensure(frame, settings)
 		return
 	end
 
-	for i = 1, bigDefensiveSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 15)
 		end
@@ -50,44 +59,46 @@ function BigDefensive:Ensure(frame, settings)
 end
 
 function BigDefensive:UpdateSettings(frame, settings)
-	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	local container = frame and frame.bigDefensiveContainer
 	if not container then
 		return
 	end
 
-	local offsetXPx = addon.Utilities:Scale(bigDefensiveSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(bigDefensiveSettings.offsetYPx)
-	local iconSizePx = addon.Utilities:ScaleEven(bigDefensiveSettings.iconSizePx)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local iconSizePx = addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		bigDefensiveSettings.anchor,
+		cachedSettings.anchor,
 		container:GetParent(),
-		bigDefensiveSettings.relativeAnchor,
+		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
 	)
 
 	container:SetSize(addon.Utilities:ToUI(iconSizePx), addon.Utilities:ToUI(iconSizePx))
 
-	for i = 1, bigDefensiveSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Managers.IconManager:CreateIcon(container, 15)
 			container.icons[i] = icon
 		end
 
-		addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, bigDefensiveSettings)
-		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, bigDefensiveSettings)
-		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, bigDefensiveSettings)
-		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, bigDefensiveSettings)
+		addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
 
 		icon:ClearAllPoints()
 		icon:SetPoint("CENTER", container, "CENTER", 0, 0)
 	end
 
-	for i = bigDefensiveSettings.maxIcons + 1, #container.icons do
+	for i = cachedSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -96,11 +107,15 @@ function BigDefensive:UpdateSettings(frame, settings)
 end
 
 function BigDefensive:UpdateState(frame, settings)
-	local bigDefensiveSettings = GetBigDefensiveSettings(settings)
 	local container = frame and frame.bigDefensiveContainer
 	if not container then
 		return
 	end
+
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	local unit = frame.unit
 	local provider = frame and frame.dataProvider
@@ -111,7 +126,7 @@ function BigDefensive:UpdateState(frame, settings)
 		return
 	end
 
-	local maxIcons = bigDefensiveSettings.maxIcons
+	local maxIcons = cachedSettings.maxIcons
 	local shown = 0
 
 	local icon = container.icons[1]
@@ -125,7 +140,7 @@ function BigDefensive:UpdateState(frame, settings)
 
 	if aura and aura.icon and icon then
 		local stackText
-		if bigDefensiveSettings.showStacks then
+		if cachedSettings.showStacks then
 			stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 		end
 

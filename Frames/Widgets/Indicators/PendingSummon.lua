@@ -7,12 +7,15 @@ addon.Frames.Widgets.Indicators.PendingSummon = addon.Frames.Widgets.Indicators.
 
 local PendingSummon = addon.Frames.Widgets.Indicators.PendingSummon
 
-local function GetPendingSummonSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.indicators or {}
 	local pendingSummon = indicators.pendingSummon or {}
 
-	return {
+	local result = {
 		sizePx = addon.Utilities:ToPixels(pendingSummon.size or 36),
 		alpha = pendingSummon.alpha or 1,
 		anchor = pendingSummon.anchor or "CENTER",
@@ -24,6 +27,8 @@ local function GetPendingSummonSettings(settings)
 		acceptedTexture = pendingSummon.acceptedTexture or "Interface\\RaidFrame\\ReadyCheck-Ready",
 		declinedTexture = pendingSummon.declinedTexture or "Interface\\RaidFrame\\ReadyCheck-NotReady",
 	}
+
+	settingsCache[settings] = result
 end
 
 function PendingSummon:Ensure(frame)
@@ -60,29 +65,30 @@ function PendingSummon:UpdateSettings(frame, settings)
 		return
 	end
 
-	local summonSettings = GetPendingSummonSettings(settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	local sizePx = addon.Utilities:Scale(summonSettings.sizePx)
-	local offsetX = addon.Utilities:Scale(summonSettings.offsetXPx)
-	local offsetY = addon.Utilities:Scale(summonSettings.offsetYPx)
+	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
+	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 	local statusSizePx = math.max(1, math.floor(sizePx * 0.45))
 
 	icon:ClearAllPoints()
 	icon:SetPoint(
-		summonSettings.anchor,
+		cachedSettings.anchor,
 		icon:GetParent(),
-		summonSettings.relativeAnchor,
+		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
 	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
-	icon:SetAlpha(summonSettings.alpha)
-	icon:SetTexture(summonSettings.texture)
+	icon:SetAlpha(cachedSettings.alpha)
+	icon:SetTexture(cachedSettings.texture)
 
 	statusIcon:ClearAllPoints()
 	statusIcon:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, 0)
 	statusIcon:SetSize(addon.Utilities:ToUI(statusSizePx), addon.Utilities:ToUI(statusSizePx))
-	statusIcon:SetAlpha(summonSettings.alpha)
+	statusIcon:SetAlpha(cachedSettings.alpha)
 end
 
 function PendingSummon:UpdateState(frame, settings)
@@ -112,19 +118,22 @@ function PendingSummon:UpdateState(frame, settings)
 		return
 	end
 
-	local summonSettings = GetPendingSummonSettings(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
-	icon:SetTexture(summonSettings.texture)
+	icon:SetTexture(cachedSettings.texture)
 	icon:Show()
 
 	if status == Enum.SummonStatus.Accepted then
-		statusIcon:SetTexture(summonSettings.acceptedTexture)
+		statusIcon:SetTexture(cachedSettings.acceptedTexture)
 		statusIcon:Show()
 	elseif status == Enum.SummonStatus.Declined then
-		statusIcon:SetTexture(summonSettings.declinedTexture)
+		statusIcon:SetTexture(cachedSettings.declinedTexture)
 		statusIcon:Show()
 	elseif status == Enum.SummonStatus.Pending then
-		statusIcon:SetTexture(summonSettings.pendingTexture)
+		statusIcon:SetTexture(cachedSettings.pendingTexture)
 		statusIcon:Show()
 	else
 		statusIcon:Hide()

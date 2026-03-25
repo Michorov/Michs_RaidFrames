@@ -7,6 +7,8 @@ addon.Frames.Widgets.Icons.Debuffs = addon.Frames.Widgets.Icons.Debuffs or {}
 
 local Debuffs = addon.Frames.Widgets.Icons.Debuffs
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
 local issecretvalue = issecretvalue
 
 local DEBUFF_BLACKLIST = {
@@ -60,12 +62,13 @@ local function IsBlacklistedAura(aura)
 	return DEBUFF_BLACKLIST[spellId] == true
 end
 
-local function GetDebuffSettings(settings)
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local debuffs = icons.debuffs or {}
 
-	return {
+	local result = {
 		enabled = debuffs.enabled ~= false,
 		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		anchor = debuffs.anchor or "BOTTOMLEFT",
@@ -82,13 +85,19 @@ local function GetDebuffSettings(settings)
 		cooldownFontSize = debuffs.cooldownFontSize or 10,
 		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
 	}
+
+	settingsCache[settings] = result
 end
 
 function Debuffs:Ensure(frame, settings)
-	local debuffSettings = GetDebuffSettings(settings)
 	if not frame then
 		return
 	end
+
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	local widgetsOverlay = frame.widgetsOverlay
 	if not widgetsOverlay then
@@ -101,7 +110,7 @@ function Debuffs:Ensure(frame, settings)
 
 	local container = frame.debuffsContainer
 
-	for i = 1, debuffSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end
@@ -109,49 +118,51 @@ function Debuffs:Ensure(frame, settings)
 end
 
 function Debuffs:UpdateSettings(frame, settings)
-	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
 	if not container then
 		return
 	end
 
-	local iconSizePx = addon.Utilities:Scale(debuffSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(debuffSettings.spacingPx)
-	local offsetXPx = addon.Utilities:Scale(debuffSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(debuffSettings.offsetYPx)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		debuffSettings.anchor,
+		cachedSettings.anchor,
 		container:GetParent(),
-		debuffSettings.relativeAnchor,
+		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
 	)
 
-	local visibleCols = math.min(debuffSettings.maxIcons, debuffSettings.iconsPerRow)
-	local rowCount = math.max(1, math.ceil(debuffSettings.maxIcons / debuffSettings.iconsPerRow))
+	local visibleCols = math.min(cachedSettings.maxIcons, cachedSettings.iconsPerRow)
+	local rowCount = math.max(1, math.ceil(cachedSettings.maxIcons / cachedSettings.iconsPerRow))
 
 	local widthPx = (visibleCols * iconSizePx) + ((visibleCols - 1) * spacingPx)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	for i = 1, debuffSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 			container.icons[i] = icon
 		end
 
-		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, debuffSettings)
-		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, debuffSettings)
-		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, debuffSettings)
-		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, debuffSettings)
+		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
 
 		local idx = i - 1
-		local col = idx % debuffSettings.iconsPerRow
-		local row = math.floor(idx / debuffSettings.iconsPerRow)
+		local col = idx % cachedSettings.iconsPerRow
+		local row = math.floor(idx / cachedSettings.iconsPerRow)
 
 		local stepPx = iconSizePx + spacingPx
 		local xPx = (col * stepPx)
@@ -161,7 +172,7 @@ function Debuffs:UpdateSettings(frame, settings)
 		icon:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", addon.Utilities:ToUI(xPx), addon.Utilities:ToUI(yPx))
 	end
 
-	for i = debuffSettings.maxIcons + 1, #container.icons do
+	for i = cachedSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -170,18 +181,22 @@ function Debuffs:UpdateSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	local debuffSettings = GetDebuffSettings(settings)
 	local container = frame and frame.debuffsContainer
 	if not container then
 		return
 	end
 
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
 	local unit = frame and frame.unit
 	local provider = frame and frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
-	if not debuffSettings.enabled then
-		addon.Frames.Managers.IconManager:HideIcons(container, debuffSettings.maxIcons)
+	if not cachedSettings.enabled then
+		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
 		return
 	end
 
@@ -191,7 +206,7 @@ function Debuffs:UpdateState(frame, settings)
 	end
 
 	local shown = 0
-	local maxIcons = debuffSettings.maxIcons
+	local maxIcons = cachedSettings.maxIcons
 	local auras = provider:GetUnitAuras(frame, "harmful")
 
 	for _, aura in ipairs(auras) do
@@ -205,7 +220,7 @@ function Debuffs:UpdateState(frame, settings)
 				shown = shown + 1
 
 				local stackText
-				if debuffSettings.showStacks then
+				if cachedSettings.showStacks then
 					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 				end
 
@@ -218,7 +233,7 @@ function Debuffs:UpdateState(frame, settings)
 					hasExpiration = hasExpiration,
 				})
 
-				if debuffSettings.borderColorByDebuffType then
+				if cachedSettings.borderColorByDebuffType then
 					local color = provider:GetAuraDispelTypeColor(frame, aura, dispelCurve)
 					if color then
 						addon.Frames.Managers.IconManager:ApplyBorderColor(icon, color)

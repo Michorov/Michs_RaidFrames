@@ -7,7 +7,11 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
-local function GetBuffSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local buffs = icons.buffs or {}
@@ -16,7 +20,7 @@ local function GetBuffSettings(settings)
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
 
-	return {
+	local result = {
 		enabled = buffs.enabled ~= false,
 		anchor = buffs.anchor or "BOTTOMRIGHT",
 		relativeAnchor = buffs.relativeAnchor or "BOTTOMRIGHT",
@@ -34,6 +38,8 @@ local function GetBuffSettings(settings)
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
 		specAuras = specAuras,
 	}
+
+	settingsCache[settings] = result
 end
 
 function Buffs:Ensure(frame, settings)
@@ -41,7 +47,10 @@ function Buffs:Ensure(frame, settings)
 		return
 	end
 
-	local buffSettings = GetBuffSettings(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
 	if not frame.buffsContainer then
 		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
@@ -49,7 +58,7 @@ function Buffs:Ensure(frame, settings)
 
 	local container = frame.buffsContainer
 
-	for i = 1, buffSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end
@@ -62,44 +71,45 @@ function Buffs:UpdateSettings(frame, settings)
 		return
 	end
 
-	local buffSettings = GetBuffSettings(settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	local iconSizePx = addon.Utilities:Scale(buffSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(buffSettings.spacingPx)
-	local offsetXPx = addon.Utilities:Scale(buffSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(buffSettings.offsetYPx)
+	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
+	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
 	local stepPx = iconSizePx + spacingPx
-	local visibleCols = math.min(buffSettings.maxIcons, buffSettings.iconsPerRow)
-	local rowCount = math.max(1, math.ceil(buffSettings.maxIcons / buffSettings.iconsPerRow))
+	local visibleCols = math.min(cachedSettings.maxIcons, cachedSettings.iconsPerRow)
+	local rowCount = math.max(1, math.ceil(cachedSettings.maxIcons / cachedSettings.iconsPerRow))
 
 	local widthPx = (visibleCols * iconSizePx) + ((visibleCols - 1) * spacingPx)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		buffSettings.anchor,
+		cachedSettings.anchor,
 		container:GetParent(),
-		buffSettings.relativeAnchor,
+		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
 	)
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
 
-	for i = 1, buffSettings.maxIcons do
+	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
 		if not icon then
 			icon = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 			container.icons[i] = icon
 		end
 
-		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, buffSettings)
-		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, buffSettings)
-		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, buffSettings)
-		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, buffSettings)
+		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
 
 		local idx = i - 1
-		local col = idx % buffSettings.iconsPerRow
-		local row = math.floor(idx / buffSettings.iconsPerRow)
+		local col = idx % cachedSettings.iconsPerRow
+		local row = math.floor(idx / cachedSettings.iconsPerRow)
 
 		local xPx = -(col * stepPx)
 		local yPx = row * stepPx
@@ -108,7 +118,7 @@ function Buffs:UpdateSettings(frame, settings)
 		icon:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", addon.Utilities:ToUI(xPx), addon.Utilities:ToUI(yPx))
 	end
 
-	for i = buffSettings.maxIcons + 1, #container.icons do
+	for i = cachedSettings.maxIcons + 1, #container.icons do
 		local icon = container.icons[i]
 		if icon then
 			icon:Hide()
@@ -122,10 +132,13 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	local buffSettings = GetBuffSettings(settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
 
-	if not buffSettings.enabled then
-		addon.Frames.Managers.IconManager:HideIcons(container, buffSettings.maxIcons)
+	if not cachedSettings.enabled then
+		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
 		return
 	end
 
@@ -138,11 +151,11 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	local maxIcons = buffSettings.maxIcons
+	local maxIcons = cachedSettings.maxIcons
 	local shown = 0
 	local shownAuraInstanceIDs = {}
 
-	if buffSettings.showExternals then
+	if cachedSettings.showExternals then
 		local bigDefensive = provider:GetUnitAuraInstanceIDs(frame, "helpfulBigDefensive")
 		for auraInstanceID in pairs(bigDefensive) do
 			shownAuraInstanceIDs[auraInstanceID] = true
@@ -157,7 +170,7 @@ function Buffs:UpdateState(frame, settings)
 		end
 
 		local ok, customAuraSettings = pcall(function()
-			return buffSettings.specAuras[aura.spellId]
+			return cachedSettings.specAuras[aura.spellId]
 		end)
 		if not ok then
 			customAuraSettings = nil
@@ -178,7 +191,7 @@ function Buffs:UpdateState(frame, settings)
 				end
 
 				local stackText
-				if buffSettings.showStacks then
+				if cachedSettings.showStacks then
 					stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 				end
 
@@ -194,7 +207,7 @@ function Buffs:UpdateState(frame, settings)
 		end
 	end
 
-	if buffSettings.showExternals and shown < maxIcons then
+	if cachedSettings.showExternals and shown < maxIcons then
 		local externals = provider:GetUnitAuras(frame, "helpfulExternalDefensive")
 
 		for _, aura in ipairs(externals) do
@@ -215,7 +228,7 @@ function Buffs:UpdateState(frame, settings)
 					end
 
 					local stackText
-					if buffSettings.showStacks then
+					if cachedSettings.showStacks then
 						stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
 					end
 

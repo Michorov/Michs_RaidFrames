@@ -7,18 +7,23 @@ addon.Frames.Widgets.Indicators.RaidMarker = addon.Frames.Widgets.Indicators.Rai
 
 local RaidMarker = addon.Frames.Widgets.Indicators.RaidMarker
 
-local function GetRaidMarkerSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.indicators or {}
 	local raidMarker = indicators.raidMarker or {}
 
-	return {
+	local result = {
 		enabled = raidMarker.enabled == true,
 		anchor = raidMarker.anchor or "TOP",
 		sizePx = addon.Utilities:ToPixels(raidMarker.size or 18),
 		offsetXPx = addon.Utilities:ToPixels(raidMarker.offsetX or 0),
 		offsetYPx = addon.Utilities:ToPixels(raidMarker.offsetY or 0),
 	}
+
+	settingsCache[settings] = result
 end
 
 function RaidMarker:Ensure(frame)
@@ -45,21 +50,23 @@ function RaidMarker:UpdateSettings(frame, settings)
 		return
 	end
 
-	local markerSettings = GetRaidMarkerSettings(settings)
-	if not markerSettings.enabled then
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
 
-	local sizePx = addon.Utilities:Scale(markerSettings.sizePx)
-	local offsetX = addon.Utilities:Scale(markerSettings.offsetXPx)
-	local offsetY = addon.Utilities:Scale(markerSettings.offsetYPx)
+	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
+	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
 	icon:ClearAllPoints()
 	icon:SetPoint(
-		markerSettings.anchor,
+		cachedSettings.anchor,
 		icon:GetParent(),
-		markerSettings.anchor,
+		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
@@ -72,8 +79,12 @@ function RaidMarker:UpdateState(frame, settings)
 		return
 	end
 
-	local markerSettings = GetRaidMarkerSettings(settings)
-	if not markerSettings.enabled then
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if not cachedSettings.enabled then
 		icon:Hide()
 		return
 	end
