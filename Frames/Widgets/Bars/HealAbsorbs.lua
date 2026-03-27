@@ -69,16 +69,22 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 	)
 end
 
-function HealAbsorbs:UpdateState(frame)
+function HealAbsorbs:UpdateState(frame, settings)
 	local bar = frame and frame.healAbsorbBar
-	if not frame or not bar then
+	if not bar then
 		return
 	end
 
 	local provider = frame and frame.dataProvider
 
-	local healAbsorbValue, currentHealth = provider:GetHealAbsorbs(frame)
-	if healAbsorbValue == nil or currentHealth == nil then
+	local healAbsorbValue = provider:GetHealAbsorbs(frame)
+	if healAbsorbValue == nil then
+		bar:Hide()
+		return
+	end
+
+	local currentHealth = provider:GetHealth(frame)
+	if currentHealth == nil then
 		bar:Hide()
 		return
 	end

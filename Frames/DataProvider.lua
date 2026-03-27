@@ -401,12 +401,8 @@ function DataProvider.Live:GetHealAbsorbs(frame)
 		return nil, nil
 	end
 
-	local currentHealth = UnitHealth(unit)
-	if currentHealth == nil then
-		return nil, nil
-	end
-
 	local healAbsorbValue
+	local totalHealAbsorbValue
 
 	if CreateUnitHealPredictionCalculator and UnitGetDetailedHealPrediction then
 		frame.healAbsorbCalculator = frame.healAbsorbCalculator or CreateUnitHealPredictionCalculator()
@@ -424,17 +420,25 @@ function DataProvider.Live:GetHealAbsorbs(frame)
 				healAbsorbValue = value
 			end
 		end
+
+		if calc.GetTotalHealAbsorbs then
+			local ok, value = pcall(calc.GetTotalHealAbsorbs, calc)
+			if ok then
+				totalHealAbsorbValue = value
+			end
+		end
 	end
 
 	if healAbsorbValue == nil and UnitGetTotalHealAbsorbs then
 		healAbsorbValue = UnitGetTotalHealAbsorbs(unit)
+		totalHealAbsorbValue = healAbsorbValue
 	end
 
 	if healAbsorbValue == nil then
 		return nil, nil
 	end
 
-	return healAbsorbValue, currentHealth
+	return healAbsorbValue, totalHealAbsorbValue or healAbsorbValue
 end
 
 function DataProvider.Test:GetHealAbsorbs(frame)
@@ -449,11 +453,10 @@ function DataProvider.Test:GetHealAbsorbs(frame)
 		23000,
 	}
 
-	local currentHealth = self:GetHealth(frame)
 	local index = frame and frame.testHealAbsorbIndex or 1
 	index = ((index - 1) % #healAbsorbSamples) + 1
 
-	return healAbsorbSamples[index], currentHealth
+	return healAbsorbSamples[index], healAbsorbSamples[index]
 end
 
 function DataProvider.Live:GetRole(frame)

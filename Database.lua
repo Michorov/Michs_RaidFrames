@@ -237,15 +237,33 @@ local function SyncCustomBuffs(currentValues, defaultValues)
 
 					currentEntry.name = defaultEntry.name
 
-					if currentEntry.enabled == nil then currentEntry.enabled = false end
-					if currentEntry.anchor == nil then currentEntry.anchor = "CENTER" end
-					if currentEntry.offsetX == nil then currentEntry.offsetX = 0 end
-					if currentEntry.offsetY == nil then currentEntry.offsetY = 0 end
-					if currentEntry.iconSize == nil then currentEntry.iconSize = 16 end
-					if currentEntry.showStacks == nil then currentEntry.showStacks = false end
-					if currentEntry.stacksFontSize == nil then currentEntry.stacksFontSize = 10 end
-					if currentEntry.showCooldown == nil then currentEntry.showCooldown = false end
-					if currentEntry.cooldownFontSize == nil then currentEntry.cooldownFontSize = 10 end
+					if currentEntry.enabled == nil then
+						currentEntry.enabled = false
+					end
+					if currentEntry.anchor == nil then
+						currentEntry.anchor = "CENTER"
+					end
+					if currentEntry.offsetX == nil then
+						currentEntry.offsetX = 0
+					end
+					if currentEntry.offsetY == nil then
+						currentEntry.offsetY = 0
+					end
+					if currentEntry.iconSize == nil then
+						currentEntry.iconSize = 16
+					end
+					if currentEntry.showStacks == nil then
+						currentEntry.showStacks = false
+					end
+					if currentEntry.stacksFontSize == nil then
+						currentEntry.stacksFontSize = 10
+					end
+					if currentEntry.showCooldown == nil then
+						currentEntry.showCooldown = false
+					end
+					if currentEntry.cooldownFontSize == nil then
+						currentEntry.cooldownFontSize = 10
+					end
 				end
 			end
 		end
@@ -267,7 +285,8 @@ local function SyncProfileCustomAuraDefaults(profileSection)
 	local buffSettings = profileSection.widgets.icons.buffs
 	buffSettings.customAuraValues = SyncCustomAuraValues(buffSettings.customAuraValues, CUSTOM_AURA_DEFAULTS)
 
-	profileSection.widgets.icons.customBuffs = SyncCustomBuffs(profileSection.widgets.icons.customBuffs, CUSTOM_AURA_DEFAULTS)
+	profileSection.widgets.icons.customBuffs =
+		SyncCustomBuffs(profileSection.widgets.icons.customBuffs, CUSTOM_AURA_DEFAULTS)
 end
 
 local function SyncAllProfilesCustomAuraDefaults(profile)
@@ -345,6 +364,22 @@ local DEFAULTS = {
 						font = "Fonts\\ARIALN.TTF",
 						size = 12,
 						outline = "NONE",
+					},
+					healAbsorbs = {
+						enabled = false,
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = 0,
+						},
+						size = 10,
+						outline = "OUTLINE",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
 					},
 				},
 				icons = {
@@ -590,6 +625,22 @@ local DEFAULTS = {
 						font = "Fonts\\ARIALN.TTF",
 						size = 10,
 						outline = "NONE",
+					},
+					healAbsorbs = {
+						enabled = false,
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = 0,
+						},
+						size = 10,
+						outline = "OUTLINE",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
 					},
 				},
 				icons = {

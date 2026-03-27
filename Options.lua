@@ -4,6 +4,9 @@ local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local APP_NAME = "Michs_RaidFrames"
+local ADDON_VERSION = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(APP_NAME, "Version"))
+	or (GetAddOnMetadata and GetAddOnMetadata(APP_NAME, "Version"))
+	or ""
 local FOOTER_BUTTON_WIDTH = 90
 local FOOTER_BUTTON_HEIGHT = 22
 local FOOTER_BUTTON_FONT_SIZE = 12
@@ -197,6 +200,19 @@ local function EnsureFooterTestButtons()
 	frame.mrfRaidTestButton:SetFrameStrata(strata)
 	frame.mrfPartyTestButton:SetFrameLevel(level)
 	frame.mrfRaidTestButton:SetFrameLevel(level)
+
+	if not frame.mrfVersionContainer then
+		local parent = closeButton:GetParent() or frame
+		frame.mrfVersionContainer = CreateFrame("Frame", nil, parent)
+		frame.mrfVersionContainer:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 17, 15)
+		frame.mrfVersionContainer:SetSize(200, FOOTER_BUTTON_HEIGHT + 2)
+		local label = frame.mrfVersionContainer:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+		label:SetPoint("LEFT", frame.mrfVersionContainer, "LEFT", 8, 0)
+		label:SetText("Version " .. ADDON_VERSION)
+		label:SetTextColor(0.8, 0.8, 0.8, 1)
+	end
+	frame.mrfVersionContainer:SetFrameStrata(strata)
+	frame.mrfVersionContainer:SetFrameLevel(level)
 
 	frame.mrfRaidTestButton:ClearAllPoints()
 	frame.mrfRaidTestButton:SetPoint("RIGHT", closeButton, "LEFT", -FOOTER_BUTTON_SPACING, 0)
@@ -566,110 +582,113 @@ local function GetCustomBuffsOptions(layoutKey)
 							},
 						},
 					},
-				stacks = {
-					type = "group",
-					name = "Stacks",
-					inline = true,
-					order = 3,
-					args = {
-						showStacks = {
-							type = "toggle",
-							name = "Enabled",
-							order = 1,
-							width = 0.8,
-							get = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showStacks == true
-							end,
-							set = function(_, v)
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								cb[classFileName] = cb[classFileName] or {}
-								cb[classFileName][specID] = cb[classFileName][specID] or {}
-								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
-								cb[classFileName][specID][spellId].showStacks = v
-								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
-							end,
-						},
-						stacksFontSize = {
-							type = "range",
-							name = "Font Size",
-							order = 2,
-							width = 0.8,
-							min = 6,
-							max = 32,
-							step = 1,
-							disabled = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
-								return s.enabled ~= true or s.showStacks ~= true
-							end,
-							get = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).stacksFontSize or 10
-							end,
-							set = function(_, v)
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								cb[classFileName] = cb[classFileName] or {}
-								cb[classFileName][specID] = cb[classFileName][specID] or {}
-								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
-								cb[classFileName][specID][spellId].stacksFontSize = v
-								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
-							end,
-						},
-					},
-				},
-				duration = {
-					type = "group",
-					name = "Duration",
-					inline = true,
-					order = 4,
-					args = {
-						showCooldown = {
-							type = "toggle",
-							name = "Enabled",
-							order = 1,
-							width = 0.8,
-							get = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showCooldown == true
-							end,
-							set = function(_, v)
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								cb[classFileName] = cb[classFileName] or {}
-								cb[classFileName][specID] = cb[classFileName][specID] or {}
-								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
-								cb[classFileName][specID][spellId].showCooldown = v
-								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
-							end,
-						},
-						cooldownFontSize = {
-							type = "range",
-							name = "Font Size",
-							order = 2,
-							width = 0.8,
-							min = 6,
-							max = 32,
-							step = 1,
-							disabled = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
-								return s.enabled ~= true or s.showCooldown ~= true
-							end,
-							get = function()
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).cooldownFontSize or 10
-							end,
-							set = function(_, v)
-								local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
-								cb[classFileName] = cb[classFileName] or {}
-								cb[classFileName][specID] = cb[classFileName][specID] or {}
-								cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
-								cb[classFileName][specID][spellId].cooldownFontSize = v
-								addon.UpdateScheduler:Notify("customBuffSettingsChanged")
-							end,
+					stacks = {
+						type = "group",
+						name = "Stacks",
+						inline = true,
+						order = 3,
+						args = {
+							showStacks = {
+								type = "toggle",
+								name = "Enabled",
+								order = 1,
+								width = 0.8,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showStacks == true
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].showStacks = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+							stacksFontSize = {
+								type = "range",
+								name = "Font Size",
+								order = 2,
+								width = 0.8,
+								min = 6,
+								max = 32,
+								step = 1,
+								disabled = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
+									return s.enabled ~= true or s.showStacks ~= true
+								end,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).stacksFontSize
+										or 10
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].stacksFontSize = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
 						},
 					},
-				},
+					duration = {
+						type = "group",
+						name = "Duration",
+						inline = true,
+						order = 4,
+						args = {
+							showCooldown = {
+								type = "toggle",
+								name = "Enabled",
+								order = 1,
+								width = 0.8,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).showCooldown
+										== true
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].showCooldown = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+							cooldownFontSize = {
+								type = "range",
+								name = "Font Size",
+								order = 2,
+								width = 0.8,
+								min = 6,
+								max = 32,
+								step = 1,
+								disabled = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									local s = (((cb[classFileName] or {})[specID] or {})[spellId] or {})
+									return s.enabled ~= true or s.showCooldown ~= true
+								end,
+								get = function()
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									return (((cb[classFileName] or {})[specID] or {})[spellId] or {}).cooldownFontSize
+										or 10
+								end,
+								set = function(_, v)
+									local cb = addon.Database:GetProfile()[layoutKey].widgets.icons.customBuffs
+									cb[classFileName] = cb[classFileName] or {}
+									cb[classFileName][specID] = cb[classFileName][specID] or {}
+									cb[classFileName][specID][spellId] = cb[classFileName][specID][spellId] or {}
+									cb[classFileName][specID][spellId].cooldownFontSize = v
+									addon.UpdateScheduler:Notify("customBuffSettingsChanged")
+								end,
+							},
+						},
+					},
 				},
 			}
 
@@ -1740,6 +1759,241 @@ local options = {
 										profile.party.widgets.texts.name.outline = value
 										addon.UpdateScheduler:Notify("nameSettingsChanged")
 									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 2,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										show = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}).enabled
+													== true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.enabled = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}).anchor
+													or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.anchor = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((
+													(((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}
+												).position or {}).x or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.position = p.party.widgets.texts.healAbsorbs.position
+													or {}
+												p.party.widgets.texts.healAbsorbs.position.x = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((
+													(((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}
+												).position or {}).y or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.position = p.party.widgets.texts.healAbsorbs.position
+													or {}
+												p.party.widgets.texts.healAbsorbs.position.y = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								text = {
+									type = "group",
+									name = "Text",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Font Size",
+											order = 1,
+											min = 6,
+											max = 32,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}).size
+													or 10
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.size = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										outline = {
+											type = "select",
+											name = "Outline",
+											order = 2,
+											values = {
+												NONE = "None",
+												OUTLINE = "Outline",
+												THICKOUTLINE = "Thick Outline",
+												MONOCHROME = "Monochrome",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}).outline
+													or "OUTLINE"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.outline = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										color = {
+											type = "color",
+											name = "Color",
+											hasAlpha = false,
+											order = 3,
+											get = function()
+												local p = addon.Database:GetProfile()
+												local c = (
+													(((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}
+												).color or { r = 1, g = 1, b = 1, a = 1 }
+												return c.r, c.g, c.b, c.a
+											end,
+											set = function(_, r, g, b, a)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
+													or {}
+												p.party.widgets.texts.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -2932,7 +3186,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck or {}
+												p.party.widgets.indicators.readyCheck = p.party.widgets.indicators.readyCheck
+													or {}
 												p.party.widgets.indicators.readyCheck.enabled = v
 												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
 											end,
@@ -3289,7 +3544,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon
+													or {}
 												p.party.widgets.indicators.roleIcon.enabled = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -3331,7 +3587,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon
+													or {}
 												p.party.widgets.indicators.roleIcon.anchor = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -3365,7 +3622,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon
+													or {}
 												p.party.widgets.indicators.roleIcon.offsetX = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -3391,7 +3649,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon
+													or {}
 												p.party.widgets.indicators.roleIcon.offsetY = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -3425,7 +3684,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.party.widgets = p.party.widgets or {}
 												p.party.widgets.indicators = p.party.widgets.indicators or {}
-												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon or {}
+												p.party.widgets.indicators.roleIcon = p.party.widgets.indicators.roleIcon
+													or {}
 												p.party.widgets.indicators.roleIcon.size = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -4471,6 +4731,243 @@ local options = {
 										profile.raid.widgets.texts.name.outline = value
 										addon.UpdateScheduler:Notify("nameSettingsChanged")
 									end,
+								},
+							},
+						},
+						healAbsorbs = {
+							type = "group",
+							name = "Heal Absorbs",
+							order = 2,
+							args = {
+								enabled = {
+									type = "group",
+									name = "Enabled",
+									inline = true,
+									order = 0,
+									args = {
+										show = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).enabled
+													== true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.enabled = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).anchor
+													or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.anchor = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 3,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).position
+													or {}
+												).x or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.position = p.raid.widgets.texts.healAbsorbs.position
+													or {}
+												p.raid.widgets.texts.healAbsorbs.position.x = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 4,
+											min = -100,
+											max = 100,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return (
+													((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).position
+													or {}
+												).y or 0
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.position = p.raid.widgets.texts.healAbsorbs.position
+													or {}
+												p.raid.widgets.texts.healAbsorbs.position.y = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
+								},
+								text = {
+									type = "group",
+									name = "Text",
+									inline = true,
+									order = 3,
+									args = {
+										size = {
+											type = "range",
+											name = "Font Size",
+											order = 1,
+											min = 6,
+											max = 32,
+											step = 1,
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).size
+													or 10
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.size = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										outline = {
+											type = "select",
+											name = "Outline",
+											order = 2,
+											values = {
+												NONE = "None",
+												OUTLINE = "Outline",
+												THICKOUTLINE = "Thick Outline",
+												MONOCHROME = "Monochrome",
+											},
+											get = function()
+												local p = addon.Database:GetProfile()
+												return ((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).outline
+													or "OUTLINE"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.outline = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										color = {
+											type = "color",
+											name = "Color",
+											hasAlpha = false,
+											order = 3,
+											get = function()
+												local p = addon.Database:GetProfile()
+												local c = (
+													(((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}
+												).color or { r = 1, g = 1, b = 1, a = 1 }
+												return c.r, c.g, c.b, c.a
+											end,
+											set = function(_, r, g, b, a)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
+													or {}
+												p.raid.widgets.texts.healAbsorbs.color = { r = r, g = g, b = b, a = a }
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+									},
 								},
 							},
 						},
@@ -5658,7 +6155,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck or {}
+												p.raid.widgets.indicators.readyCheck = p.raid.widgets.indicators.readyCheck
+													or {}
 												p.raid.widgets.indicators.readyCheck.enabled = v
 												addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
 											end,
@@ -6015,7 +6513,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon
+													or {}
 												p.raid.widgets.indicators.roleIcon.enabled = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -6057,7 +6556,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon
+													or {}
 												p.raid.widgets.indicators.roleIcon.anchor = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -6091,7 +6591,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon
+													or {}
 												p.raid.widgets.indicators.roleIcon.offsetX = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -6117,7 +6618,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon
+													or {}
 												p.raid.widgets.indicators.roleIcon.offsetY = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,
@@ -6151,7 +6653,8 @@ local options = {
 												local p = addon.Database:GetProfile()
 												p.raid.widgets = p.raid.widgets or {}
 												p.raid.widgets.indicators = p.raid.widgets.indicators or {}
-												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon or {}
+												p.raid.widgets.indicators.roleIcon = p.raid.widgets.indicators.roleIcon
+													or {}
 												p.raid.widgets.indicators.roleIcon.size = v
 												addon.UpdateScheduler:Notify("roleIconSettingsChanged")
 											end,

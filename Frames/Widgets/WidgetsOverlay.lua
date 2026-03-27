@@ -39,6 +39,15 @@ function Overlay:Ensure(frame)
 		textLayer:SetFrameLevel(widgetsOverlay:GetFrameLevel() + 10)
 		frame.textLayer = textLayer
 	end
+
+	local topWidgetsOverlay = frame.topWidgetsOverlay
+	if not frame.topTextLayer then
+		local topTextLayer = CreateFrame("Frame", nil, topWidgetsOverlay)
+		topTextLayer:SetAllPoints(topWidgetsOverlay)
+		topTextLayer:SetFrameStrata(topWidgetsOverlay:GetFrameStrata())
+		topTextLayer:SetFrameLevel(topWidgetsOverlay:GetFrameLevel() + 10)
+		frame.topTextLayer = topTextLayer
+	end
 end
 
 function Overlay:Init()
