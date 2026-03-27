@@ -59,6 +59,11 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.healAbsorbsTextSettingsChanged then
+			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateState(frame, settings)
+		end
+
 		if updateReasons.buffAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.Buffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
@@ -141,6 +146,7 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.rosterChanged or updateReasons.healAbsorbsStateChanged then
 			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
+			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.statusStateChanged then
