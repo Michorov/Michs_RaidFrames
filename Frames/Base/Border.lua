@@ -6,27 +6,27 @@ addon.Frames.Base.Border = addon.Frames.Base.Border or {}
 
 local Border = addon.Frames.Base.Border
 
-local function GetBorderSettings(settings)
-	settings = settings or {}
-	local border = settings.border or {}
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+	local border = (settings and settings.border) or {}
 	local color = border.color or {}
 
-	local thicknessPx = border.thicknessPx or 1
-	local thicknessRawPx = addon.Utilities:ToPixels(thicknessPx)
-	local scaledThicknessPx = math.max(1, addon.Utilities:Scale(thicknessRawPx))
-	local r = color.r or 0
-	local g = color.g or 0
-	local b = color.b or 0
-	local a = color.a or 1
+	local result = {
+		thicknessPx = math.max(1, addon.Utilities:ToPixels(border.thicknessPx or 1)),
+		color = {
+			r = color.r or 0,
+			g = color.g or 0,
+			b = color.b or 0,
+			a = color.a or 1,
+		},
+	}
 
-	return scaledThicknessPx, r, g, b, a
+	settingsCache[settings] = result
 end
 
 function Border:Ensure(frame)
-	if not frame then
-		return nil
-	end
-
 	local border = frame.border
 
 	if not border then
@@ -44,38 +44,39 @@ function Border:Ensure(frame)
 end
 
 function Border:UpdateSettings(frame, settings)
-	local border = frame and frame.border
-	if not border then
-		return
-	end
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	local thicknessPx, r, g, b, a = GetBorderSettings(settings)
-	local thicknessUI = addon.Utilities:ToUI(thicknessPx)
+	local border = frame.border
+
+	local scaledThickness = addon.Utilities:Scale(cachedSettings.thicknessPx)
+	local uiThickness = addon.Utilities:ToUI(scaledThickness)
+	local c = cachedSettings.color
 
 	border.left:ClearAllPoints()
 	border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
 	border.left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	border.left:SetWidth(thicknessUI)
+	border.left:SetWidth(uiThickness)
 
 	border.right:ClearAllPoints()
 	border.right:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
 	border.right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	border.right:SetWidth(thicknessUI)
+	border.right:SetWidth(uiThickness)
 
 	border.top:ClearAllPoints()
 	border.top:SetPoint("TOPLEFT", border.left, "TOPRIGHT", 0, 0)
 	border.top:SetPoint("TOPRIGHT", border.right, "TOPLEFT", 0, 0)
-	border.top:SetHeight(thicknessUI)
+	border.top:SetHeight(uiThickness)
 
 	border.bottom:ClearAllPoints()
 	border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
 	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
-	border.bottom:SetHeight(thicknessUI)
+	border.bottom:SetHeight(uiThickness)
 
-	border.top:SetColorTexture(r, g, b, a)
-	border.bottom:SetColorTexture(r, g, b, a)
-	border.left:SetColorTexture(r, g, b, a)
-	border.right:SetColorTexture(r, g, b, a)
+	border.top:SetColorTexture(c.r, c.g, c.b, c.a)
+	border.bottom:SetColorTexture(c.r, c.g, c.b, c.a)
+	border.left:SetColorTexture(c.r, c.g, c.b, c.a)
+	border.right:SetColorTexture(c.r, c.g, c.b, c.a)
 
 	for _, tex in ipairs({ border.top, border.bottom, border.left, border.right }) do
 		if tex.SetSnapToPixelGrid then
@@ -85,8 +86,6 @@ function Border:UpdateSettings(frame, settings)
 			tex:SetTexelSnappingBias(0)
 		end
 	end
-
-	border:Show()
 end
 
 function Border:Init()

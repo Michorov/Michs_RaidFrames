@@ -307,6 +307,7 @@ local DEFAULTS = {
 		core = {
 			showSoloPartyFrame = true,
 			hideBlizzardRaidFrames = true,
+			hideBlizzardRaidFrameManager = false,
 			outOfRangeAlpha = 0.5,
 			uiScale = 1.0,
 		},

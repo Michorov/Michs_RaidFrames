@@ -6,18 +6,27 @@ addon.Frames.Base.Background = addon.Frames.Base.Background or {}
 
 local Background = addon.Frames.Base.Background
 
-local function GetBackgroundColor(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
 	local background = (settings and settings.background) or {}
 	local color = background.color or {}
 
-	return color.r or 0.12, color.g or 0.12, color.b or 0.12, color.a or 1.0
+	local result = {
+		color = {
+			r = color.r or 0.12,
+			g = color.g or 0.12,
+			b = color.b or 0.12,
+			a = color.a or 1.0,
+		},
+	}
+
+	settingsCache[settings] = result
 end
 
 function Background:Ensure(frame)
-	if not frame then
-		return nil
-	end
-
 	local background = frame.background
 
 	if not background then
@@ -28,14 +37,10 @@ function Background:Ensure(frame)
 end
 
 function Background:UpdateSettings(frame, settings)
-	local background = frame and frame.background
-	if not background then
-		return
-	end
+	UpdateSettingsCache(settings)
+	local color = settingsCache[settings].color
 
-	local r, g, b, a = GetBackgroundColor(settings)
-	background:SetColorTexture(r, g, b, a)
-	background:Show()
+	frame.background:SetColorTexture(color.r, color.g, color.b, color.a)
 end
 
 function Background:Init()

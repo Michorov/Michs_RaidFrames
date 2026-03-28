@@ -4,7 +4,6 @@ local FrameRegistry = {}
 addon.FrameRegistry = FrameRegistry
 
 local initialized = false
-local compactOverlayHooksInstalled = false
 local restoreLiveDriversAfterCombat = false
 
 local partyGroup = {
@@ -77,114 +76,26 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	restoreLiveDriversAfterCombat = false
 end
 
-local function ShouldHideBlizzardFrames()
-	local profile = addon.Database:GetProfile()
-	return profile and profile.core and profile.core.hideBlizzardRaidFrames == true
-end
-
-local function IsRaidPartyCompactUnit(frame)
-	if not frame then
-		return false
-	end
-	local unit = frame.displayedUnit or frame.unit
-	if type(unit) ~= "string" then
-		return false
-	end
-	return unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$")
-end
-
-local function HideCompactVisualOverlays(frame)
-	if not frame or not IsRaidPartyCompactUnit(frame) then
-		return
-	end
-
-	local function SafeHide(obj)
-		if obj and obj.Hide then
-			pcall(function()
-				obj:Hide()
-			end)
-		end
-	end
-
-	SafeHide(frame.selectionHighlight)
-	SafeHide(frame.aggroHighlight)
-
-	SafeHide(frame.readyCheckIcon)
-	SafeHide(frame.readyCheckStatus)
-
-	SafeHide(frame.summonStatus)
-	SafeHide(frame.summonIcon)
-	SafeHide(frame.summonFrame)
-end
-
-local function InstallCompactOverlayHooks()
-	if compactOverlayHooksInstalled then
-		return
-	end
-	compactOverlayHooksInstalled = true
-
-	local function HideIfNeeded(frame)
-		if ShouldHideBlizzardFrames() then
-			HideCompactVisualOverlays(frame)
-		end
-	end
-
-	local hookNames = {
-		"CompactUnitFrame_UpdateSelectionHighlight",
-		"CompactUnitFrame_UpdateAggroHighlight",
-		"CompactUnitFrame_UpdateReadyCheck",
-		"CompactUnitFrame_UpdateReadyCheckStatus",
-		"CompactUnitFrame_UpdateSummonStatus",
-		"CompactUnitFrame_UpdateStatusIcon",
-	}
-
-	for _, fnName in ipairs(hookNames) do
-		local fn = _G[fnName]
-		if type(fn) == "function" then
-			hooksecurefunc(fnName, HideIfNeeded)
-		end
-	end
-end
-
 local function ApplyBlizzardFramesVisibility()
-	local hide = ShouldHideBlizzardFrames()
-	local visible = not hide
+	local profile = addon.Database:GetProfile()
+	local core = profile and profile.core
 
-	local function SetFrameTreeVisibility(frame, visible)
-		if not frame then
-			return
-		end
-
-		frame:SetAlpha(visible and 1 or 0)
-
-		if frame.EnableMouse then
-			frame:EnableMouse(visible)
-		end
-
-		if frame.SetMouseClickEnabled then
-			frame:SetMouseClickEnabled(visible)
-		end
-
-		if frame.SetMouseMotionEnabled then
-			frame:SetMouseMotionEnabled(visible)
-		end
-
-		local children = { frame:GetChildren() }
-		for _, child in ipairs(children) do
-			if child.SetAlpha then
-				child:SetAlpha(visible and 1 or 0)
-			end
-			if child.EnableMouse then
-				child:EnableMouse(visible)
-			end
-		end
+	if core and core.hideBlizzardRaidFrames == true then
+		RegisterStateDriver(CompactPartyFrame, "visibility", "hide")
+		RegisterStateDriver(CompactRaidFrameContainer, "visibility", "hide")
+	else
+		UnregisterStateDriver(CompactPartyFrame, "visibility")
+		UnregisterStateDriver(CompactRaidFrameContainer, "visibility")
+		CompactPartyFrame:Show()
+		CompactRaidFrameContainer:Show()
 	end
 
-	SetFrameTreeVisibility(CompactPartyFrame, visible)
-	SetFrameTreeVisibility(CompactRaidFrameContainer, visible)
-	SetFrameTreeVisibility(CompactRaidFrameManager, visible)
-
-	InstallCompactOverlayHooks()
+	if core and core.hideBlizzardRaidFrameManager == true then
+		RegisterStateDriver(CompactRaidFrameManager, "visibility", "hide")
+	else
+		UnregisterStateDriver(CompactRaidFrameManager, "visibility")
+		CompactRaidFrameManager:Show()
+	end
 end
 
 local function ResolveRaidSettings(profile)

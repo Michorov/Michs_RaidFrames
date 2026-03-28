@@ -934,6 +934,21 @@ local options = {
 						addon.UpdateScheduler:Notify("layoutChanged")
 					end,
 				},
+				hideBlizzardRaidFrameManager = {
+					type = "toggle",
+					name = "Hide Blizzard Raid Frame Manager",
+					order = 3,
+					width = "full",
+					get = function()
+						local profile = addon.Database:GetProfile()
+						return profile.core.hideBlizzardRaidFrameManager == true
+					end,
+					set = function(_, value)
+						local profile = addon.Database:GetProfile()
+						profile.core.hideBlizzardRaidFrameManager = value
+						addon.UpdateScheduler:Notify("layoutChanged")
+					end,
+				},
 				rowSpacer1 = {
 					type = "description",
 					name = " ",
