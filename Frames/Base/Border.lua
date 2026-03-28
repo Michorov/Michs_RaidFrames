@@ -51,7 +51,6 @@ function Border:UpdateSettings(frame, settings)
 
 	local scaledThickness = addon.Utilities:Scale(cachedSettings.thicknessPx)
 	local uiThickness = addon.Utilities:ToUI(scaledThickness)
-	local c = cachedSettings.color
 
 	border.left:ClearAllPoints()
 	border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
@@ -73,10 +72,11 @@ function Border:UpdateSettings(frame, settings)
 	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
 	border.bottom:SetHeight(uiThickness)
 
-	border.top:SetColorTexture(c.r, c.g, c.b, c.a)
-	border.bottom:SetColorTexture(c.r, c.g, c.b, c.a)
-	border.left:SetColorTexture(c.r, c.g, c.b, c.a)
-	border.right:SetColorTexture(c.r, c.g, c.b, c.a)
+	local color = cachedSettings.color
+	border.top:SetColorTexture(color.r, color.g, color.b, color.a)
+	border.bottom:SetColorTexture(color.r, color.g, color.b, color.a)
+	border.left:SetColorTexture(color.r, color.g, color.b, color.a)
+	border.right:SetColorTexture(color.r, color.g, color.b, color.a)
 
 	for _, tex in ipairs({ border.top, border.bottom, border.left, border.right }) do
 		if tex.SetSnapToPixelGrid then
