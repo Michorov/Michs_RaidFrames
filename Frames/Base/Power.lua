@@ -92,7 +92,7 @@ function Power:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local scaledHeightPx = math.max(1, addon.Utilities:Scale(cachedSettings.heightPx))
-	local scaledBorderPx = math.max(1, addon.Utilities:Scale(cachedSettings.borderThicknessPx))
+	local scaledBorderPx = addon.Utilities:Scale(cachedSettings.borderThicknessPx)
 
 	powerBar:SetStatusBarTexture(cachedSettings.texture)
 
@@ -115,7 +115,7 @@ function Power:UpdateSettings(frame, settings)
 	end
 
 	if powerBar.border then
-		if cachedSettings.borderEnabled then
+		if cachedSettings.borderEnabled and scaledBorderPx > 0 then
 			powerBar.border:ClearAllPoints()
 			powerBar.border:SetAllPoints(powerBar)
 			powerBar.border:SetBackdrop({

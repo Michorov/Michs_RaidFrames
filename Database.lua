@@ -368,6 +368,7 @@ local DEFAULTS = {
 					},
 					healAbsorbs = {
 						enabled = false,
+						abbreviate = true,
 						anchor = "CENTER",
 						position = {
 							x = 0,
@@ -629,6 +630,7 @@ local DEFAULTS = {
 					},
 					healAbsorbs = {
 						enabled = false,
+						abbreviate = true,
 						anchor = "CENTER",
 						position = {
 							x = 0,

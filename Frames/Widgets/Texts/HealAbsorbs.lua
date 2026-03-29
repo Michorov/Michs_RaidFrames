@@ -19,6 +19,7 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = healAbsorbs.enabled == true,
+		abbreviate = healAbsorbs.abbreviate ~= false,
 		anchor = healAbsorbs.anchor or "CENTER",
 		positionX = addon.Utilities:ToPixels(position.x or 0),
 		positionY = addon.Utilities:ToPixels(position.y or 0),
@@ -104,12 +105,10 @@ function HealAbsorbs:UpdateState(frame, settings)
 	local provider = frame and frame.dataProvider
 	local _, totalHealAbsorbValue = provider:GetHealAbsorbs(frame)
 
-	if not totalHealAbsorbValue then
-		text:Hide()
-		return
-	end
-
-	text:SetText(C_StringUtil.TruncateWhenZero(totalHealAbsorbValue))
+	totalHealAbsorbValue = totalHealAbsorbValue or 0
+	local displayText = cachedSettings.abbreviate and AbbreviateNumbers(totalHealAbsorbValue) or tostring(totalHealAbsorbValue)
+	text:SetText(displayText)
+	text:SetAlpha(totalHealAbsorbValue)
 	text:Show()
 end
 
