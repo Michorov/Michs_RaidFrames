@@ -1190,7 +1190,7 @@ local options = {
 								partyBorderThickness = {
 									type = "range",
 									name = "Border Thickness",
-									min = 1,
+									min = 0,
 									max = 6,
 									step = 1,
 									order = 3,
@@ -1425,7 +1425,7 @@ local options = {
 									name = "Border Thickness",
 									order = 5,
 									width = 1,
-									min = 1,
+									min = 0,
 									max = 6,
 									step = 1,
 									disabled = function()
@@ -1808,6 +1808,28 @@ local options = {
 												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs
 													or {}
 												p.party.widgets.texts.healAbsorbs.enabled = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										abbreviate = {
+											type = "toggle",
+											name = "Abbreviate Numbers",
+											order = 2,
+											get = function()
+												local p = addon.Database:GetProfile()
+												local v = ((((p.party or {}).widgets or {}).texts or {}).healAbsorbs or {}).abbreviate
+												return v ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.party.widgets = p.party.widgets or {}
+												p.party.widgets.texts = p.party.widgets.texts or {}
+												p.party.widgets.texts.healAbsorbs = p.party.widgets.texts.healAbsorbs or {}
+												p.party.widgets.texts.healAbsorbs.abbreviate = v
 												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
 											end,
 										},
@@ -4163,7 +4185,7 @@ local options = {
 								raidBorderThickness = {
 									type = "range",
 									name = "Border Thickness",
-									min = 1,
+									min = 0,
 									max = 6,
 									step = 1,
 									order = 3,
@@ -4398,7 +4420,7 @@ local options = {
 									name = "Border Thickness",
 									order = 5,
 									width = 1,
-									min = 1,
+									min = 0,
 									max = 6,
 									step = 1,
 									disabled = function()
@@ -4780,6 +4802,28 @@ local options = {
 												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs
 													or {}
 												p.raid.widgets.texts.healAbsorbs.enabled = v
+												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+											end,
+										},
+										abbreviate = {
+											type = "toggle",
+											name = "Abbreviate Numbers",
+											order = 2,
+											get = function()
+												local p = addon.Database:GetProfile()
+												local v = ((((p.raid or {}).widgets or {}).texts or {}).healAbsorbs or {}).abbreviate
+												return v ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local p = addon.Database:GetProfile()
+												p.raid.widgets = p.raid.widgets or {}
+												p.raid.widgets.texts = p.raid.widgets.texts or {}
+												p.raid.widgets.texts.healAbsorbs = p.raid.widgets.texts.healAbsorbs or {}
+												p.raid.widgets.texts.healAbsorbs.abbreviate = v
 												addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
 											end,
 										},

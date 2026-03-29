@@ -14,7 +14,7 @@ local function UpdateSettingsCache(settings)
 	local color = border.color or {}
 
 	local result = {
-		thicknessPx = math.max(1, addon.Utilities:ToPixels(border.thicknessPx or 1)),
+		thicknessPx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 		color = {
 			r = color.r or 0,
 			g = color.g or 0,
@@ -50,6 +50,12 @@ function Border:UpdateSettings(frame, settings)
 	local border = frame.border
 
 	local scaledThickness = addon.Utilities:Scale(cachedSettings.thicknessPx)
+
+	if scaledThickness == 0 then
+		border:Hide()
+		return
+	end
+
 	local uiThickness = addon.Utilities:ToUI(scaledThickness)
 
 	border.left:ClearAllPoints()
@@ -86,6 +92,8 @@ function Border:UpdateSettings(frame, settings)
 			tex:SetTexelSnappingBias(0)
 		end
 	end
+
+	border:Show()
 end
 
 function Border:Init()
