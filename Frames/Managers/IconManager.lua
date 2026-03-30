@@ -59,15 +59,15 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 	icon.texture:SetAllPoints(icon)
 	icon.texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
+	icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
+	icon.border:SetAllPoints(icon)
+	icon.border:SetFrameLevel(icon:GetFrameLevel() + 2)
+
 	icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
 	icon.cooldown:SetAllPoints(icon)
 	icon.cooldown:SetReverse(true)
 	icon.cooldown:SetHideCountdownNumbers(true)
-	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
-
-	icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
-	icon.border:SetAllPoints(icon)
-	icon.border:SetFrameLevel(icon:GetFrameLevel() + 3)
+	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
 
 	icon.textLayer = CreateFrame("Frame", nil, icon)
 	icon.textLayer:SetAllPoints(icon)
