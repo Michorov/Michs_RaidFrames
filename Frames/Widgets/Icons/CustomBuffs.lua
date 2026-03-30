@@ -44,17 +44,15 @@ local function UpdateSettingsCache(settings)
 end
 
 function CustomBuffs:Ensure(frame, settings)
-	if not frame then
-		return
+	if not frame.customBuffsFrame then
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetAllPoints(frame)
+		container:SetFrameLevel(43)
+		frame.customBuffsFrame = container
 	end
 
 	if not frame.customBuffs then
 		frame.customBuffs = {}
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
 	end
 
 	if not settingsCache[settings] then
@@ -64,27 +62,22 @@ function CustomBuffs:Ensure(frame, settings)
 
 	for spellId, iconSettings in pairs(cachedSettings.specAuras) do
 		if iconSettings.enabled and not frame.customBuffs[spellId] then
-			frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
+			frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
 		end
 	end
 end
 
 function CustomBuffs:UpdateSettings(frame, settings)
-	local widgetsOverlay = frame and frame.widgetsOverlay
-	local customBuffs = frame and frame.customBuffs
-	if not widgetsOverlay or not customBuffs then
-		return
-	end
-
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
+	local customBuffs = frame.customBuffs
 
 	for spellId, iconSettings in pairs(cachedSettings.specAuras) do
 		local icon = customBuffs[spellId]
 
 		if iconSettings.enabled then
 			if not icon then
-				icon = addon.Frames.Managers.IconManager:CreateIcon(widgetsOverlay, 20)
+				icon = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
 				customBuffs[spellId] = icon
 			end
 
@@ -97,7 +90,7 @@ function CustomBuffs:UpdateSettings(frame, settings)
 			icon:ClearAllPoints()
 			icon:SetPoint(
 				s.anchor,
-				widgetsOverlay,
+				frame.customBuffsFrame,
 				s.anchor,
 				addon.Utilities:ToUI(scaledOffsetXPx),
 				addon.Utilities:ToUI(scaledOffsetYPx)
@@ -113,13 +106,10 @@ function CustomBuffs:UpdateSettings(frame, settings)
 end
 
 function CustomBuffs:UpdateState(frame, settings)
-	local customBuffs = frame and frame.customBuffs
-	if not customBuffs then
-		return
-	end
+	local customBuffs = frame.customBuffs
 
-	local unit = frame and frame.unit
-	local provider = frame and frame.dataProvider
+	local unit = frame.unit
+	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit)) then

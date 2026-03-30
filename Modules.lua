@@ -34,7 +34,6 @@ function Modules:Initialize()
 		addon.Frames.Base.Health,
 		addon.Frames.Base.Power,
 		addon.Frames.Base.Border,
-		addon.Frames.Widgets.Overlay,
 		addon.Frames.Widgets.Indicators.ReadyCheck,
 		addon.Frames.Widgets.Indicators.PendingSummon,
 		addon.Frames.Widgets.Indicators.RaidMarker,

@@ -26,13 +26,13 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function ApplyRoleAtlas(icon, role)
+local function ApplyRoleAtlas(texture, role)
 	if role == "TANK" then
-		icon:SetAtlas("groupfinder-icon-role-large-tank")
+		texture:SetAtlas("groupfinder-icon-role-large-tank")
 	elseif role == "HEALER" then
-		icon:SetAtlas("groupfinder-icon-role-large-heal")
+		texture:SetAtlas("groupfinder-icon-role-large-heal")
 	elseif role == "DAMAGER" then
-		icon:SetAtlas("groupfinder-icon-role-large-dps")
+		texture:SetAtlas("groupfinder-icon-role-large-dps")
 	else
 		return false
 	end
@@ -41,33 +41,24 @@ local function ApplyRoleAtlas(icon, role)
 end
 
 function RoleIcon:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local topWidgetsOverlay = frame.topWidgetsOverlay
-	if not topWidgetsOverlay then
-		return
-	end
-
 	if not frame.roleIcon then
-		local icon = topWidgetsOverlay:CreateTexture(nil, "OVERLAY", nil, 7)
-		icon:Hide()
-		frame.roleIcon = icon
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetFrameLevel(32)
+		container.texture = container:CreateTexture(nil, "OVERLAY")
+		container.texture:SetAllPoints(container)
+		container:Hide()
+		frame.roleIcon = container
 	end
 end
 
 function RoleIcon:UpdateSettings(frame, settings)
-	local icon = frame and frame.roleIcon
-	if not icon then
-		return
-	end
+	local container = frame.roleIcon
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
@@ -75,22 +66,19 @@ function RoleIcon:UpdateSettings(frame, settings)
 	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
-	icon:ClearAllPoints()
-	icon:SetPoint(
+	container:ClearAllPoints()
+	container:SetPoint(
 		cachedSettings.anchor,
-		icon:GetParent(),
+		frame,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
-	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
+	container:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
 end
 
 function RoleIcon:UpdateState(frame, settings)
-	local icon = frame and frame.roleIcon
-	if not icon then
-		return
-	end
+	local container = frame.roleIcon
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -98,25 +86,25 @@ function RoleIcon:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
-	local provider = frame and frame.dataProvider
+	local provider = frame.dataProvider
 	if not provider or type(provider.GetRole) ~= "function" then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
 	local role = provider:GetRole(frame)
 	if role ~= "TANK" and role ~= "HEALER" and role ~= "DAMAGER" then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
-	icon:SetTexCoord(0, 1, 0, 1)
-	ApplyRoleAtlas(icon, role)
-	icon:Show()
+	container.texture:SetTexCoord(0, 1, 0, 1)
+	ApplyRoleAtlas(container.texture, role)
+	container:Show()
 end
 
 function RoleIcon:Init()

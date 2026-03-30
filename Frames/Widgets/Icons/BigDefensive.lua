@@ -33,23 +33,16 @@ local function UpdateSettingsCache(settings)
 end
 
 function BigDefensive:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
 	if not frame.bigDefensiveContainer then
-		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer")
+		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
 	end
 
 	local container = frame.bigDefensiveContainer
-	if not container then
-		return
-	end
 
 	for i = 1, cachedSettings.maxIcons do
 		if not container.icons[i] then
@@ -59,10 +52,7 @@ function BigDefensive:Ensure(frame, settings)
 end
 
 function BigDefensive:UpdateSettings(frame, settings)
-	local container = frame and frame.bigDefensiveContainer
-	if not container then
-		return
-	end
+	local container = frame.bigDefensiveContainer
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
@@ -74,7 +64,7 @@ function BigDefensive:UpdateSettings(frame, settings)
 	container:ClearAllPoints()
 	container:SetPoint(
 		cachedSettings.anchor,
-		container:GetParent(),
+		frame,
 		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
@@ -107,10 +97,7 @@ function BigDefensive:UpdateSettings(frame, settings)
 end
 
 function BigDefensive:UpdateState(frame, settings)
-	local container = frame and frame.bigDefensiveContainer
-	if not container then
-		return
-	end
+	local container = frame.bigDefensiveContainer
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -118,7 +105,7 @@ function BigDefensive:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local unit = frame.unit
-	local provider = frame and frame.dataProvider
+	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit) or not UnitIsVisible(unit)) then
@@ -130,15 +117,10 @@ function BigDefensive:UpdateState(frame, settings)
 	local shown = 0
 
 	local icon = container.icons[1]
-	if not icon then
-		container:Hide()
-		return
-	end
-
 	local auras = provider:GetUnitAuras(frame, "helpfulBigDefensive")
 	local aura = auras and auras[1]
 
-	if aura and aura.icon and icon then
+	if aura and aura.icon then
 		local stackText
 		if cachedSettings.showStacks then
 			stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)

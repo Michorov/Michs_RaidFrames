@@ -27,34 +27,25 @@ local function UpdateSettingsCache(settings)
 end
 
 function RaidMarker:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local topWidgetsOverlay = frame.topWidgetsOverlay
-	if not topWidgetsOverlay then
-		return
-	end
-
 	if not frame.raidMarker then
-		local icon = topWidgetsOverlay:CreateTexture(nil, "OVERLAY", nil, 7)
-		icon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-		icon:Hide()
-		frame.raidMarker = icon
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetFrameLevel(35)
+		container.texture = container:CreateTexture(nil, "OVERLAY")
+		container.texture:SetAllPoints(container)
+		container.texture:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+		container:Hide()
+		frame.raidMarker = container
 	end
 end
 
 function RaidMarker:UpdateSettings(frame, settings)
-	local icon = frame and frame.raidMarker
-	if not icon then
-		return
-	end
+	local container = frame.raidMarker
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
@@ -62,22 +53,19 @@ function RaidMarker:UpdateSettings(frame, settings)
 	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
-	icon:ClearAllPoints()
-	icon:SetPoint(
+	container:ClearAllPoints()
+	container:SetPoint(
 		cachedSettings.anchor,
-		icon:GetParent(),
+		frame,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
-	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
+	container:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
 end
 
 function RaidMarker:UpdateState(frame, settings)
-	local icon = frame and frame.raidMarker
-	if not icon then
-		return
-	end
+	local container = frame.raidMarker
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -85,24 +73,24 @@ function RaidMarker:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
-	local unit = frame and frame.unit
+	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
 	local raidTargetIndex = GetRaidTargetIndex(unit)
-	if not raidTargetIndex or not icon.SetSpriteSheetCell then
-		icon:Hide()
+	if not raidTargetIndex or not container.texture.SetSpriteSheetCell then
+		container:Hide()
 		return
 	end
 
-	icon:SetSpriteSheetCell(raidTargetIndex, 4, 4, 64, 64)
-	icon:Show()
+	container.texture:SetSpriteSheetCell(raidTargetIndex, 4, 4, 64, 64)
+	container:Show()
 end
 
 function RaidMarker:Init()

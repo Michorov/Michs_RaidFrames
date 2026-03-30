@@ -32,38 +32,27 @@ local function UpdateSettingsCache(settings)
 end
 
 function PendingSummon:Ensure(frame)
-	if not frame then
-		return
-	end
+	if not frame.pendingSummon then
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetFrameLevel(50)
 
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
+		container.icon = container:CreateTexture(nil, "ARTWORK")
+		container.icon:SetAllPoints(container)
+		container.icon:SetTexture("Interface\\RaidFrame\\Raid-Icon-SummonPending")
+		container.icon:SetTexCoord(0, 1, 0, 1)
 
-	if not frame.pendingSummonIcon then
-		local icon = widgetsOverlay:CreateTexture(nil, "ARTWORK")
-		icon:SetTexture("Interface\\RaidFrame\\Raid-Icon-SummonPending")
-		icon:SetTexCoord(0, 1, 0, 1)
-		icon:Hide()
-		frame.pendingSummonIcon = icon
-	end
+		container.statusIcon = container:CreateTexture(nil, "OVERLAY")
+		container.statusIcon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
+		container.statusIcon:SetTexCoord(0, 1, 0, 1)
+		container.statusIcon:Hide()
 
-	if not frame.pendingSummonStatusIcon then
-		local statusIcon = widgetsOverlay:CreateTexture(nil, "OVERLAY")
-		statusIcon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
-		statusIcon:SetTexCoord(0, 1, 0, 1)
-		statusIcon:Hide()
-		frame.pendingSummonStatusIcon = statusIcon
+		container:Hide()
+		frame.pendingSummon = container
 	end
 end
 
 function PendingSummon:UpdateSettings(frame, settings)
-	local icon = frame and frame.pendingSummonIcon
-	local statusIcon = frame and frame.pendingSummonStatusIcon
-	if not icon or not statusIcon then
-		return
-	end
+	local container = frame.pendingSummon
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
@@ -73,48 +62,40 @@ function PendingSummon:UpdateSettings(frame, settings)
 	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 	local statusSizePx = math.max(1, math.floor(sizePx * 0.45))
 
-	icon:ClearAllPoints()
-	icon:SetPoint(
+	container:ClearAllPoints()
+	container:SetPoint(
 		cachedSettings.anchor,
-		icon:GetParent(),
+		frame,
 		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
-	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
-	icon:SetAlpha(cachedSettings.alpha)
-	icon:SetTexture(cachedSettings.texture)
+	container:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
+	container:SetAlpha(cachedSettings.alpha)
+	container.icon:SetTexture(cachedSettings.texture)
 
-	statusIcon:ClearAllPoints()
-	statusIcon:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", 0, 0)
-	statusIcon:SetSize(addon.Utilities:ToUI(statusSizePx), addon.Utilities:ToUI(statusSizePx))
-	statusIcon:SetAlpha(cachedSettings.alpha)
+	container.statusIcon:ClearAllPoints()
+	container.statusIcon:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+	container.statusIcon:SetSize(addon.Utilities:ToUI(statusSizePx), addon.Utilities:ToUI(statusSizePx))
 end
 
 function PendingSummon:UpdateState(frame, settings)
-	local icon = frame and frame.pendingSummonIcon
-	local statusIcon = frame and frame.pendingSummonStatusIcon
-	if not icon or not statusIcon then
-		return
-	end
+	local container = frame.pendingSummon
 
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
-		icon:Hide()
-		statusIcon:Hide()
+		container:Hide()
 		return
 	end
 
 	if not C_IncomingSummon or not C_IncomingSummon.IncomingSummonStatus or not Enum or not Enum.SummonStatus then
-		icon:Hide()
-		statusIcon:Hide()
+		container:Hide()
 		return
 	end
 
 	local status = C_IncomingSummon.IncomingSummonStatus(unit)
 	if not status or status == Enum.SummonStatus.None then
-		icon:Hide()
-		statusIcon:Hide()
+		container:Hide()
 		return
 	end
 
@@ -123,20 +104,20 @@ function PendingSummon:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	icon:SetTexture(cachedSettings.texture)
-	icon:Show()
+	container.icon:SetTexture(cachedSettings.texture)
+	container:Show()
 
 	if status == Enum.SummonStatus.Accepted then
-		statusIcon:SetTexture(cachedSettings.acceptedTexture)
-		statusIcon:Show()
+		container.statusIcon:SetTexture(cachedSettings.acceptedTexture)
+		container.statusIcon:Show()
 	elseif status == Enum.SummonStatus.Declined then
-		statusIcon:SetTexture(cachedSettings.declinedTexture)
-		statusIcon:Show()
+		container.statusIcon:SetTexture(cachedSettings.declinedTexture)
+		container.statusIcon:Show()
 	elseif status == Enum.SummonStatus.Pending then
-		statusIcon:SetTexture(cachedSettings.pendingTexture)
-		statusIcon:Show()
+		container.statusIcon:SetTexture(cachedSettings.pendingTexture)
+		container.statusIcon:Show()
 	else
-		statusIcon:Hide()
+		container.statusIcon:Hide()
 	end
 end
 

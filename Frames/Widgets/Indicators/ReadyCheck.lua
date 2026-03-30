@@ -46,35 +46,26 @@ local function GetTextureForStatus(status, settings)
 end
 
 function ReadyCheck:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
-	if not frame.readyCheckIcon then
-		local icon = widgetsOverlay:CreateTexture(nil, "ARTWORK")
-		icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
-		icon:SetTexCoord(0, 1, 0, 1)
-		icon:Hide()
-		frame.readyCheckIcon = icon
+	if not frame.readyCheck then
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetFrameLevel(55)
+		container.texture = container:CreateTexture(nil, "ARTWORK")
+		container.texture:SetAllPoints(container)
+		container.texture:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
+		container.texture:SetTexCoord(0, 1, 0, 1)
+		container:Hide()
+		frame.readyCheck = container
 	end
 end
 
 function ReadyCheck:UpdateSettings(frame, settings)
-	local icon = frame and frame.readyCheckIcon
-	if not icon then
-		return
-	end
+	local container = frame.readyCheck
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
@@ -82,23 +73,20 @@ function ReadyCheck:UpdateSettings(frame, settings)
 	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
 
-	icon:ClearAllPoints()
-	icon:SetPoint(
+	container:ClearAllPoints()
+	container:SetPoint(
 		cachedSettings.anchor,
-		icon:GetParent(),
+		frame,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
-	icon:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
-	icon:SetAlpha(1)
+	container:SetSize(addon.Utilities:ToUI(sizePx), addon.Utilities:ToUI(sizePx))
+	container:SetAlpha(1)
 end
 
 function ReadyCheck:UpdateState(frame, settings)
-	local icon = frame and frame.readyCheckIcon
-	if not icon then
-		return
-	end
+	local container = frame.readyCheck
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -106,13 +94,13 @@ function ReadyCheck:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
@@ -120,21 +108,21 @@ function ReadyCheck:UpdateState(frame, settings)
 	if not status then
 		local lastFinishedTime = self.lastFinishedAt or 0
 		if (GetTime() - lastFinishedTime) > READY_CHECK_HOLD then
-			icon:Hide()
+			container:Hide()
 		else
-			icon:Show()
+			container:Show()
 		end
 		return
 	end
 
 	local tex = GetTextureForStatus(status, cachedSettings)
 	if not tex then
-		icon:Hide()
+		container:Hide()
 		return
 	end
 
-	icon:SetTexture(tex)
-	icon:Show()
+	container.texture:SetTexture(tex)
+	container:Show()
 end
 
 function ReadyCheck:Init()

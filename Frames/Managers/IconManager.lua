@@ -10,7 +10,7 @@ local function ToSuffixFromKey(key)
 	return (key:gsub("^%l", string.upper))
 end
 
-function IconManager:CreateContainer(frame, key, frameLevelDelta)
+function IconManager:CreateContainer(frame, key, level)
 	if not frame or not key then
 		return nil
 	end
@@ -19,19 +19,14 @@ function IconManager:CreateContainer(frame, key, frameLevelDelta)
 		return frame[key]
 	end
 
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return nil
-	end
-
 	local frameName
 	if frame.GetName and frame:GetName() then
 		frameName = frame:GetName() .. "_" .. ToSuffixFromKey(key)
 	end
 
-	local container = CreateFrame("Frame", frameName, widgetsOverlay)
-	container:SetFrameLevel(widgetsOverlay:GetFrameLevel() + (frameLevelDelta or 15))
-	container.icons = container.icons or {}
+	local container = CreateFrame("Frame", frameName, frame)
+	container:SetFrameLevel(level)
+	container.icons = {}
 
 	return container
 end

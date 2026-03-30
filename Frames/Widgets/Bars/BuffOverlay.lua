@@ -92,7 +92,7 @@ function BuffOverlay:UpdateState(frame, settings)
 	local specAuras = classAuras[specID] or {}
 
 	local provider = frame.dataProvider
-	local auras = provider and provider:GetUnitAuras(frame, "helpfulPlayer") or {}
+	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 
 	for index = 1, #cachedSettings.overlayKeys do
 		local overlayKey = cachedSettings.overlayKeys[index]

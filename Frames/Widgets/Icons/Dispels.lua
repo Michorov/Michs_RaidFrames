@@ -64,12 +64,10 @@ local function GetGrowthOffsets(growDirection, stepPx)
 end
 
 function Dispels:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
 	if not frame.dispelsContainer then
-		frame.dispelsContainer = CreateFrame("Frame", nil, frame.widgetsOverlay)
+		local container = CreateFrame("Frame", nil, frame)
+		container:SetFrameLevel(40)
+		frame.dispelsContainer = container
 	end
 
 	if not settingsCache[settings] then
@@ -101,13 +99,9 @@ function Dispels:Ensure(frame, settings)
 end
 
 function Dispels:UpdateSettings(frame, settings)
-	local container = frame and frame.dispelsContainer
-	if not container then
-		return
-	end
-
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
+	local container = frame.dispelsContainer
 
 	local iconSizePx = addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
@@ -118,7 +112,7 @@ function Dispels:UpdateSettings(frame, settings)
 	container:ClearAllPoints()
 	container:SetPoint(
 		cachedSettings.anchor,
-		container:GetParent(),
+		frame,
 		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
@@ -181,15 +175,11 @@ function Dispels:UpdateSettings(frame, settings)
 end
 
 function Dispels:UpdateState(frame, settings)
-	local container = frame and frame.dispelsContainer
-	if not container then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+	local container = frame.dispelsContainer
 
 	if not cachedSettings.enabled then
 		for i = 1, cachedSettings.maxIcons do
@@ -202,8 +192,8 @@ function Dispels:UpdateState(frame, settings)
 		return
 	end
 
-	local provider = frame and frame.dataProvider
-	local unit = frame and frame.unit
+	local provider = frame.dataProvider
+	local unit = frame.unit
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit) or not UnitIsVisible(unit)) then
