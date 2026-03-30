@@ -36,17 +36,32 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function GetNameColor(frame, nameSettings)
-	if nameSettings.classColor then
-		local provider = frame and frame.dataProvider
-		return provider:GetClassColor(frame, nameSettings.color)
+local function GetNameColor(frame, cachedSettings)
+	if cachedSettings.classColor then
+		return frame.dataProvider:GetClassColor(frame, cachedSettings.color)
 	end
 
-	local c = nameSettings.color
+	local c = cachedSettings.color
 	return c.r, c.g, c.b, c.a
 end
 
-local function ApplyNameSettings(frame, nameText, cachedSettings)
+function Name:Ensure(frame)
+	if not frame.nameText then
+		local nameFrame = CreateFrame("Frame", nil, frame)
+		nameFrame:SetAllPoints(frame)
+		nameFrame:SetFrameLevel(30)
+		nameFrame.text = nameFrame:CreateFontString(nil, "OVERLAY")
+
+		frame.nameText = nameFrame
+	end
+end
+
+function Name:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local nameText = frame.nameText.text
+
 	local scaledPositionX = addon.Utilities:Scale(cachedSettings.positionX)
 	local scaledPositionY = addon.Utilities:Scale(cachedSettings.positionY)
 	local scaledFontSize = addon.Utilities:ScaleFont(cachedSettings.size)
@@ -66,63 +81,17 @@ local function ApplyNameSettings(frame, nameText, cachedSettings)
 	end
 
 	nameText:SetFont(cachedSettings.font, scaledFontSize, fontFlags)
-
-	local r, g, b, a = GetNameColor(frame, cachedSettings)
-	nameText:SetTextColor(r, g, b, a)
-end
-
-function Name:Ensure(frame, settings)
-	if not frame then
-		return nil
-	end
-
-	local textLayer = frame.textLayer
-	if not textLayer then
-		return
-	end
-
-	if not frame.nameText then
-		frame.nameText = textLayer:CreateFontString(nil, "OVERLAY")
-	end
-
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
-	ApplyNameSettings(frame, frame.nameText, cachedSettings)
-end
-
-function Name:UpdateSettings(frame, settings)
-	local nameText = frame and frame.nameText
-	if not nameText then
-		return
-	end
-
-	UpdateSettingsCache(settings)
-	local cachedSettings = settingsCache[settings]
-
-	ApplyNameSettings(frame, nameText, cachedSettings)
+	nameText:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 
 function Name:UpdateState(frame, settings)
-	local nameText = frame and frame.nameText
-	if not nameText then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	local provider = frame and frame.dataProvider
-
-	local name = provider:GetName(frame) or ""
-	nameText:SetText(name)
-
-	local r, g, b, a = GetNameColor(frame, cachedSettings)
-	nameText:SetTextColor(r, g, b, a)
+	frame.nameText.text:SetText(frame.dataProvider:GetName(frame) or "")
+	frame.nameText.text:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 
 function Name:Init()

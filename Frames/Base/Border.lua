@@ -10,6 +10,7 @@ local settingsCache = setmetatable({}, { __mode = "k" })
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
+
 	local border = (settings and settings.border) or {}
 	local color = border.color or {}
 
@@ -32,7 +33,7 @@ function Border:Ensure(frame)
 	if not border then
 		border = CreateFrame("Frame", nil, frame)
 		border:SetAllPoints(frame)
-		border:SetFrameLevel(frame:GetFrameLevel() + 20)
+		border:SetFrameLevel(25)
 
 		border.top = border:CreateTexture(nil, "OVERLAY", nil, 0)
 		border.bottom = border:CreateTexture(nil, "OVERLAY", nil, 0)

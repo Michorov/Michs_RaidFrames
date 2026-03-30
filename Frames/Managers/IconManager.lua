@@ -30,7 +30,6 @@ function IconManager:CreateContainer(frame, key, frameLevelDelta)
 	end
 
 	local container = CreateFrame("Frame", frameName, widgetsOverlay)
-	container:SetFrameStrata(widgetsOverlay:GetFrameStrata())
 	container:SetFrameLevel(widgetsOverlay:GetFrameLevel() + (frameLevelDelta or 15))
 	container.icons = container.icons or {}
 
@@ -59,7 +58,6 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 
 	local icon = CreateFrame("Frame", nil, container)
 	icon:EnableMouse(false)
-	icon:SetFrameStrata(container:GetFrameStrata())
 	icon:SetFrameLevel(container:GetFrameLevel() + (iconFrameLevelDelta or 1))
 
 	icon.texture = icon:CreateTexture(nil, "ARTWORK")
@@ -70,17 +68,14 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 	icon.cooldown:SetAllPoints(icon)
 	icon.cooldown:SetReverse(true)
 	icon.cooldown:SetHideCountdownNumbers(true)
-	icon.cooldown:SetFrameStrata(container:GetFrameStrata())
 	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 2)
 
 	icon.border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
 	icon.border:SetAllPoints(icon)
-	icon.border:SetFrameStrata(container:GetFrameStrata())
 	icon.border:SetFrameLevel(icon:GetFrameLevel() + 3)
 
 	icon.textLayer = CreateFrame("Frame", nil, icon)
 	icon.textLayer:SetAllPoints(icon)
-	icon.textLayer:SetFrameStrata(container:GetFrameStrata())
 	icon.textLayer:SetFrameLevel(icon:GetFrameLevel() + 20)
 
 	icon.countText = icon:CreateFontString(nil, "OVERLAY", "NumberFontNormal")

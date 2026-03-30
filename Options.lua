@@ -1467,7 +1467,7 @@ local options = {
 									get = function()
 										local p = addon.Database:GetProfile()
 										return ((((p.party or {}).widgets or {}).bars or {}).absorbs or {}).texture
-											or "Striped"
+											or "Flat"
 									end,
 									set = function(_, value)
 										if InCombatLockdown() then
@@ -1517,6 +1517,32 @@ local options = {
 							name = "Heal Absorbs",
 							order = 5,
 							args = {
+								partyHealAbsorbsTexture = {
+									type = "select",
+									name = "Texture",
+									order = 9,
+									values = {
+										Flat = "Flat",
+										Striped = "Striped",
+									},
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((((p.party or {}).widgets or {}).bars or {}).healAbsorbs or {}).texture or "Flat"
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.party = p.party or {}
+										p.party.widgets = p.party.widgets or {}
+										p.party.widgets.bars = p.party.widgets.bars or {}
+										p.party.widgets.bars.healAbsorbs = p.party.widgets.bars.healAbsorbs or {}
+										p.party.widgets.bars.healAbsorbs.texture = value
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
+									end,
+								},
 								partyHealAbsorbsColor = {
 									type = "color",
 									name = "Heal Absorb Color",
@@ -4462,7 +4488,7 @@ local options = {
 									get = function()
 										local p = addon.Database:GetProfile()
 										return ((((p.raid or {}).widgets or {}).bars or {}).absorbs or {}).texture
-											or "Striped"
+											or "Flat"
 									end,
 									set = function(_, value)
 										if InCombatLockdown() then
@@ -4512,6 +4538,32 @@ local options = {
 							name = "Heal Absorbs",
 							order = 5,
 							args = {
+								raidHealAbsorbsTexture = {
+									type = "select",
+									name = "Texture",
+									order = 9,
+									values = {
+										Flat = "Flat",
+										Striped = "Striped",
+									},
+									get = function()
+										local p = addon.Database:GetProfile()
+										return ((((p.raid or {}).widgets or {}).bars or {}).healAbsorbs or {}).texture or "Flat"
+									end,
+									set = function(_, value)
+										if InCombatLockdown() then
+											ShowCombatLockMessage()
+											return
+										end
+										local p = addon.Database:GetProfile()
+										p.raid = p.raid or {}
+										p.raid.widgets = p.raid.widgets or {}
+										p.raid.widgets.bars = p.raid.widgets.bars or {}
+										p.raid.widgets.bars.healAbsorbs = p.raid.widgets.bars.healAbsorbs or {}
+										p.raid.widgets.bars.healAbsorbs.texture = value
+										addon.UpdateScheduler:Notify("healAbsorbsSettingsChanged")
+									end,
+								},
 								raidHealAbsorbsColor = {
 									type = "color",
 									name = "Heal Absorb Color",

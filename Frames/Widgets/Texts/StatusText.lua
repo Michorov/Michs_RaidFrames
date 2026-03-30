@@ -8,56 +8,44 @@ addon.Frames.Widgets.Texts.StatusText = addon.Frames.Widgets.Texts.StatusText or
 local StatusText = addon.Frames.Widgets.Texts.StatusText
 
 function StatusText:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local textLayer = frame.textLayer
-	if not textLayer then
-		return
-	end
-
-	local scaledFontSize = addon.Utilities:ScaleFont(16)
-
 	if not frame.statusText then
-		local statusText = textLayer:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		statusText:SetPoint("CENTER", textLayer, "CENTER", 0, 0)
-		statusText:SetFont("Fonts\\FRIZQT__.TTF", scaledFontSize, "NONE")
-		statusText:SetTextColor(0.55, 0.55, 0.55, 1)
-		statusText:SetShadowColor(0, 0, 0, 0.9)
-		statusText:SetShadowOffset(1, -1)
-		statusText:SetText("Dead")
-		statusText:Hide()
+		local statusFrame = CreateFrame("Frame", nil, frame)
+		statusFrame:SetAllPoints(frame)
+		statusFrame:SetFrameLevel(31)
 
-		frame.statusText = statusText
+		local text = statusFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		text:SetPoint("CENTER", statusFrame, "CENTER", 0, 0)
+		text:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(16), "NONE")
+		text:SetTextColor(0.55, 0.55, 0.55, 1)
+		text:SetShadowColor(0, 0, 0, 0.9)
+		text:SetShadowOffset(1, -1)
+		text:Hide()
+
+		statusFrame.text = text
+		frame.statusText = statusFrame
 	end
-
-	self:UpdateState(frame)
 end
 
 function StatusText:UpdateState(frame)
-	local statusText = frame and frame.statusText
-	if not statusText then
-		return
-	end
-
+	local text = frame.statusText.text
 	local unit = frame.unit
+
 	if not UnitExists(unit) then
-		statusText:Hide()
+		text:Hide()
 		return
 	end
 
 	if UnitIsConnected(unit) == false then
-		statusText:SetText("Offline")
-		statusText:Show()
+		text:SetText("Offline")
+		text:Show()
 	elseif UnitIsGhost(unit) then
-		statusText:SetText("Ghost")
-		statusText:Show()
+		text:SetText("Ghost")
+		text:Show()
 	elseif UnitIsDead(unit) then
-		statusText:SetText("Dead")
-		statusText:Show()
+		text:SetText("Dead")
+		text:Show()
 	else
-		statusText:Hide()
+		text:Hide()
 	end
 end
 
