@@ -39,7 +39,7 @@ local function RemovePrivateAuraAnchors(frame)
 end
 
 local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
-	local container = frame and frame.privateAurasContainer
+	local container = frame.privateAurasContainer
 	if not container then
 		return
 	end
@@ -93,25 +93,13 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 end
 
 function PrivateAuras:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
 	if not frame.privateAurasContainer then
-		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer")
+		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
 	end
 end
 
 function PrivateAuras:UpdateSettings(frame, settings)
-	local container = frame and frame.privateAurasContainer
-	if not container then
-		return
-	end
+	local container = frame.privateAurasContainer
 
 	local privateAuraSettings = GetPrivateAurasSettings(settings)
 
@@ -126,7 +114,7 @@ function PrivateAuras:UpdateSettings(frame, settings)
 	container:ClearAllPoints()
 	container:SetPoint(
 		privateAuraSettings.anchor,
-		container:GetParent(),
+		frame,
 		privateAuraSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)

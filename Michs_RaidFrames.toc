@@ -22,9 +22,6 @@ Modules.lua
 # Frame Managers
 Frames/Managers/IconManager.lua
 
-# Widgets
-Frames/Widgets/WidgetsOverlay.lua
-
 # Widgets Text
 Frames/Widgets/Texts/Name.lua
 Frames/Widgets/Texts/StatusText.lua

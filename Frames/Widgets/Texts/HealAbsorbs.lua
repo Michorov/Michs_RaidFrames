@@ -61,7 +61,7 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 	text:ClearAllPoints()
 	text:SetPoint(
 		cachedSettings.anchor,
-		frame,
+		frame.healAbsorbText,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(scaledPositionX),
 		addon.Utilities:ToUI(scaledPositionY)

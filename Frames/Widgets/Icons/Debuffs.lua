@@ -90,22 +90,13 @@ local function UpdateSettingsCache(settings)
 end
 
 function Debuffs:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
 	if not frame.debuffsContainer then
-		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer")
+		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer", 41)
 	end
 
 	local container = frame.debuffsContainer
@@ -118,10 +109,7 @@ function Debuffs:Ensure(frame, settings)
 end
 
 function Debuffs:UpdateSettings(frame, settings)
-	local container = frame and frame.debuffsContainer
-	if not container then
-		return
-	end
+	local container = frame.debuffsContainer
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
@@ -134,7 +122,7 @@ function Debuffs:UpdateSettings(frame, settings)
 	container:ClearAllPoints()
 	container:SetPoint(
 		cachedSettings.anchor,
-		container:GetParent(),
+		frame,
 		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
@@ -181,18 +169,15 @@ function Debuffs:UpdateSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	local container = frame and frame.debuffsContainer
-	if not container then
-		return
-	end
+	local container = frame.debuffsContainer
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	local unit = frame and frame.unit
-	local provider = frame and frame.dataProvider
+	local unit = frame.unit
+	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not cachedSettings.enabled then

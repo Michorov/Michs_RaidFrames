@@ -69,7 +69,7 @@ function Name:UpdateSettings(frame, settings)
 	nameText:ClearAllPoints()
 	nameText:SetPoint(
 		cachedSettings.anchor,
-		frame,
+		frame.nameText,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(scaledPositionX),
 		addon.Utilities:ToUI(scaledPositionY)

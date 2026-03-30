@@ -43,17 +43,13 @@ local function UpdateSettingsCache(settings)
 end
 
 function Buffs:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
 	if not frame.buffsContainer then
-		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer")
+		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer", 42)
 	end
 
 	local container = frame.buffsContainer
@@ -66,10 +62,7 @@ function Buffs:Ensure(frame, settings)
 end
 
 function Buffs:UpdateSettings(frame, settings)
-	local container = frame and frame.buffsContainer
-	if not container then
-		return
-	end
+	local container = frame.buffsContainer
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
@@ -88,7 +81,7 @@ function Buffs:UpdateSettings(frame, settings)
 	container:ClearAllPoints()
 	container:SetPoint(
 		cachedSettings.anchor,
-		container:GetParent(),
+		frame,
 		cachedSettings.relativeAnchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
@@ -127,10 +120,7 @@ function Buffs:UpdateSettings(frame, settings)
 end
 
 function Buffs:UpdateState(frame, settings)
-	local container = frame and frame.buffsContainer
-	if not container then
-		return
-	end
+	local container = frame.buffsContainer
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -142,8 +132,8 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame and frame.unit
-	local provider = frame and frame.dataProvider
+	local unit = frame.unit
+	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
 
 	if not isTestProvider and (not unit or not UnitExists(unit)) then
