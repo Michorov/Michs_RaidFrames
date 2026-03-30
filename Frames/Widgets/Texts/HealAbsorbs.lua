@@ -38,30 +38,21 @@ local function UpdateSettingsCache(settings)
 end
 
 function HealAbsorbs:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local topTextLayer = frame.topTextLayer
-	if not topTextLayer then
-		return
-	end
-
 	if not frame.healAbsorbText then
-		local text = topTextLayer:CreateFontString(nil, "OVERLAY")
-		text:Hide()
-		frame.healAbsorbText = text
+		local healAbsorbTextFrame = CreateFrame("Frame", nil, frame)
+		healAbsorbTextFrame:SetAllPoints(frame)
+		healAbsorbTextFrame:SetFrameLevel(100)
+		healAbsorbTextFrame.text = healAbsorbTextFrame:CreateFontString(nil, "OVERLAY")
+		healAbsorbTextFrame.text:Hide()
+
+		frame.healAbsorbText = healAbsorbTextFrame
 	end
 end
 
 function HealAbsorbs:UpdateSettings(frame, settings)
-	local text = frame and frame.healAbsorbText
-	if not text then
-		return
-	end
-
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
+	local text = frame.healAbsorbText.text
 
 	local scaledPositionX = addon.Utilities:Scale(cachedSettings.positionX)
 	local scaledPositionY = addon.Utilities:Scale(cachedSettings.positionY)
@@ -88,28 +79,23 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 end
 
 function HealAbsorbs:UpdateState(frame, settings)
-	local text = frame and frame.healAbsorbText
-	if not text then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
 	if not cachedSettings.enabled then
-		text:Hide()
+		frame.healAbsorbText.text:Hide()
 		return
 	end
 
-	local provider = frame and frame.dataProvider
-	local _, totalHealAbsorbValue = provider:GetHealAbsorbs(frame)
-
+	local _, totalHealAbsorbValue = frame.dataProvider:GetHealAbsorbs(frame)
 	totalHealAbsorbValue = totalHealAbsorbValue or 0
+
 	local displayText = cachedSettings.abbreviate and AbbreviateNumbers(totalHealAbsorbValue) or tostring(totalHealAbsorbValue)
-	text:SetText(displayText)
-	text:SetAlpha(totalHealAbsorbValue)
-	text:Show()
+	frame.healAbsorbText.text:SetText(displayText)
+	frame.healAbsorbText.text:SetAlpha(totalHealAbsorbValue)
+	frame.healAbsorbText.text:Show()
 end
 
 function HealAbsorbs:Init()

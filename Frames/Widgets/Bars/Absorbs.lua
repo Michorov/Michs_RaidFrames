@@ -7,31 +7,23 @@ addon.Frames.Widgets.Bars.Absorbs = addon.Frames.Widgets.Bars.Absorbs or {}
 
 local Absorbs = addon.Frames.Widgets.Bars.Absorbs
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
 local ABSORB_TEXTURES = {
 	Flat = "Interface\\Buttons\\WHITE8x8",
 	Striped = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\Absorb",
 }
 
-local function ResolveAbsorbTexture(textureKey)
-	if type(textureKey) == "string" and ABSORB_TEXTURES[textureKey] then
-		return ABSORB_TEXTURES[textureKey]
-	end
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
 
-	if type(textureKey) == "string" and textureKey ~= "" then
-		return textureKey
-	end
-
-	return ABSORB_TEXTURES.Striped
-end
-
-local function GetAbsorbSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
 	local absorbs = bars.absorbs or {}
 	local color = absorbs.color or {}
 
-	return {
-		texture = ResolveAbsorbTexture(absorbs.texture),
+	local result = {
+		texture = ABSORB_TEXTURES[absorbs.texture] or ABSORB_TEXTURES.Flat,
 		color = {
 			r = color.r or 0.2,
 			g = color.g or 0.8,
@@ -39,24 +31,17 @@ local function GetAbsorbSettings(settings)
 			a = color.a or 0.5,
 		},
 	}
+
+	settingsCache[settings] = result
 end
 
 function Absorbs:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
 	if not frame.absorbBar then
-		local bar = CreateFrame("StatusBar", nil, widgetsOverlay)
-		bar:SetFrameStrata(widgetsOverlay:GetFrameStrata())
-		bar:SetFrameLevel(widgetsOverlay:GetFrameLevel() + 5)
+		local bar = CreateFrame("StatusBar", nil, frame)
+		bar:SetFrameLevel(15)
 		bar:SetOrientation("HORIZONTAL")
 		bar:SetReverseFill(true)
+		bar:SetAllPoints(frame)
 		bar:Hide()
 
 		local tex = bar:CreateTexture(nil, "ARTWORK")
@@ -69,44 +54,33 @@ function Absorbs:Ensure(frame)
 
 		frame.absorbBar = bar
 	end
-
-	local bar = frame.absorbBar
-	bar:ClearAllPoints()
-	bar:SetPoint("TOPLEFT", widgetsOverlay, "TOPLEFT", 0, 0)
-	bar:SetPoint("BOTTOMRIGHT", widgetsOverlay, "BOTTOMRIGHT", 0, 0)
 end
 
 function Absorbs:UpdateSettings(frame, settings)
-	local absorbSettings = GetAbsorbSettings(settings)
-	local bar = frame and frame.absorbBar
-	if not bar then
-		return
-	end
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local bar = frame.absorbBar
 
 	local tex = bar:GetStatusBarTexture()
 	if tex then
-		tex:SetTexture(absorbSettings.texture, "REPEAT", "REPEAT")
+		tex:SetTexture(cachedSettings.texture, "REPEAT", "REPEAT")
 		tex:SetHorizTile(true)
 		tex:SetVertTile(true)
 	end
 
 	bar:SetStatusBarColor(
-		absorbSettings.color.r,
-		absorbSettings.color.g,
-		absorbSettings.color.b,
-		absorbSettings.color.a
+		cachedSettings.color.r,
+		cachedSettings.color.g,
+		cachedSettings.color.b,
+		cachedSettings.color.a
 	)
 end
 
 function Absorbs:UpdateState(frame)
-	local bar = frame and frame.absorbBar
-	if not bar then
-		return
-	end
+	local bar = frame.absorbBar
 
-	local provider = frame and frame.dataProvider
-
-	local absorbValue, maxHealth = provider:GetAbsorbs(frame)
+	local absorbValue, maxHealth = frame.dataProvider:GetAbsorbs(frame)
 	if absorbValue == nil or maxHealth == nil then
 		bar:Hide()
 		return

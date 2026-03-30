@@ -7,14 +7,23 @@ addon.Frames.Widgets.Bars.HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs or
 
 local HealAbsorbs = addon.Frames.Widgets.Bars.HealAbsorbs
 
-local function GetHealAbsorbSettings(settings)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local HEAL_ABSORB_TEXTURES = {
+	Flat = "Interface\\Buttons\\WHITE8x8",
+	Striped = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\Absorb",
+}
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
 	local healAbsorbs = bars.healAbsorbs or {}
 	local color = healAbsorbs.color or {}
 
-	return {
-		texture = healAbsorbs.texture or "Interface\\Buttons\\WHITE8x8",
+	local result = {
+		texture = HEAL_ABSORB_TEXTURES[healAbsorbs.texture] or HEAL_ABSORB_TEXTURES.Flat,
 		color = {
 			r = color.r or 1,
 			g = color.g or 0,
@@ -22,68 +31,61 @@ local function GetHealAbsorbSettings(settings)
 			a = color.a or 0.5,
 		},
 	}
+
+	settingsCache[settings] = result
 end
 
 function HealAbsorbs:Ensure(frame)
-	if not frame then
-		return
-	end
-
-	local widgetsOverlay = frame.widgetsOverlay
-	if not widgetsOverlay then
-		return
-	end
-
 	if not frame.healAbsorbBar then
-		local bar = CreateFrame("StatusBar", nil, widgetsOverlay)
-		bar:SetFrameStrata(widgetsOverlay:GetFrameStrata())
-		bar:SetFrameLevel(widgetsOverlay:GetFrameLevel() + 4)
+		local bar = CreateFrame("StatusBar", nil, frame)
+		bar:SetFrameLevel(10)
 		bar:SetOrientation("HORIZONTAL")
 		bar:SetReverseFill(false)
+		bar:SetAllPoints(frame)
 		bar:Hide()
 		frame.healAbsorbBar = bar
 	end
 end
 
 function HealAbsorbs:UpdateSettings(frame, settings)
-	local healAbsorbSettings = GetHealAbsorbSettings(settings)
-	local bar = frame and frame.healAbsorbBar
-	if not bar then
-		return
-	end
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 
-	local healthBar = frame.healthBar
-	local healthTex = healthBar and healthBar.GetStatusBarTexture and healthBar:GetStatusBarTexture()
+	local bar = frame.healAbsorbBar
+
+	local healthTex = frame.healthBar:GetStatusBarTexture()
 	if healthTex then
 		bar:ClearAllPoints()
 		bar:SetPoint("TOPLEFT", healthTex, "TOPLEFT", 0, 0)
 		bar:SetPoint("BOTTOMRIGHT", healthTex, "BOTTOMRIGHT", 0, 0)
 	end
 
-	bar:SetStatusBarTexture(healAbsorbSettings.texture)
+	bar:SetStatusBarTexture(cachedSettings.texture)
+	local tex = bar:GetStatusBarTexture()
+	if tex then
+		tex:SetTexture(cachedSettings.texture, "REPEAT", "REPEAT")
+		tex:SetHorizTile(true)
+		tex:SetVertTile(true)
+	end
+
 	bar:SetStatusBarColor(
-		healAbsorbSettings.color.r,
-		healAbsorbSettings.color.g,
-		healAbsorbSettings.color.b,
-		healAbsorbSettings.color.a
+		cachedSettings.color.r,
+		cachedSettings.color.g,
+		cachedSettings.color.b,
+		cachedSettings.color.a
 	)
 end
 
-function HealAbsorbs:UpdateState(frame, settings)
-	local bar = frame and frame.healAbsorbBar
-	if not bar then
-		return
-	end
+function HealAbsorbs:UpdateState(frame)
+	local bar = frame.healAbsorbBar
 
-	local provider = frame and frame.dataProvider
-
-	local healAbsorbValue = provider:GetHealAbsorbs(frame)
+	local healAbsorbValue = frame.dataProvider:GetHealAbsorbs(frame)
 	if healAbsorbValue == nil then
 		bar:Hide()
 		return
 	end
 
-	local currentHealth = provider:GetHealth(frame)
+	local currentHealth = frame.dataProvider:GetHealth(frame)
 	if currentHealth == nil then
 		bar:Hide()
 		return

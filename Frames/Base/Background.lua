@@ -38,8 +38,9 @@ end
 
 function Background:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
-	local color = settingsCache[settings].color
+	local cachedSettings = settingsCache[settings]
 
+	local color = cachedSettings.color
 	frame.background:SetColorTexture(color.r, color.g, color.b, color.a)
 end
 

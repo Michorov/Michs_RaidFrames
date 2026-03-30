@@ -29,15 +29,6 @@ local function UpdateSettingsCache(settings)
 end
 
 function BuffOverlay:Ensure(frame, settings)
-	if not frame then
-		return
-	end
-
-	local healthBar = frame.healthBar
-	if not healthBar then
-		return
-	end
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -51,8 +42,7 @@ function BuffOverlay:Ensure(frame, settings)
 
 		if not overlay then
 			overlay = CreateFrame("Frame", nil, frame)
-			overlay:SetFrameStrata(frame:GetFrameStrata())
-			overlay:SetFrameLevel(healthBar:GetFrameLevel() + index)
+			overlay:SetFrameLevel(4 + index)
 			overlay:Hide()
 
 			overlay.texture = overlay:CreateTexture(nil, "ARTWORK")
@@ -65,30 +55,16 @@ function BuffOverlay:Ensure(frame, settings)
 end
 
 function BuffOverlay:UpdateSettings(frame, settings)
-	local buffOverlays = frame and frame.buffOverlays
-	if not buffOverlays then
-		return
-	end
-
-	local healthBar = frame.healthBar
-	if not healthBar then
-		return
-	end
-
-	local healthTexture = healthBar.GetStatusBarTexture and healthBar:GetStatusBarTexture()
-	if not healthTexture then
-		return
-	end
+	local healthTexture = frame.healthBar:GetStatusBarTexture()
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	for index = 1, #cachedSettings.overlayKeys do
 		local overlayKey = cachedSettings.overlayKeys[index]
-		local overlay = buffOverlays[overlayKey]
+		local overlay = frame.buffOverlays[overlayKey]
 
 		if overlay then
-			overlay:SetFrameLevel(healthBar:GetFrameLevel() + index)
 			overlay:ClearAllPoints()
 			overlay:SetPoint("TOPLEFT", healthTexture, "TOPLEFT", 0, 0)
 			overlay:SetPoint("BOTTOMRIGHT", healthTexture, "BOTTOMRIGHT", 0, 0)
@@ -97,10 +73,6 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
-	if not frame or not frame.buffOverlays then
-		return
-	end
-
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
 		for _, overlay in pairs(frame.buffOverlays) do

@@ -341,8 +341,7 @@ local DEFAULTS = {
 				height = 8,
 				borderEnabled = true,
 				borderThicknessPx = 1,
-				backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
-			},
+				},
 			border = {
 				thicknessPx = 1,
 				color = { r = 0, g = 0, b = 0, a = 1 },
@@ -483,6 +482,7 @@ local DEFAULTS = {
 						},
 					},
 					healAbsorbs = {
+						texture = "Flat",
 						color = {
 							r = 1,
 							g = 0,
@@ -603,8 +603,7 @@ local DEFAULTS = {
 				height = 6,
 				borderEnabled = true,
 				borderThicknessPx = 1,
-				backgroundColor = { r = 0, g = 0, b = 0, a = 0.5 },
-			},
+				},
 			border = {
 				thicknessPx = 1,
 				color = { r = 0, g = 0, b = 0, a = 1 },
@@ -745,6 +744,7 @@ local DEFAULTS = {
 						},
 					},
 					healAbsorbs = {
+						texture = "Flat",
 						color = {
 							r = 1,
 							g = 0,
