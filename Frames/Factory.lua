@@ -3,72 +3,93 @@ local _, addon = ...
 addon.Frames = addon.Frames or {}
 local Frames = addon.Frames
 
-function Frames:CreateGroup(groupType)
-	if type(groupType) ~= "string" or groupType == "" then
-		error("Frames:CreateGroup requires a non-empty group type", 2)
-	end
-
-	local groupName = "MRF_" .. groupType .. "Group"
-	local group = CreateFrame("Frame", groupName, UIParent, "SecureHandlerStateTemplate")
-	group.name = groupName
-
-	group:SetSize(1, 1)
-	group:ClearAllPoints()
-	group:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-
-	return group
-end
-
-function Frames:CreateFrame(group, unit, unitIndex)
-	if not group then
-		error("Frames:CreateFrame requires group", 2)
-	end
-
-	if type(unit) ~= "string" or unit == "" then
-		error("Frames:CreateFrame requires non-empty unit", 2)
-	end
-
-	local frameName = group.name .. "_Frame" .. unitIndex
-	local frame = CreateFrame("Button", frameName, group, "SecureUnitButtonTemplate")
-	frame.unit = unit
+function MRF_OnUnitFrameLoad(frame)
 	frame.dataProvider = addon.Frames.DataProvider.Live
 
-	frame:SetAttribute("unit", unit)
-	frame:SetAttribute("*type1", "target")
-	frame:SetAttribute("*type2", "togglemenu")
-	frame:RegisterForClicks("AnyUp")
-
-	frame:SetScript("OnEnter", function(self)
-		if not self.unit then
-			return
-		end
-		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-		GameTooltip:SetUnit(self.unit)
-		GameTooltip:Show()
-	end)
-
-	frame:SetScript("OnLeave", function()
-		GameTooltip:Hide()
-	end)
-
-	-- Register Frame for Targeted Spells Addon
-	-- https://www.curseforge.com/wow/addons/targetedspells
 	local targetedSpellsApi = _G.TargetedSpellsAPI
-	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName and frameName then
-		targetedSpellsApi.RegisterFrameByName(frameName)
+	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then
+		local name = frame:GetName()
+		if name then
+			targetedSpellsApi.RegisterFrameByName(name)
+		end
 	end
 
-	-- Register Frames for Clique Addon
-	-- https://www.curseforge.com/wow/addons/clique
 	if _G.ClickCastFrames then
 		_G.ClickCastFrames[frame] = true
 	end
+end
 
-	frame:SetSize(1, 1)
+function Frames:CreateRaidHeader(raidSettings, groupIndex)
+	local size = raidSettings.size or {}
+	local spacing = raidSettings.spacing or {}
 
-	RegisterUnitWatch(frame)
+	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.width or 112)))
+	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.height or 56)))
+	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
 
-	return frame
+	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
+
+	header:SetAttribute("point", "TOP")
+	header:SetAttribute("xOffset", 0)
+	header:SetAttribute("yOffset", -spacingY)
+	header:SetAttribute("columnAnchorPoint", "TOPLEFT")
+	header:SetAttribute("template", "MRF_UnitFrameTemplate")
+	header:SetAttribute("showPlayer", true)
+	header:SetAttribute("showParty", false)
+	header:SetAttribute("showRaid", true)
+	header:SetAttribute("showSolo", false)
+	header:SetAttribute("groupFilter", tostring(groupIndex))
+	header:SetAttribute("frameWidth", frameWidth)
+	header:SetAttribute("frameHeight", frameHeight)
+	header:SetAttribute("sortMethod", "INDEX")
+	header:SetAttribute("unitsPerColumn", 5)
+	header:SetAttribute("maxColumns", 1)
+
+	header:SetAttribute("startingIndex", -4)
+	header:Show()
+	header:SetAttribute("startingIndex", 1)
+
+	return header
+end
+
+function Frames:CreatePartyHeader(partySettings)
+	local size = partySettings.size or {}
+	local spacing = partySettings.spacing or {}
+	local position = partySettings.position or {}
+
+	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.width or 128)))
+	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.height or 64)))
+	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
+	local posX = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.x or 0)))
+	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
+
+	local header = CreateFrame("Frame", "MRF_PartyHeader", UIParent, "SecureGroupHeaderTemplate")
+
+	local totalHeight = (5 * frameHeight) + (4 * spacingY)
+	header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)
+
+	header:SetAttribute("point", "TOP")
+	header:SetAttribute("xOffset", 0)
+	header:SetAttribute("yOffset", -spacingY)
+	header:SetAttribute("columnAnchorPoint", "TOPLEFT")
+	header:SetAttribute("template", "MRF_UnitFrameTemplate")
+	header:SetAttribute("showPlayer", true)
+	header:SetAttribute("showParty", true)
+	header:SetAttribute("showRaid", false)
+	header:SetAttribute("showSolo", true)
+	header:SetAttribute("frameWidth", frameWidth)
+	header:SetAttribute("frameHeight", frameHeight)
+	header:SetAttribute("groupingOrder", "TANK,HEALER,DAMAGER,NONE")
+	header:SetAttribute("groupBy", "ASSIGNEDROLE")
+	header:SetAttribute("sortMethod", "INDEX")
+	header:SetAttribute("unitsPerColumn", 5)
+	header:SetAttribute("maxColumns", 5)
+
+	header:SetAttribute("startingIndex", -4)
+	header:Show()
+	header:SetAttribute("startingIndex", 1)
+
+	return header
 end
 
 function Frames:CreateTestGroup(groupType)

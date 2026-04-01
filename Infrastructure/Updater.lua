@@ -88,7 +88,7 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end
 
-		if updateReasons.privateAurasSettingsChanged then
+		if updateReasons.rosterChanged or updateReasons.privateAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 		end
 

@@ -90,6 +90,10 @@ end
 function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
 
+	if InCombatLockdown() then
+		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = true
+	end
+
 	QueueLateRosterRefresh()
 end
 
@@ -103,8 +107,17 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 		end)
 	end
 
-	if addon.FrameRegistry:ShouldRestoreLiveDriversAfterCombat() then
+	if addon.FrameRegistry.restoreLiveDriversAfterCombat then
 		addon.FrameRegistry:UpdateStateDrivers()
+	end
+
+	if addon.FrameRegistry.needsLayoutUpdateAfterCombat then
+		addon.UpdateScheduler:Notify("layoutChanged")
+	end
+
+	if addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat then
+		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = false
+		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 	end
 end
 

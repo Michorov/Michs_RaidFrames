@@ -51,6 +51,7 @@ Frames/DataProvider.lua
 Frames/RangeChecker.lua
 Frames/Layout.lua
 Frames/Factory.lua
+Frames/UnitFrameTemplate.xml
 
 # Frames Base
 Frames/Base/Border.lua
