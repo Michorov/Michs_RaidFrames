@@ -7,6 +7,8 @@ addon.Frames.Widgets.Icons.PrivateAuras = addon.Frames.Widgets.Icons.PrivateAura
 
 local PrivateAuras = addon.Frames.Widgets.Icons.PrivateAuras
 
+PrivateAuras.needsUpdateAfterCombat = false
+
 local function GetPrivateAurasSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
@@ -94,7 +96,8 @@ end
 
 function PrivateAuras:Ensure(frame, settings)
 	if not frame.privateAurasContainer then
-		frame.privateAurasContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
+		frame.privateAurasContainer =
+			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
 	end
 end
 

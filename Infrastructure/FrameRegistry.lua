@@ -4,17 +4,21 @@ local FrameRegistry = {}
 addon.FrameRegistry = FrameRegistry
 
 local initialized = false
-local restoreLiveDriversAfterCombat = false
 
-local partyGroup = {
+FrameRegistry.restoreLiveDriversAfterCombat = false
+FrameRegistry.needsLayoutUpdateAfterCombat = false
+
+local partyHeader = {
 	type = "party",
+	isSecureHeader = true,
 	container = nil,
 	frames = {},
 }
 
-local raidGroup = {
+local raidHeaders = {
 	type = "raid",
-	container = nil,
+	isSecureHeader = true,
+	containers = {},
 	frames = {},
 }
 
@@ -36,6 +40,19 @@ local testRaidGroup = {
 
 local unitFrameMap = {}
 
+function MRF_OnUnitChanged(frame, unit)
+	if unit then
+		unitFrameMap[unit] = frame
+	else
+		for k, v in pairs(unitFrameMap) do
+			if v == frame then
+				unitFrameMap[k] = nil
+				break
+			end
+		end
+	end
+end
+
 function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	local profile = addon.Database:GetProfile()
 	local showSoloPartyFrame = profile and profile.core and profile.core.showSoloPartyFrame == true
@@ -45,35 +62,51 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 		return
 	end
 
-	UnregisterStateDriver(raidGroup.container, "visibility")
-	UnregisterStateDriver(partyGroup.container, "visibility")
+	UnregisterStateDriver(partyHeader.container, "visibility")
+	for _, raidContainer in ipairs(raidHeaders.containers) do
+		UnregisterStateDriver(raidContainer, "visibility")
+	end
+
+	local raidGroupSettings = (profile.raid and profile.raid.groups) or {}
 
 	if testModeActive then
-		RegisterStateDriver(raidGroup.container, "visibility", "[@player,combat,group:raid] show; hide")
-
 		if showSoloPartyFrame then
-			RegisterStateDriver(partyGroup.container, "visibility", "[@player,combat,nogroup:raid] show; hide")
+			RegisterStateDriver(partyHeader.container, "visibility", "[@player,combat,nogroup:raid] show; hide")
 		else
 			RegisterStateDriver(
-				partyGroup.container,
+				partyHeader.container,
 				"visibility",
 				"[@player,combat,group:party,nogroup:raid] show; hide"
 			)
 		end
 
-		restoreLiveDriversAfterCombat = false
+		for groupIndex, raidContainer in ipairs(raidHeaders.containers) do
+			if raidGroupSettings[groupIndex] then
+				RegisterStateDriver(raidContainer, "visibility", "[@player,combat,group:raid] show; hide")
+			else
+				RegisterStateDriver(raidContainer, "visibility", "hide")
+			end
+		end
+
+		self.restoreLiveDriversAfterCombat = false
 		return
 	end
 
-	RegisterStateDriver(raidGroup.container, "visibility", "[@player,group:raid] show; hide")
-
 	if showSoloPartyFrame then
-		RegisterStateDriver(partyGroup.container, "visibility", "[@player,group:raid] hide; show")
+		RegisterStateDriver(partyHeader.container, "visibility", "[@player,nogroup:raid] show; hide")
 	else
-		RegisterStateDriver(partyGroup.container, "visibility", "[@player,group:party,nogroup:raid] show; hide")
+		RegisterStateDriver(partyHeader.container, "visibility", "[@player,group:party,nogroup:raid] show; hide")
 	end
 
-	restoreLiveDriversAfterCombat = false
+	for groupIndex, raidContainer in ipairs(raidHeaders.containers) do
+		if raidGroupSettings[groupIndex] then
+			RegisterStateDriver(raidContainer, "visibility", "[@player,group:raid] show; hide")
+		else
+			RegisterStateDriver(raidContainer, "visibility", "hide")
+		end
+	end
+
+	self.restoreLiveDriversAfterCombat = false
 end
 
 local function ApplyBlizzardFramesVisibility()
@@ -139,8 +172,8 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 		end
 	end
 
-	UpdateGroup(partyGroup, partySettings)
-	UpdateGroup(raidGroup, raidSettings)
+	UpdateGroup(partyHeader, partySettings)
+	UpdateGroup(raidHeaders, raidSettings)
 
 	if testPartyGroup.isActive then
 		UpdateGroup(testPartyGroup, partySettings)
@@ -162,37 +195,41 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 	local partySettings = profile.party or {}
 	local raidSettings = ResolveRaidSettings(profile)
 
+	local function UpdateFrame(frame, settings)
+		if (not inCombat) and type(settingsCallback) == "function" then
+			settingsCallback(frame, settings)
+		end
+		if type(stateCallback) == "function" then
+			stateCallback(frame, settings)
+		end
+	end
+
 	local frame = unitFrameMap[unit]
-	if not frame then
-		return
-	end
-
-	local settings
-	if frame.unit == "player" or frame.unit:match("^party%d$") then
-		settings = partySettings
-	else
-		settings = raidSettings
-	end
-
-	if (not inCombat) and type(settingsCallback) == "function" then
-		settingsCallback(frame, settings)
-	end
-
-	if type(stateCallback) == "function" then
-		stateCallback(frame, settings)
+	if frame then
+		local settings
+		if unit == "player" or unit:match("^party%d$") then
+			settings = partySettings
+		else
+			settings = raidSettings
+		end
+		UpdateFrame(frame, settings)
 	end
 end
 
 function FrameRegistry:UpdateLayout()
 	if InCombatLockdown() then
+		self.needsLayoutUpdateAfterCombat = true
 		return
 	end
+
+	self.needsLayoutUpdateAfterCombat = false
 
 	if not initialized then
 		error("FrameRegistry is not initialized", 2)
 	end
 
 	ApplyBlizzardFramesVisibility()
+	self:UpdateStateDrivers()
 
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
@@ -206,8 +243,8 @@ function FrameRegistry:UpdateLayout()
 		addon.Frames:UpdateLayout(testRaidGroup, profile.raid or {})
 	end
 
-	addon.Frames:UpdateLayout(partyGroup, partySettings)
-	addon.Frames:UpdateLayout(raidGroup, raidSettings)
+	addon.Frames:UpdateLayout(partyHeader, partySettings)
+	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
 end
 
 function FrameRegistry:Initialize()
@@ -219,24 +256,27 @@ function FrameRegistry:Initialize()
 	local partySettings = profile.party or {}
 	local raidSettings = ResolveRaidSettings(profile)
 
-	partyGroup.container = addon.Frames:CreateGroup("Party")
-	raidGroup.container = addon.Frames:CreateGroup("Raid")
+	local header = addon.Frames:CreatePartyHeader(partySettings)
+	partyHeader.container = header
 
-	local function CreateUnitFramesForGroup(group, units)
-		for unitIndex, unit in ipairs(units) do
-			local frame = addon.Frames:CreateFrame(group.container, unit, unitIndex)
-			group.frames[unitIndex] = frame
-			unitFrameMap[unit] = frame
+	for i = 1, 5 do
+		local frame = header:GetAttribute("child" .. i)
+		if frame then
+			partyHeader.frames[i] = frame
 		end
 	end
 
-	local raidUnits = {}
-	for raidIndex = 1, 40 do
-		raidUnits[raidIndex] = "raid" .. raidIndex
-	end
+	for groupIndex = 1, 8 do
+		local raidHeader = addon.Frames:CreateRaidHeader(raidSettings, groupIndex)
+		raidHeaders.containers[groupIndex] = raidHeader
 
-	CreateUnitFramesForGroup(partyGroup, { "player", "party1", "party2", "party3", "party4" })
-	CreateUnitFramesForGroup(raidGroup, raidUnits)
+		for i = 1, 5 do
+			local frame = raidHeader:GetAttribute("child" .. i)
+			if frame then
+				table.insert(raidHeaders.frames, frame)
+			end
+		end
+	end
 
 	ApplyBlizzardFramesVisibility()
 	self:UpdateStateDrivers(true)
@@ -252,13 +292,13 @@ function FrameRegistry:Initialize()
 		end
 	end
 
-	EnsureWidgetsAndUpdateSettings(partyGroup, partySettings)
-	EnsureWidgetsAndUpdateSettings(raidGroup, raidSettings)
+	EnsureWidgetsAndUpdateSettings(partyHeader, partySettings)
+	EnsureWidgetsAndUpdateSettings(raidHeaders, raidSettings)
 
 	initialized = true
 
-	addon.Frames:UpdateLayout(partyGroup, partySettings)
-	addon.Frames:UpdateLayout(raidGroup, raidSettings)
+	addon.Frames:UpdateLayout(partyHeader, partySettings)
+	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
 end
 
 function FrameRegistry:IsInitialized()
@@ -386,7 +426,7 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 	end
 
 	if InCombatLockdown() then
-		restoreLiveDriversAfterCombat = true
+		self.restoreLiveDriversAfterCombat = true
 		return
 	end
 
@@ -423,6 +463,3 @@ function FrameRegistry:ToggleTestMode(groupType)
 	end
 end
 
-function FrameRegistry:ShouldRestoreLiveDriversAfterCombat()
-	return restoreLiveDriversAfterCombat
-end
