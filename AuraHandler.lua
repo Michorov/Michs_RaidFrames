@@ -4,6 +4,7 @@ addon.AuraHandler = addon.AuraHandler or {}
 local AuraHandler = addon.AuraHandler
 
 local AURA_FILTERS = {
+	helpful = "HELPFUL",
 	helpfulPlayer = "HELPFUL|PLAYER",
 	helpfulBigDefensive = "HELPFUL|BIG_DEFENSIVE",
 	helpfulExternalDefensive = "HELPFUL|EXTERNAL_DEFENSIVE",
@@ -12,6 +13,7 @@ local AURA_FILTERS = {
 }
 
 AuraHandler.unitAuras = {
+	helpful = {},
 	helpfulPlayer = {},
 	helpfulBigDefensive = {},
 	helpfulExternalDefensive = {},
@@ -20,6 +22,7 @@ AuraHandler.unitAuras = {
 }
 
 AuraHandler.auraByInstanceID = {
+	helpful = {},
 	helpfulPlayer = {},
 	helpfulBigDefensive = {},
 	helpfulExternalDefensive = {},

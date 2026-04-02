@@ -341,7 +341,7 @@ local DEFAULTS = {
 				height = 8,
 				borderEnabled = true,
 				borderThicknessPx = 1,
-				},
+			},
 			border = {
 				thicknessPx = 1,
 				color = { r = 0, g = 0, b = 0, a = 1 },
@@ -469,6 +469,16 @@ local DEFAULTS = {
 						iconSize = 12,
 						spacing = 1,
 						alpha = 1.0,
+					},
+					raidBuffReminder = {
+						enabled = true,
+						showInCombat = false,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						iconSize = 32,
+						borderSizePx = 1,
+						borderColor = { r = 1, g = 0, b = 0, a = 1 },
 					},
 				},
 				bars = {
@@ -603,7 +613,7 @@ local DEFAULTS = {
 				height = 6,
 				borderEnabled = true,
 				borderThicknessPx = 1,
-				},
+			},
 			border = {
 				thicknessPx = 1,
 				color = { r = 0, g = 0, b = 0, a = 1 },
@@ -731,6 +741,16 @@ local DEFAULTS = {
 						iconSize = 12,
 						spacing = 1,
 						alpha = 1.0,
+					},
+					raidBuffReminder = {
+						enabled = true,
+						showInCombat = false,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						iconSize = 28,
+						borderSizePx = 1,
+						borderColor = { r = 1, g = 0, b = 0, a = 1 },
 					},
 				},
 				bars = {
