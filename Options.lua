@@ -3117,6 +3117,212 @@ local options = {
 								},
 							},
 						},
+						raidBuffReminder = {
+							type = "group",
+							name = "Raid Buff Reminder",
+							order = 7,
+							args = {
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.enabled ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.enabled = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										showInCombat = {
+											type = "toggle",
+											name = "Show in Combat",
+											order = 2,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.showInCombat == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.showInCombat = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.anchor
+													or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.anchor = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.offsetX
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.offsetX = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.offsetY
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.offsetY = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								icon = {
+									type = "group",
+									name = "Icon",
+									inline = true,
+									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 1,
+											min = 8,
+											max = 128,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.iconSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.iconSize = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size",
+											order = 2,
+											min = 0,
+											max = 6,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.borderSizePx
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.borderSizePx = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										borderColor = {
+											type = "color",
+											name = "Border Color",
+											hasAlpha = false,
+											order = 3,
+											get = function()
+												local c = addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.borderColor
+													or { r = 1, g = 0, b = 0 }
+												return c.r, c.g, c.b
+											end,
+											set = function(_, r, g, b)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local c = addon.Database:GetProfile().party.widgets.icons.raidBuffReminder.borderColor
+												c.r = r
+												c.g = g
+												c.b = b
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
 						privateAuras = {
 							type = "group",
 							name = "Private Auras",
@@ -6133,6 +6339,212 @@ local options = {
 												addon.Database:GetProfile().raid.widgets.icons.bigDefensive.cooldownFontSize =
 													v
 												addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")
+											end,
+										},
+									},
+								},
+							},
+						},
+						raidBuffReminder = {
+							type = "group",
+							name = "Raid Buff Reminder",
+							order = 7,
+							args = {
+								general = {
+									type = "group",
+									name = "General",
+									inline = true,
+									order = 0,
+									args = {
+										enabled = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.enabled ~= false
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.enabled = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										showInCombat = {
+											type = "toggle",
+											name = "Show in Combat",
+											order = 2,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.showInCombat == true
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.showInCombat = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								anchors = {
+									type = "group",
+									name = "Anchors",
+									inline = true,
+									order = 1,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										anchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.anchor
+													or "CENTER"
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.anchor = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
+									order = 2,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										offsetX = {
+											type = "range",
+											name = "Offset X",
+											order = 1,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.offsetX
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.offsetX = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										offsetY = {
+											type = "range",
+											name = "Offset Y",
+											order = 2,
+											min = -300,
+											max = 300,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.offsetY
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.offsetY = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+									},
+								},
+								icon = {
+									type = "group",
+									name = "Icon",
+									inline = true,
+									order = 3,
+									disabled = function()
+										return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.enabled == false
+									end,
+									args = {
+										iconSize = {
+											type = "range",
+											name = "Icon Size",
+											order = 1,
+											min = 8,
+											max = 128,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.iconSize
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.iconSize = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										borderSizePx = {
+											type = "range",
+											name = "Border Size",
+											order = 2,
+											min = 0,
+											max = 6,
+											step = 1,
+											get = function()
+												return addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.borderSizePx
+											end,
+											set = function(_, v)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.borderSizePx = v
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+											end,
+										},
+										borderColor = {
+											type = "color",
+											name = "Border Color",
+											hasAlpha = false,
+											order = 3,
+											get = function()
+												local c = addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.borderColor
+													or { r = 1, g = 0, b = 0 }
+												return c.r, c.g, c.b
+											end,
+											set = function(_, r, g, b)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local c = addon.Database:GetProfile().raid.widgets.icons.raidBuffReminder.borderColor
+												c.r = r
+												c.g = g
+												c.b = b
+												addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
 											end,
 										},
 									},

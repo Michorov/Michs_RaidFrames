@@ -119,12 +119,16 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = false
 		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 	end
+
+	addon.UpdateScheduler:Notify("combatEnded")
 end
 
 function EventHandler:PLAYER_REGEN_DISABLED()
 	if addon.IsOptionsOpen and addon:IsOptionsOpen() then
 		addon:CloseOptions()
 	end
+
+	addon.UpdateScheduler:Notify("combatStarted")
 end
 
 function EventHandler:READY_CHECK()

@@ -797,7 +797,7 @@ function DataProvider.Test:GetUnitAuras(frame, filter)
 		return dispellableHarmfulAuras
 	elseif filter == "harmful" or filter == "HARMFUL" then
 		return harmfulAuras
-	elseif filter == "helpfulPlayer" or filter == "HELPFUL" then
+	elseif filter == "helpful" or filter == "helpfulPlayer" or filter == "HELPFUL" then
 		return helpfulAuras
 	end
 

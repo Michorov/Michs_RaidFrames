@@ -76,6 +76,7 @@ local function BuildSettingsUpdater(updateReasons)
 
 		if updateReasons.buffOverlaySettingsChanged then
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 		end
 
 		if updateReasons.debuffAurasSettingsChanged then
@@ -86,6 +87,11 @@ local function BuildSettingsUpdater(updateReasons)
 		if updateReasons.bigDefensiveAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
+		end
+
+		if updateReasons.raidBuffReminderSettingsChanged then
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.privateAurasSettingsChanged then
@@ -164,6 +170,15 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Dispels:UpdateState(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
+		end
+
+		if updateReasons.combatStarted then
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
+		end
+
+		if updateReasons.combatEnded then
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
 		if updateReasons.outOfRangeAlphaStateChanged or updateReasons.outOfRangeAlphaSettingChanged then
