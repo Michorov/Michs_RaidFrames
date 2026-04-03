@@ -129,7 +129,7 @@ function CustomBuffs:UpdateState(frame, settings)
 	end
 
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
-	for _, aura in ipairs(auras) do
+	for _, aura in pairs(auras) do
 		local spellOk, isEnabled = pcall(function()
 			return aura.spellId and cachedSettings.iconSettings[aura.spellId] ~= nil
 		end)

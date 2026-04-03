@@ -154,7 +154,7 @@ function Buffs:UpdateState(frame, settings)
 
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 
-	for _, aura in ipairs(auras) do
+	for _, aura in pairs(auras) do
 		if shown >= maxIcons then
 			break
 		end
@@ -200,7 +200,7 @@ function Buffs:UpdateState(frame, settings)
 	if cachedSettings.showExternals and shown < maxIcons then
 		local externals = provider:GetUnitAuras(frame, "helpfulExternalDefensive")
 
-		for _, aura in ipairs(externals) do
+		for _, aura in pairs(externals) do
 			if shown >= maxIcons then
 				break
 			end

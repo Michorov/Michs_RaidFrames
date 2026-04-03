@@ -121,7 +121,7 @@ function BuffOverlay:UpdateState(frame, settings)
 			else
 				local hasBuff = false
 
-				for _, aura in ipairs(auras) do
+				for _, aura in pairs(auras) do
 					local matchesSpell = false
 					local ok = pcall(function()
 						matchesSpell = aura.spellId == spellId

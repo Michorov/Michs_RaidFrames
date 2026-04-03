@@ -118,7 +118,7 @@ function BigDefensive:UpdateState(frame, settings)
 
 	local icon = container.icons[1]
 	local auras = provider:GetUnitAuras(frame, "helpfulBigDefensive")
-	local aura = auras and auras[1]
+	local _, aura = next(auras)
 
 	if aura and aura.icon then
 		local stackText

@@ -143,7 +143,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 
 	if playerClass == "EVOKER" then
 		local hasBlessingOfTheBronze = false
-		for _, aura in ipairs(auras) do
+		for _, aura in pairs(auras) do
 			local auraSpellId = aura.spellId
 			if auraSpellId and not issecretvalue(auraSpellId) then
 				for _, bronzeSpellId in ipairs(BLESSING_OF_THE_BRONZE) do
@@ -167,7 +167,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		end
 	else
 		local hasBuff = false
-		for _, aura in ipairs(auras) do
+		for _, aura in pairs(auras) do
 			local auraSpellId = aura.spellId
 			if auraSpellId and not issecretvalue(auraSpellId) then
 				for _, spellId in ipairs(classBuffSpellIds) do

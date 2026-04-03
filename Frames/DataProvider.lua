@@ -791,17 +791,29 @@ function DataProvider.Test:GetUnitAuras(frame, filter)
 		},
 	}
 
+	local list
 	if filter == "helpfulBigDefensive" then
-		return helpfulBigDefensiveAuras
+		list = helpfulBigDefensiveAuras
 	elseif filter == "harmfulRaidPlayerDispellable" then
-		return dispellableHarmfulAuras
+		list = dispellableHarmfulAuras
 	elseif filter == "harmful" or filter == "HARMFUL" then
-		return harmfulAuras
+		list = harmfulAuras
 	elseif filter == "helpful" or filter == "helpfulPlayer" or filter == "HELPFUL" then
-		return helpfulAuras
+		list = helpfulAuras
 	end
 
-	return {}
+	if not list then
+		return {}
+	end
+
+	local map = {}
+	for _, aura in ipairs(list) do
+		local id = aura and aura.auraInstanceID
+		if id then
+			map[id] = aura
+		end
+	end
+	return map
 end
 
 function DataProvider.Live:GetUnitAuraInstanceIDs(frame, filterKey)
@@ -817,7 +829,7 @@ function DataProvider.Test:GetUnitAuraInstanceIDs(frame, filterKey)
 	local auraInstanceIDs = {}
 	local auras = self:GetUnitAuras(frame, filterKey)
 
-	for _, aura in ipairs(auras) do
+	for _, aura in pairs(auras) do
 		local auraInstanceID = aura and aura.auraInstanceID
 		if auraInstanceID then
 			auraInstanceIDs[auraInstanceID] = true
