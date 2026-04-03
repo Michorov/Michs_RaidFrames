@@ -49,8 +49,10 @@ function EventHandler:Initialize()
 	if not self.rangeTicker then
 		addon.Frames.RangeChecker:UpdateSettings()
 
-		self.rangeTicker = C_Timer.NewTicker(0.25, function()
-			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+		self.rangeTicker = C_Timer.NewTicker(0.5, function()
+			if IsInGroup() or IsInRaid() then
+				addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+			end
 		end)
 	end
 
