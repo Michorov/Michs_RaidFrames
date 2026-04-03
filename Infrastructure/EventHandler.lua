@@ -74,6 +74,7 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
 
 	C_Timer.After(0.1, function()
 		addon.UpdateScheduler:Notify("rosterChanged")
@@ -85,12 +86,14 @@ end
 function EventHandler:ZONE_CHANGED_NEW_AREA()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("layoutChanged")
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
 
 	QueueLateRosterRefresh()
 end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
 
 	if InCombatLockdown() then
 		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = true
@@ -239,12 +242,13 @@ function EventHandler:UNIT_DISPLAYPOWER(event, unit)
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
-function EventHandler:UNIT_AURA(event, unit)
+function EventHandler:UNIT_AURA(event, unit, updateInfo)
 	if not IsSupportedUnit(unit) then
 		return
 	end
 
-	addon.UpdateScheduler:Notify("unitAurasChanged", unit)
+	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
+	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 end
 
 function EventHandler:UNIT_CONNECTION(event, unit)

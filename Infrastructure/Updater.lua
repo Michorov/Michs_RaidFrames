@@ -159,7 +159,7 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.unitAurasChanged then
+		if updateReasons.rosterChanged then
 			addon.AuraHandler:UpdateAurasForUnit(frame.unit)
 		end
 

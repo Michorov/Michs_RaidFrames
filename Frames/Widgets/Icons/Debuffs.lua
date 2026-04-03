@@ -194,7 +194,7 @@ function Debuffs:UpdateState(frame, settings)
 	local maxIcons = cachedSettings.maxIcons
 	local auras = provider:GetUnitAuras(frame, "harmful")
 
-	for _, aura in ipairs(auras) do
+	for _, aura in pairs(auras) do
 		if shown >= maxIcons then
 			break
 		end
