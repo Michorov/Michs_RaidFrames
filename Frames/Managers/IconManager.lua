@@ -67,11 +67,20 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 	icon.cooldown:SetAllPoints(icon)
 	icon.cooldown:SetReverse(true)
 	icon.cooldown:SetHideCountdownNumbers(true)
-	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 3)
+	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
 
 	icon.textLayer = CreateFrame("Frame", nil, icon)
 	icon.textLayer:SetAllPoints(icon)
 	icon.textLayer:SetFrameLevel(icon:GetFrameLevel() + 20)
+
+	for _, region in ipairs({ icon.cooldown:GetRegions() }) do
+		if region and region.GetObjectType and region:GetObjectType() == "FontString" then
+			region:SetParent(icon.textLayer)
+			region:ClearAllPoints()
+			region:SetPoint("CENTER", icon.cooldown, "CENTER")
+			break
+		end
+	end
 
 	icon.countText = icon:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	icon.countText:SetText("")
