@@ -118,7 +118,7 @@ function DataProvider.Live:GetName(frame)
 		return ""
 	end
 
-	return GetUnitName(frame.unit, false) or ""
+	return UnitName(frame.unit) or ""
 end
 
 function DataProvider.Test:GetName(frame)
