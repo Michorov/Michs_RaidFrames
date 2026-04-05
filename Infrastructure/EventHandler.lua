@@ -103,6 +103,10 @@ function EventHandler:GROUP_ROSTER_UPDATE()
 end
 
 function EventHandler:PLAYER_REGEN_ENABLED()
+	if addon.Options:ShouldOpenAfterCombat() then
+		addon.Options:Open()
+	end
+
 	if addon.optionsDeferredOpen then
 		addon.optionsDeferredOpen = false
 		C_Timer.After(0, function()
@@ -129,6 +133,10 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 end
 
 function EventHandler:PLAYER_REGEN_DISABLED()
+	if addon.Options:IsOpen() then
+		addon.Options:Close()
+	end
+
 	if addon.IsOptionsOpen and addon:IsOptionsOpen() then
 		addon:CloseOptions()
 	end
@@ -271,11 +279,13 @@ end
 function EventHandler:UI_SCALE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
+	addon.Options:Snap()
 end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
+	addon.Options:Snap()
 end
 
 function EventHandler:RAID_TARGET_UPDATE()

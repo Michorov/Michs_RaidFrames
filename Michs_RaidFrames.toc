@@ -68,6 +68,7 @@ Infrastructure/FrameRegistry.lua
 
 # Options
 Options.lua
+Options/Options.lua
 
 # Entry Point
 Core.lua
