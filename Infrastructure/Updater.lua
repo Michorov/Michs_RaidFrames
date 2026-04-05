@@ -114,7 +114,12 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Base.Power:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.nameStateChanged or updateReasons.healthStateChanged then
+		if
+			updateReasons.rosterChanged
+			or updateReasons.nameStateChanged
+			or updateReasons.nameSettingsChanged
+			or updateReasons.healthStateChanged
+		then
 			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 		end
 

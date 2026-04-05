@@ -31,6 +31,8 @@ local function UpdateSettingsCache(settings)
 		font = name.font or "Fonts\\FRIZQT__.TTF",
 		size = name.size or 12,
 		outline = name.outline or "NONE",
+		truncate = name.truncate == true,
+		maxLength = name.maxLength or 12,
 	}
 
 	settingsCache[settings] = result
@@ -90,7 +92,16 @@ function Name:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	frame.nameText.text:SetText(frame.dataProvider:GetName(frame) or "")
+	local name = frame.dataProvider:GetName(frame) or ""
+
+	if cachedSettings.truncate then
+		local maxLength = cachedSettings.maxLength
+		if maxLength > 0 and #name > maxLength then
+			name = name:sub(1, maxLength):gsub("%s+$", "") .. ".."
+		end
+	end
+
+	frame.nameText.text:SetText(name)
 	frame.nameText.text:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 

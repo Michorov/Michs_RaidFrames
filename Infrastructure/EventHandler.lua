@@ -65,6 +65,7 @@ local function QueueLateRosterRefresh()
 		C_Timer.After(delay, function()
 			addon.UpdateScheduler:Notify("rosterChanged")
 			addon.UpdateScheduler:Notify("layoutChanged")
+			addon.UpdateScheduler:Notify("nameStateChanged")
 		end)
 	end
 end

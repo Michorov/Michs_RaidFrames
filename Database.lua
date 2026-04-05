@@ -364,6 +364,8 @@ local DEFAULTS = {
 						font = "Fonts\\ARIALN.TTF",
 						size = 12,
 						outline = "NONE",
+						truncate = false,
+						maxLength = 12,
 					},
 					healAbsorbs = {
 						enabled = false,
@@ -636,6 +638,8 @@ local DEFAULTS = {
 						font = "Fonts\\ARIALN.TTF",
 						size = 10,
 						outline = "NONE",
+						truncate = false,
+						maxLength = 12,
 					},
 					healAbsorbs = {
 						enabled = false,

@@ -1582,224 +1582,297 @@ local options = {
 							name = "Name",
 							order = 1,
 							args = {
-								partyNameAnchor = {
-									type = "select",
-									name = "Name Anchor",
+								anchor = {
+									type = "group",
+									name = "Anchor",
+									inline = true,
 									order = 1,
-									values = {
-										TOPLEFT = "Top Left",
-										TOP = "Top Center",
-										TOPRIGHT = "Top Right",
-										LEFT = "Left",
-										CENTER = "Center",
-										RIGHT = "Right",
-										BOTTOMLEFT = "Bottom Left",
-										BOTTOM = "Bottom Center",
-										BOTTOMRIGHT = "Bottom Right",
+									args = {
+										partyNameAnchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top Center",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom Center",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).anchor
+													or "TOPLEFT"
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.anchor = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
 									},
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).anchor
-											or "TOPLEFT"
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.anchor = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
 								},
-								partyNameSize = {
-									type = "range",
-									name = "Name Size",
-									min = 6,
-									max = 32,
-									step = 1,
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
 									order = 2,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).size
-											or 11
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.size = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer1 = {
-									type = "description",
-									name = " ",
-									order = 10,
-									width = "full",
-								},
-								partyNameOffsetX = {
-									type = "range",
-									name = "Name Offset X",
-									min = -100,
-									max = 100,
-									step = 1,
-									order = 11,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local pos = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).position
-											or {}
-										return pos.x or 2
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.position = profile.party.widgets.texts.name.position
-											or {}
-										profile.party.widgets.texts.name.position.x = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								partyNameOffsetY = {
-									type = "range",
-									name = "Name Offset Y",
-									min = -100,
-									max = 100,
-									step = 1,
-									order = 12,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local pos = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).position
-											or {}
-										return pos.y or -2
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.position = profile.party.widgets.texts.name.position
-											or {}
-										profile.party.widgets.texts.name.position.y = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer2 = {
-									type = "description",
-									name = " ",
-									order = 20,
-									width = "full",
-								},
-								partyNameClassColor = {
-									type = "toggle",
-									name = "Name Class Color",
-									order = 21,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).classColor
-											== true
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.classColor = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-
-								partyNameColor = {
-									type = "color",
-									name = "Name Color",
-									hasAlpha = true,
-									order = 22,
-									disabled = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).classColor
-											== true
-									end,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local c = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).color
-											or { r = 0, g = 0, b = 0, a = 1 }
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer3 = {
-									type = "description",
-									name = " ",
-									order = 30,
-									width = "full",
-								},
-								partyNameOutline = {
-									type = "select",
-									name = "Name Outline",
-									order = 31,
-									values = {
-										NONE = "None",
-										OUTLINE = "Outline",
-										THICKOUTLINE = "Thick Outline",
-										MONOCHROME = "Monochrome",
+									args = {
+										partyNameOffsetX = {
+											type = "range",
+											name = "Offset X",
+											min = -100,
+											max = 100,
+											step = 1,
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local pos = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).position or {}
+												return pos.x or 2
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.position = profile.party.widgets.texts.name.position
+														or {}
+													profile.party.widgets.texts.name.position.x = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										partyNameOffsetY = {
+											type = "range",
+											name = "Offset Y",
+											min = -100,
+											max = 100,
+											step = 1,
+											order = 2,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local pos = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).position or {}
+												return pos.y or -2
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.position = profile.party.widgets.texts.name.position
+														or {}
+													profile.party.widgets.texts.name.position.y = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
 									},
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).outline
-											or "NONE"
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.party = profile.party or {}
-										profile.party.widgets = profile.party.widgets or {}
-										profile.party.widgets.texts = profile.party.widgets.texts or {}
-										profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
-										profile.party.widgets.texts.name.outline = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
+								},
+								text = {
+									type = "group",
+									name = "Text",
+									inline = true,
+									order = 3,
+									args = {
+										partyNameSize = {
+											type = "range",
+											name = "Font Size",
+											min = 6,
+											max = 32,
+											step = 1,
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).size
+													or 12
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.size = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										partyNameOutline = {
+											type = "select",
+											name = "Outline",
+											order = 2,
+											values = {
+												NONE = "None",
+												OUTLINE = "Outline",
+												THICKOUTLINE = "Thick Outline",
+												MONOCHROME = "Monochrome",
+											},
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).outline
+													or "NONE"
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.outline = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+									},
+								},
+								style = {
+									type = "group",
+									name = "Style",
+									inline = true,
+									order = 4,
+									args = {
+										partyNameClassColor = {
+											type = "toggle",
+											name = "Use Class Color",
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).classColor
+													== true
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.classColor = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										partyNameColor = {
+											type = "color",
+											name = "Color",
+											hasAlpha = true,
+											order = 2,
+											disabled = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).classColor
+													== true
+											end,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local c = ((((profile.party or {}).widgets or {}).texts or {}).name or {}).color
+													or { r = 0, g = 0, b = 0, a = 1 }
+												return c.r, c.g, c.b, c.a
+											end,
+											set = function(_, r, g, b, a)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local profile = addon.Database:GetProfile()
+												profile.party = profile.party or {}
+												profile.party.widgets = profile.party.widgets or {}
+												profile.party.widgets.texts = profile.party.widgets.texts or {}
+												profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+												profile.party.widgets.texts.name.color = { r = r, g = g, b = b, a = a }
+												addon.UpdateScheduler:Notify("nameSettingsChanged")
+											end,
+										},
+									},
+								},
+								truncateName = {
+									type = "group",
+									name = "Truncate Name",
+									inline = true,
+									order = 5,
+									args = {
+										partyNameTruncate = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).truncate
+													== true
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.truncate = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										partyNameMaxLength = {
+											type = "range",
+											name = "Max Length",
+											min = 1,
+											max = 32,
+											step = 1,
+											order = 2,
+											disabled = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).truncate
+													~= true
+											end,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.party or {}).widgets or {}).texts or {}).name or {}).maxLength
+													or 12
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.party = profile.party or {}
+													profile.party.widgets = profile.party.widgets or {}
+													profile.party.widgets.texts = profile.party.widgets.texts or {}
+													profile.party.widgets.texts.name = profile.party.widgets.texts.name or {}
+													profile.party.widgets.texts.name.maxLength = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+									},
 								},
 							},
 						},
@@ -4809,223 +4882,297 @@ local options = {
 							name = "Name",
 							order = 1,
 							args = {
-								raidNameAnchor = {
-									type = "select",
-									name = "Name Anchor",
+								anchor = {
+									type = "group",
+									name = "Anchor",
+									inline = true,
 									order = 1,
-									values = {
-										TOPLEFT = "Top Left",
-										TOP = "Top Center",
-										TOPRIGHT = "Top Right",
-										LEFT = "Left",
-										CENTER = "Center",
-										RIGHT = "Right",
-										BOTTOMLEFT = "Bottom Left",
-										BOTTOM = "Bottom Center",
-										BOTTOMRIGHT = "Bottom Right",
+									args = {
+										raidNameAnchor = {
+											type = "select",
+											name = "Anchor",
+											order = 1,
+											values = {
+												TOPLEFT = "Top Left",
+												TOP = "Top Center",
+												TOPRIGHT = "Top Right",
+												LEFT = "Left",
+												CENTER = "Center",
+												RIGHT = "Right",
+												BOTTOMLEFT = "Bottom Left",
+												BOTTOM = "Bottom Center",
+												BOTTOMRIGHT = "Bottom Right",
+											},
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).anchor
+													or "TOPLEFT"
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.anchor = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
 									},
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).anchor
-											or "TOPLEFT"
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.anchor = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
 								},
-								raidNameSize = {
-									type = "range",
-									name = "Name Size",
-									min = 6,
-									max = 32,
-									step = 1,
+								position = {
+									type = "group",
+									name = "Position",
+									inline = true,
 									order = 2,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).size
-											or 11
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.size = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer1 = {
-									type = "description",
-									name = " ",
-									order = 10,
-									width = "full",
-								},
-								raidNameOffsetX = {
-									type = "range",
-									name = "Name Offset X",
-									min = -100,
-									max = 100,
-									step = 1,
-									order = 11,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local pos = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).position
-											or {}
-										return pos.x or 2
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.position = profile.raid.widgets.texts.name.position
-											or {}
-										profile.raid.widgets.texts.name.position.x = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								raidNameOffsetY = {
-									type = "range",
-									name = "Name Offset Y",
-									min = -100,
-									max = 100,
-									step = 1,
-									order = 12,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local pos = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).position
-											or {}
-										return pos.y or -2
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.position = profile.raid.widgets.texts.name.position
-											or {}
-										profile.raid.widgets.texts.name.position.y = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer2 = {
-									type = "description",
-									name = " ",
-									order = 20,
-									width = "full",
-								},
-								raidNameClassColor = {
-									type = "toggle",
-									name = "Name Class Color",
-									order = 21,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).classColor
-											== true
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.classColor = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								raidNameColor = {
-									type = "color",
-									name = "Name Color",
-									hasAlpha = true,
-									order = 22,
-									disabled = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).classColor
-											== true
-									end,
-									get = function()
-										local profile = addon.Database:GetProfile()
-										local c = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).color
-											or { r = 0, g = 0, b = 0, a = 1 }
-										return c.r, c.g, c.b, c.a
-									end,
-									set = function(_, r, g, b, a)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.color = { r = r, g = g, b = b, a = a }
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
-								},
-								rowSpacer3 = {
-									type = "description",
-									name = " ",
-									order = 30,
-									width = "full",
-								},
-								raidNameOutline = {
-									type = "select",
-									name = "Name Outline",
-									order = 31,
-									values = {
-										NONE = "None",
-										OUTLINE = "Outline",
-										THICKOUTLINE = "Thick Outline",
-										MONOCHROME = "Monochrome",
+									args = {
+										raidNameOffsetX = {
+											type = "range",
+											name = "Offset X",
+											min = -100,
+											max = 100,
+											step = 1,
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local pos = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).position or {}
+												return pos.x or 2
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.position = profile.raid.widgets.texts.name.position
+														or {}
+													profile.raid.widgets.texts.name.position.x = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										raidNameOffsetY = {
+											type = "range",
+											name = "Offset Y",
+											min = -100,
+											max = 100,
+											step = 1,
+											order = 2,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local pos = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).position or {}
+												return pos.y or -2
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.position = profile.raid.widgets.texts.name.position
+														or {}
+													profile.raid.widgets.texts.name.position.y = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
 									},
-									get = function()
-										local profile = addon.Database:GetProfile()
-										return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).outline
-											or "NONE"
-									end,
-									set = function(_, value)
-										if InCombatLockdown() then
-											ShowCombatLockMessage()
-											return
-										end
-										local profile = addon.Database:GetProfile()
-										profile.raid = profile.raid or {}
-										profile.raid.widgets = profile.raid.widgets or {}
-										profile.raid.widgets.texts = profile.raid.widgets.texts or {}
-										profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
-										profile.raid.widgets.texts.name.outline = value
-										addon.UpdateScheduler:Notify("nameSettingsChanged")
-									end,
+								},
+								text = {
+									type = "group",
+									name = "Text",
+									inline = true,
+									order = 3,
+									args = {
+										raidNameSize = {
+											type = "range",
+											name = "Font Size",
+											min = 6,
+											max = 32,
+											step = 1,
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).size
+													or 11
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.size = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										raidNameOutline = {
+											type = "select",
+											name = "Outline",
+											order = 2,
+											values = {
+												NONE = "None",
+												OUTLINE = "Outline",
+												THICKOUTLINE = "Thick Outline",
+												MONOCHROME = "Monochrome",
+											},
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).outline
+													or "NONE"
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.outline = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+									},
+								},
+								style = {
+									type = "group",
+									name = "Style",
+									inline = true,
+									order = 4,
+									args = {
+										raidNameClassColor = {
+											type = "toggle",
+											name = "Use Class Color",
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).classColor
+													== true
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.classColor = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										raidNameColor = {
+											type = "color",
+											name = "Color",
+											hasAlpha = true,
+											order = 2,
+											disabled = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).classColor
+													== true
+											end,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												local c = ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).color
+													or { r = 0, g = 0, b = 0, a = 1 }
+												return c.r, c.g, c.b, c.a
+											end,
+											set = function(_, r, g, b, a)
+												if InCombatLockdown() then
+													ShowCombatLockMessage()
+													return
+												end
+												local profile = addon.Database:GetProfile()
+												profile.raid = profile.raid or {}
+												profile.raid.widgets = profile.raid.widgets or {}
+												profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+												profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+												profile.raid.widgets.texts.name.color = { r = r, g = g, b = b, a = a }
+												addon.UpdateScheduler:Notify("nameSettingsChanged")
+											end,
+										},
+									},
+								},
+								truncateName = {
+									type = "group",
+									name = "Truncate Name",
+									inline = true,
+									order = 5,
+									args = {
+										raidNameTruncate = {
+											type = "toggle",
+											name = "Enabled",
+											order = 1,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).truncate
+													== true
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.truncate = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+										raidNameMaxLength = {
+											type = "range",
+											name = "Max Length",
+											min = 1,
+											max = 32,
+											step = 1,
+											order = 2,
+											disabled = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).truncate
+													~= true
+											end,
+											get = function()
+												local profile = addon.Database:GetProfile()
+												return ((((profile.raid or {}).widgets or {}).texts or {}).name or {}).maxLength
+													or 12
+											end,
+											set = function(_, value)
+													if InCombatLockdown() then
+														ShowCombatLockMessage()
+														return
+													end
+													local profile = addon.Database:GetProfile()
+													profile.raid = profile.raid or {}
+													profile.raid.widgets = profile.raid.widgets or {}
+													profile.raid.widgets.texts = profile.raid.widgets.texts or {}
+													profile.raid.widgets.texts.name = profile.raid.widgets.texts.name or {}
+													profile.raid.widgets.texts.name.maxLength = value
+													addon.UpdateScheduler:Notify("nameSettingsChanged")
+												end,
+										},
+									},
 								},
 							},
 						},
