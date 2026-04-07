@@ -88,7 +88,21 @@ function PendingSummon:UpdateState(frame, settings)
 		return
 	end
 
-	if not C_IncomingSummon or not C_IncomingSummon.IncomingSummonStatus or not Enum or not Enum.SummonStatus then
+	if
+		not C_IncomingSummon
+		or not C_IncomingSummon.HasIncomingSummon
+		or not C_IncomingSummon.IncomingSummonStatus
+		or not Enum
+		or not Enum.SummonStatus
+	then
+		container:Hide()
+		return
+	end
+
+	local hasIncomingSummon = C_IncomingSummon.HasIncomingSummon(unit)
+	print("Unit has pending summon: ")
+	print(hasIncomingSummon)
+	if not hasIncomingSummon then
 		container:Hide()
 		return
 	end
