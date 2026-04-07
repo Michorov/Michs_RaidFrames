@@ -68,6 +68,21 @@ Infrastructure/FrameRegistry.lua
 
 # Options
 Options.lua
+Options/Theme.lua
+Options/Data.lua
+Options/Controls/Button.lua
+Options/Controls/Checkbox.lua
+Options/Controls/Slider.lua
+Options/Pages/General.lua
+Options/Pages/Layout.lua
+Options/Pages/Texts.lua
+Options/Pages/Auras.lua
+Options/Pages/Indicators.lua
+Options/Pages/Profiles.lua
+Options/Sections/Header.lua
+Options/Sections/Content.lua
+Options/Sections/SideMenu.lua
+Options/Sections/StatusBar.lua
 Options/Options.lua
 
 # Entry Point

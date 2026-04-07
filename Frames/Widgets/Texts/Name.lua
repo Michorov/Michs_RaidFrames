@@ -28,7 +28,7 @@ local function UpdateSettingsCache(settings)
 			b = color.b or 0,
 			a = color.a or 1,
 		},
-		font = name.font or "Fonts\\FRIZQT__.TTF",
+		font = name.font or "Interface\\AddOns\\Michs_RaidFrames\\Media\\Fonts\\Roboto-Bold.ttf",
 		size = name.size or 12,
 		outline = name.outline or "NONE",
 		truncate = name.truncate == true,

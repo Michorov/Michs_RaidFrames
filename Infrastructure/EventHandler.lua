@@ -280,12 +280,14 @@ end
 function EventHandler:UI_SCALE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
+	addon.Options:UpdateLayout()
 	addon.Options:Snap()
 end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
+	addon.Options:UpdateLayout()
 	addon.Options:Snap()
 end
 
