@@ -914,6 +914,10 @@ function Database:Initialize()
 	local function OnProfileChanged()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
+		if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
+			addon.Options.Data:RefreshProfile()
+		end
+
 		addon.Frames.RangeChecker:UpdateSettings()
 		addon.Modules:RequestUpdateAll()
 	end
