@@ -100,8 +100,6 @@ function PendingSummon:UpdateState(frame, settings)
 	end
 
 	local hasIncomingSummon = C_IncomingSummon.HasIncomingSummon(unit)
-	print("Unit has pending summon: ")
-	print(hasIncomingSummon)
 	if not hasIncomingSummon then
 		container:Hide()
 		return
