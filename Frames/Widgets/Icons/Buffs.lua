@@ -8,6 +8,7 @@ addon.Frames.Widgets.Icons.Buffs = addon.Frames.Widgets.Icons.Buffs or {}
 local Buffs = addon.Frames.Widgets.Icons.Buffs
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local ENSURE_MAX_ICONS = 10
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -42,19 +43,14 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function Buffs:Ensure(frame, settings)
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
+function Buffs:Ensure(frame)
 	if not frame.buffsContainer then
 		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer", 42)
 	end
 
 	local container = frame.buffsContainer
 
-	for i = 1, cachedSettings.maxIcons do
+	for i = 1, ENSURE_MAX_ICONS do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end

@@ -43,7 +43,7 @@ local function UpdateSettingsCache(settings)
 	}
 end
 
-function CustomBuffs:Ensure(frame, settings)
+function CustomBuffs:Ensure(frame)
 	if not frame.customBuffsFrame then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetAllPoints(frame)
@@ -55,14 +55,15 @@ function CustomBuffs:Ensure(frame, settings)
 		frame.customBuffs = {}
 	end
 
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
+	local classFileName = addon.Utilities:GetPlayerClassFileName()
+	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
+	local classDefaults = defaultAuraValues[classFileName] or {}
 
-	for spellId, iconSettings in pairs(cachedSettings.specAuras) do
-		if iconSettings.enabled and not frame.customBuffs[spellId] then
-			frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
+	for _, specDefaults in pairs(classDefaults) do
+		for spellId, defaultEntry in pairs(specDefaults) do
+			if defaultEntry.enabled ~= false and not frame.customBuffs[spellId] then
+				frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
+			end
 		end
 	end
 end

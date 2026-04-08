@@ -28,29 +28,21 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function BuffOverlay:Ensure(frame, settings)
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
+function BuffOverlay:Ensure(frame)
 	frame.buffOverlays = frame.buffOverlays or {}
 
-	for index = 1, #cachedSettings.overlayKeys do
-		local overlayKey = cachedSettings.overlayKeys[index]
-		local overlay = frame.buffOverlays[overlayKey]
+	local overlay = frame.buffOverlays.overlay1
 
-		if not overlay then
-			overlay = CreateFrame("Frame", nil, frame)
-			overlay:SetFrameLevel(4 + index)
-			overlay:Hide()
+	if not overlay then
+		overlay = CreateFrame("Frame", nil, frame)
+		overlay:SetFrameLevel(5)
+		overlay:Hide()
 
-			overlay.texture = overlay:CreateTexture(nil, "ARTWORK")
-			overlay.texture:SetAllPoints(overlay)
-			overlay.texture:SetColorTexture(1, 1, 1, 1)
+		overlay.texture = overlay:CreateTexture(nil, "ARTWORK")
+		overlay.texture:SetAllPoints(overlay)
+		overlay.texture:SetColorTexture(1, 1, 1, 1)
 
-			frame.buffOverlays[overlayKey] = overlay
-		end
+		frame.buffOverlays.overlay1 = overlay
 	end
 end
 
