@@ -94,7 +94,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	container:SetShown(#frame.privateAurasAnchorIDs > 0)
 end
 
-function PrivateAuras:Ensure(frame, settings)
+function PrivateAuras:Ensure(frame)
 	if not frame.privateAurasContainer then
 		frame.privateAurasContainer =
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
