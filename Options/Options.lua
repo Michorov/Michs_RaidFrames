@@ -36,7 +36,7 @@ function Options:UpdateLayout()
 	panel.sideMenu:ClearAllPoints()
 	panel.sideMenu:SetPoint("TOPLEFT", panel.header, "BOTTOMLEFT", 0, 0)
 	panel.sideMenu:SetPoint("BOTTOMLEFT", panel.statusBar, "TOPLEFT", 0, 0)
-	panel.sideMenu:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(158)))
+	panel.sideMenu:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(154)))
 	addon.Options.Sections.SideMenu:UpdateLayout()
 
 	panel.content:ClearAllPoints()

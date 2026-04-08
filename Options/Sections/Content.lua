@@ -8,6 +8,25 @@ local Content = addon.Options.Sections.Content
 
 local content
 local activePage = "general"
+local function ToUI(value)
+	return addon.Utilities:ToUI(addon.Utilities:ToPixels(value))
+end
+
+local layout = {
+	padding = ToUI(32),
+	innerWidth = ToUI(582),
+	columnGap = ToUI(16),
+	twoColumn = {
+		slotWidth = ToUI(275),
+		controlWidth = ToUI(200),
+		startX = { ToUI(32), ToUI(323) },
+	},
+	threeColumn = {
+		slotWidth = ToUI(178),
+		controlWidth = ToUI(150),
+		startX = { ToUI(32), ToUI(226), ToUI(420) },
+	},
+}
 
 local pageModules = {
 	general = addon.Options.Pages.General,
@@ -19,6 +38,39 @@ local pageModules = {
 }
 
 local pageFrames = {}
+
+local function UpdateLayoutValues()
+	if not content then
+		return
+	end
+
+	local pagePadding = ToUI(32)
+	local columnGap = ToUI(16)
+	local contentWidth = content:GetWidth()
+
+	if not contentWidth or contentWidth <= 0 then
+		return
+	end
+
+	local innerWidth = contentWidth - (pagePadding * 2)
+	local twoColumnStep = innerWidth / 2
+	local threeColumnStep = innerWidth / 3
+
+	layout.padding = pagePadding
+	layout.innerWidth = innerWidth
+	layout.columnGap = columnGap
+
+	layout.twoColumn.slotWidth = twoColumnStep - columnGap
+	layout.twoColumn.controlWidth = ToUI(200)
+	layout.twoColumn.startX[1] = pagePadding
+	layout.twoColumn.startX[2] = pagePadding + twoColumnStep
+
+	layout.threeColumn.slotWidth = threeColumnStep - columnGap
+	layout.threeColumn.controlWidth = ToUI(150)
+	layout.threeColumn.startX[1] = pagePadding
+	layout.threeColumn.startX[2] = pagePadding + threeColumnStep
+	layout.threeColumn.startX[3] = pagePadding + (threeColumnStep * 2)
+end
 
 local function EnsurePage(pageKey)
 	local pageModule = pageModules[pageKey]
@@ -62,6 +114,8 @@ function Content:UpdateLayout()
 		return
 	end
 
+	UpdateLayoutValues()
+
 	for pageKey, pageFrame in pairs(pageFrames) do
 		pageFrame:ClearAllPoints()
 		pageFrame:SetPoint("TOPLEFT", content, "TOPLEFT", 0, 0)
@@ -81,6 +135,8 @@ function Content:SetActivePage(pageKey)
 		return
 	end
 
+	addon.Options.Controls.Dropdown:CloseOpenDropdown()
+
 	for key, pageFrame in pairs(pageFrames) do
 		pageFrame:SetShown(key == pageKey)
 	end
@@ -95,4 +151,8 @@ end
 
 function Content:GetActivePage()
 	return activePage
+end
+
+function Content:GetLayout()
+	return layout
 end

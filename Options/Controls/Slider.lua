@@ -22,8 +22,13 @@ local function UpdateVisuals(control)
 	control.fill:SetWidth(control.trackWidth * progress)
 
 	if control.handle then
+		local handleWidth = control.handle:GetWidth() or 0
+		local handleHalfWidth = handleWidth / 2
+		local handleTravelWidth = math.max(0, control.trackWidth - handleWidth)
+		local handleOffset = handleHalfWidth + (handleTravelWidth * progress)
+
 		control.handle:ClearAllPoints()
-		control.handle:SetPoint("CENTER", control.track, "LEFT", control.trackWidth * progress, 0)
+		control.handle:SetPoint("CENTER", control.track, "LEFT", handleOffset, 0)
 	end
 end
 
@@ -229,6 +234,13 @@ function Slider:Create(parent, text)
 
 	function control:SetValue(value)
 		self.slider:SetValue(value)
+	end
+
+	function control:SetControlWidth(width)
+		self:SetWidth(width)
+		self.trackWidth = width
+		self.track:SetWidth(width)
+		UpdateVisuals(self)
 	end
 
 	function control:SetValueSilently(value)
