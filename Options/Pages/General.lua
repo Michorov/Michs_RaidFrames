@@ -109,26 +109,38 @@ function General:UpdateLayout()
 		return
 	end
 
-	local pagePadding = addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
-	local contentWidth = page:GetWidth() - (pagePadding * 2)
-	local rightColumnX = pagePadding + (contentWidth / 2)
+	local layout = addon.Options.Sections.Content:GetLayout()
+	local pagePadding = layout.padding
+	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
+	local rightColumnOffset = layout.twoColumn.startX[2] - layout.twoColumn.startX[1]
+	local twoColumnWidth = layout.twoColumn.controlWidth
 
 	page.title:ClearAllPoints()
 	page.title:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
 
+	page.showSoloPartyFrameCheckbox:SetWidth(twoColumnWidth)
 	page.showSoloPartyFrameCheckbox:ClearAllPoints()
-	page.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.title, "BOTTOMLEFT", 0, -12)
+	page.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.title, "BOTTOMLEFT", 0, -firstControlOffset)
 
+	page.hideBlizzardPartyRaidFramesCheckbox:SetWidth(twoColumnWidth)
 	page.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
-	page.hideBlizzardPartyRaidFramesCheckbox:SetPoint("TOPLEFT", page.showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -8)
+	page.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
+		"TOPLEFT",
+		page.showSoloPartyFrameCheckbox,
+		"BOTTOMLEFT",
+		0,
+		-rowSpacing
+	)
 
+	page.hideBlizzardRaidFrameManagerCheckbox:SetWidth(twoColumnWidth)
 	page.hideBlizzardRaidFrameManagerCheckbox:ClearAllPoints()
 	page.hideBlizzardRaidFrameManagerCheckbox:SetPoint(
 		"TOPLEFT",
 		page.hideBlizzardPartyRaidFramesCheckbox,
 		"BOTTOMLEFT",
 		0,
-		-8
+		-rowSpacing
 	)
 
 	page.globalScaleSlider:ClearAllPoints()
@@ -136,12 +148,12 @@ function General:UpdateLayout()
 		"TOPLEFT",
 		page.showSoloPartyFrameCheckbox,
 		"TOPLEFT",
-		rightColumnX - pagePadding,
+		rightColumnOffset,
 		0
 	)
 
 	page.outOfRangeAlphaSlider:ClearAllPoints()
-	page.outOfRangeAlphaSlider:SetPoint("TOPLEFT", page.globalScaleSlider, "BOTTOMLEFT", 0, -8)
+	page.outOfRangeAlphaSlider:SetPoint("TOPLEFT", page.globalScaleSlider, "BOTTOMLEFT", 0, -rowSpacing)
 end
 
 function General:UpdateState(profile)

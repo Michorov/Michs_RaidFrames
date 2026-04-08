@@ -6,9 +6,26 @@ addon.Options.Controls.Checkbox = addon.Options.Controls.Checkbox or {}
 
 local Checkbox = addon.Options.Controls.Checkbox
 local theme = addon.Options.Theme
+local hoverAccentColor = { 1.0, 0.74, 0.42, 1 }
 
 local function UpdateVisual(checkbox)
 	if checkbox.checked then
+		if checkbox.isHovered then
+			checkbox.check:SetColorTexture(
+				hoverAccentColor[1],
+				hoverAccentColor[2],
+				hoverAccentColor[3],
+				hoverAccentColor[4]
+			)
+		else
+			checkbox.check:SetColorTexture(
+				theme.colors.brand[1],
+				theme.colors.brand[2],
+				theme.colors.brand[3],
+				theme.colors.brand[4]
+			)
+		end
+
 		checkbox.check:Show()
 	else
 		checkbox.check:Hide()
@@ -26,6 +43,7 @@ function Checkbox:Create(parent, text)
 		addon.Utilities:ToUI(addon.Utilities:ToPixels(20))
 	)
 	checkbox.checked = false
+	checkbox.isHovered = false
 
 	checkbox.box = CreateFrame("Frame", nil, checkbox, "BackdropTemplate")
 	checkbox.box:SetSize(boxSize, boxSize)
@@ -34,6 +52,12 @@ function Checkbox:Create(parent, text)
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
 	checkbox.box:SetBackdropColor(0.04, 0.05, 0.07, 1)
+
+	checkbox.boxHover = checkbox.box:CreateTexture(nil, "ARTWORK")
+	checkbox.boxHover:SetColorTexture(1, 1, 1, 0.04)
+	checkbox.boxHover:SetPoint("TOPLEFT", checkbox.box, "TOPLEFT", 0, 0)
+	checkbox.boxHover:SetPoint("BOTTOMRIGHT", checkbox.box, "BOTTOMRIGHT", 0, 0)
+	checkbox.boxHover:Hide()
 
 	checkbox.boxTopBorder = checkbox.box:CreateTexture(nil, "OVERLAY")
 	checkbox.boxTopBorder:SetColorTexture(
@@ -114,6 +138,18 @@ function Checkbox:Create(parent, text)
 	function checkbox:SetOnValueChanged(callback)
 		self.onValueChanged = callback
 	end
+
+	checkbox:SetScript("OnEnter", function(self)
+		self.isHovered = true
+		self.boxHover:Show()
+		UpdateVisual(self)
+	end)
+
+	checkbox:SetScript("OnLeave", function(self)
+		self.isHovered = false
+		self.boxHover:Hide()
+		UpdateVisual(self)
+	end)
 
 	checkbox:SetScript("OnClick", function(self)
 		self:SetChecked(not self:GetChecked())

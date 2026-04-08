@@ -90,5 +90,17 @@ function Button:Create(parent, text)
 		self:SetBackdropColor(normalBg[1], normalBg[2], normalBg[3], normalBg[4])
 	end)
 
+	function button:SetOnClick(callback)
+		self.onClickCallback = callback
+
+		self:SetScript("OnClick", function(self)
+			addon.Options.Controls.Dropdown:CloseOpenDropdown()
+
+			if self.onClickCallback then
+				self.onClickCallback(self)
+			end
+		end)
+	end
+
 	return button
 end

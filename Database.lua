@@ -854,11 +854,14 @@ function Database:GetCurrentProfileName()
 end
 
 function Database:GetProfileNames()
-	local t = {}
-	for _, name in ipairs({ self.db:GetProfiles() }) do
-		t[name] = name
+	local values = {}
+	local names = self.db:GetProfiles({})
+
+	for _, name in ipairs(names) do
+		values[name] = name
 	end
-	return t
+
+	return values
 end
 
 function Database:HasProfile(name)
