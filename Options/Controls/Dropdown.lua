@@ -10,6 +10,29 @@ local theme = addon.Options.Theme
 local openDropdown
 local defaultArrowColor = { 0.72, 0.74, 0.78, 1 }
 
+local function UpdateLayout(control)
+	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
+	local fieldHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
+
+	control.label:ClearAllPoints()
+	control.field:ClearAllPoints()
+
+	if control.labelVisible then
+		control:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(46)))
+		control.label:Show()
+		control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+		control.field:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -labelSpacing)
+		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -labelSpacing)
+	else
+		control:SetHeight(fieldHeight)
+		control.label:Hide()
+		control.field:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
+	end
+
+	control.field:SetHeight(fieldHeight)
+end
+
 local function HideOpenDropdown()
 	if not openDropdown then
 		return
@@ -32,7 +55,15 @@ end
 
 local function UpdateSelectionText(control)
 	local selectedText = GetOptionText(control.options, control.value)
+	local isPlaceholder = not selectedText
+
 	control.selectionText:SetText(selectedText or control.placeholder or "")
+
+	if isPlaceholder then
+		control.selectionText:SetTextColor(0.50, 0.52, 0.56, 1)
+	else
+		control.selectionText:SetTextColor(0.85, 0.85, 0.88, 1)
+	end
 end
 
 local function SetArrowColor(control, color)
@@ -63,20 +94,8 @@ local function EnsureListRows(control)
 			button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 			button.text:SetFont(theme.fonts.arialNarrow, 12, "")
 			button.text:SetJustifyH("LEFT")
-			button.text:SetPoint(
-				"LEFT",
-				button,
-				"LEFT",
-				addon.Utilities:ToUI(addon.Utilities:ToPixels(10)),
-				0
-			)
-			button.text:SetPoint(
-				"RIGHT",
-				button,
-				"RIGHT",
-				addon.Utilities:ToUI(addon.Utilities:ToPixels(-10)),
-				0
-			)
+			button.text:SetPoint("LEFT", button, "LEFT", addon.Utilities:ToUI(addon.Utilities:ToPixels(10)), 0)
+			button.text:SetPoint("RIGHT", button, "RIGHT", addon.Utilities:ToUI(addon.Utilities:ToPixels(-10)), 0)
 
 			button:SetScript("OnEnter", function(self)
 				self.hoverTexture:Show()
@@ -180,8 +199,6 @@ end
 function Dropdown:Create(parent, labelText)
 	local control = CreateFrame("Frame", nil, parent)
 	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local fieldHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
 	local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
 	local arrowInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
 	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(220))
@@ -190,18 +207,15 @@ function Dropdown:Create(parent, labelText)
 	control.options = {}
 	control.value = nil
 	control.placeholder = "Select..."
+	control.labelVisible = true
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.label:SetJustifyH("LEFT")
 	control.label:SetText(labelText or "Dropdown")
 
 	control.field = CreateFrame("Button", nil, control, "BackdropTemplate")
-	control.field:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -labelSpacing)
-	control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -labelSpacing)
-	control.field:SetHeight(fieldHeight)
 	control.field:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
@@ -256,7 +270,13 @@ function Dropdown:Create(parent, labelText)
 	control.selectionText:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.selectionText:SetJustifyH("LEFT")
 	control.selectionText:SetPoint("LEFT", control.field, "LEFT", textInset, 0)
-	control.selectionText:SetPoint("RIGHT", control.field, "RIGHT", -addon.Utilities:ToUI(addon.Utilities:ToPixels(24)), 0)
+	control.selectionText:SetPoint(
+		"RIGHT",
+		control.field,
+		"RIGHT",
+		-addon.Utilities:ToUI(addon.Utilities:ToPixels(24)),
+		0
+	)
 	control.selectionText:SetText(control.placeholder)
 
 	control.arrow = CreateFrame("Frame", nil, control.field)
@@ -362,6 +382,15 @@ function Dropdown:Create(parent, labelText)
 		UpdateSelectionText(self)
 	end
 
+	function control:SetLabel(text)
+		self.label:SetText(text or "")
+	end
+
+	function control:SetLabelVisible(isVisible)
+		self.labelVisible = isVisible ~= false
+		UpdateLayout(self)
+	end
+
 	function control:SetOnValueChanged(callback)
 		self.onValueChanged = callback
 	end
@@ -375,6 +404,7 @@ function Dropdown:Create(parent, labelText)
 		end
 	end)
 
+	UpdateLayout(control)
 	UpdateSelectionText(control)
 
 	return control

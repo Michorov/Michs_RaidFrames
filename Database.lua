@@ -928,6 +928,7 @@ function Database:Initialize()
 	self.db:RegisterCallback("OnProfileChanged", OnProfileChanged)
 	self.db:RegisterCallback("OnProfileCopied", OnProfileChanged)
 	self.db:RegisterCallback("OnProfileReset", OnProfileChanged)
+	self.db:RegisterCallback("OnProfileDeleted", OnProfileChanged)
 
 	initialized = true
 end

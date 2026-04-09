@@ -73,6 +73,7 @@ Options/Data.lua
 Options/Controls/Button.lua
 Options/Controls/Checkbox.lua
 Options/Controls/Dropdown.lua
+Options/Controls/Input.lua
 Options/Controls/Slider.lua
 Options/Pages/General.lua
 Options/Pages/Layout.lua
