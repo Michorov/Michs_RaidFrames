@@ -39,7 +39,8 @@ function BigDefensive:Ensure(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if not frame.bigDefensiveContainer then
-		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
+		frame.bigDefensiveContainer =
+			addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
 	end
 
 	local container = frame.bigDefensiveContainer
