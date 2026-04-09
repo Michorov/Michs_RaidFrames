@@ -18,6 +18,7 @@ local function GetButtonsByPageKey()
 	return {
 		general = sideMenu.generalButton,
 		layout = sideMenu.layoutButton,
+		bars = sideMenu.barsButton,
 		texts = sideMenu.textsButton,
 		auras = sideMenu.aurasButton,
 		indicators = sideMenu.indicatorsButton,
@@ -91,6 +92,12 @@ function SideMenu:Ensure(parent)
 	InitializeButton(sideMenu.layoutButton)
 	sideMenu.layoutButton:SetOnClick(function()
 		addon.Options:SetActivePage("layout")
+	end)
+
+	sideMenu.barsButton = addon.Options.Controls.Button:Create(sideMenu, "Bars")
+	InitializeButton(sideMenu.barsButton)
+	sideMenu.barsButton:SetOnClick(function()
+		addon.Options:SetActivePage("bars")
 	end)
 
 	sideMenu.textsButton = addon.Options.Controls.Button:Create(sideMenu, "Texts")
@@ -178,8 +185,13 @@ function SideMenu:UpdateLayout()
 
 	UpdateButtonLayout(sideMenu.textsButton)
 	sideMenu.textsButton:ClearAllPoints()
-	sideMenu.textsButton:SetPoint("TOPLEFT", sideMenu.layoutButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.textsButton:SetPoint("TOPRIGHT", sideMenu.layoutButton, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.textsButton:SetPoint("TOPLEFT", sideMenu.barsButton, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.textsButton:SetPoint("TOPRIGHT", sideMenu.barsButton, "BOTTOMRIGHT", 0, -compactSpacing)
+
+	UpdateButtonLayout(sideMenu.barsButton)
+	sideMenu.barsButton:ClearAllPoints()
+	sideMenu.barsButton:SetPoint("TOPLEFT", sideMenu.layoutButton, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.barsButton:SetPoint("TOPRIGHT", sideMenu.layoutButton, "BOTTOMRIGHT", 0, -compactSpacing)
 
 	UpdateButtonLayout(sideMenu.aurasButton)
 	sideMenu.aurasButton:ClearAllPoints()

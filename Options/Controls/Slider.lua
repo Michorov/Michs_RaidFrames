@@ -92,26 +92,27 @@ function Slider:Create(parent, text)
 	local trackHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
 	local trackWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(200))
 	local thumbSize = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+	local trackVerticalOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
+	local topRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
 	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
 	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
+	local valueInputWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(48))
+	local valueInputGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
 
-	control:SetSize(trackWidth, addon.Utilities:ToUI(addon.Utilities:ToPixels(34)))
+	control:SetSize(trackWidth, topRowHeight + labelSpacing + thumbSize)
 	control.trackWidth = trackWidth
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.label:SetJustifyH("LEFT")
+	control.label:SetJustifyV("MIDDLE")
 	control.label:SetText(text or "Slider")
 
 	control.valueInput = CreateFrame("EditBox", nil, control)
 	control.valueInput:SetAutoFocus(false)
 	control.valueInput:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	control.valueInput:SetSize(
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(48)),
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-	)
+	control.valueInput:SetSize(valueInputWidth, topRowHeight)
 	control.valueInput:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.valueInput:SetTextColor(0.65, 0.65, 0.68, 1)
 	control.valueInput:SetJustifyH("RIGHT")
@@ -119,10 +120,15 @@ function Slider:Create(parent, text)
 	control.valueInput:SetText("0")
 	control.valueInput:SetCursorPosition(0)
 
+	control.label:ClearAllPoints()
+	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+	control.label:SetPoint("TOPRIGHT", control.valueInput, "TOPLEFT", -valueInputGap, 0)
+	control.label:SetHeight(topRowHeight)
+
 	control.slider = CreateFrame("Slider", nil, control)
 	control.slider:SetOrientation("HORIZONTAL")
-	control.slider:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -labelSpacing)
-	control.slider:SetPoint("TOPRIGHT", control.valueInput, "BOTTOMRIGHT", 0, -labelSpacing)
+	control.slider:SetPoint("TOPLEFT", control, "TOPLEFT", 0, -(topRowHeight + labelSpacing))
+	control.slider:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -(topRowHeight + labelSpacing))
 	control.slider:SetHeight(thumbSize)
 	control.slider:SetMinMaxValues(0, 100)
 	control.slider:SetValueStep(1)
@@ -131,7 +137,7 @@ function Slider:Create(parent, text)
 	control.track = control.slider:CreateTexture(nil, "BACKGROUND")
 	control.track:SetColorTexture(0.04, 0.05, 0.07, 1)
 	control.track:SetSize(trackWidth, trackHeight)
-	control.track:SetPoint("CENTER", control.slider, "CENTER", 0, 0)
+	control.track:SetPoint("TOPLEFT", control.slider, "TOPLEFT", 0, -trackVerticalOffset)
 
 	control.trackTopBorder = control.slider:CreateTexture(nil, "OVERLAY")
 	control.trackTopBorder:SetColorTexture(
@@ -237,9 +243,10 @@ function Slider:Create(parent, text)
 	end
 
 	function control:SetControlWidth(width)
-		self:SetWidth(width)
-		self.trackWidth = width
-		self.track:SetWidth(width)
+		local snappedWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(width))
+		self:SetWidth(snappedWidth)
+		self.trackWidth = snappedWidth
+		self.track:SetWidth(snappedWidth)
 		UpdateVisuals(self)
 	end
 
@@ -255,6 +262,16 @@ function Slider:Create(parent, text)
 
 	control.valueInput:SetScript("OnEnterPressed", function()
 		CommitValueInput(control)
+	end)
+
+	control.valueInput:SetScript("OnEditFocusGained", function(self)
+		self:HighlightText()
+	end)
+
+	control.valueInput:SetScript("OnMouseUp", function(self)
+		if self:HasFocus() then
+			self:HighlightText()
+		end
 	end)
 
 	control.valueInput:SetScript("OnEscapePressed", function()

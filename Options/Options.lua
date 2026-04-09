@@ -51,8 +51,12 @@ function Options:Ensure()
 		return
 	end
 
-	panel = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+	panel = CreateFrame("Frame", "MichsRaidFramesOptionsPanel", UIParent, "BackdropTemplate")
 	panel:Hide()
+
+	if panel:GetName() and not tContains(UISpecialFrames, panel:GetName()) then
+		table.insert(UISpecialFrames, panel:GetName())
+	end
 
 	panel:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",

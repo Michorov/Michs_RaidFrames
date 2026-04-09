@@ -1,0 +1,244 @@
+local _, addon = ...
+
+addon.Options = addon.Options or {}
+addon.Options.Controls = addon.Options.Controls or {}
+addon.Options.Controls.SegmentedToggle = addon.Options.Controls.SegmentedToggle or {}
+
+local SegmentedToggle = addon.Options.Controls.SegmentedToggle
+local theme = addon.Options.Theme
+
+local function ApplyVisualState(control)
+	local activeBg = {
+		theme.colors.brand[1],
+		theme.colors.brand[2],
+		theme.colors.brand[3],
+		theme.colors.brand[4],
+	}
+	local activeHoverBg = { 1.0, 0.74, 0.42, 1 }
+	local inactiveBg = { 0.04, 0.05, 0.07, 1 }
+	local inactiveTextColor = { 0.82, 0.83, 0.87, 1 }
+	local inactiveHoverTextColor = { 0.94, 0.95, 0.98, 1 }
+	local activeTextColor = {
+		theme.colors.panelBackground[1],
+		theme.colors.panelBackground[2],
+		theme.colors.panelBackground[3],
+		1,
+	}
+	local plateInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(2))
+
+	local leftActive = control.value == control.leftOption.value
+	local rightActive = control.value == control.rightOption.value
+	local activePlateColor = activeBg
+
+	control.activePlate:ClearAllPoints()
+
+	if leftActive then
+		control.activePlate:SetPoint("TOPLEFT", control, "TOPLEFT", plateInset, -plateInset)
+		control.activePlate:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", plateInset, plateInset)
+		control.activePlate:SetPoint("RIGHT", control, "CENTER", 0, 0)
+		if control.hoveredSegment == control.leftSegment then
+			activePlateColor = activeHoverBg
+		end
+	else
+		control.activePlate:SetPoint("TOPRIGHT", control, "TOPRIGHT", -plateInset, -plateInset)
+		control.activePlate:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", -plateInset, plateInset)
+		control.activePlate:SetPoint("LEFT", control, "CENTER", 0, 0)
+		if control.hoveredSegment == control.rightSegment then
+			activePlateColor = activeHoverBg
+		end
+	end
+
+	control.activePlate.bg:SetColorTexture(
+		activePlateColor[1],
+		activePlateColor[2],
+		activePlateColor[3],
+		activePlateColor[4]
+	)
+	control.activePlate.topHighlight:SetColorTexture(
+		1,
+		1,
+		1,
+		control.hoveredSegment and 0.12 or 0.08
+	)
+
+	if leftActive then
+		control.leftSegment.text:SetTextColor(
+			activeTextColor[1],
+			activeTextColor[2],
+			activeTextColor[3],
+			activeTextColor[4]
+		)
+	else
+		control.leftSegment.text:SetTextColor(
+			control.hoveredSegment == control.leftSegment and inactiveHoverTextColor[1] or inactiveTextColor[1],
+			control.hoveredSegment == control.leftSegment and inactiveHoverTextColor[2] or inactiveTextColor[2],
+			control.hoveredSegment == control.leftSegment and inactiveHoverTextColor[3] or inactiveTextColor[3],
+			control.hoveredSegment == control.leftSegment and inactiveHoverTextColor[4] or inactiveTextColor[4]
+		)
+	end
+
+	control.leftSegment.hoverTexture:SetShown(control.hoveredSegment == control.leftSegment and not leftActive)
+	control.leftSegment.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+
+	if rightActive then
+		control.rightSegment.text:SetTextColor(
+			activeTextColor[1],
+			activeTextColor[2],
+			activeTextColor[3],
+			activeTextColor[4]
+		)
+	else
+		control.rightSegment.text:SetTextColor(
+			control.hoveredSegment == control.rightSegment and inactiveHoverTextColor[1] or inactiveTextColor[1],
+			control.hoveredSegment == control.rightSegment and inactiveHoverTextColor[2] or inactiveTextColor[2],
+			control.hoveredSegment == control.rightSegment and inactiveHoverTextColor[3] or inactiveTextColor[3],
+			control.hoveredSegment == control.rightSegment and inactiveHoverTextColor[4] or inactiveTextColor[4]
+		)
+	end
+
+	control.rightSegment.hoverTexture:SetShown(control.hoveredSegment == control.rightSegment and not rightActive)
+	control.rightSegment.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+end
+
+local function CreateSegment(control, option, side)
+	local segment = CreateFrame("Button", nil, control)
+
+	segment.hoverTexture = segment:CreateTexture(nil, "ARTWORK")
+	segment.hoverTexture:SetPoint("TOPLEFT", segment, "TOPLEFT", 0, 0)
+	segment.hoverTexture:SetPoint("BOTTOMRIGHT", segment, "BOTTOMRIGHT", 0, 0)
+	segment.hoverTexture:Hide()
+
+	segment.text = segment:CreateFontString(nil, "OVERLAY")
+	segment.text:SetPoint("CENTER", segment, "CENTER", 0, 0)
+	segment.text:SetFont(theme.fonts.arialNarrow, 12, "")
+	segment.text:SetShadowOffset(0, 0)
+	segment.text:SetShadowColor(0, 0, 0, 0)
+	segment.text:SetText(option.text or "")
+
+	segment:SetScript("OnEnter", function(self)
+		control.hoveredSegment = self
+		ApplyVisualState(control)
+	end)
+
+	segment:SetScript("OnLeave", function()
+		control.hoveredSegment = nil
+		ApplyVisualState(control)
+	end)
+
+	segment:SetScript("OnClick", function()
+		addon.Options.Controls.Dropdown:CloseOpenDropdown()
+
+		if control.value == option.value then
+			return
+		end
+
+		control:SetValue(option.value)
+
+		if control.onValueChanged then
+			control.onValueChanged(control, option.value)
+		end
+	end)
+
+	return segment
+end
+
+function SegmentedToggle:Create(parent, leftOption, rightOption)
+	local control = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
+	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(112))
+	local height = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
+
+	control:SetSize(width, height)
+
+	control.leftOption = leftOption or { value = "left", text = "Left" }
+	control.rightOption = rightOption or { value = "right", text = "Right" }
+	control.value = control.leftOption.value
+
+	control:SetBackdrop({
+		bgFile = "Interface\\Buttons\\WHITE8x8",
+	})
+	control:SetBackdropColor(0.04, 0.05, 0.07, 1)
+
+	control.activePlate = CreateFrame("Frame", nil, control)
+	control.activePlate:SetFrameLevel(control:GetFrameLevel() + 1)
+
+	control.activePlate.bg = control.activePlate:CreateTexture(nil, "BACKGROUND")
+	control.activePlate.bg:SetPoint("TOPLEFT", control.activePlate, "TOPLEFT", 0, 0)
+	control.activePlate.bg:SetPoint("BOTTOMRIGHT", control.activePlate, "BOTTOMRIGHT", 0, 0)
+
+	control.activePlate.topHighlight = control.activePlate:CreateTexture(nil, "ARTWORK")
+	control.activePlate.topHighlight:SetPoint("TOPLEFT", control.activePlate, "TOPLEFT", 0, 0)
+	control.activePlate.topHighlight:SetPoint("TOPRIGHT", control.activePlate, "TOPRIGHT", 0, 0)
+	control.activePlate.topHighlight:SetHeight(borderThickness)
+
+	control.topBorder = control:CreateTexture(nil, "OVERLAY")
+	control.topBorder:SetColorTexture(
+		theme.colors.border[1],
+		theme.colors.border[2],
+		theme.colors.border[3],
+		theme.colors.border[4]
+	)
+	control.topBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+	control.topBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
+	control.topBorder:SetHeight(borderThickness)
+
+	control.bottomBorder = control:CreateTexture(nil, "OVERLAY")
+	control.bottomBorder:SetColorTexture(
+		theme.colors.border[1],
+		theme.colors.border[2],
+		theme.colors.border[3],
+		theme.colors.border[4]
+	)
+	control.bottomBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
+	control.bottomBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
+	control.bottomBorder:SetHeight(borderThickness)
+
+	control.leftBorder = control:CreateTexture(nil, "OVERLAY")
+	control.leftBorder:SetColorTexture(
+		theme.colors.border[1],
+		theme.colors.border[2],
+		theme.colors.border[3],
+		theme.colors.border[4]
+	)
+	control.leftBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+	control.leftBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
+	control.leftBorder:SetWidth(borderThickness)
+
+	control.rightBorder = control:CreateTexture(nil, "OVERLAY")
+	control.rightBorder:SetColorTexture(
+		theme.colors.border[1],
+		theme.colors.border[2],
+		theme.colors.border[3],
+		theme.colors.border[4]
+	)
+	control.rightBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
+	control.rightBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
+	control.rightBorder:SetWidth(borderThickness)
+
+	control.leftSegment = CreateSegment(control, control.leftOption, "left")
+	control.leftSegment:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
+	control.leftSegment:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
+	control.leftSegment:SetPoint("RIGHT", control, "CENTER", 0, 0)
+
+	control.rightSegment = CreateSegment(control, control.rightOption, "right")
+	control.rightSegment:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
+	control.rightSegment:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
+	control.rightSegment:SetPoint("LEFT", control, "CENTER", 0, 0)
+
+	function control:SetValue(value)
+		self.value = value
+		ApplyVisualState(self)
+	end
+
+	function control:GetValue()
+		return self.value
+	end
+
+	function control:SetOnValueChanged(callback)
+		self.onValueChanged = callback
+	end
+
+	ApplyVisualState(control)
+
+	return control
+end

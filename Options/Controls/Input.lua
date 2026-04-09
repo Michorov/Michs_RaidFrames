@@ -193,6 +193,10 @@ function Input:Create(parent, labelText)
 		self:ClearFocus()
 	end)
 
+	control.field:SetScript("OnEscapePressed", function(self)
+		self:ClearFocus()
+	end)
+
 	control.field:SetScript("OnEditFocusLost", function(self)
 		UpdatePlaceholder(control)
 

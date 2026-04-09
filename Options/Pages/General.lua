@@ -34,14 +34,16 @@ function General:Ensure(parent)
 	end
 
 	page = CreateFrame("Frame", nil, parent)
+	page.headerRow = CreateFrame("Frame", nil, page)
+	page.body = CreateFrame("Frame", nil, page)
 
-	page.title = page:CreateFontString(nil, "OVERLAY")
+	page.title = page.headerRow:CreateFontString(nil, "OVERLAY")
 	page.title:SetJustifyH("LEFT")
-	page.title:SetFont(theme.fonts.arialNarrow, 18, "")
-	page.title:SetTextColor(0.85, 0.85, 0.88, 1)
+	page.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	page.title:SetTextColor(0.88, 0.89, 0.92, 1)
 	page.title:SetText("General")
 
-	page.showSoloPartyFrameCheckbox = addon.Options.Controls.Checkbox:Create(page, "Show Solo Party Frame")
+	page.showSoloPartyFrameCheckbox = addon.Options.Controls.Checkbox:Create(page.body, "Show Solo Party Frame")
 	page.showSoloPartyFrameCheckbox:SetChecked(false)
 	page.showSoloPartyFrameCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -50,7 +52,7 @@ function General:Ensure(parent)
 	end)
 
 	page.hideBlizzardPartyRaidFramesCheckbox =
-		addon.Options.Controls.Checkbox:Create(page, "Hide Blizzard Party/Raid Frames")
+		addon.Options.Controls.Checkbox:Create(page.body, "Hide Blizzard Party/Raid Frames")
 	page.hideBlizzardPartyRaidFramesCheckbox:SetChecked(false)
 	page.hideBlizzardPartyRaidFramesCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -59,7 +61,7 @@ function General:Ensure(parent)
 	end)
 
 	page.hideBlizzardRaidFrameManagerCheckbox =
-		addon.Options.Controls.Checkbox:Create(page, "Hide Blizzard Raid Frame Manager")
+		addon.Options.Controls.Checkbox:Create(page.body, "Hide Blizzard Raid Frame Manager")
 	page.hideBlizzardRaidFrameManagerCheckbox:SetChecked(false)
 	page.hideBlizzardRaidFrameManagerCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -67,7 +69,7 @@ function General:Ensure(parent)
 		addon.UpdateScheduler:Notify("layoutChanged")
 	end)
 
-	page.globalScaleSlider = addon.Options.Controls.Slider:Create(page, "Global Scale")
+	page.globalScaleSlider = addon.Options.Controls.Slider:Create(page.body, "Global Scale")
 	page.globalScaleSlider:SetMinMaxValues(0.5, 2.0)
 	page.globalScaleSlider:SetStep(0.01)
 	page.globalScaleSlider:SetValueFormatter(function(value)
@@ -81,7 +83,7 @@ function General:Ensure(parent)
 		addon.Modules:RequestUpdateSettings()
 	end)
 
-	page.outOfRangeAlphaSlider = addon.Options.Controls.Slider:Create(page, "Out of Range Alpha")
+	page.outOfRangeAlphaSlider = addon.Options.Controls.Slider:Create(page.body, "Out of Range Alpha")
 	page.outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
 	page.outOfRangeAlphaSlider:SetStep(0.05)
 	page.outOfRangeAlphaSlider:SetValueFormatter(function(value)
@@ -111,17 +113,29 @@ function General:UpdateLayout()
 
 	local layout = addon.Options.Sections.Content:GetLayout()
 	local pagePadding = layout.padding
-	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+	local headerRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
+	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
 	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
 	local rightColumnOffset = layout.twoColumn.startX[2] - layout.twoColumn.startX[1]
 	local twoColumnWidth = layout.twoColumn.controlWidth
 
+	page.headerRow:ClearAllPoints()
+	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
+	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -pagePadding, -pagePadding)
+	page.headerRow:SetHeight(headerRowHeight)
+
 	page.title:ClearAllPoints()
-	page.title:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
+	page.title:SetPoint("LEFT", page.headerRow, "LEFT", 0, 0)
+
+	page.body:ClearAllPoints()
+	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -firstControlOffset)
+	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -firstControlOffset)
+	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", pagePadding, 0)
+	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -pagePadding, 0)
 
 	page.showSoloPartyFrameCheckbox:SetWidth(twoColumnWidth)
 	page.showSoloPartyFrameCheckbox:ClearAllPoints()
-	page.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.title, "BOTTOMLEFT", 0, -firstControlOffset)
+	page.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
 
 	page.hideBlizzardPartyRaidFramesCheckbox:SetWidth(twoColumnWidth)
 	page.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()

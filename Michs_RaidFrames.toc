@@ -74,9 +74,11 @@ Options/Controls/Button.lua
 Options/Controls/Checkbox.lua
 Options/Controls/Dropdown.lua
 Options/Controls/Input.lua
+Options/Controls/SegmentedToggle.lua
 Options/Controls/Slider.lua
 Options/Pages/General.lua
 Options/Pages/Layout.lua
+Options/Pages/Bars.lua
 Options/Pages/Texts.lua
 Options/Pages/Auras.lua
 Options/Pages/Indicators.lua
