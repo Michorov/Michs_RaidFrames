@@ -289,13 +289,13 @@ function Dropdown:Create(parent, labelText)
 
 	control.arrow.leftStroke = control.arrow:CreateLine(nil, "OVERLAY")
 	control.arrow.leftStroke:SetThickness(addon.Utilities:ToUI(addon.Utilities:ToPixels(1)))
-	control.arrow.leftStroke:SetStartPoint("TOPLEFT", control.arrow, "TOPLEFT", 0, 0)
-	control.arrow.leftStroke:SetEndPoint("BOTTOM", control.arrow, "BOTTOM", 0, 0)
+	control.arrow.leftStroke:SetStartPoint("TOPLEFT", control.arrow, 0, 0)
+	control.arrow.leftStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
 
 	control.arrow.rightStroke = control.arrow:CreateLine(nil, "OVERLAY")
 	control.arrow.rightStroke:SetThickness(addon.Utilities:ToUI(addon.Utilities:ToPixels(1)))
-	control.arrow.rightStroke:SetStartPoint("TOPRIGHT", control.arrow, "TOPRIGHT", 0, 0)
-	control.arrow.rightStroke:SetEndPoint("BOTTOM", control.arrow, "BOTTOM", 0, 0)
+	control.arrow.rightStroke:SetStartPoint("TOPRIGHT", control.arrow, 0, 0)
+	control.arrow.rightStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
 
 	function control:SetArrowColor(color)
 		SetArrowColor(self, color)
