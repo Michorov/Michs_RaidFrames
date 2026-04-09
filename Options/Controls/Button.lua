@@ -74,20 +74,45 @@ function Button:Create(parent, text)
 	button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	button.text:SetPoint("CENTER", button, "CENTER", 0, 0)
 	button.text:SetFont(theme.fonts.arialNarrow, 14, "")
-	button.text:SetTextColor(0.85, 0.85, 0.88, 1)
 	button.text:SetText(text or "Button")
 
 	local normalBg = { 0.12, 0.12, 0.14, 1 }
 	local hoverBg = { 0.18, 0.18, 0.22, 1 }
+	button.normalTextColor = { 0.85, 0.85, 0.88, 1 }
+	button.hoverTextColor = {
+		theme.colors.brand[1],
+		theme.colors.brand[2],
+		theme.colors.brand[3],
+		theme.colors.brand[4],
+	}
+
+	button.text:SetTextColor(
+		button.normalTextColor[1],
+		button.normalTextColor[2],
+		button.normalTextColor[3],
+		button.normalTextColor[4]
+	)
 
 	button:SetBackdropColor(normalBg[1], normalBg[2], normalBg[3], normalBg[4])
 
 	button:SetScript("OnEnter", function(self)
 		self:SetBackdropColor(hoverBg[1], hoverBg[2], hoverBg[3], hoverBg[4])
+		self.text:SetTextColor(
+			self.hoverTextColor[1],
+			self.hoverTextColor[2],
+			self.hoverTextColor[3],
+			self.hoverTextColor[4]
+		)
 	end)
 
 	button:SetScript("OnLeave", function(self)
 		self:SetBackdropColor(normalBg[1], normalBg[2], normalBg[3], normalBg[4])
+		self.text:SetTextColor(
+			self.normalTextColor[1],
+			self.normalTextColor[2],
+			self.normalTextColor[3],
+			self.normalTextColor[4]
+		)
 	end)
 
 	function button:SetOnClick(callback)
