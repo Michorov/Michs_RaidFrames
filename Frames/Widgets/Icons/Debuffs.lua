@@ -8,6 +8,7 @@ addon.Frames.Widgets.Icons.Debuffs = addon.Frames.Widgets.Icons.Debuffs or {}
 local Debuffs = addon.Frames.Widgets.Icons.Debuffs
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local ENSURE_MAX_ICONS = 10
 
 local issecretvalue = issecretvalue
 
@@ -89,19 +90,14 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function Debuffs:Ensure(frame, settings)
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
+function Debuffs:Ensure(frame)
 	if not frame.debuffsContainer then
 		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer", 41)
 	end
 
 	local container = frame.debuffsContainer
 
-	for i = 1, cachedSettings.maxIcons do
+	for i = 1, ENSURE_MAX_ICONS do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 1)
 		end

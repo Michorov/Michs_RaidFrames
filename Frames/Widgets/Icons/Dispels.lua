@@ -8,6 +8,7 @@ addon.Frames.Widgets.Icons.Dispels = addon.Frames.Widgets.Icons.Dispels or {}
 local Dispels = addon.Frames.Widgets.Icons.Dispels
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local ENSURE_MAX_ICONS = 10
 
 local DISPEL_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\DispelIconFill"
 local DISPEL_BORDER_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\DispelIconBorder"
@@ -63,22 +64,17 @@ local function GetGrowthOffsets(growDirection, stepPx)
 	return -stepPx, 0
 end
 
-function Dispels:Ensure(frame, settings)
+function Dispels:Ensure(frame)
 	if not frame.dispelsContainer then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetFrameLevel(40)
 		frame.dispelsContainer = container
 	end
 
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
 	local container = frame.dispelsContainer
 	container.icons = container.icons or {}
 
-	for i = 1, cachedSettings.maxIcons do
+	for i = 1, ENSURE_MAX_ICONS do
 		local icon = container.icons[i]
 		if not icon then
 			icon = CreateFrame("Frame", nil, container)

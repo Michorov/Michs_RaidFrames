@@ -8,6 +8,7 @@ addon.Frames.Widgets.Icons.BigDefensive = addon.Frames.Widgets.Icons.BigDefensiv
 local BigDefensive = addon.Frames.Widgets.Icons.BigDefensive
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local ENSURE_MAX_ICONS = 10
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -32,19 +33,15 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function BigDefensive:Ensure(frame, settings)
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
-
+function BigDefensive:Ensure(frame)
 	if not frame.bigDefensiveContainer then
-		frame.bigDefensiveContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
+		frame.bigDefensiveContainer =
+			addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
 	end
 
 	local container = frame.bigDefensiveContainer
 
-	for i = 1, cachedSettings.maxIcons do
+	for i = 1, ENSURE_MAX_ICONS do
 		if not container.icons[i] then
 			container.icons[i] = addon.Frames.Managers.IconManager:CreateIcon(container, 15)
 		end

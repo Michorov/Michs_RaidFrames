@@ -3,22 +3,6 @@ local _, addon = ...
 addon.Frames = addon.Frames or {}
 local Frames = addon.Frames
 
-function MRF_OnUnitFrameLoad(frame)
-	frame.dataProvider = addon.Frames.DataProvider.Live
-
-	local targetedSpellsApi = _G.TargetedSpellsAPI
-	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then
-		local name = frame:GetName()
-		if name then
-			targetedSpellsApi.RegisterFrameByName(name)
-		end
-	end
-
-	if _G.ClickCastFrames then
-		_G.ClickCastFrames[frame] = true
-	end
-end
-
 function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local size = raidSettings.size or {}
 	local spacing = raidSettings.spacing or {}
@@ -28,6 +12,7 @@ function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
+	header.mrfHeaderKind = "raid"
 
 	header:SetAttribute("point", "TOP")
 	header:SetAttribute("xOffset", 0)
@@ -64,6 +49,7 @@ function Frames:CreatePartyHeader(partySettings)
 	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_PartyHeader", UIParent, "SecureGroupHeaderTemplate")
+	header.mrfHeaderKind = "party"
 
 	local totalHeight = (5 * frameHeight) + (4 * spacingY)
 	header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)

@@ -12,14 +12,12 @@ local partyHeader = {
 	type = "party",
 	isSecureHeader = true,
 	container = nil,
-	frames = {},
 }
 
 local raidHeaders = {
 	type = "raid",
 	isSecureHeader = true,
 	containers = {},
-	frames = {},
 }
 
 local testPartyGroup = {
@@ -40,6 +38,28 @@ local testRaidGroup = {
 
 local unitFrameMap = {}
 
+function MRF_OnUnitFrameLoad(frame)
+	frame.dataProvider = addon.Frames.DataProvider.Live
+
+	local targetedSpellsApi = _G.TargetedSpellsAPI
+	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then
+		local name = frame:GetName()
+		if name then
+			targetedSpellsApi.RegisterFrameByName(name)
+		end
+	end
+
+	if _G.ClickCastFrames then
+		_G.ClickCastFrames[frame] = true
+	end
+
+	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
+	if settings then
+		addon.Modules:EnsureFrame(frame, settings)
+		addon.Modules:UpdateSettingsFrame(frame, settings)
+	end
+end
+
 function MRF_OnUnitChanged(frame, unit)
 	if unit then
 		unitFrameMap[unit] = frame
@@ -50,6 +70,28 @@ function MRF_OnUnitChanged(frame, unit)
 				break
 			end
 		end
+	end
+end
+
+local function ApplyBlizzardFramesVisibility()
+	local profile = addon.Database:GetProfile()
+	local core = profile and profile.core
+
+	if core and core.hideBlizzardRaidFrames == true then
+		RegisterStateDriver(CompactPartyFrame, "visibility", "hide")
+		RegisterStateDriver(CompactRaidFrameContainer, "visibility", "hide")
+	else
+		UnregisterStateDriver(CompactPartyFrame, "visibility")
+		UnregisterStateDriver(CompactRaidFrameContainer, "visibility")
+		CompactPartyFrame:Show()
+		CompactRaidFrameContainer:Show()
+	end
+
+	if core and core.hideBlizzardRaidFrameManager == true then
+		RegisterStateDriver(CompactRaidFrameManager, "visibility", "hide")
+	else
+		UnregisterStateDriver(CompactRaidFrameManager, "visibility")
+		CompactRaidFrameManager:Show()
 	end
 end
 
@@ -109,29 +151,7 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	self.restoreLiveDriversAfterCombat = false
 end
 
-local function ApplyBlizzardFramesVisibility()
-	local profile = addon.Database:GetProfile()
-	local core = profile and profile.core
-
-	if core and core.hideBlizzardRaidFrames == true then
-		RegisterStateDriver(CompactPartyFrame, "visibility", "hide")
-		RegisterStateDriver(CompactRaidFrameContainer, "visibility", "hide")
-	else
-		UnregisterStateDriver(CompactPartyFrame, "visibility")
-		UnregisterStateDriver(CompactRaidFrameContainer, "visibility")
-		CompactPartyFrame:Show()
-		CompactRaidFrameContainer:Show()
-	end
-
-	if core and core.hideBlizzardRaidFrameManager == true then
-		RegisterStateDriver(CompactRaidFrameManager, "visibility", "hide")
-	else
-		UnregisterStateDriver(CompactRaidFrameManager, "visibility")
-		CompactRaidFrameManager:Show()
-	end
-end
-
-local function ResolveRaidSettings(profile)
+function FrameRegistry:ResolveRaidSettings(profile)
 	local partySettings = profile.party or {}
 	local raidSettings = profile.raid or {}
 
@@ -145,6 +165,34 @@ local function ResolveRaidSettings(profile)
 	return raidSettings
 end
 
+function FrameRegistry:GetSettingsForFrame(frame)
+	local profile = addon.Database:GetProfile()
+	local parent = frame:GetParent()
+	if not parent then
+		return nil
+	end
+
+	local headerKind = parent.mrfHeaderKind
+	if not headerKind then
+		local parentName = parent.GetName and parent:GetName() or nil
+		if parentName == "MRF_PartyHeader" then
+			headerKind = "party"
+		elseif parentName and parentName:match("^MRF_RaidHeader%d+$") then
+			headerKind = "raid"
+		end
+	end
+
+	if headerKind == "party" then
+		return profile.party or {}
+	end
+
+	if headerKind == "raid" then
+		return self:ResolveRaidSettings(profile)
+	end
+
+	return nil
+end
+
 function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 	if not initialized then
 		error("FrameRegistry is not initialized", 2)
@@ -154,33 +202,49 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
+	local raidSettings = self:ResolveRaidSettings(profile)
 
-	local function UpdateGroup(group, settings)
+	local function UpdateFrame(frame, settings)
+		if (not inCombat) and type(settingsCallback) == "function" then
+			settingsCallback(frame, settings)
+		end
+
+		if type(stateCallback) == "function" then
+			stateCallback(frame, settings)
+		end
+	end
+
+	local function UpdateHeaderChildren(header, settings)
+		for i = 1, 5 do
+			local frame = header:GetAttribute("child" .. i)
+			if frame then
+				UpdateFrame(frame, settings)
+			end
+		end
+	end
+
+	local function UpdateTestGroup(group, settings)
 		if not group or not group.frames then
 			return
 		end
 
 		for _, frame in ipairs(group.frames) do
-			if (not inCombat) and type(settingsCallback) == "function" then
-				settingsCallback(frame, settings)
-			end
-
-			if type(stateCallback) == "function" then
-				stateCallback(frame, settings)
-			end
+			UpdateFrame(frame, settings)
 		end
 	end
 
-	UpdateGroup(partyHeader, partySettings)
-	UpdateGroup(raidHeaders, raidSettings)
+	UpdateHeaderChildren(partyHeader.container, partySettings)
+
+	for _, header in ipairs(raidHeaders.containers) do
+		UpdateHeaderChildren(header, raidSettings)
+	end
 
 	if testPartyGroup.isActive then
-		UpdateGroup(testPartyGroup, partySettings)
+		UpdateTestGroup(testPartyGroup, partySettings)
 	end
 
 	if testRaidGroup.isActive then
-		UpdateGroup(testRaidGroup, profile.raid or {})
+		UpdateTestGroup(testRaidGroup, profile.raid or {})
 	end
 end
 
@@ -193,7 +257,7 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
+	local raidSettings = self:ResolveRaidSettings(profile)
 
 	local function UpdateFrame(frame, settings)
 		if (not inCombat) and type(settingsCallback) == "function" then
@@ -233,7 +297,7 @@ function FrameRegistry:UpdateLayout()
 
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
+	local raidSettings = self:ResolveRaidSettings(profile)
 
 	if testPartyGroup.isActive and testPartyGroup.container then
 		addon.Frames:UpdateLayout(testPartyGroup, partySettings)
@@ -254,46 +318,16 @@ function FrameRegistry:Initialize()
 
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
-	local raidSettings = ResolveRaidSettings(profile)
+	local raidSettings = self:ResolveRaidSettings(profile)
 
-	local header = addon.Frames:CreatePartyHeader(partySettings)
-	partyHeader.container = header
-
-	for i = 1, 5 do
-		local frame = header:GetAttribute("child" .. i)
-		if frame then
-			partyHeader.frames[i] = frame
-		end
-	end
+	partyHeader.container = addon.Frames:CreatePartyHeader(partySettings)
 
 	for groupIndex = 1, 8 do
-		local raidHeader = addon.Frames:CreateRaidHeader(raidSettings, groupIndex)
-		raidHeaders.containers[groupIndex] = raidHeader
-
-		for i = 1, 5 do
-			local frame = raidHeader:GetAttribute("child" .. i)
-			if frame then
-				table.insert(raidHeaders.frames, frame)
-			end
-		end
+		raidHeaders.containers[groupIndex] = addon.Frames:CreateRaidHeader(raidSettings, groupIndex)
 	end
 
 	ApplyBlizzardFramesVisibility()
 	self:UpdateStateDrivers(true)
-
-	local function EnsureWidgetsAndUpdateSettings(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, unitFrame in ipairs(group.frames) do
-			addon.Modules:EnsureFrame(unitFrame, settings)
-			addon.Modules:UpdateSettingsFrame(unitFrame, settings)
-		end
-	end
-
-	EnsureWidgetsAndUpdateSettings(partyHeader, partySettings)
-	EnsureWidgetsAndUpdateSettings(raidHeaders, raidSettings)
 
 	initialized = true
 
@@ -462,4 +496,3 @@ function FrameRegistry:ToggleTestMode(groupType)
 		return
 	end
 end
-
