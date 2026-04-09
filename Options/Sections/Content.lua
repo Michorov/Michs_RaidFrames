@@ -12,25 +12,38 @@ local function ToUI(value)
 	return addon.Utilities:ToUI(addon.Utilities:ToPixels(value))
 end
 
+local controllerState = addon.Options.ControllerState or {
+	mode = "party",
+	subpages = {
+		auras = "buffs",
+		texts = "name",
+		indicators = "readyCheck",
+		bars = "absorbs",
+	},
+}
+
+addon.Options.ControllerState = controllerState
+
 local layout = {
 	padding = ToUI(32),
 	innerWidth = ToUI(582),
-	columnGap = ToUI(16),
+	columnGap = ToUI(30),
 	twoColumn = {
-		slotWidth = ToUI(275),
+		slotWidth = ToUI(276),
 		controlWidth = ToUI(200),
-		startX = { ToUI(32), ToUI(323) },
+		startX = { ToUI(0), ToUI(306) },
 	},
 	threeColumn = {
-		slotWidth = ToUI(178),
+		slotWidth = ToUI(174),
 		controlWidth = ToUI(150),
-		startX = { ToUI(32), ToUI(226), ToUI(420) },
+		startX = { ToUI(0), ToUI(204), ToUI(408) },
 	},
 }
 
 local pageModules = {
 	general = addon.Options.Pages.General,
 	layout = addon.Options.Pages.Layout,
+	bars = addon.Options.Pages.Bars,
 	texts = addon.Options.Pages.Texts,
 	auras = addon.Options.Pages.Auras,
 	indicators = addon.Options.Pages.Indicators,
@@ -53,23 +66,24 @@ local function UpdateLayoutValues()
 	end
 
 	local innerWidth = contentWidth - (pagePadding * 2)
-	local twoColumnStep = innerWidth / 2
-	local threeColumnStep = innerWidth / 3
+	local columnGap = ToUI(30)
+	local twoColumnWidth = (innerWidth - columnGap) / 2
+	local threeColumnWidth = (innerWidth - (columnGap * 2)) / 3
 
 	layout.padding = pagePadding
 	layout.innerWidth = innerWidth
 	layout.columnGap = columnGap
 
-	layout.twoColumn.slotWidth = twoColumnStep - columnGap
+	layout.twoColumn.slotWidth = twoColumnWidth
 	layout.twoColumn.controlWidth = ToUI(200)
-	layout.twoColumn.startX[1] = pagePadding
-	layout.twoColumn.startX[2] = pagePadding + twoColumnStep
+	layout.twoColumn.startX[1] = ToUI(0)
+	layout.twoColumn.startX[2] = twoColumnWidth + columnGap
 
-	layout.threeColumn.slotWidth = threeColumnStep - columnGap
+	layout.threeColumn.slotWidth = threeColumnWidth
 	layout.threeColumn.controlWidth = ToUI(150)
-	layout.threeColumn.startX[1] = pagePadding
-	layout.threeColumn.startX[2] = pagePadding + threeColumnStep
-	layout.threeColumn.startX[3] = pagePadding + (threeColumnStep * 2)
+	layout.threeColumn.startX[1] = ToUI(0)
+	layout.threeColumn.startX[2] = threeColumnWidth + columnGap
+	layout.threeColumn.startX[3] = (threeColumnWidth * 2) + (columnGap * 2)
 end
 
 local function EnsurePage(pageKey)
@@ -146,6 +160,11 @@ function Content:SetActivePage(pageKey)
 		pageFrame:Show()
 	end
 
+	local pageModule = pageModules[pageKey]
+	if pageModule and pageModule.UpdateState then
+		pageModule:UpdateState(addon.Database:GetProfile())
+	end
+
 	activePage = pageKey
 end
 
@@ -155,4 +174,8 @@ end
 
 function Content:GetLayout()
 	return layout
+end
+
+function Content:GetControllerState()
+	return controllerState
 end
