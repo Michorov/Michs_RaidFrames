@@ -5,7 +5,7 @@ addon.Utilities = Utilities
 
 local cachedPixelStep
 
-local function RoundToNearestInt(value)
+function Utilities:RoundToNearestInt(value)
 	value = value or 0
 
 	if value >= 0 then
@@ -41,12 +41,12 @@ end
 
 function Utilities:ToPixels(value)
 	local step = GetPixelStep()
-	return RoundToNearestInt((value or 0) / step)
+	return self:RoundToNearestInt((value or 0) / step)
 end
 
 function Utilities:Scale(pixelCount)
 	local scaledPx = (pixelCount or 0) * GetGlobalScale()
-	return RoundToNearestInt(scaledPx)
+	return self:RoundToNearestInt(scaledPx)
 end
 
 function Utilities:ScaleEven(pixelCount)

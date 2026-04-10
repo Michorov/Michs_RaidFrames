@@ -93,52 +93,52 @@ function Bars:UpdateLayout()
 	end
 
 	local layout = addon.Options.Sections.Content:GetLayout()
-	local pagePadding = layout.padding
-	local headerControlGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
-	local headerControlWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(150))
-	local headerRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local toggleWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(112))
-	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-	local bodyRowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-	local testControlWidth = layout.twoColumn.controlWidth
+	local pagePaddingPx = layout.paddingPx
+	local headerControlGapPx = addon.Utilities:ToPixels(8)
+	local headerControlWidthPx = addon.Utilities:ToPixels(150)
+	local headerRowHeightPx = addon.Utilities:ToPixels(24)
+	local toggleWidthPx = addon.Utilities:ToPixels(112)
+	local firstControlOffsetPx = addon.Utilities:ToPixels(12)
+	local bodyRowSpacingPx = addon.Utilities:ToPixels(16)
+	local testControlWidthPx = layout.twoColumn.controlWidthPx
 
 	page.headerRow:ClearAllPoints()
-	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
-	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -pagePadding, -pagePadding)
-	page.headerRow:SetHeight(headerRowHeight)
+	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
+	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
+	page.headerRow:SetHeight(addon.Utilities:ToUI(headerRowHeightPx))
 
 	page.title:ClearAllPoints()
 	page.title:SetPoint("LEFT", page.headerRow, "LEFT", 0, 0)
 
-	page.modeToggle:SetWidth(toggleWidth)
+	page.modeToggle:SetWidth(addon.Utilities:ToUI(toggleWidthPx))
 	page.modeToggle:ClearAllPoints()
 	page.modeToggle:SetPoint("RIGHT", page.headerRow, "RIGHT", 0, 0)
 
-	page.subpageDropdown:SetWidth(headerControlWidth)
+	page.subpageDropdown:SetWidth(addon.Utilities:ToUI(headerControlWidthPx))
 	page.subpageDropdown:ClearAllPoints()
-	page.subpageDropdown:SetPoint("RIGHT", page.modeToggle, "LEFT", -headerControlGap, 0)
+	page.subpageDropdown:SetPoint("RIGHT", page.modeToggle, "LEFT", -addon.Utilities:ToUI(headerControlGapPx), 0)
 
 	page.body:ClearAllPoints()
-	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -firstControlOffset)
-	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -firstControlOffset)
-	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", pagePadding, 0)
-	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -pagePadding, 0)
+	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", addon.Utilities:ToUI(pagePaddingPx), 0)
+	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -addon.Utilities:ToUI(pagePaddingPx), 0)
 
 	page.description:ClearAllPoints()
 	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
 
-	page.opacityTestColorPicker:SetWidth(testControlWidth)
+	page.opacityTestColorPicker:SetWidth(addon.Utilities:ToUI(testControlWidthPx))
 	page.opacityTestColorPicker:ClearAllPoints()
-	page.opacityTestColorPicker:SetPoint("TOPLEFT", page.description, "BOTTOMLEFT", 0, -bodyRowSpacing)
+	page.opacityTestColorPicker:SetPoint("TOPLEFT", page.description, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(bodyRowSpacingPx))
 
-	page.noOpacityTestColorPicker:SetWidth(testControlWidth)
+	page.noOpacityTestColorPicker:SetWidth(addon.Utilities:ToUI(testControlWidthPx))
 	page.noOpacityTestColorPicker:ClearAllPoints()
 	page.noOpacityTestColorPicker:SetPoint(
 		"TOPLEFT",
 		page.opacityTestColorPicker,
 		"BOTTOMLEFT",
 		0,
-		-bodyRowSpacing
+		-addon.Utilities:ToUI(bodyRowSpacingPx)
 	)
 end
 

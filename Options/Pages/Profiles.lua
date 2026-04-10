@@ -244,58 +244,57 @@ function Profiles:UpdateLayout()
 	end
 
 	local layout = addon.Options.Sections.Content:GetLayout()
-	local pagePadding = layout.padding
-	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-	local sectionSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local sectionControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
-	local controlWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(200))
-	local controlGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local buttonWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(48))
-	local buttonHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
+	local pagePaddingPx = layout.paddingPx
+	local sectionSpacingPx = addon.Utilities:ToPixels(24)
+	local sectionControlOffsetPx = addon.Utilities:ToPixels(10)
+	local controlWidthPx = addon.Utilities:ToPixels(200)
+	local controlGapPx = addon.Utilities:ToPixels(1)
+	local buttonWidthPx = addon.Utilities:ToPixels(48)
+	local buttonHeightPx = addon.Utilities:ToPixels(24)
 
 	page.activeSectionTitle:ClearAllPoints()
-	page.activeSectionTitle:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
+	page.activeSectionTitle:SetPoint("TOPLEFT", page, "TOPLEFT", addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
 
-	page.activeProfileDropdown:SetWidth(controlWidth)
+	page.activeProfileDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
 	page.activeProfileDropdown:ClearAllPoints()
-	page.activeProfileDropdown:SetPoint("TOPLEFT", page.activeSectionTitle, "BOTTOMLEFT", 0, -sectionControlOffset)
+	page.activeProfileDropdown:SetPoint("TOPLEFT", page.activeSectionTitle, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionControlOffsetPx))
 
 	page.createSectionTitle:ClearAllPoints()
-	page.createSectionTitle:SetPoint("TOPLEFT", page.activeProfileDropdown, "BOTTOMLEFT", 0, -sectionSpacing)
+	page.createSectionTitle:SetPoint("TOPLEFT", page.activeProfileDropdown, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionSpacingPx))
 
-	page.newProfileInput:SetWidth(controlWidth)
+	page.newProfileInput:SetWidth(addon.Utilities:ToUI(controlWidthPx))
 	page.newProfileInput:ClearAllPoints()
-	page.newProfileInput:SetPoint("TOPLEFT", page.createSectionTitle, "BOTTOMLEFT", 0, -sectionControlOffset)
+	page.newProfileInput:SetPoint("TOPLEFT", page.createSectionTitle, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionControlOffsetPx))
 
 	page.createProfileButton:ClearAllPoints()
-	page.createProfileButton:SetSize(buttonWidth, buttonHeight)
-	page.createProfileButton:SetPoint("TOPLEFT", page.newProfileInput.field, "TOPRIGHT", controlGap, 0)
+	page.createProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
+	page.createProfileButton:SetPoint("TOPLEFT", page.newProfileInput.field, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
 
 	page.copySectionTitle:ClearAllPoints()
-	page.copySectionTitle:SetPoint("TOPLEFT", page.newProfileInput, "BOTTOMLEFT", 0, -sectionSpacing)
+	page.copySectionTitle:SetPoint("TOPLEFT", page.newProfileInput, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionSpacingPx))
 
-	page.copyFromDropdown:SetWidth(controlWidth)
+	page.copyFromDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
 	page.copyFromDropdown:ClearAllPoints()
-	page.copyFromDropdown:SetPoint("TOPLEFT", page.copySectionTitle, "BOTTOMLEFT", 0, -sectionControlOffset)
+	page.copyFromDropdown:SetPoint("TOPLEFT", page.copySectionTitle, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionControlOffsetPx))
 
-	page.copyProfileInput:SetWidth(controlWidth)
+	page.copyProfileInput:SetWidth(addon.Utilities:ToUI(controlWidthPx))
 	page.copyProfileInput:ClearAllPoints()
-	page.copyProfileInput:SetPoint("TOPLEFT", page.copyFromDropdown, "TOPRIGHT", controlGap, 0)
+	page.copyProfileInput:SetPoint("TOPLEFT", page.copyFromDropdown, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
 
 	page.copyProfileButton:ClearAllPoints()
-	page.copyProfileButton:SetSize(buttonWidth, buttonHeight)
-	page.copyProfileButton:SetPoint("TOPLEFT", page.copyProfileInput, "TOPRIGHT", controlGap, 0)
+	page.copyProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
+	page.copyProfileButton:SetPoint("TOPLEFT", page.copyProfileInput, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
 
 	page.deleteSectionTitle:ClearAllPoints()
-	page.deleteSectionTitle:SetPoint("TOPLEFT", page.copyFromDropdown, "BOTTOMLEFT", 0, -sectionSpacing)
+	page.deleteSectionTitle:SetPoint("TOPLEFT", page.copyFromDropdown, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionSpacingPx))
 
-	page.deleteProfileDropdown:SetWidth(controlWidth)
+	page.deleteProfileDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
 	page.deleteProfileDropdown:ClearAllPoints()
-	page.deleteProfileDropdown:SetPoint("TOPLEFT", page.deleteSectionTitle, "BOTTOMLEFT", 0, -sectionControlOffset)
+	page.deleteProfileDropdown:SetPoint("TOPLEFT", page.deleteSectionTitle, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(sectionControlOffsetPx))
 
 	page.deleteProfileButton:ClearAllPoints()
-	page.deleteProfileButton:SetSize(buttonWidth, buttonHeight)
-	page.deleteProfileButton:SetPoint("TOPLEFT", page.deleteProfileDropdown, "TOPRIGHT", controlGap, 0)
+	page.deleteProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
+	page.deleteProfileButton:SetPoint("TOPLEFT", page.deleteProfileDropdown, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
 end
 
 function Profiles:UpdateState(profile)

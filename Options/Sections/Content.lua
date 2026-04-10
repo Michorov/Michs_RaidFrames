@@ -8,9 +8,6 @@ local Content = addon.Options.Sections.Content
 
 local content
 local activePage = "general"
-local function ToUI(value)
-	return addon.Utilities:ToUI(addon.Utilities:ToPixels(value))
-end
 
 local controllerState = addon.Options.ControllerState or {
 	mode = "party",
@@ -25,18 +22,18 @@ local controllerState = addon.Options.ControllerState or {
 addon.Options.ControllerState = controllerState
 
 local layout = {
-	padding = ToUI(32),
-	innerWidth = ToUI(582),
-	columnGap = ToUI(30),
+	paddingPx = addon.Utilities:ToPixels(32),
+	innerWidthPx = addon.Utilities:ToPixels(582),
+	columnGapPx = addon.Utilities:ToPixels(30),
 	twoColumn = {
-		slotWidth = ToUI(276),
-		controlWidth = ToUI(200),
-		startX = { ToUI(0), ToUI(306) },
+		slotWidthPx = addon.Utilities:ToPixels(276),
+		controlWidthPx = addon.Utilities:ToPixels(200),
+		startXPx = { 0, addon.Utilities:ToPixels(306) },
 	},
 	threeColumn = {
-		slotWidth = ToUI(174),
-		controlWidth = ToUI(150),
-		startX = { ToUI(0), ToUI(204), ToUI(408) },
+		slotWidthPx = addon.Utilities:ToPixels(174),
+		controlWidthPx = addon.Utilities:ToPixels(150),
+		startXPx = { 0, addon.Utilities:ToPixels(204), addon.Utilities:ToPixels(408) },
 	},
 }
 
@@ -57,33 +54,32 @@ local function UpdateLayoutValues()
 		return
 	end
 
-	local pagePadding = ToUI(32)
-	local columnGap = ToUI(16)
-	local contentWidth = content:GetWidth()
+	local pagePaddingPx = addon.Utilities:ToPixels(32)
+	local columnGapPx = addon.Utilities:ToPixels(30)
+	local contentWidthPx = addon.Utilities:ToPixels(content:GetWidth())
 
-	if not contentWidth or contentWidth <= 0 then
+	if not contentWidthPx or contentWidthPx <= 0 then
 		return
 	end
 
-	local innerWidth = contentWidth - (pagePadding * 2)
-	local columnGap = ToUI(30)
-	local twoColumnWidth = (innerWidth - columnGap) / 2
-	local threeColumnWidth = (innerWidth - (columnGap * 2)) / 3
+	local innerWidthPx = contentWidthPx - (pagePaddingPx * 2)
+	local twoColumnWidthPx = addon.Utilities:RoundToNearestInt((innerWidthPx - columnGapPx) / 2)
+	local threeColumnWidthPx = addon.Utilities:RoundToNearestInt((innerWidthPx - (columnGapPx * 2)) / 3)
 
-	layout.padding = pagePadding
-	layout.innerWidth = innerWidth
-	layout.columnGap = columnGap
+	layout.paddingPx = pagePaddingPx
+	layout.innerWidthPx = innerWidthPx
+	layout.columnGapPx = columnGapPx
 
-	layout.twoColumn.slotWidth = twoColumnWidth
-	layout.twoColumn.controlWidth = ToUI(200)
-	layout.twoColumn.startX[1] = ToUI(0)
-	layout.twoColumn.startX[2] = twoColumnWidth + columnGap
+	layout.twoColumn.slotWidthPx = twoColumnWidthPx
+	layout.twoColumn.controlWidthPx = addon.Utilities:ToPixels(200)
+	layout.twoColumn.startXPx[1] = 0
+	layout.twoColumn.startXPx[2] = twoColumnWidthPx + columnGapPx
 
-	layout.threeColumn.slotWidth = threeColumnWidth
-	layout.threeColumn.controlWidth = ToUI(150)
-	layout.threeColumn.startX[1] = ToUI(0)
-	layout.threeColumn.startX[2] = threeColumnWidth + columnGap
-	layout.threeColumn.startX[3] = (threeColumnWidth * 2) + (columnGap * 2)
+	layout.threeColumn.slotWidthPx = threeColumnWidthPx
+	layout.threeColumn.controlWidthPx = addon.Utilities:ToPixels(150)
+	layout.threeColumn.startXPx[1] = 0
+	layout.threeColumn.startXPx[2] = threeColumnWidthPx + columnGapPx
+	layout.threeColumn.startXPx[3] = (threeColumnWidthPx * 2) + (columnGapPx * 2)
 end
 
 local function EnsurePage(pageKey)

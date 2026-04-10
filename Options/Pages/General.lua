@@ -112,49 +112,49 @@ function General:UpdateLayout()
 	end
 
 	local layout = addon.Options.Sections.Content:GetLayout()
-	local pagePadding = layout.padding
-	local headerRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
-	local rightColumnOffset = layout.twoColumn.startX[2] - layout.twoColumn.startX[1]
-	local twoColumnWidth = layout.twoColumn.controlWidth
+	local pagePaddingPx = layout.paddingPx
+	local headerRowHeightPx = addon.Utilities:ToPixels(24)
+	local firstControlOffsetPx = addon.Utilities:ToPixels(24)
+	local rowSpacingPx = addon.Utilities:ToPixels(8)
+	local rightColumnOffsetPx = layout.twoColumn.startXPx[2] - layout.twoColumn.startXPx[1]
+	local twoColumnWidthPx = layout.twoColumn.controlWidthPx
 
 	page.headerRow:ClearAllPoints()
-	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
-	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -pagePadding, -pagePadding)
-	page.headerRow:SetHeight(headerRowHeight)
+	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
+	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
+	page.headerRow:SetHeight(addon.Utilities:ToUI(headerRowHeightPx))
 
 	page.title:ClearAllPoints()
 	page.title:SetPoint("LEFT", page.headerRow, "LEFT", 0, 0)
 
 	page.body:ClearAllPoints()
-	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -firstControlOffset)
-	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -firstControlOffset)
-	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", pagePadding, 0)
-	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -pagePadding, 0)
+	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", addon.Utilities:ToUI(pagePaddingPx), 0)
+	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -addon.Utilities:ToUI(pagePaddingPx), 0)
 
-	page.showSoloPartyFrameCheckbox:SetWidth(twoColumnWidth)
+	page.showSoloPartyFrameCheckbox:SetWidth(addon.Utilities:ToUI(twoColumnWidthPx))
 	page.showSoloPartyFrameCheckbox:ClearAllPoints()
 	page.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
 
-	page.hideBlizzardPartyRaidFramesCheckbox:SetWidth(twoColumnWidth)
+	page.hideBlizzardPartyRaidFramesCheckbox:SetWidth(addon.Utilities:ToUI(twoColumnWidthPx))
 	page.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
 	page.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
 		"TOPLEFT",
 		page.showSoloPartyFrameCheckbox,
 		"BOTTOMLEFT",
 		0,
-		-rowSpacing
+		-addon.Utilities:ToUI(rowSpacingPx)
 	)
 
-	page.hideBlizzardRaidFrameManagerCheckbox:SetWidth(twoColumnWidth)
+	page.hideBlizzardRaidFrameManagerCheckbox:SetWidth(addon.Utilities:ToUI(twoColumnWidthPx))
 	page.hideBlizzardRaidFrameManagerCheckbox:ClearAllPoints()
 	page.hideBlizzardRaidFrameManagerCheckbox:SetPoint(
 		"TOPLEFT",
 		page.hideBlizzardPartyRaidFramesCheckbox,
 		"BOTTOMLEFT",
 		0,
-		-rowSpacing
+		-addon.Utilities:ToUI(rowSpacingPx)
 	)
 
 	page.globalScaleSlider:ClearAllPoints()
@@ -162,12 +162,12 @@ function General:UpdateLayout()
 		"TOPLEFT",
 		page.showSoloPartyFrameCheckbox,
 		"TOPLEFT",
-		rightColumnOffset,
+		addon.Utilities:ToUI(rightColumnOffsetPx),
 		0
 	)
 
 	page.outOfRangeAlphaSlider:ClearAllPoints()
-	page.outOfRangeAlphaSlider:SetPoint("TOPLEFT", page.globalScaleSlider, "BOTTOMLEFT", 0, -rowSpacing)
+	page.outOfRangeAlphaSlider:SetPoint("TOPLEFT", page.globalScaleSlider, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(rowSpacingPx))
 end
 
 function General:UpdateState(profile)

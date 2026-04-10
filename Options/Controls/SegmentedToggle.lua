@@ -8,22 +8,12 @@ local SegmentedToggle = addon.Options.Controls.SegmentedToggle
 local theme = addon.Options.Theme
 
 local function ApplyVisualState(control)
-	local activeBg = {
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4],
-	}
+	local activeBg = { theme:GetColor("brand") }
 	local activeHoverBg = { 1.0, 0.74, 0.42, 1 }
 	local inactiveBg = { 0.04, 0.05, 0.07, 1 }
 	local inactiveTextColor = { 0.82, 0.83, 0.87, 1 }
 	local inactiveHoverTextColor = { 0.94, 0.95, 0.98, 1 }
-	local activeTextColor = {
-		theme.colors.panelBackground[1],
-		theme.colors.panelBackground[2],
-		theme.colors.panelBackground[3],
-		1,
-	}
+	local activeTextColor = { theme:GetColor("panelBackground", 1) }
 	local plateInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(2))
 
 	local leftActive = control.value == control.leftOption.value
@@ -172,45 +162,25 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 	control.activePlate.topHighlight:SetHeight(borderThickness)
 
 	control.topBorder = control:CreateTexture(nil, "OVERLAY")
-	control.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.topBorder:SetColorTexture(theme:GetColor("border"))
 	control.topBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.topBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
 	control.topBorder:SetHeight(borderThickness)
 
 	control.bottomBorder = control:CreateTexture(nil, "OVERLAY")
-	control.bottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.bottomBorder:SetColorTexture(theme:GetColor("border"))
 	control.bottomBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
 	control.bottomBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
 	control.bottomBorder:SetHeight(borderThickness)
 
 	control.leftBorder = control:CreateTexture(nil, "OVERLAY")
-	control.leftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.leftBorder:SetColorTexture(theme:GetColor("border"))
 	control.leftBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.leftBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
 	control.leftBorder:SetWidth(borderThickness)
 
 	control.rightBorder = control:CreateTexture(nil, "OVERLAY")
-	control.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.rightBorder:SetColorTexture(theme:GetColor("border"))
 	control.rightBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
 	control.rightBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
 	control.rightBorder:SetWidth(borderThickness)
