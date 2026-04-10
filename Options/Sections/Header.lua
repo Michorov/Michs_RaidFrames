@@ -20,35 +20,30 @@ function Header:Ensure(parent)
 	header.title:SetJustifyH("LEFT")
 	header.title:SetFont(theme.fonts.philosopherBold, 22, "")
 	header.title:SetText("Mich's Raid Frames")
-	header.title:SetTextColor(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	header.title:SetTextColor(theme:GetColor("brand"))
 
 	header.closeButton = addon.Options.Controls.Button:Create(header, "X")
-	header.closeButton:SetBackdropColor(0, 0, 0, 0)
-	header.closeButton.borderTop:Hide()
-	header.closeButton.borderBottom:Hide()
-	header.closeButton.borderLeft:Hide()
-	header.closeButton.borderRight:Hide()
+	header.closeButton:SetLayoutSize(24, 24)
+	header.closeButton:SetLayoutBorderSize(0)
 	header.closeButton.text:SetFont(theme.fonts.arialNarrow, 16, "")
-	header.closeButton.text:SetTextColor(0.72, 0.74, 0.78, 1)
+	header.closeButton.text:SetTextColor(theme:GetTextColor("secondary"))
+	header.closeButton:SetBackdropColor(0, 0, 0, 0)
+
 	header.closeButton:SetOnClick(function()
 		addon.Options:Close()
 	end)
+
 	header.closeButton:SetScript("OnEnter", function(self)
-		self.text:SetTextColor(
-			theme.colors.brand[1],
-			theme.colors.brand[2],
-			theme.colors.brand[3],
-			theme.colors.brand[4]
-		)
+		self.text:SetTextColor(theme:GetColor("brand"))
 	end)
+
 	header.closeButton:SetScript("OnLeave", function(self)
-		self.text:SetTextColor(0.72, 0.74, 0.78, 1)
+		self.text:SetTextColor(theme:GetTextColor("secondary"))
 	end)
+
+	header.controls = {
+		header.closeButton,
+	}
 
 	self:UpdateLayout()
 
@@ -58,6 +53,12 @@ end
 function Header:UpdateLayout()
 	if not header then
 		return
+	end
+
+	for _, control in ipairs(header.controls or {}) do
+		if control.UpdateLayout then
+			control:UpdateLayout()
+		end
 	end
 
 	header.title:ClearAllPoints()
@@ -70,7 +71,6 @@ function Header:UpdateLayout()
 	)
 
 	header.closeButton:ClearAllPoints()
-	header.closeButton:SetSize(24, 24)
 	header.closeButton:SetPoint(
 		"TOPRIGHT",
 		header,

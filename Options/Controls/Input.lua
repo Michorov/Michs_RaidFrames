@@ -75,7 +75,7 @@ function Input:Create(parent, labelText)
 	control.field:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	control.field:SetBackdropColor(0.04, 0.05, 0.07, 1)
+	control.field:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	control.field.topBorder = control.field:CreateTexture(nil, "OVERLAY")
 	control.field.topBorder:SetColorTexture(
@@ -122,7 +122,7 @@ function Input:Create(parent, labelText)
 	control.field.rightBorder:SetWidth(borderThickness)
 
 	control.field.hoverTexture = control.field:CreateTexture(nil, "ARTWORK")
-	control.field.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+	control.field.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 	control.field.hoverTexture:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.hoverTexture:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
 	control.field.hoverTexture:Hide()

@@ -10,7 +10,7 @@ local theme = addon.Options.Theme
 local function ApplyVisualState(control)
 	local activeBg = { theme:GetColor("brand") }
 	local activeHoverBg = { 1.0, 0.74, 0.42, 1 }
-	local inactiveBg = { 0.04, 0.05, 0.07, 1 }
+	local inactiveBg = { theme:GetColor("controlBackground") }
 	local inactiveTextColor = { 0.82, 0.83, 0.87, 1 }
 	local inactiveHoverTextColor = { 0.94, 0.95, 0.98, 1 }
 	local activeTextColor = { theme:GetColor("panelBackground", 1) }
@@ -68,7 +68,7 @@ local function ApplyVisualState(control)
 	end
 
 	control.leftSegment.hoverTexture:SetShown(control.hoveredSegment == control.leftSegment and not leftActive)
-	control.leftSegment.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+	control.leftSegment.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 
 	if rightActive then
 		control.rightSegment.text:SetTextColor(
@@ -87,7 +87,7 @@ local function ApplyVisualState(control)
 	end
 
 	control.rightSegment.hoverTexture:SetShown(control.hoveredSegment == control.rightSegment and not rightActive)
-	control.rightSegment.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+	control.rightSegment.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 end
 
 local function CreateSegment(control, option, side)
@@ -147,7 +147,7 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 	control:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	control:SetBackdropColor(0.04, 0.05, 0.07, 1)
+	control:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	control.activePlate = CreateFrame("Frame", nil, control)
 	control.activePlate:SetFrameLevel(control:GetFrameLevel() + 1)

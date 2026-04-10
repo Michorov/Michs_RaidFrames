@@ -51,10 +51,10 @@ function Checkbox:Create(parent, text)
 	checkbox.box:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	checkbox.box:SetBackdropColor(0.04, 0.05, 0.07, 1)
+	checkbox.box:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	checkbox.boxHover = checkbox.box:CreateTexture(nil, "ARTWORK")
-	checkbox.boxHover:SetColorTexture(1, 1, 1, 0.04)
+	checkbox.boxHover:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 	checkbox.boxHover:SetPoint("TOPLEFT", checkbox.box, "TOPLEFT", 0, 0)
 	checkbox.boxHover:SetPoint("BOTTOMRIGHT", checkbox.box, "BOTTOMRIGHT", 0, 0)
 	checkbox.boxHover:Hide()

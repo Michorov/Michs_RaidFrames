@@ -15,15 +15,16 @@ local function GetControllerState()
 		return content:GetControllerState()
 	end
 
-	addon.Options.ControllerState = addon.Options.ControllerState or {
-		mode = "party",
-		subpages = {
-			auras = "buffs",
-			texts = "name",
-			indicators = "readyCheck",
-			bars = "absorbs",
-		},
-	}
+	addon.Options.ControllerState = addon.Options.ControllerState
+		or {
+			mode = "party",
+			subpages = {
+				auras = "buffs",
+				texts = "name",
+				indicators = "readyCheck",
+				bars = "absorbs",
+			},
+		}
 
 	return addon.Options.ControllerState
 end
@@ -243,7 +244,7 @@ function Layout:UpdateLayout()
 	local toggleWidthPx = addon.Utilities:ToPixels(112)
 	local headerRowHeightPx = addon.Utilities:ToPixels(24)
 	local firstControlOffsetPx = addon.Utilities:ToPixels(24)
-	local controlSlotHeightPx = addon.Utilities:ToPixels(64)
+	local controlSlotHeightPx = addon.Utilities:ToPixels(56)
 	local sliderControlHeightPx = addon.Utilities:ToPixels(34)
 	local colorPickerControlHeightPx = addon.Utilities:ToPixels(24)
 	local rowStepPx = controlSlotHeightPx
@@ -257,8 +258,20 @@ function Layout:UpdateLayout()
 	local threeColumnSlotWidthPx = layout.threeColumn.slotWidthPx
 
 	page.headerRow:ClearAllPoints()
-	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
-	page.headerRow:SetPoint("TOPRIGHT", page, "TOPRIGHT", -addon.Utilities:ToUI(pagePaddingPx), -addon.Utilities:ToUI(pagePaddingPx))
+	page.headerRow:SetPoint(
+		"TOPLEFT",
+		page,
+		"TOPLEFT",
+		addon.Utilities:ToUI(pagePaddingPx),
+		-addon.Utilities:ToUI(pagePaddingPx)
+	)
+	page.headerRow:SetPoint(
+		"TOPRIGHT",
+		page,
+		"TOPRIGHT",
+		-addon.Utilities:ToUI(pagePaddingPx),
+		-addon.Utilities:ToUI(pagePaddingPx)
+	)
 	page.headerRow:SetHeight(addon.Utilities:ToUI(headerRowHeightPx))
 
 	page.title:ClearAllPoints()
@@ -275,40 +288,94 @@ function Layout:UpdateLayout()
 	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -addon.Utilities:ToUI(pagePaddingPx), 0)
 
 	page.horizontalPositionSlot:ClearAllPoints()
-	page.horizontalPositionSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
+	page.horizontalPositionSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
 	page.horizontalPositionSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
 
 	page.verticalPositionSlot:ClearAllPoints()
-	page.verticalPositionSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
-	page.verticalPositionSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", addon.Utilities:ToUI(threeColumnSecondOffsetPx), 0)
+	page.verticalPositionSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
+	page.verticalPositionSlot:SetPoint(
+		"TOPLEFT",
+		page.body,
+		"TOPLEFT",
+		addon.Utilities:ToUI(threeColumnSecondOffsetPx),
+		0
+	)
 
 	page.horizontalSpacingSlot:ClearAllPoints()
-	page.horizontalSpacingSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
+	page.horizontalSpacingSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
 	page.horizontalSpacingSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, -addon.Utilities:ToUI(rowStepPx))
 
 	page.verticalSpacingSlot:ClearAllPoints()
-	page.verticalSpacingSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
-	page.verticalSpacingSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", addon.Utilities:ToUI(threeColumnSecondOffsetPx), -addon.Utilities:ToUI(rowStepPx))
+	page.verticalSpacingSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
+	page.verticalSpacingSlot:SetPoint(
+		"TOPLEFT",
+		page.body,
+		"TOPLEFT",
+		addon.Utilities:ToUI(threeColumnSecondOffsetPx),
+		-addon.Utilities:ToUI(rowStepPx)
+	)
 
 	page.frameWidthSlot:ClearAllPoints()
 	page.frameWidthSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
 	page.frameWidthSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, -addon.Utilities:ToUI(thirdRowOffsetPx))
 
 	page.frameHeightSlot:ClearAllPoints()
-	page.frameHeightSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
-	page.frameHeightSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", addon.Utilities:ToUI(threeColumnSecondOffsetPx), -addon.Utilities:ToUI(thirdRowOffsetPx))
+	page.frameHeightSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
+	page.frameHeightSlot:SetPoint(
+		"TOPLEFT",
+		page.body,
+		"TOPLEFT",
+		addon.Utilities:ToUI(threeColumnSecondOffsetPx),
+		-addon.Utilities:ToUI(thirdRowOffsetPx)
+	)
 
 	page.frameBorderThicknessSlot:ClearAllPoints()
-	page.frameBorderThicknessSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
+	page.frameBorderThicknessSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
 	page.frameBorderThicknessSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, -addon.Utilities:ToUI(fourthRowOffsetPx))
 
 	page.backgroundColorSlot:ClearAllPoints()
-	page.backgroundColorSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
-	page.backgroundColorSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", addon.Utilities:ToUI(threeColumnThirdOffsetPx), -addon.Utilities:ToUI(thirdRowOffsetPx))
+	page.backgroundColorSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
+	page.backgroundColorSlot:SetPoint(
+		"TOPLEFT",
+		page.body,
+		"TOPLEFT",
+		addon.Utilities:ToUI(threeColumnThirdOffsetPx),
+		-addon.Utilities:ToUI(thirdRowOffsetPx)
+	)
 
 	page.borderColorSlot:ClearAllPoints()
-	page.borderColorSlot:SetSize(addon.Utilities:ToUI(threeColumnSlotWidthPx), addon.Utilities:ToUI(controlSlotHeightPx))
-	page.borderColorSlot:SetPoint("TOPLEFT", page.body, "TOPLEFT", addon.Utilities:ToUI(threeColumnSecondOffsetPx), -addon.Utilities:ToUI(fourthRowOffsetPx))
+	page.borderColorSlot:SetSize(
+		addon.Utilities:ToUI(threeColumnSlotWidthPx),
+		addon.Utilities:ToUI(controlSlotHeightPx)
+	)
+	page.borderColorSlot:SetPoint(
+		"TOPLEFT",
+		page.body,
+		"TOPLEFT",
+		addon.Utilities:ToUI(threeColumnSecondOffsetPx),
+		-addon.Utilities:ToUI(fourthRowOffsetPx)
+	)
 
 	page.horizontalPositionSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
 	page.horizontalPositionSlider:ClearAllPoints()
@@ -425,11 +492,6 @@ function Layout:UpdateState(profile)
 	page.frameWidthSlider:SetValueSilently(size.width or defaults.frameWidth)
 	page.frameHeightSlider:SetValueSilently(size.height or defaults.frameHeight)
 	page.frameBorderThicknessSlider:SetValueSilently(border.thicknessPx or defaults.borderThickness)
-	page.backgroundColorPicker:SetColor(
-		backgroundColor.r,
-		backgroundColor.g,
-		backgroundColor.b,
-		backgroundColor.a
-	)
+	page.backgroundColorPicker:SetColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
 	page.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
 end
