@@ -71,7 +71,15 @@ function Bars:Ensure(parent)
 	page.description:SetJustifyH("LEFT")
 	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
 	page.description:SetTextColor(0.65, 0.65, 0.68, 1)
-	page.description:SetText("Bar settings will go here.")
+	page.description:SetText("Testing controls for the Bars page live here for now.")
+
+	page.opacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Background Color")
+	page.opacityTestColorPicker:SetHasOpacity(true)
+	page.opacityTestColorPicker:SetColor(1, 0.62, 0.24, 0.65)
+
+	page.noOpacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Health Color")
+	page.noOpacityTestColorPicker:SetHasOpacity(false)
+	page.noOpacityTestColorPicker:SetColor(0.20, 0.85, 0.35, 1)
 
 	self:UpdateLayout()
 	self:UpdateState(addon.Database:GetProfile())
@@ -91,6 +99,8 @@ function Bars:UpdateLayout()
 	local headerRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
 	local toggleWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(112))
 	local firstControlOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+	local bodyRowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
+	local testControlWidth = layout.twoColumn.controlWidth
 
 	page.headerRow:ClearAllPoints()
 	page.headerRow:SetPoint("TOPLEFT", page, "TOPLEFT", pagePadding, -pagePadding)
@@ -116,6 +126,20 @@ function Bars:UpdateLayout()
 
 	page.description:ClearAllPoints()
 	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+
+	page.opacityTestColorPicker:SetWidth(testControlWidth)
+	page.opacityTestColorPicker:ClearAllPoints()
+	page.opacityTestColorPicker:SetPoint("TOPLEFT", page.description, "BOTTOMLEFT", 0, -bodyRowSpacing)
+
+	page.noOpacityTestColorPicker:SetWidth(testControlWidth)
+	page.noOpacityTestColorPicker:ClearAllPoints()
+	page.noOpacityTestColorPicker:SetPoint(
+		"TOPLEFT",
+		page.opacityTestColorPicker,
+		"BOTTOMLEFT",
+		0,
+		-bodyRowSpacing
+	)
 end
 
 function Bars:UpdateState(profile)
