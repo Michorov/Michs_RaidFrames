@@ -74,6 +74,7 @@ Options/Controls/Button.lua
 Options/Controls/Checkbox.lua
 Options/Controls/Dropdown.lua
 Options/Controls/Input.lua
+Options/Controls/ColorPicker.lua
 Options/Controls/SegmentedToggle.lua
 Options/Controls/Slider.lua
 Options/Pages/General.lua

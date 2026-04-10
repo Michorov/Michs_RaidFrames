@@ -43,6 +43,8 @@ local function GetModeDefaults(mode)
 			frameWidth = 110,
 			frameHeight = 56,
 			borderThickness = 1,
+			backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
+			borderColor = { r = 0, g = 0, b = 0, a = 1 },
 		}
 	end
 
@@ -54,6 +56,8 @@ local function GetModeDefaults(mode)
 		frameWidth = 128,
 		frameHeight = 64,
 		borderThickness = 1,
+		backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
+		borderColor = { r = 0, g = 0, b = 0, a = 1 },
 	}
 end
 
@@ -177,6 +181,24 @@ function Layout:Ensure(parent)
 		end, "borderSettingsChanged")
 	end)
 
+	page.backgroundColorPicker = addon.Options.Controls.ColorPicker:Create(page, "Background Color")
+	page.backgroundColorPicker:SetHasOpacity(true)
+	page.backgroundColorPicker:SetOnValueChanged(function(_, r, g, b, a)
+		ApplyModeSetting(function(section)
+			section.background = section.background or {}
+			section.background.color = { r = r, g = g, b = b, a = a }
+		end, "backgroundSettingsChanged")
+	end)
+
+	page.borderColorPicker = addon.Options.Controls.ColorPicker:Create(page, "Border Color")
+	page.borderColorPicker:SetHasOpacity(true)
+	page.borderColorPicker:SetOnValueChanged(function(_, r, g, b, a)
+		ApplyModeSetting(function(section)
+			section.border = section.border or {}
+			section.border.color = { r = r, g = g, b = b, a = a }
+		end, "borderSettingsChanged")
+	end)
+
 	addon.Options.Data:RegisterForUpdates(Layout, function(profile)
 		Layout:UpdateState(profile)
 	end)
@@ -200,6 +222,9 @@ function Layout:UpdateLayout()
 	local sliderRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(34))
 	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(18))
 	local rowStep = sliderRowHeight + rowSpacing
+	local sectionGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(18))
+	local thirdRowOffset = (rowStep * 2) + sectionGap
+	local fourthRowOffset = thirdRowOffset + rowStep
 	local threeColumnSecondOffset = layout.threeColumn.startX[2] - layout.threeColumn.startX[1]
 	local threeColumnThirdOffset = layout.threeColumn.startX[3] - layout.threeColumn.startX[1]
 	local threeColumnControlWidth = layout.threeColumn.slotWidth
@@ -258,7 +283,7 @@ function Layout:UpdateLayout()
 
 	page.frameWidthSlider:SetControlWidth(threeColumnControlWidth)
 	page.frameWidthSlider:ClearAllPoints()
-	page.frameWidthSlider:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, -(rowStep * 2))
+	page.frameWidthSlider:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, -thirdRowOffset)
 
 	page.frameHeightSlider:SetControlWidth(threeColumnControlWidth)
 	page.frameHeightSlider:ClearAllPoints()
@@ -267,7 +292,7 @@ function Layout:UpdateLayout()
 		page.body,
 		"TOPLEFT",
 		threeColumnSecondOffset,
-		-(rowStep * 2)
+		-thirdRowOffset
 	)
 
 	page.frameBorderThicknessSlider:SetControlWidth(threeColumnControlWidth)
@@ -276,8 +301,28 @@ function Layout:UpdateLayout()
 		"TOPLEFT",
 		page.body,
 		"TOPLEFT",
+		0,
+		-fourthRowOffset
+	)
+
+	page.backgroundColorPicker:SetWidth(threeColumnControlWidth)
+	page.backgroundColorPicker:ClearAllPoints()
+	page.backgroundColorPicker:SetPoint(
+		"BOTTOMLEFT",
+		page.body,
+		"TOPLEFT",
 		threeColumnThirdOffset,
-		-(rowStep * 2)
+		-(thirdRowOffset + sliderRowHeight)
+	)
+
+	page.borderColorPicker:SetWidth(threeColumnControlWidth)
+	page.borderColorPicker:ClearAllPoints()
+	page.borderColorPicker:SetPoint(
+		"BOTTOMLEFT",
+		page.body,
+		"TOPLEFT",
+		threeColumnSecondOffset,
+		-(fourthRowOffset + sliderRowHeight)
 	)
 end
 
@@ -292,7 +337,10 @@ function Layout:UpdateState(profile)
 	local position = section.position or {}
 	local spacing = section.spacing or {}
 	local size = section.size or {}
+	local background = section.background or {}
 	local border = section.border or {}
+	local backgroundColor = background.color or defaults.backgroundColor
+	local borderColor = border.color or defaults.borderColor
 
 	page.modeToggle:SetValue(mode)
 	page.horizontalPositionSlider:SetValueSilently(position.x or defaults.positionX)
@@ -302,4 +350,11 @@ function Layout:UpdateState(profile)
 	page.frameWidthSlider:SetValueSilently(size.width or defaults.frameWidth)
 	page.frameHeightSlider:SetValueSilently(size.height or defaults.frameHeight)
 	page.frameBorderThicknessSlider:SetValueSilently(border.thicknessPx or defaults.borderThickness)
+	page.backgroundColorPicker:SetColor(
+		backgroundColor.r,
+		backgroundColor.g,
+		backgroundColor.b,
+		backgroundColor.a
+	)
+	page.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
 end
