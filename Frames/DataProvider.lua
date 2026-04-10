@@ -68,6 +68,14 @@ local function BuildCustomHelpfulTestAuras()
 	return auras
 end
 
+local function GetTestAuraInstanceID(filter, index)
+	if filter == "harmful" or filter == "HARMFUL" then
+		return 4000 + index
+	end
+
+	return 5000 + index
+end
+
 function DataProvider.Live:GetHealth(frame)
 	if not frame or not frame.unit or not UnitExists(frame.unit) then
 		return 0, 1
@@ -807,7 +815,11 @@ function DataProvider.Test:GetUnitAuras(frame, filter)
 	end
 
 	local map = {}
-	for _, aura in ipairs(list) do
+	for index, aura in ipairs(list) do
+		if aura and aura.auraInstanceID == nil then
+			aura.auraInstanceID = GetTestAuraInstanceID(filter, index)
+		end
+
 		local id = aura and aura.auraInstanceID
 		if id then
 			map[id] = aura
