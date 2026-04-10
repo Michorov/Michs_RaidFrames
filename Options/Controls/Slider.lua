@@ -135,7 +135,7 @@ function Slider:Create(parent, text)
 	control.slider:SetObeyStepOnDrag(true)
 
 	control.track = control.slider:CreateTexture(nil, "BACKGROUND")
-	control.track:SetColorTexture(0.04, 0.05, 0.07, 1)
+	control.track:SetColorTexture(theme:GetColor("controlBackground"))
 	control.track:SetSize(trackWidth, trackHeight)
 	control.track:SetPoint("TOPLEFT", control.slider, "TOPLEFT", 0, -trackVerticalOffset)
 

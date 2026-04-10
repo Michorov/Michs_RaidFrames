@@ -10,109 +10,56 @@ local theme = addon.Options.Theme
 function Button:Create(parent, text)
 	local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
 
-	button:SetSize(48, 24)
-
-	button:ClearAllPoints()
-	button:SetPoint("CENTER", parent, "CENTER", 0, 0)
+	button.layoutValues = {
+		width = 48,
+		height = 24,
+		borderThickness = 1,
+	}
 
 	button:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	button:SetBackdropColor(0.12, 0.12, 0.14, 1)
+	button:SetBackdropColor(theme:GetColor("buttonBackground"))
 
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
+	local borderTop = button:CreateTexture(nil, "OVERLAY")
+	borderTop:SetColorTexture(theme:GetColor("border"))
+	borderTop:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+	borderTop:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
 
-	local top = button:CreateTexture(nil, "OVERLAY")
-	top:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
-	top:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
-	top:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
-	top:SetHeight(borderThickness)
+	local borderBottom = button:CreateTexture(nil, "OVERLAY")
+	borderBottom:SetColorTexture(theme:GetColor("border"))
+	borderBottom:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
+	borderBottom:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
 
-	local bottom = button:CreateTexture(nil, "OVERLAY")
-	bottom:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
-	bottom:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
-	bottom:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
-	bottom:SetHeight(borderThickness)
+	local borderLeft = button:CreateTexture(nil, "OVERLAY")
+	borderLeft:SetColorTexture(theme:GetColor("border"))
+	borderLeft:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
+	borderLeft:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
 
-	local left = button:CreateTexture(nil, "OVERLAY")
-	left:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
-	left:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
-	left:SetPoint("BOTTOMLEFT", button, "BOTTOMLEFT", 0, 0)
-	left:SetWidth(borderThickness)
+	local borderRight = button:CreateTexture(nil, "OVERLAY")
+	borderRight:SetColorTexture(theme:GetColor("border"))
+	borderRight:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
+	borderRight:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
 
-	local right = button:CreateTexture(nil, "OVERLAY")
-	right:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
-	right:SetPoint("TOPRIGHT", button, "TOPRIGHT", 0, 0)
-	right:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
-	right:SetWidth(borderThickness)
-
-	button.borderTop = top
-	button.borderBottom = bottom
-	button.borderLeft = left
-	button.borderRight = right
+	button.borderTop = borderTop
+	button.borderBottom = borderBottom
+	button.borderLeft = borderLeft
+	button.borderRight = borderRight
 
 	button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	button.text:SetPoint("CENTER", button, "CENTER", 0, 0)
 	button.text:SetFont(theme.fonts.arialNarrow, 14, "")
 	button.text:SetText(text or "Button")
-
-	local normalBg = { 0.12, 0.12, 0.14, 1 }
-	local hoverBg = { 0.18, 0.18, 0.22, 1 }
-	button.normalTextColor = { 0.85, 0.85, 0.88, 1 }
-	button.hoverTextColor = {
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4],
-	}
-
-	button.text:SetTextColor(
-		button.normalTextColor[1],
-		button.normalTextColor[2],
-		button.normalTextColor[3],
-		button.normalTextColor[4]
-	)
-
-	button:SetBackdropColor(normalBg[1], normalBg[2], normalBg[3], normalBg[4])
+	button.text:SetTextColor(theme:GetTextColor("primary"))
 
 	button:SetScript("OnEnter", function(self)
-		self:SetBackdropColor(hoverBg[1], hoverBg[2], hoverBg[3], hoverBg[4])
-		self.text:SetTextColor(
-			self.hoverTextColor[1],
-			self.hoverTextColor[2],
-			self.hoverTextColor[3],
-			self.hoverTextColor[4]
-		)
+		self:SetBackdropColor(theme:GetColor("buttonBackgroundHover"))
+		self.text:SetTextColor(theme:GetColor("brand"))
 	end)
 
 	button:SetScript("OnLeave", function(self)
-		self:SetBackdropColor(normalBg[1], normalBg[2], normalBg[3], normalBg[4])
-		self.text:SetTextColor(
-			self.normalTextColor[1],
-			self.normalTextColor[2],
-			self.normalTextColor[3],
-			self.normalTextColor[4]
-		)
+		self:SetBackdropColor(theme:GetColor("buttonBackground"))
+		self.text:SetTextColor(theme:GetTextColor("primary"))
 	end)
 
 	function button:SetOnClick(callback)
@@ -126,6 +73,58 @@ function Button:Create(parent, text)
 			end
 		end)
 	end
+
+	function button:SetLayoutWidth(width)
+		self.layoutValues.width = width
+
+		self:UpdateLayout()
+	end
+
+	function button:SetLayoutHeight(height)
+		self.layoutValues.height = height
+
+		self:UpdateLayout()
+	end
+
+	function button:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.height = height
+
+		self:UpdateLayout()
+	end
+
+	function button:SetLayoutBorderSize(borderThickness)
+		self.layoutValues.borderThickness = borderThickness
+
+		self:UpdateLayout()
+	end
+
+	function button:UpdateLayout()
+		self:SetSize(
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.width)),
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.height))
+		)
+
+		if self.layoutValues.borderThickness == 0 then
+			self.borderTop:Hide()
+			self.borderBottom:Hide()
+			self.borderLeft:Hide()
+			self.borderRight:Hide()
+		else
+			local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.borderThickness))
+			self.borderTop:SetHeight(borderThickness)
+			self.borderBottom:SetHeight(borderThickness)
+			self.borderLeft:SetWidth(borderThickness)
+			self.borderRight:SetWidth(borderThickness)
+
+			self.borderTop:Show()
+			self.borderBottom:Show()
+			self.borderLeft:Show()
+			self.borderRight:Show()
+		end
+	end
+
+	button:UpdateLayout()
 
 	return button
 end

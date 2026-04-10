@@ -86,7 +86,7 @@ local function EnsureListRows(control)
 			button:SetBackdropColor(0, 0, 0, 0)
 
 			button.hoverTexture = button:CreateTexture(nil, "ARTWORK")
-			button.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+			button.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 			button.hoverTexture:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
 			button.hoverTexture:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
 			button.hoverTexture:Hide()
@@ -219,7 +219,7 @@ function Dropdown:Create(parent, labelText)
 	control.field:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	control.field:SetBackdropColor(0.04, 0.05, 0.07, 1)
+	control.field:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	control.field.topBorder = control.field:CreateTexture(nil, "OVERLAY")
 	control.field.topBorder:SetColorTexture(
@@ -304,7 +304,7 @@ function Dropdown:Create(parent, labelText)
 	control:SetArrowColor(defaultArrowColor)
 
 	control.field.hoverTexture = control.field:CreateTexture(nil, "ARTWORK")
-	control.field.hoverTexture:SetColorTexture(1, 1, 1, 0.03)
+	control.field.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 	control.field.hoverTexture:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.hoverTexture:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
 	control.field.hoverTexture:Hide()
@@ -327,7 +327,7 @@ function Dropdown:Create(parent, labelText)
 	control.list:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
-	control.list:SetBackdropColor(0.04, 0.05, 0.07, 1)
+	control.list:SetBackdropColor(theme:GetColor("controlBackground"))
 	control.list:Hide()
 
 	control.list.topBorder = control.list:CreateTexture(nil, "OVERLAY")
