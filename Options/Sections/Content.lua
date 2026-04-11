@@ -9,102 +9,18 @@ local Content = addon.Options.Sections.Content
 local content
 local activePage = "general"
 
-local controllerState = addon.Options.ControllerState or {
-	mode = "party",
-	subpages = {
-		auras = "buffs",
-		texts = "name",
-		indicators = "readyCheck",
-		bars = "absorbs",
-	},
-}
+local controllerState = addon.Options.ControllerState
+	or {
+		mode = "party",
+		subpages = {
+			auras = "buffs",
+			texts = "name",
+			indicators = "readyCheck",
+			bars = "absorbs",
+		},
+	}
 
 addon.Options.ControllerState = controllerState
-
-local layout = {
-	paddingPx = addon.Utilities:ToPixels(32),
-	innerWidthPx = addon.Utilities:ToPixels(582),
-	columnGapPx = addon.Utilities:ToPixels(30),
-	twoColumn = {
-		slotWidthPx = addon.Utilities:ToPixels(276),
-		controlWidthPx = addon.Utilities:ToPixels(200),
-		startXPx = { 0, addon.Utilities:ToPixels(306) },
-	},
-	threeColumn = {
-		slotWidthPx = addon.Utilities:ToPixels(174),
-		controlWidthPx = addon.Utilities:ToPixels(150),
-		startXPx = { 0, addon.Utilities:ToPixels(204), addon.Utilities:ToPixels(408) },
-	},
-}
-
-local pageModules = {
-	general = addon.Options.Pages.General,
-	layout = addon.Options.Pages.Layout,
-	bars = addon.Options.Pages.Bars,
-	texts = addon.Options.Pages.Texts,
-	auras = addon.Options.Pages.Auras,
-	indicators = addon.Options.Pages.Indicators,
-	profiles = addon.Options.Pages.Profiles,
-}
-
-local pageFrames = {}
-
-local function UpdateLayoutValues()
-	if not content then
-		return
-	end
-
-	local pagePaddingPx = addon.Utilities:ToPixels(32)
-	local columnGapPx = addon.Utilities:ToPixels(30)
-	local contentWidthPx = addon.Utilities:ToPixels(content:GetWidth())
-
-	if not contentWidthPx or contentWidthPx <= 0 then
-		return
-	end
-
-	local innerWidthPx = contentWidthPx - (pagePaddingPx * 2)
-	local twoColumnWidthPx = addon.Utilities:RoundToNearestInt((innerWidthPx - columnGapPx) / 2)
-	local threeColumnWidthPx = addon.Utilities:RoundToNearestInt((innerWidthPx - (columnGapPx * 2)) / 3)
-
-	layout.paddingPx = pagePaddingPx
-	layout.innerWidthPx = innerWidthPx
-	layout.columnGapPx = columnGapPx
-
-	layout.twoColumn.slotWidthPx = twoColumnWidthPx
-	layout.twoColumn.controlWidthPx = addon.Utilities:ToPixels(200)
-	layout.twoColumn.startXPx[1] = 0
-	layout.twoColumn.startXPx[2] = twoColumnWidthPx + columnGapPx
-
-	layout.threeColumn.slotWidthPx = threeColumnWidthPx
-	layout.threeColumn.controlWidthPx = addon.Utilities:ToPixels(150)
-	layout.threeColumn.startXPx[1] = 0
-	layout.threeColumn.startXPx[2] = threeColumnWidthPx + columnGapPx
-	layout.threeColumn.startXPx[3] = (threeColumnWidthPx * 2) + (columnGapPx * 2)
-end
-
-local function EnsurePage(pageKey)
-	local pageModule = pageModules[pageKey]
-	if not pageModule or not content then
-		return nil
-	end
-
-	local pageFrame = pageFrames[pageKey]
-	if pageFrame then
-		return pageFrame
-	end
-
-	pageFrame = pageModule:Ensure(content)
-	pageFrame:ClearAllPoints()
-	pageFrame:SetPoint("TOPLEFT", content, "TOPLEFT", 0, 0)
-	pageFrame:SetPoint("TOPRIGHT", content, "TOPRIGHT", 0, 0)
-	pageFrame:SetPoint("BOTTOMLEFT", content, "BOTTOMLEFT", 0, 0)
-	pageFrame:SetPoint("BOTTOMRIGHT", content, "BOTTOMRIGHT", 0, 0)
-	pageFrame:Hide()
-
-	pageFrames[pageKey] = pageFrame
-
-	return pageFrame
-end
 
 function Content:Ensure(parent)
 	if content then
@@ -113,7 +29,33 @@ function Content:Ensure(parent)
 
 	content = CreateFrame("Frame", nil, parent)
 
-	EnsurePage(activePage)
+	local general = addon.Options.Pages.General:Ensure(content)
+	local layout = addon.Options.Pages.Layout:Ensure(content)
+	local bars = addon.Options.Pages.Bars:Ensure(content)
+	local texts = addon.Options.Pages.Texts:Ensure(content)
+	local auras = addon.Options.Pages.Auras:Ensure(content)
+	local indicators = addon.Options.Pages.Indicators:Ensure(content)
+	local profiles = addon.Options.Pages.Profiles:Ensure(content)
+
+	content.pages = {
+		general = general,
+		layout = layout,
+		bars = bars,
+		texts = texts,
+		auras = auras,
+		indicators = indicators,
+		profiles = profiles,
+	}
+
+	for pageKey, pageFrame in pairs(content.pages) do
+		pageFrame:ClearAllPoints()
+		pageFrame:SetPoint("TOPLEFT", content, "TOPLEFT", 0, 0)
+		pageFrame:SetPoint("TOPRIGHT", content, "TOPRIGHT", 0, 0)
+		pageFrame:SetPoint("BOTTOMLEFT", content, "BOTTOMLEFT", 0, 0)
+		pageFrame:SetPoint("BOTTOMRIGHT", content, "BOTTOMRIGHT", 0, 0)
+		pageFrame:SetShown(pageKey == activePage)
+	end
+
 	self:UpdateLayout()
 
 	return content
@@ -124,52 +66,62 @@ function Content:UpdateLayout()
 		return
 	end
 
-	UpdateLayoutValues()
+	for _, page in pairs(content.pages) do
+		page:ClearAllPoints()
+		page:SetPoint(
+			"TOPLEFT",
+			content,
+			"TOPLEFT",
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(32)),
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
+		)
+		page:SetPoint(
+			"TOPRIGHT",
+			content,
+			"TOPRIGHT",
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(32)),
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
+		)
+		page:SetPoint(
+			"BOTTOMLEFT",
+			content,
+			"BOTTOMLEFT",
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(32)),
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
+		)
+		page:SetPoint(
+			"BOTTOMRIGHT",
+			content,
+			"BOTTOMRIGHT",
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(32)),
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
+		)
 
-	for pageKey, pageFrame in pairs(pageFrames) do
-		pageFrame:ClearAllPoints()
-		pageFrame:SetPoint("TOPLEFT", content, "TOPLEFT", 0, 0)
-		pageFrame:SetPoint("TOPRIGHT", content, "TOPRIGHT", 0, 0)
-		pageFrame:SetPoint("BOTTOMLEFT", content, "BOTTOMLEFT", 0, 0)
-		pageFrame:SetPoint("BOTTOMRIGHT", content, "BOTTOMRIGHT", 0, 0)
-
-		local pageModule = pageModules[pageKey]
-		if pageModule and pageModule.UpdateLayout then
-			pageModule:UpdateLayout()
-		end
+		page:UpdateLayout()
 	end
 end
 
 function Content:SetActivePage(pageKey)
-	if not pageModules[pageKey] then
+	activePage = pageKey
+
+	if not content or not content.pages or not content.pages[pageKey] then
 		return
 	end
 
 	addon.Options.Controls.Dropdown:CloseOpenDropdown()
 
-	for key, pageFrame in pairs(pageFrames) do
+	for key, pageFrame in pairs(content.pages) do
 		pageFrame:SetShown(key == pageKey)
 	end
 
-	local pageFrame = EnsurePage(pageKey)
-	if pageFrame then
-		pageFrame:Show()
+	local page = content.pages[pageKey]
+	if page.UpdateState then
+		page:UpdateState(addon.Database:GetProfile())
 	end
-
-	local pageModule = pageModules[pageKey]
-	if pageModule and pageModule.UpdateState then
-		pageModule:UpdateState(addon.Database:GetProfile())
-	end
-
-	activePage = pageKey
 end
 
 function Content:GetActivePage()
 	return activePage
-end
-
-function Content:GetLayout()
-	return layout
 end
 
 function Content:GetControllerState()

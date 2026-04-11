@@ -8,14 +8,7 @@ local StatusBar = addon.Options.Sections.StatusBar
 
 local statusBar
 local theme = addon.Options.Theme
-
-local function GetAddonVersion()
-	if C_AddOns and C_AddOns.GetAddOnMetadata then
-		return C_AddOns.GetAddOnMetadata(addonName, "Version") or "dev"
-	end
-
-	return GetAddOnMetadata(addonName, "Version") or "dev"
-end
+local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
 
 function StatusBar:Ensure(parent)
 	if statusBar then
@@ -30,12 +23,7 @@ function StatusBar:Ensure(parent)
 	statusBar.text:SetTextColor(0.65, 0.65, 0.68, 1)
 
 	statusBar.topBorder = statusBar:CreateTexture(nil, "OVERLAY")
-	statusBar.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	statusBar.topBorder:SetColorTexture(theme:GetColor("border"))
 
 	addon.Options.Data:RegisterForUpdates(StatusBar, function()
 		StatusBar:UpdateState()
@@ -72,8 +60,7 @@ function StatusBar:UpdateState()
 		return
 	end
 
-	local version = GetAddonVersion()
 	local profileName = addon.Database:GetCurrentProfileName() or "Default"
 
-	statusBar.text:SetText(("Version %s | Active Profile: |cff00ff00%s|r"):format(version, profileName))
+	statusBar.text:SetText(("Version %s | Active Profile: |cff00ff00%s|r"):format(addonVersion, profileName))
 end

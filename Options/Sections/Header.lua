@@ -22,27 +22,27 @@ function Header:Ensure(parent)
 	header.title:SetText("Mich's Raid Frames")
 	header.title:SetTextColor(theme:GetColor("brand"))
 
-	header.closeButton = addon.Options.Controls.Button:Create(header, "X")
-	header.closeButton:SetLayoutSize(24, 24)
-	header.closeButton:SetLayoutBorderSize(0)
-	header.closeButton.text:SetFont(theme.fonts.arialNarrow, 16, "")
-	header.closeButton.text:SetTextColor(theme:GetTextColor("secondary"))
-	header.closeButton:SetBackdropColor(0, 0, 0, 0)
+	local closeButton = addon.Options.Controls.Button:Create(header, "X")
+	closeButton:SetLayoutSize(24, 24)
+	closeButton:SetLayoutBorderSize(0)
+	closeButton.text:SetFont(theme.fonts.arialNarrow, 16, "")
+	closeButton.text:SetTextColor(theme:GetTextColor("secondary"))
+	closeButton:SetBackdropColor(0, 0, 0, 0)
 
-	header.closeButton:SetOnClick(function()
+	closeButton:SetOnClick(function()
 		addon.Options:Close()
 	end)
 
-	header.closeButton:SetScript("OnEnter", function(self)
+	closeButton:SetScript("OnEnter", function(self)
 		self.text:SetTextColor(theme:GetColor("brand"))
 	end)
 
-	header.closeButton:SetScript("OnLeave", function(self)
+	closeButton:SetScript("OnLeave", function(self)
 		self.text:SetTextColor(theme:GetTextColor("secondary"))
 	end)
 
 	header.controls = {
-		header.closeButton,
+		closeButton = closeButton,
 	}
 
 	self:UpdateLayout()
@@ -55,7 +55,7 @@ function Header:UpdateLayout()
 		return
 	end
 
-	for _, control in ipairs(header.controls or {}) do
+	for _, control in pairs(header.controls or {}) do
 		if control.UpdateLayout then
 			control:UpdateLayout()
 		end
@@ -70,8 +70,8 @@ function Header:UpdateLayout()
 		addon.Utilities:ToUI(addon.Utilities:ToPixels(-8))
 	)
 
-	header.closeButton:ClearAllPoints()
-	header.closeButton:SetPoint(
+	header.controls.closeButton:ClearAllPoints()
+	header.controls.closeButton:SetPoint(
 		"TOPRIGHT",
 		header,
 		"TOPRIGHT",
