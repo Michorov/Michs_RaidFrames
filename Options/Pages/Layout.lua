@@ -73,7 +73,11 @@ end
 local function ApplyModeSetting(updateFn, notifyEvent)
 	if InCombatLockdown() then
 		ShowCombatLockMessage()
-		Layout:UpdateState(addon.Database:GetProfile())
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		else
+			Layout:UpdateState(addon.Database:GetProfile())
+		end
 		return
 	end
 
@@ -120,7 +124,11 @@ function Layout:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
-		Layout:UpdateState(addon.Database:GetProfile())
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		else
+			Layout:UpdateState(addon.Database:GetProfile())
+		end
 	end)
 
 	page.horizontalPositionSlider = addon.Options.Controls.Slider:Create(page, "Horizontal Position")
@@ -224,12 +232,20 @@ function Layout:Ensure(parent)
 	page.backgroundColorPicker:SetParent(page.backgroundColorSlot)
 	page.borderColorPicker:SetParent(page.borderColorSlot)
 
-	addon.Options.Data:RegisterForUpdates(Layout, function(profile)
+	function page:UpdateLayout()
+		--Layout:UpdateLayout()
+	end
+
+	function page:UpdateState(profile)
 		Layout:UpdateState(profile)
+	end
+
+	addon.Options.Data:RegisterForUpdates(page, function(profile)
+		page:UpdateState(profile)
 	end)
 
-	self:UpdateLayout()
-	self:UpdateState(addon.Database:GetProfile())
+	--page:UpdateLayout()
+	page:UpdateState(addon.Database:GetProfile())
 
 	return page
 end

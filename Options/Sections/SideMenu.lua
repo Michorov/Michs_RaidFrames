@@ -10,40 +10,16 @@ local sideMenu
 local theme = addon.Options.Theme
 local activePage
 
-local function GetButtonsByPageKey()
-	if not sideMenu then
-		return {}
-	end
-
-	return {
-		general = sideMenu.generalButton,
-		layout = sideMenu.layoutButton,
-		bars = sideMenu.barsButton,
-		texts = sideMenu.textsButton,
-		auras = sideMenu.aurasButton,
-		indicators = sideMenu.indicatorsButton,
-		profiles = sideMenu.profilesButton,
-	}
-end
-
 local function InitializeButton(button)
 	button:SetBackdropColor(0, 0, 0, 0)
+	button:SetLayoutBorderSize(0)
+	button:SetLayoutHeight(32)
 
-	button.borderTop:Hide()
-	button.borderBottom:Hide()
-	button.borderLeft:Hide()
-	button.borderRight:Hide()
-
-	button.normalTextColor = { 0.80, 0.80, 0.84, 1 }
-	button.activeTextColor = {
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4],
-	}
+	button.text:SetJustifyH("LEFT")
+	button.text:SetFont(theme.fonts.arialNarrow, 16, "")
 
 	button.hoverTexture = button:CreateTexture(nil, "BACKGROUND")
-	button.hoverTexture:SetColorTexture(1, 1, 1, 0.02)
+	button.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
 	button.hoverTexture:SetPoint("TOPLEFT", button, "TOPLEFT", 0, 0)
 	button.hoverTexture:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 0, 0)
 	button.hoverTexture:Hide()
@@ -57,22 +33,11 @@ local function InitializeButton(button)
 	end)
 end
 
-local function UpdateButtonLayout(button)
-	local buttonHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(32))
+local function ApplySideMenuButtonLayout(button)
 	local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
-
-	button:SetHeight(buttonHeight)
 
 	button.text:ClearAllPoints()
 	button.text:SetPoint("LEFT", button, "LEFT", textInset, 0)
-	button.text:SetJustifyH("LEFT")
-	button.text:SetFont(theme.fonts.arialNarrow, 16, "")
-	button.text:SetTextColor(
-		button.normalTextColor[1],
-		button.normalTextColor[2],
-		button.normalTextColor[3],
-		button.normalTextColor[4]
-	)
 end
 
 function SideMenu:Ensure(parent)
@@ -82,55 +47,60 @@ function SideMenu:Ensure(parent)
 
 	sideMenu = CreateFrame("Frame", nil, parent)
 
-	sideMenu.generalButton = addon.Options.Controls.Button:Create(sideMenu, "General")
-	InitializeButton(sideMenu.generalButton)
-	sideMenu.generalButton:SetOnClick(function()
+	local generalButton = addon.Options.Controls.Button:Create(sideMenu, "General")
+	InitializeButton(generalButton)
+	generalButton:SetOnClick(function()
 		addon.Options:SetActivePage("general")
 	end)
 
-	sideMenu.layoutButton = addon.Options.Controls.Button:Create(sideMenu, "Layout")
-	InitializeButton(sideMenu.layoutButton)
-	sideMenu.layoutButton:SetOnClick(function()
+	local layoutButton = addon.Options.Controls.Button:Create(sideMenu, "Layout")
+	InitializeButton(layoutButton)
+	layoutButton:SetOnClick(function()
 		addon.Options:SetActivePage("layout")
 	end)
 
-	sideMenu.barsButton = addon.Options.Controls.Button:Create(sideMenu, "Bars")
-	InitializeButton(sideMenu.barsButton)
-	sideMenu.barsButton:SetOnClick(function()
+	local barsButton = addon.Options.Controls.Button:Create(sideMenu, "Bars")
+	InitializeButton(barsButton)
+	barsButton:SetOnClick(function()
 		addon.Options:SetActivePage("bars")
 	end)
 
-	sideMenu.textsButton = addon.Options.Controls.Button:Create(sideMenu, "Texts")
-	InitializeButton(sideMenu.textsButton)
-	sideMenu.textsButton:SetOnClick(function()
+	local textsButton = addon.Options.Controls.Button:Create(sideMenu, "Texts")
+	InitializeButton(textsButton)
+	textsButton:SetOnClick(function()
 		addon.Options:SetActivePage("texts")
 	end)
 
-	sideMenu.aurasButton = addon.Options.Controls.Button:Create(sideMenu, "Auras")
-	InitializeButton(sideMenu.aurasButton)
-	sideMenu.aurasButton:SetOnClick(function()
+	local aurasButton = addon.Options.Controls.Button:Create(sideMenu, "Auras")
+	InitializeButton(aurasButton)
+	aurasButton:SetOnClick(function()
 		addon.Options:SetActivePage("auras")
 	end)
 
-	sideMenu.indicatorsButton = addon.Options.Controls.Button:Create(sideMenu, "Indicators")
-	InitializeButton(sideMenu.indicatorsButton)
-	sideMenu.indicatorsButton:SetOnClick(function()
+	local indicatorsButton = addon.Options.Controls.Button:Create(sideMenu, "Indicators")
+	InitializeButton(indicatorsButton)
+	indicatorsButton:SetOnClick(function()
 		addon.Options:SetActivePage("indicators")
 	end)
 
-	sideMenu.profilesButton = addon.Options.Controls.Button:Create(sideMenu, "Profiles")
-	InitializeButton(sideMenu.profilesButton)
-	sideMenu.profilesButton:SetOnClick(function()
+	local profilesButton = addon.Options.Controls.Button:Create(sideMenu, "Profiles")
+	InitializeButton(profilesButton)
+	profilesButton:SetOnClick(function()
 		addon.Options:SetActivePage("profiles")
 	end)
 
+	sideMenu.controls = {
+		general = generalButton,
+		layout = layoutButton,
+		bars = barsButton,
+		texts = textsButton,
+		auras = aurasButton,
+		indicators = indicatorsButton,
+		profiles = profilesButton,
+	}
+
 	sideMenu.rightBorder = sideMenu:CreateTexture(nil, "OVERLAY")
-	sideMenu.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	sideMenu.rightBorder:SetColorTexture(theme:GetColor("border"))
 
 	self:UpdateLayout()
 
@@ -144,23 +114,13 @@ function SideMenu:SetActivePage(pageKey)
 
 	activePage = pageKey
 
-	for key, button in pairs(GetButtonsByPageKey()) do
+	for key, button in pairs(sideMenu.controls) do
 		local isActive = key == pageKey
 
 		if isActive then
-			button.text:SetTextColor(
-				button.activeTextColor[1],
-				button.activeTextColor[2],
-				button.activeTextColor[3],
-				button.activeTextColor[4]
-			)
+			button.text:SetTextColor(theme:GetColor("brand"))
 		else
-			button.text:SetTextColor(
-				button.normalTextColor[1],
-				button.normalTextColor[2],
-				button.normalTextColor[3],
-				button.normalTextColor[4]
-			)
+			button.text:SetTextColor(theme:GetTextColor("primary"))
 		end
 	end
 end
@@ -173,40 +133,41 @@ function SideMenu:UpdateLayout()
 	local outerInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
 	local compactSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
 
-	UpdateButtonLayout(sideMenu.generalButton)
-	sideMenu.generalButton:ClearAllPoints()
-	sideMenu.generalButton:SetPoint("TOPLEFT", sideMenu, "TOPLEFT", outerInset, -outerInset)
-	sideMenu.generalButton:SetPoint("TOPRIGHT", sideMenu, "TOPRIGHT", -outerInset, -outerInset)
+	for _, button in pairs(sideMenu.controls) do
+		if button.UpdateLayout then
+			button:UpdateLayout()
+		end
 
-	UpdateButtonLayout(sideMenu.layoutButton)
-	sideMenu.layoutButton:ClearAllPoints()
-	sideMenu.layoutButton:SetPoint("TOPLEFT", sideMenu.generalButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.layoutButton:SetPoint("TOPRIGHT", sideMenu.generalButton, "BOTTOMRIGHT", 0, -compactSpacing)
+		ApplySideMenuButtonLayout(button)
+	end
 
-	UpdateButtonLayout(sideMenu.textsButton)
-	sideMenu.textsButton:ClearAllPoints()
-	sideMenu.textsButton:SetPoint("TOPLEFT", sideMenu.barsButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.textsButton:SetPoint("TOPRIGHT", sideMenu.barsButton, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.controls.general:ClearAllPoints()
+	sideMenu.controls.general:SetPoint("TOPLEFT", sideMenu, "TOPLEFT", outerInset, -outerInset)
+	sideMenu.controls.general:SetPoint("TOPRIGHT", sideMenu, "TOPRIGHT", -outerInset, -outerInset)
 
-	UpdateButtonLayout(sideMenu.barsButton)
-	sideMenu.barsButton:ClearAllPoints()
-	sideMenu.barsButton:SetPoint("TOPLEFT", sideMenu.layoutButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.barsButton:SetPoint("TOPRIGHT", sideMenu.layoutButton, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.controls.layout:ClearAllPoints()
+	sideMenu.controls.layout:SetPoint("TOPLEFT", sideMenu.controls.general, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.layout:SetPoint("TOPRIGHT", sideMenu.controls.general, "BOTTOMRIGHT", 0, -compactSpacing)
 
-	UpdateButtonLayout(sideMenu.aurasButton)
-	sideMenu.aurasButton:ClearAllPoints()
-	sideMenu.aurasButton:SetPoint("TOPLEFT", sideMenu.textsButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.aurasButton:SetPoint("TOPRIGHT", sideMenu.textsButton, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.controls.texts:ClearAllPoints()
+	sideMenu.controls.texts:SetPoint("TOPLEFT", sideMenu.controls.bars, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.texts:SetPoint("TOPRIGHT", sideMenu.controls.bars, "BOTTOMRIGHT", 0, -compactSpacing)
 
-	UpdateButtonLayout(sideMenu.indicatorsButton)
-	sideMenu.indicatorsButton:ClearAllPoints()
-	sideMenu.indicatorsButton:SetPoint("TOPLEFT", sideMenu.aurasButton, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.indicatorsButton:SetPoint("TOPRIGHT", sideMenu.aurasButton, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.controls.bars:ClearAllPoints()
+	sideMenu.controls.bars:SetPoint("TOPLEFT", sideMenu.controls.layout, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.bars:SetPoint("TOPRIGHT", sideMenu.controls.layout, "BOTTOMRIGHT", 0, -compactSpacing)
 
-	UpdateButtonLayout(sideMenu.profilesButton)
-	sideMenu.profilesButton:ClearAllPoints()
-	sideMenu.profilesButton:SetPoint("BOTTOMLEFT", sideMenu, "BOTTOMLEFT", outerInset, outerInset)
-	sideMenu.profilesButton:SetPoint("BOTTOMRIGHT", sideMenu, "BOTTOMRIGHT", -outerInset, outerInset)
+	sideMenu.controls.auras:ClearAllPoints()
+	sideMenu.controls.auras:SetPoint("TOPLEFT", sideMenu.controls.texts, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.auras:SetPoint("TOPRIGHT", sideMenu.controls.texts, "BOTTOMRIGHT", 0, -compactSpacing)
+
+	sideMenu.controls.indicators:ClearAllPoints()
+	sideMenu.controls.indicators:SetPoint("TOPLEFT", sideMenu.controls.auras, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.indicators:SetPoint("TOPRIGHT", sideMenu.controls.auras, "BOTTOMRIGHT", 0, -compactSpacing)
+
+	sideMenu.controls.profiles:ClearAllPoints()
+	sideMenu.controls.profiles:SetPoint("BOTTOMLEFT", sideMenu, "BOTTOMLEFT", outerInset, outerInset)
+	sideMenu.controls.profiles:SetPoint("BOTTOMRIGHT", sideMenu, "BOTTOMRIGHT", -outerInset, outerInset)
 
 	sideMenu.rightBorder:ClearAllPoints()
 	sideMenu.rightBorder:SetPoint("TOPRIGHT", sideMenu, "TOPRIGHT", 0, -outerInset)

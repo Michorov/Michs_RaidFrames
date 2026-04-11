@@ -18,12 +18,7 @@ local function UpdateVisual(checkbox)
 				hoverAccentColor[4]
 			)
 		else
-			checkbox.check:SetColorTexture(
-				theme.colors.brand[1],
-				theme.colors.brand[2],
-				theme.colors.brand[3],
-				theme.colors.brand[4]
-			)
+			checkbox.check:SetColorTexture(theme:GetColor("brand"))
 		end
 
 		checkbox.check:Show()
@@ -34,19 +29,19 @@ end
 
 function Checkbox:Create(parent, text)
 	local checkbox = CreateFrame("Button", nil, parent, "BackdropTemplate")
-	local boxSize = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
 
-	checkbox:SetSize(
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(200)),
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(20))
-	)
+	checkbox.layoutValues = {
+		width = 220,
+		height = 20,
+		boxSize = 20,
+		borderThickness = 1,
+		textInset = 8,
+		checkInset = 3,
+	}
 	checkbox.checked = false
 	checkbox.isHovered = false
 
 	checkbox.box = CreateFrame("Frame", nil, checkbox, "BackdropTemplate")
-	checkbox.box:SetSize(boxSize, boxSize)
 	checkbox.box:SetPoint("LEFT", checkbox, "LEFT", 0, 0)
 	checkbox.box:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -60,66 +55,33 @@ function Checkbox:Create(parent, text)
 	checkbox.boxHover:Hide()
 
 	checkbox.boxTopBorder = checkbox.box:CreateTexture(nil, "OVERLAY")
-	checkbox.boxTopBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	checkbox.boxTopBorder:SetColorTexture(theme:GetColor("border"))
 	checkbox.boxTopBorder:SetPoint("TOPLEFT", checkbox.box, "TOPLEFT", 0, 0)
 	checkbox.boxTopBorder:SetPoint("TOPRIGHT", checkbox.box, "TOPRIGHT", 0, 0)
-	checkbox.boxTopBorder:SetHeight(borderThickness)
 
 	checkbox.boxBottomBorder = checkbox.box:CreateTexture(nil, "OVERLAY")
-	checkbox.boxBottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	checkbox.boxBottomBorder:SetColorTexture(theme:GetColor("border"))
 	checkbox.boxBottomBorder:SetPoint("BOTTOMLEFT", checkbox.box, "BOTTOMLEFT", 0, 0)
 	checkbox.boxBottomBorder:SetPoint("BOTTOMRIGHT", checkbox.box, "BOTTOMRIGHT", 0, 0)
-	checkbox.boxBottomBorder:SetHeight(borderThickness)
 
 	checkbox.boxLeftBorder = checkbox.box:CreateTexture(nil, "OVERLAY")
-	checkbox.boxLeftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	checkbox.boxLeftBorder:SetColorTexture(theme:GetColor("border"))
 	checkbox.boxLeftBorder:SetPoint("TOPLEFT", checkbox.box, "TOPLEFT", 0, 0)
 	checkbox.boxLeftBorder:SetPoint("BOTTOMLEFT", checkbox.box, "BOTTOMLEFT", 0, 0)
-	checkbox.boxLeftBorder:SetWidth(borderThickness)
 
 	checkbox.boxRightBorder = checkbox.box:CreateTexture(nil, "OVERLAY")
-	checkbox.boxRightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	checkbox.boxRightBorder:SetColorTexture(theme:GetColor("border"))
 	checkbox.boxRightBorder:SetPoint("TOPRIGHT", checkbox.box, "TOPRIGHT", 0, 0)
 	checkbox.boxRightBorder:SetPoint("BOTTOMRIGHT", checkbox.box, "BOTTOMRIGHT", 0, 0)
-	checkbox.boxRightBorder:SetWidth(borderThickness)
 
 	checkbox.check = checkbox.box:CreateTexture(nil, "ARTWORK")
-	checkbox.check:SetColorTexture(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
-	checkbox.check:SetPoint("TOPLEFT", checkbox.box, "TOPLEFT", borderThickness * 3, -borderThickness * 3)
-	checkbox.check:SetPoint("BOTTOMRIGHT", checkbox.box, "BOTTOMRIGHT", -borderThickness * 3, borderThickness * 3)
+	checkbox.check:SetColorTexture(theme:GetColor("brand"))
 	checkbox.check:Hide()
 
 	checkbox.text = checkbox:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	checkbox.text:SetPoint("LEFT", checkbox.box, "RIGHT", textInset, 0)
-	checkbox.text:SetPoint("RIGHT", checkbox, "RIGHT", 0, 0)
 	checkbox.text:SetJustifyH("LEFT")
 	checkbox.text:SetFont(theme.fonts.arialNarrow, 12, "")
-	checkbox.text:SetTextColor(0.85, 0.85, 0.88, 1)
+	checkbox.text:SetTextColor(theme:GetTextColor("primary"))
 	checkbox.text:SetText(text or "Checkbox")
 
 	function checkbox:SetChecked(checked)
@@ -137,6 +99,60 @@ function Checkbox:Create(parent, text)
 
 	function checkbox:SetOnValueChanged(callback)
 		self.onValueChanged = callback
+	end
+
+	function checkbox:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
+	end
+
+	function checkbox:SetLayoutHeight(height)
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function checkbox:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function checkbox:UpdateLayout()
+		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
+		local boxSizePx = addon.Utilities:ToPixels(self.layoutValues.boxSize)
+		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
+		local textInsetPx = addon.Utilities:ToPixels(self.layoutValues.textInset)
+		local checkInsetPx = addon.Utilities:ToPixels(self.layoutValues.checkInset)
+		local boxTopInsetPx = addon.Utilities:RoundToNearestInt((heightPx - boxSizePx) / 2)
+
+		local width = addon.Utilities:ToUI(widthPx)
+		local height = addon.Utilities:ToUI(heightPx)
+		local boxSize = addon.Utilities:ToUI(boxSizePx)
+		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+		local checkInset = addon.Utilities:ToUI(checkInsetPx)
+		local textInset = addon.Utilities:ToUI(textInsetPx)
+		local boxTopInset = addon.Utilities:ToUI(boxTopInsetPx)
+		local textLeftOffset = addon.Utilities:ToUI(boxSizePx + textInsetPx)
+
+		self:SetSize(width, height)
+
+		self.box:ClearAllPoints()
+		self.box:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -boxTopInset)
+		self.box:SetSize(boxSize, boxSize)
+
+		self.boxTopBorder:SetHeight(borderThickness)
+		self.boxBottomBorder:SetHeight(borderThickness)
+		self.boxLeftBorder:SetWidth(borderThickness)
+		self.boxRightBorder:SetWidth(borderThickness)
+
+		self.check:ClearAllPoints()
+		self.check:SetPoint("TOPLEFT", self.box, "TOPLEFT", checkInset, -checkInset)
+		self.check:SetPoint("BOTTOMRIGHT", self.box, "BOTTOMRIGHT", -checkInset, checkInset)
+
+		self.text:ClearAllPoints()
+		self.text:SetPoint("LEFT", self, "LEFT", textLeftOffset, 0)
+		self.text:SetPoint("RIGHT", self, "RIGHT", 0, 0)
 	end
 
 	checkbox:SetScript("OnEnter", function(self)
@@ -158,6 +174,8 @@ function Checkbox:Create(parent, text)
 			self.onValueChanged(self, self:GetChecked())
 		end
 	end)
+
+	checkbox:UpdateLayout()
 
 	return checkbox
 end
