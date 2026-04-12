@@ -13,6 +13,39 @@ local FOOTER_BUTTON_FONT_SIZE = 12
 local FOOTER_BUTTON_SPACING = 2
 local FOOTER_CLOSE_RIGHT_INSET = 17
 
+local function CapturePoint(region, index)
+	if not region or not region.GetPoint then
+		return nil
+	end
+
+	local point, relativeTo, relativePoint, xOfs, yOfs = region:GetPoint(index or 1)
+	if not point then
+		return nil
+	end
+
+	return {
+		point = point,
+		relativeTo = relativeTo,
+		relativePoint = relativePoint,
+		xOfs = xOfs,
+		yOfs = yOfs,
+	}
+end
+
+local function RestorePoint(region, pointData)
+	if not region or not pointData or not pointData.point then
+		return
+	end
+
+	region:SetPoint(
+		pointData.point,
+		pointData.relativeTo,
+		pointData.relativePoint,
+		pointData.xOfs,
+		pointData.yOfs
+	)
+end
+
 local function AddPageHeader(args, orderStart)
 	args.pageTopSpacer = {
 		type = "description",
@@ -95,6 +128,94 @@ local function FindStatusBar(frame, window, closeButton)
 	return nil
 end
 
+local function CaptureFooterDefaults(frame, closeButton, statusBg, statusText)
+	if not frame or frame.mrfFooterDefaults then
+		return
+	end
+
+	local defaults = {
+		closePoint = CapturePoint(closeButton, 1),
+		closeWidth = closeButton and closeButton:GetWidth() or nil,
+		closeHeight = closeButton and closeButton:GetHeight() or nil,
+		statusPoint1 = CapturePoint(statusBg, 1),
+		statusPoint2 = CapturePoint(statusBg, 2),
+		statusHeight = statusBg and statusBg.GetHeight and statusBg:GetHeight() or nil,
+		statusTextShown = statusText and statusText.IsShown and statusText:IsShown() or nil,
+	}
+
+	local closeText = closeButton and closeButton.GetFontString and closeButton:GetFontString()
+	if closeText and closeText.GetFont then
+		local fontPath, fontSize, fontFlags = closeText:GetFont()
+		defaults.closeFontPath = fontPath
+		defaults.closeFontSize = fontSize
+		defaults.closeFontFlags = fontFlags
+	end
+
+	frame.mrfFooterDefaults = defaults
+end
+
+local function CleanupFooterTestButtons(frame, window)
+	if not frame or not frame.mrfFooterApplied then
+		return
+	end
+
+	local defaults = frame.mrfFooterDefaults
+	local closeButton = FindCloseButton(frame)
+	local statusBg = frame.statusbg or (window and window.statusbg) or FindStatusBar(frame, window, closeButton)
+	local statusText = frame.statustext or (window and window.statustext)
+
+	if closeButton and defaults then
+		closeButton:ClearAllPoints()
+		RestorePoint(closeButton, defaults.closePoint)
+
+		if defaults.closeWidth then
+			closeButton:SetWidth(defaults.closeWidth)
+		end
+		if defaults.closeHeight then
+			closeButton:SetHeight(defaults.closeHeight)
+		end
+
+		local closeText = closeButton.GetFontString and closeButton:GetFontString()
+		if closeText and defaults.closeFontPath then
+			closeText:SetFont(
+				defaults.closeFontPath,
+				defaults.closeFontSize or FOOTER_BUTTON_FONT_SIZE,
+				defaults.closeFontFlags or ""
+			)
+		end
+	end
+
+	if statusBg then
+		statusBg:ClearAllPoints()
+		RestorePoint(statusBg, defaults and defaults.statusPoint1)
+		RestorePoint(statusBg, defaults and defaults.statusPoint2)
+
+		if defaults and defaults.statusHeight and statusBg.SetHeight then
+			statusBg:SetHeight(defaults.statusHeight)
+		end
+	end
+
+	if statusText then
+		if defaults and defaults.statusTextShown == false and statusText.Hide then
+			statusText:Hide()
+		elseif statusText.Show then
+			statusText:Show()
+		end
+	end
+
+	if frame.mrfPartyTestButton then
+		frame.mrfPartyTestButton:Hide()
+	end
+	if frame.mrfRaidTestButton then
+		frame.mrfRaidTestButton:Hide()
+	end
+	if frame.mrfVersionContainer then
+		frame.mrfVersionContainer:Hide()
+	end
+
+	frame.mrfFooterApplied = nil
+end
+
 local function EnsureFooterTestButtons()
 	local openFrames = AceConfigDialog and AceConfigDialog.OpenFrames
 	local window = openFrames and openFrames[APP_NAME]
@@ -112,11 +233,14 @@ local function EnsureFooterTestButtons()
 		return
 	end
 
+	local statusBg = frame.statusbg or window.statusbg or FindStatusBar(frame, window, closeButton)
+	local statusText = frame.statustext or window.statustext
+	CaptureFooterDefaults(frame, closeButton, statusBg, statusText)
+
 	closeButton:ClearAllPoints()
 	closeButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -FOOTER_CLOSE_RIGHT_INSET, 17)
 	closeButton:SetSize(FOOTER_BUTTON_WIDTH, FOOTER_BUTTON_HEIGHT)
 
-	local statusBg = frame.statusbg or window.statusbg or FindStatusBar(frame, window, closeButton)
 	if statusBg then
 		local reservedRightWidth = (3 * FOOTER_BUTTON_WIDTH) + (3 * FOOTER_BUTTON_SPACING) + FOOTER_CLOSE_RIGHT_INSET
 		statusBg:ClearAllPoints()
@@ -128,7 +252,6 @@ local function EnsureFooterTestButtons()
 		end
 	end
 
-	local statusText = frame.statustext or window.statustext
 	if statusText and statusText.Hide then
 		statusText:Hide()
 	end
@@ -154,6 +277,8 @@ local function EnsureFooterTestButtons()
 
 	frame.mrfPartyTestButton:SetWidth(FOOTER_BUTTON_WIDTH)
 	frame.mrfRaidTestButton:SetWidth(FOOTER_BUTTON_WIDTH)
+	frame.mrfPartyTestButton:Show()
+	frame.mrfRaidTestButton:Show()
 
 	local closeHeight = closeButton:GetHeight() or 20
 	frame.mrfPartyTestButton:SetHeight(closeHeight)
@@ -213,12 +338,14 @@ local function EnsureFooterTestButtons()
 	end
 	frame.mrfVersionContainer:SetFrameStrata(strata)
 	frame.mrfVersionContainer:SetFrameLevel(level)
+	frame.mrfVersionContainer:Show()
 
 	frame.mrfRaidTestButton:ClearAllPoints()
 	frame.mrfRaidTestButton:SetPoint("RIGHT", closeButton, "LEFT", -FOOTER_BUTTON_SPACING, 0)
 
 	frame.mrfPartyTestButton:ClearAllPoints()
 	frame.mrfPartyTestButton:SetPoint("RIGHT", frame.mrfRaidTestButton, "LEFT", -FOOTER_BUTTON_SPACING, 0)
+	frame.mrfFooterApplied = true
 end
 
 function addon:IsOptionsOpen()
@@ -249,7 +376,11 @@ function addon:OpenOptions()
 
 	if frame and not frame.mrfOnHideHooked then
 		frame:HookScript("OnHide", function()
-			addon.FrameRegistry:DisableTestMode()
+			local ownerAppName = window and window.GetUserData and window:GetUserData("appName")
+			CleanupFooterTestButtons(frame, window)
+			if ownerAppName == APP_NAME then
+				addon.FrameRegistry:DisableTestMode()
+			end
 		end)
 		frame.mrfOnHideHooked = true
 	end
