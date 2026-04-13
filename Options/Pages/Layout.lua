@@ -22,7 +22,7 @@ local function GetControllerState()
 				auras = "buffs",
 				texts = "name",
 				indicators = "readyCheck",
-				bars = "absorbs",
+				bars = "health",
 			},
 		}
 
@@ -41,11 +41,18 @@ local function GetModeDefaults(mode)
 			positionY = 0,
 			spacingX = -1,
 			spacingY = -1,
-			frameWidth = 110,
-			frameHeight = 56,
-			borderThickness = 1,
-			backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
-			borderColor = { r = 0, g = 0, b = 0, a = 1 },
+			groups = {
+				[1] = true,
+				[2] = true,
+				[3] = true,
+				[4] = true,
+				[5] = true,
+				[6] = false,
+				[7] = false,
+				[8] = false,
+			},
+			direction = "HORIZONTAL",
+			reverse = false,
 		}
 	end
 
@@ -54,11 +61,7 @@ local function GetModeDefaults(mode)
 		positionY = 0,
 		spacingX = -1,
 		spacingY = -1,
-		frameWidth = 128,
-		frameHeight = 64,
-		borderThickness = 1,
-		backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
-		borderColor = { r = 0, g = 0, b = 0, a = 1 },
+		direction = "VERTICAL",
 	}
 end
 
@@ -88,14 +91,26 @@ local function ApplyModeSetting(updateFn, notifyEvent)
 	addon.UpdateScheduler:Notify(notifyEvent)
 end
 
+local function ApplyRaidSetting(updateFn, notifyEvent)
+	if InCombatLockdown() then
+		ShowCombatLockMessage()
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
+		return
+	end
+
+	local profile = addon.Database:GetProfile()
+	profile.raid = profile.raid or {}
+	updateFn(profile.raid)
+
+	addon.UpdateScheduler:Notify(notifyEvent)
+end
+
 local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
 	slider:SetMinMaxValues(minValue, maxValue)
 	slider:SetStep(step or 1)
 	slider:SetValueFormatter(FormatInteger)
-end
-
-local function CreateControlSlot(parent)
-	return CreateFrame("Frame", nil, parent)
 end
 
 function Layout:Ensure(parent)
@@ -130,12 +145,15 @@ function Layout:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
+		if page and page.UpdateLayout then
+			page:UpdateLayout()
+		end
 		if page and page.UpdateState then
 			page:UpdateState(addon.Database:GetProfile())
 		end
 	end)
 
-	page.horizontalPositionSlider = addon.Options.Controls.Slider:Create(page, "Horizontal Position")
+	page.horizontalPositionSlider = addon.Options.Controls.Slider:Create(page.body, "Horizontal Position")
 	page.horizontalPositionSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.horizontalPositionSlider, -2000, 2000, 1)
 	page.horizontalPositionSlider:SetOnValueChanged(function(_, value)
@@ -145,7 +163,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.verticalPositionSlider = addon.Options.Controls.Slider:Create(page, "Vertical Position")
+	page.verticalPositionSlider = addon.Options.Controls.Slider:Create(page.body, "Vertical Position")
 	page.verticalPositionSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.verticalPositionSlider, -2000, 2000, 1)
 	page.verticalPositionSlider:SetOnValueChanged(function(_, value)
@@ -155,7 +173,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.horizontalSpacingSlider = addon.Options.Controls.Slider:Create(page, "Horizontal Spacing")
+	page.horizontalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, "Horizontal Spacing")
 	page.horizontalSpacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.horizontalSpacingSlider, -25, 25, 1)
 	page.horizontalSpacingSlider:SetOnValueChanged(function(_, value)
@@ -165,7 +183,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.verticalSpacingSlider = addon.Options.Controls.Slider:Create(page, "Vertical Spacing")
+	page.verticalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, "Vertical Spacing")
 	page.verticalSpacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.verticalSpacingSlider, -25, 25, 1)
 	page.verticalSpacingSlider:SetOnValueChanged(function(_, value)
@@ -175,55 +193,39 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page, "Frame Width")
-	page.frameWidthSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameWidthSlider, 25, 300, 1)
-	page.frameWidthSlider:SetOnValueChanged(function(_, value)
+	page.orientationDropdown = addon.Options.Controls.Dropdown:Create(page.body, "Orientation")
+	page.orientationDropdown:SetLayoutWidth(174)
+	page.orientationDropdown:SetOptions({
+		{ value = "HORIZONTAL", text = "Horizontal" },
+		{ value = "VERTICAL", text = "Vertical" },
+	})
+	page.orientationDropdown:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
-			section.size = section.size or {}
-			section.size.width = value
+			section.direction = value
 		end, "layoutChanged")
 	end)
 
-	page.frameHeightSlider = addon.Options.Controls.Slider:Create(page, "Frame Height")
-	page.frameHeightSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameHeightSlider, 25, 300, 1)
-	page.frameHeightSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.size = section.size or {}
-			section.size.height = value
+	page.reverseGroupOrderCheckbox = addon.Options.Controls.Checkbox:Create(page.body, "Reverse Group Order")
+	page.reverseGroupOrderCheckbox:SetLayoutWidth(174)
+	page.reverseGroupOrderCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyRaidSetting(function(section)
+			section.reverse = checked == true
 		end, "layoutChanged")
 	end)
 
-	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page, "Border Thickness")
-	page.frameBorderThicknessSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameBorderThicknessSlider, 0, 6, 1)
-	page.frameBorderThicknessSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.border = section.border or {}
-			section.border.thicknessPx = value
-		end, "borderSettingsChanged")
-	end)
+	page.raidGroupCheckboxes = {}
+	for groupIndex = 1, 8 do
+		local checkbox = addon.Options.Controls.Checkbox:Create(page.body, "Group " .. groupIndex)
+		checkbox:SetLayoutWidth(87)
+		checkbox:SetOnValueChanged(function(_, checked)
+			ApplyRaidSetting(function(section)
+				section.groups = section.groups or {}
+				section.groups[groupIndex] = checked == true
+			end, "layoutChanged")
+		end)
 
-	page.backgroundColorPicker = addon.Options.Controls.ColorPicker:Create(page, "Background Color")
-	page.backgroundColorPicker:SetLayoutWidth(174)
-	page.backgroundColorPicker:SetHasOpacity(true)
-	page.backgroundColorPicker:SetOnValueChanged(function(_, r, g, b, a)
-		ApplyModeSetting(function(section)
-			section.background = section.background or {}
-			section.background.color = { r = r, g = g, b = b, a = a }
-		end, "backgroundSettingsChanged")
-	end)
-
-	page.borderColorPicker = addon.Options.Controls.ColorPicker:Create(page, "Border Color")
-	page.borderColorPicker:SetLayoutWidth(174)
-	page.borderColorPicker:SetHasOpacity(true)
-	page.borderColorPicker:SetOnValueChanged(function(_, r, g, b, a)
-		ApplyModeSetting(function(section)
-			section.border = section.border or {}
-			section.border.color = { r = r, g = g, b = b, a = a }
-		end, "borderSettingsChanged")
-	end)
+		page.raidGroupCheckboxes[groupIndex] = checkbox
+	end
 
 	page.controls = {
 		modeToggle = page.modeToggle,
@@ -231,57 +233,46 @@ function Layout:Ensure(parent)
 		verticalPositionSlider = page.verticalPositionSlider,
 		horizontalSpacingSlider = page.horizontalSpacingSlider,
 		verticalSpacingSlider = page.verticalSpacingSlider,
-		frameWidthSlider = page.frameWidthSlider,
-		frameHeightSlider = page.frameHeightSlider,
-		frameBorderThicknessSlider = page.frameBorderThicknessSlider,
-		backgroundColorPicker = page.backgroundColorPicker,
-		borderColorPicker = page.borderColorPicker,
+		orientationDropdown = page.orientationDropdown,
+		reverseGroupOrderCheckbox = page.reverseGroupOrderCheckbox,
 	}
 
-	page.horizontalPositionSlot = CreateControlSlot(page.body)
-	page.verticalPositionSlot = CreateControlSlot(page.body)
-	page.horizontalSpacingSlot = CreateControlSlot(page.body)
-	page.verticalSpacingSlot = CreateControlSlot(page.body)
-	page.frameWidthSlot = CreateControlSlot(page.body)
-	page.frameHeightSlot = CreateControlSlot(page.body)
-	page.frameBorderThicknessSlot = CreateControlSlot(page.body)
-	page.backgroundColorSlot = CreateControlSlot(page.body)
-	page.borderColorSlot = CreateControlSlot(page.body)
-
-	page.horizontalPositionSlider:SetParent(page.horizontalPositionSlot)
-	page.verticalPositionSlider:SetParent(page.verticalPositionSlot)
-	page.horizontalSpacingSlider:SetParent(page.horizontalSpacingSlot)
-	page.verticalSpacingSlider:SetParent(page.verticalSpacingSlot)
-	page.frameWidthSlider:SetParent(page.frameWidthSlot)
-	page.frameHeightSlider:SetParent(page.frameHeightSlot)
-	page.frameBorderThicknessSlider:SetParent(page.frameBorderThicknessSlot)
-	page.backgroundColorPicker:SetParent(page.backgroundColorSlot)
-	page.borderColorPicker:SetParent(page.borderColorSlot)
+	for groupIndex, checkbox in ipairs(page.raidGroupCheckboxes) do
+		page.controls["raidGroupCheckbox" .. groupIndex] = checkbox
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
 		local headerHeightPx = addon.Utilities:ToPixels(32)
 		local firstControlOffsetPx = addon.Utilities:ToPixels(16)
-		local controlSlotHeightPx = addon.Utilities:ToPixels(56)
-		local rowStepPx = controlSlotHeightPx
-		local sectionGapPx = addon.Utilities:ToPixels(18)
+		local rowStepPx = addon.Utilities:ToPixels(50)
+		local sectionGapPx = addon.Utilities:ToPixels(16)
 		local thirdRowOffsetPx = (rowStepPx * 2) + sectionGapPx
-		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local threeColumnThirdOffsetPx = (threeColumnSlotWidthPx * 2) + (columnGapPx * 2)
+		local reverseCheckboxHeightPx = addon.Utilities:ToPixels(controls.reverseGroupOrderCheckbox.layoutValues.height)
+		local orientationFieldTopInsetPx = addon.Utilities:ToPixels(
+			controls.orientationDropdown.layoutValues.labelHeight
+				+ controls.orientationDropdown.layoutValues.labelSpacing
+		)
+		local orientationFieldHeightPx = addon.Utilities:ToPixels(controls.orientationDropdown.layoutValues.fieldHeight)
+		local orientationControlHeightPx = orientationFieldTopInsetPx + orientationFieldHeightPx
+		local reverseCheckboxOffsetPx = orientationFieldTopInsetPx
+			+ addon.Utilities:RoundToNearestInt(math.max(0, (orientationFieldHeightPx - reverseCheckboxHeightPx) / 2))
+		local groupCheckboxWidthPx = addon.Utilities:ToPixels(self.raidGroupCheckboxes[1].layoutValues.width)
+		local groupCheckboxHeightPx = addon.Utilities:ToPixels(self.raidGroupCheckboxes[1].layoutValues.height)
+		local groupSubColumnGapPx = addon.Utilities:ToPixels(14)
+		local groupTopGapPx = addon.Utilities:ToPixels(16)
+		local groupRowGapPx = addon.Utilities:ToPixels(8)
+		local firstGroupRowOffsetPx = thirdRowOffsetPx + orientationControlHeightPx + groupTopGapPx
+		local secondGroupRowOffsetPx = firstGroupRowOffsetPx + groupCheckboxHeightPx + groupRowGapPx
+		local isRaidMode = GetModeKey() == "raid"
 
 		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
 
-		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
-		self.body:SetPoint(
-			"TOPRIGHT",
-			self.header,
-			"BOTTOMRIGHT",
-			0,
-			-addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-		)
+		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -289,19 +280,11 @@ function Layout:Ensure(parent)
 			end
 		end
 
-		self.horizontalPositionSlot:ClearAllPoints()
-		self.horizontalPositionSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.horizontalPositionSlot:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
+		controls.horizontalPositionSlider:ClearAllPoints()
+		controls.horizontalPositionSlider:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
 
-		self.verticalPositionSlot:ClearAllPoints()
-		self.verticalPositionSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.verticalPositionSlot:SetPoint(
+		controls.verticalPositionSlider:ClearAllPoints()
+		controls.verticalPositionSlider:SetPoint(
 			"TOPLEFT",
 			self.body,
 			"TOPLEFT",
@@ -309,19 +292,11 @@ function Layout:Ensure(parent)
 			0
 		)
 
-		self.horizontalSpacingSlot:ClearAllPoints()
-		self.horizontalSpacingSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.horizontalSpacingSlot:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, -addon.Utilities:ToUI(rowStepPx))
+		controls.horizontalSpacingSlider:ClearAllPoints()
+		controls.horizontalSpacingSlider:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, -addon.Utilities:ToUI(rowStepPx))
 
-		self.verticalSpacingSlot:ClearAllPoints()
-		self.verticalSpacingSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.verticalSpacingSlot:SetPoint(
+		controls.verticalSpacingSlider:ClearAllPoints()
+		controls.verticalSpacingSlider:SetPoint(
 			"TOPLEFT",
 			self.body,
 			"TOPLEFT",
@@ -329,145 +304,54 @@ function Layout:Ensure(parent)
 			-addon.Utilities:ToUI(rowStepPx)
 		)
 
-		self.frameWidthSlot:ClearAllPoints()
-		self.frameWidthSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
+		controls.orientationDropdown:ClearAllPoints()
+		controls.orientationDropdown:SetPoint(
+			"TOPLEFT",
+			self.body,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(thirdRowOffsetPx)
 		)
-		self.frameWidthSlot:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, -addon.Utilities:ToUI(thirdRowOffsetPx))
 
-		self.frameHeightSlot:ClearAllPoints()
-		self.frameHeightSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.frameHeightSlot:SetPoint(
+		controls.reverseGroupOrderCheckbox:ClearAllPoints()
+		controls.reverseGroupOrderCheckbox:SetPoint(
 			"TOPLEFT",
 			self.body,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(thirdRowOffsetPx)
+			-addon.Utilities:ToUI(thirdRowOffsetPx + reverseCheckboxOffsetPx)
 		)
 
-		self.frameBorderThicknessSlot:ClearAllPoints()
-		self.frameBorderThicknessSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.frameBorderThicknessSlot:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(fourthRowOffsetPx)
-		)
+		if isRaidMode then
+			controls.reverseGroupOrderCheckbox:Show()
+		else
+			controls.reverseGroupOrderCheckbox:Hide()
+		end
 
-		self.backgroundColorSlot:ClearAllPoints()
-		self.backgroundColorSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.backgroundColorSlot:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			addon.Utilities:ToUI(threeColumnThirdOffsetPx),
-			-addon.Utilities:ToUI(thirdRowOffsetPx)
-		)
+		for groupIndex, checkbox in ipairs(self.raidGroupCheckboxes) do
+			local rowIndex = math.floor((groupIndex - 1) / 4)
+			local rowColumnIndex = (groupIndex - 1) % 4
+			local columnIndex = math.floor(rowColumnIndex / 2)
+			local subColumnIndex = rowColumnIndex % 2
+			local columnStartXPx = columnIndex == 0 and 0 or threeColumnSecondOffsetPx
+			local offsetXPx = columnStartXPx + (subColumnIndex * (groupCheckboxWidthPx + groupSubColumnGapPx))
+			local offsetYPx = rowIndex == 0 and firstGroupRowOffsetPx or secondGroupRowOffsetPx
 
-		self.borderColorSlot:ClearAllPoints()
-		self.borderColorSlot:SetSize(
-			addon.Utilities:ToUI(threeColumnSlotWidthPx),
-			addon.Utilities:ToUI(controlSlotHeightPx)
-		)
-		self.borderColorSlot:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(fourthRowOffsetPx)
-		)
+			checkbox:ClearAllPoints()
+			checkbox:SetPoint(
+				"TOPLEFT",
+				self.body,
+				"TOPLEFT",
+				addon.Utilities:ToUI(offsetXPx),
+				-addon.Utilities:ToUI(offsetYPx)
+			)
 
-		controls.horizontalPositionSlider:ClearAllPoints()
-		controls.horizontalPositionSlider:SetPoint(
-			"TOPLEFT",
-			self.horizontalPositionSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.verticalPositionSlider:ClearAllPoints()
-		controls.verticalPositionSlider:SetPoint(
-			"TOPLEFT",
-			self.verticalPositionSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.horizontalSpacingSlider:ClearAllPoints()
-		controls.horizontalSpacingSlider:SetPoint(
-			"TOPLEFT",
-			self.horizontalSpacingSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.verticalSpacingSlider:ClearAllPoints()
-		controls.verticalSpacingSlider:SetPoint(
-			"TOPLEFT",
-			self.verticalSpacingSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.frameWidthSlider:ClearAllPoints()
-		controls.frameWidthSlider:SetPoint(
-			"TOPLEFT",
-			self.frameWidthSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.frameHeightSlider:ClearAllPoints()
-		controls.frameHeightSlider:SetPoint(
-			"TOPLEFT",
-			self.frameHeightSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.frameBorderThicknessSlider:ClearAllPoints()
-		controls.frameBorderThicknessSlider:SetPoint(
-			"TOPLEFT",
-			self.frameBorderThicknessSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.backgroundColorPicker:ClearAllPoints()
-		controls.backgroundColorPicker:SetPoint(
-			"TOPLEFT",
-			self.backgroundColorSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
-
-		controls.borderColorPicker:ClearAllPoints()
-		controls.borderColorPicker:SetPoint(
-			"TOPLEFT",
-			self.borderColorSlot,
-			"TOPLEFT",
-			0,
-			0
-		)
+			if isRaidMode then
+				checkbox:Show()
+			else
+				checkbox:Hide()
+			end
+		end
 	end
 
 	function page:UpdateState(profile)
@@ -482,27 +366,27 @@ function Layout:Ensure(parent)
 		local defaults = GetModeDefaults(mode)
 		local position = section.position or {}
 		local spacing = section.spacing or {}
-		local size = section.size or {}
-		local background = section.background or {}
-		local border = section.border or {}
-		local backgroundColor = background.color or defaults.backgroundColor
-		local borderColor = border.color or defaults.borderColor
+		local direction = section.direction or defaults.direction
+		local raidSection = profile.raid or {}
+		local raidDefaults = GetModeDefaults("raid")
+		local raidGroups = raidSection.groups or {}
 
 		controls.modeToggle:SetValue(mode)
 		controls.horizontalPositionSlider:SetValueSilently(position.x or defaults.positionX)
 		controls.verticalPositionSlider:SetValueSilently(position.y or defaults.positionY)
 		controls.horizontalSpacingSlider:SetValueSilently(spacing.x or defaults.spacingX)
 		controls.verticalSpacingSlider:SetValueSilently(spacing.y or defaults.spacingY)
-		controls.frameWidthSlider:SetValueSilently(size.width or defaults.frameWidth)
-		controls.frameHeightSlider:SetValueSilently(size.height or defaults.frameHeight)
-		controls.frameBorderThicknessSlider:SetValueSilently(border.thicknessPx or defaults.borderThickness)
-		controls.backgroundColorPicker:SetColor(
-			backgroundColor.r,
-			backgroundColor.g,
-			backgroundColor.b,
-			backgroundColor.a
-		)
-		controls.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
+		controls.orientationDropdown:SetValue(direction)
+		controls.reverseGroupOrderCheckbox:SetChecked(raidSection.reverse == true)
+
+		for groupIndex, checkbox in ipairs(self.raidGroupCheckboxes) do
+			local isEnabled = raidGroups[groupIndex]
+			if isEnabled == nil then
+				isEnabled = raidDefaults.groups[groupIndex]
+			end
+
+			checkbox:SetChecked(isEnabled == true)
+		end
 	end
 
 	addon.Options.Data:RegisterForUpdates(page, function(profile)

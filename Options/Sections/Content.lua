@@ -16,7 +16,7 @@ local controllerState = addon.Options.ControllerState
 			auras = "buffs",
 			texts = "name",
 			indicators = "readyCheck",
-			bars = "absorbs",
+			bars = "health",
 		},
 	}
 
@@ -31,6 +31,7 @@ function Content:Ensure(parent)
 
 	local general = addon.Options.Pages.General:Ensure(content)
 	local layout = addon.Options.Pages.Layout:Ensure(content)
+	local frames = addon.Options.Pages.Frames:Ensure(content)
 	local bars = addon.Options.Pages.Bars:Ensure(content)
 	local texts = addon.Options.Pages.Texts:Ensure(content)
 	local auras = addon.Options.Pages.Auras:Ensure(content)
@@ -40,6 +41,7 @@ function Content:Ensure(parent)
 	content.pages = {
 		general = general,
 		layout = layout,
+		frames = frames,
 		bars = bars,
 		texts = texts,
 		auras = auras,
@@ -115,6 +117,10 @@ function Content:SetActivePage(pageKey)
 	end
 
 	local page = content.pages[pageKey]
+	if page.UpdateLayout then
+		page:UpdateLayout()
+	end
+
 	if page.UpdateState then
 		page:UpdateState(addon.Database:GetProfile())
 	end
