@@ -11,7 +11,6 @@ local theme = addon.Options.Theme
 
 local subpageOptions = {
 	{ value = "name", text = "Name" },
-	{ value = "statusText", text = "Status Text" },
 	{ value = "healAbsorbs", text = "Heal Absorbs" },
 }
 
@@ -33,6 +32,19 @@ local function GetControllerState()
 		}
 
 	return addon.Options.ControllerState
+end
+
+local function GetActiveSubpageKey()
+	local state = GetControllerState()
+	local subpageKey = (state.subpages or {}).texts or subpageOptions[1].value
+
+	for _, option in ipairs(subpageOptions) do
+		if option.value == subpageKey then
+			return subpageKey
+		end
+	end
+
+	return subpageOptions[1].value
 end
 
 function Texts:Ensure(parent)
@@ -67,6 +79,12 @@ function Texts:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
+		if page and page.UpdateLayout then
+			page:UpdateLayout()
+		end
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
@@ -76,19 +94,59 @@ function Texts:Ensure(parent)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.subpages.texts = value
+		if page and page.SetActiveSubpage then
+			page:SetActiveSubpage(value, addon.Database:GetProfile())
+		end
 	end)
 
-	page.description = page.body:CreateFontString(nil, "OVERLAY")
-	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-	page.description:SetJustifyH("LEFT")
-	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
-	page.description:SetTextColor(theme:GetTextColor("secondary"))
-	page.description:SetText("Text settings will go here.")
+	local nameSubpage = addon.Options.Pages.Texts.Name:Ensure(page.body)
+	local healAbsorbsSubpage = addon.Options.Pages.Texts.HealAbsorbs:Ensure(page.body)
+
+	page.subpages = {
+		name = nameSubpage,
+		healAbsorbs = healAbsorbsSubpage,
+	}
+
+	for subpageKey, subpage in pairs(page.subpages) do
+		subpage:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+		subpage:SetPoint("TOPRIGHT", page.body, "TOPRIGHT", 0, 0)
+		subpage:SetPoint("BOTTOMLEFT", page.body, "BOTTOMLEFT", 0, 0)
+		subpage:SetPoint("BOTTOMRIGHT", page.body, "BOTTOMRIGHT", 0, 0)
+		subpage:SetShown(subpageKey == GetActiveSubpageKey())
+	end
 
 	page.controls = {
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:SetActiveSubpage(subpageKey, profile)
+		local state = GetControllerState()
+		state.subpages = state.subpages or {}
+
+		local activeSubpageKey = subpageOptions[1].value
+		for _, option in ipairs(subpageOptions) do
+			if option.value == subpageKey then
+				activeSubpageKey = subpageKey
+				break
+			end
+		end
+
+		state.subpages.texts = activeSubpageKey
+
+		for key, subpage in pairs(self.subpages) do
+			subpage:SetShown(key == activeSubpageKey)
+		end
+
+		local activeSubpage = self.subpages[activeSubpageKey]
+		if activeSubpage and activeSubpage.UpdateLayout then
+			activeSubpage:UpdateLayout()
+		end
+
+		if activeSubpage and activeSubpage.UpdateState then
+			activeSubpage:UpdateState(profile)
+		end
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
@@ -115,15 +173,27 @@ function Texts:Ensure(parent)
 			-addon.Utilities:ToUI(headerControlGapPx),
 			0
 		)
+
+		for _, subpage in pairs(self.subpages) do
+			if subpage.UpdateLayout then
+				subpage:UpdateLayout()
+			end
+		end
 	end
 
 	function page:UpdateState(profile)
 		local state = GetControllerState()
+		local activeSubpageKey = GetActiveSubpageKey()
 
 		self.modeToggle:SetValue(state.mode or "party")
 		self.subpageDropdown:SetOptions(subpageOptions)
-		self.subpageDropdown:SetValue(state.subpages.texts or subpageOptions[1].value)
+		self.subpageDropdown:SetValue(activeSubpageKey)
+		self:SetActiveSubpage(activeSubpageKey, profile)
 	end
+
+	addon.Options.Data:RegisterForUpdates(page, function(profile)
+		page:UpdateState(profile)
+	end)
 
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
