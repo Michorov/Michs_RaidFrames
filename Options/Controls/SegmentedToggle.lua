@@ -10,7 +10,6 @@ local theme = addon.Options.Theme
 local function ApplyVisualState(control)
 	local activeBg = { theme:GetColor("brand") }
 	local activeHoverBg = { 1.0, 0.74, 0.42, 1 }
-	local inactiveBg = { theme:GetColor("controlBackground") }
 	local inactiveTextColor = { 0.82, 0.83, 0.87, 1 }
 	local inactiveHoverTextColor = { 0.94, 0.95, 0.98, 1 }
 	local activeTextColor = { theme:GetColor("panelBackground", 1) }
@@ -44,12 +43,7 @@ local function ApplyVisualState(control)
 		activePlateColor[3],
 		activePlateColor[4]
 	)
-	control.activePlate.topHighlight:SetColorTexture(
-		1,
-		1,
-		1,
-		control.hoveredSegment and 0.12 or 0.08
-	)
+	control.activePlate.topHighlight:SetColorTexture(1, 1, 1, control.hoveredSegment and 0.12 or 0.08)
 
 	if leftActive then
 		control.leftSegment.text:SetTextColor(
@@ -134,11 +128,11 @@ end
 
 function SegmentedToggle:Create(parent, leftOption, rightOption)
 	local control = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(112))
-	local height = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-
-	control:SetSize(width, height)
+	control.layoutValues = {
+		width = 112,
+		height = 24,
+		borderThickness = 1,
+	}
 
 	control.leftOption = leftOption or { value = "left", text = "Left" }
 	control.rightOption = rightOption or { value = "right", text = "Right" }
@@ -159,31 +153,26 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 	control.activePlate.topHighlight = control.activePlate:CreateTexture(nil, "ARTWORK")
 	control.activePlate.topHighlight:SetPoint("TOPLEFT", control.activePlate, "TOPLEFT", 0, 0)
 	control.activePlate.topHighlight:SetPoint("TOPRIGHT", control.activePlate, "TOPRIGHT", 0, 0)
-	control.activePlate.topHighlight:SetHeight(borderThickness)
 
 	control.topBorder = control:CreateTexture(nil, "OVERLAY")
 	control.topBorder:SetColorTexture(theme:GetColor("border"))
 	control.topBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.topBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	control.topBorder:SetHeight(borderThickness)
 
 	control.bottomBorder = control:CreateTexture(nil, "OVERLAY")
 	control.bottomBorder:SetColorTexture(theme:GetColor("border"))
 	control.bottomBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
 	control.bottomBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
-	control.bottomBorder:SetHeight(borderThickness)
 
 	control.leftBorder = control:CreateTexture(nil, "OVERLAY")
 	control.leftBorder:SetColorTexture(theme:GetColor("border"))
 	control.leftBorder:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.leftBorder:SetPoint("BOTTOMLEFT", control, "BOTTOMLEFT", 0, 0)
-	control.leftBorder:SetWidth(borderThickness)
 
 	control.rightBorder = control:CreateTexture(nil, "OVERLAY")
 	control.rightBorder:SetColorTexture(theme:GetColor("border"))
 	control.rightBorder:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
 	control.rightBorder:SetPoint("BOTTOMRIGHT", control, "BOTTOMRIGHT", 0, 0)
-	control.rightBorder:SetWidth(borderThickness)
 
 	control.leftSegment = CreateSegment(control, control.leftOption, "left")
 	control.leftSegment:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
@@ -208,7 +197,39 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 		self.onValueChanged = callback
 	end
 
-	ApplyVisualState(control)
+	function control:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutHeight(height)
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function control:UpdateLayout()
+		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
+		local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.borderThickness))
+
+		self:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+
+		self.activePlate.topHighlight:SetHeight(borderThickness)
+		self.topBorder:SetHeight(borderThickness)
+		self.bottomBorder:SetHeight(borderThickness)
+		self.leftBorder:SetWidth(borderThickness)
+		self.rightBorder:SetWidth(borderThickness)
+
+		ApplyVisualState(self)
+	end
+
+	control:UpdateLayout()
 
 	return control
 end

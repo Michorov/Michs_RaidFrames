@@ -17,80 +17,30 @@ local function ClampChannel(value, fallback)
 end
 
 local function CreateBorder(frame)
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-
 	frame.topBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	frame.topBorder:SetColorTexture(theme:GetColor("border"))
 	frame.topBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 	frame.topBorder:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-	frame.topBorder:SetHeight(borderThickness)
 
 	frame.bottomBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.bottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	frame.bottomBorder:SetColorTexture(theme:GetColor("border"))
 	frame.bottomBorder:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
 	frame.bottomBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-	frame.bottomBorder:SetHeight(borderThickness)
 
 	frame.leftBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.leftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	frame.leftBorder:SetColorTexture(theme:GetColor("border"))
 	frame.leftBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 	frame.leftBorder:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-	frame.leftBorder:SetWidth(borderThickness)
 
 	frame.rightBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	frame.rightBorder:SetColorTexture(theme:GetColor("border"))
 	frame.rightBorder:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
 	frame.rightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-	frame.rightBorder:SetWidth(borderThickness)
 end
 
 local function UpdateVisual(control)
 	control.swatchFill:SetColorTexture(control.r, control.g, control.b, control.a)
 	control.field.hoverTexture:SetShown(control.isHovered == true)
-end
-
-local function UpdateLayout(control)
-	local swatchSize = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local labelInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
-	local controlHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-
-	control:SetHeight(controlHeight)
-
-	control.field:ClearAllPoints()
-	control.field:SetPoint("LEFT", control, "LEFT", 0, 0)
-	control.field:SetSize(swatchSize, swatchSize)
-
-	control.label:ClearAllPoints()
-
-	if control.labelVisible then
-		control.label:Show()
-		control.label:SetPoint("LEFT", control.field, "RIGHT", labelInset, 0)
-		control.label:SetPoint("RIGHT", control, "RIGHT", 0, 0)
-		control.label:SetPoint("TOP", control.field, "TOP", 0, 0)
-		control.label:SetPoint("BOTTOM", control.field, "BOTTOM", 0, 0)
-	else
-		control.label:Hide()
-	end
 end
 
 local function NotifyValueChanged(control)
@@ -143,11 +93,13 @@ end
 
 function ColorPicker:Create(parent, labelText)
 	local control = CreateFrame("Frame", nil, parent)
-	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(220))
-	local swatchSize = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local swatchInnerInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(2))
-
-	control:SetSize(width, addon.Utilities:ToUI(addon.Utilities:ToPixels(24)))
+	control.layoutValues = {
+		width = 220,
+		pickerSize = 24,
+		labelInset = 8,
+		borderThickness = 1,
+		swatchInnerInset = 2,
+	}
 	control.labelVisible = true
 	control.hasOpacity = false
 	control.isHovered = false
@@ -158,7 +110,7 @@ function ColorPicker:Create(parent, labelText)
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
-	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
+	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
 	control.label:SetText(labelText or "Color")
@@ -178,16 +130,24 @@ function ColorPicker:Create(parent, labelText)
 	control.field.hoverTexture:Hide()
 
 	control.swatchFill = control.field:CreateTexture(nil, "ARTWORK")
-	control.swatchFill:SetPoint("TOPLEFT", control.field, "TOPLEFT", swatchInnerInset, -swatchInnerInset)
-	control.swatchFill:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", -swatchInnerInset, swatchInnerInset)
 
 	function control:SetLabel(text)
 		self.label:SetText(text or "")
 	end
 
+	function control:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
+	end
+
+	function control:SetPickerSize(size)
+		self.layoutValues.pickerSize = size
+		self:UpdateLayout()
+	end
+
 	function control:SetLabelVisible(isVisible)
 		self.labelVisible = isVisible ~= false
-		UpdateLayout(self)
+		self:UpdateLayout()
 	end
 
 	function control:SetHasOpacity(hasOpacity)
@@ -219,6 +179,47 @@ function ColorPicker:Create(parent, labelText)
 		self.onValueChanged = callback
 	end
 
+	function control:UpdateLayout()
+		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local pickerSizePx = addon.Utilities:ToPixels(self.layoutValues.pickerSize)
+		local labelInsetPx = addon.Utilities:ToPixels(self.layoutValues.labelInset)
+		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
+		local swatchInnerInsetPx = addon.Utilities:ToPixels(self.layoutValues.swatchInnerInset)
+
+		local width = addon.Utilities:ToUI(widthPx)
+		local pickerSize = addon.Utilities:ToUI(pickerSizePx)
+		local labelInset = addon.Utilities:ToUI(labelInsetPx)
+		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+		local swatchInnerInset = addon.Utilities:ToUI(swatchInnerInsetPx)
+
+		self:SetSize(width, pickerSize)
+
+		self.field:ClearAllPoints()
+		self.field:SetPoint("LEFT", self, "LEFT", 0, 0)
+		self.field:SetSize(pickerSize, pickerSize)
+
+		self.field.topBorder:SetHeight(borderThickness)
+		self.field.bottomBorder:SetHeight(borderThickness)
+		self.field.leftBorder:SetWidth(borderThickness)
+		self.field.rightBorder:SetWidth(borderThickness)
+
+		self.swatchFill:ClearAllPoints()
+		self.swatchFill:SetPoint("TOPLEFT", self.field, "TOPLEFT", swatchInnerInset, -swatchInnerInset)
+		self.swatchFill:SetPoint("BOTTOMRIGHT", self.field, "BOTTOMRIGHT", -swatchInnerInset, swatchInnerInset)
+
+		self.label:ClearAllPoints()
+
+		if self.labelVisible then
+			self.label:Show()
+			self.label:SetPoint("LEFT", self.field, "RIGHT", labelInset, 0)
+			self.label:SetPoint("RIGHT", self, "RIGHT", 0, 0)
+			self.label:SetPoint("TOP", self.field, "TOP", 0, 0)
+			self.label:SetPoint("BOTTOM", self.field, "BOTTOM", 0, 0)
+		else
+			self.label:Hide()
+		end
+	end
+
 	control.field:SetScript("OnEnter", function()
 		control.isHovered = true
 		UpdateVisual(control)
@@ -233,7 +234,7 @@ function ColorPicker:Create(parent, labelText)
 		OpenPicker(control)
 	end)
 
-	UpdateLayout(control)
+	control:UpdateLayout()
 	UpdateVisual(control)
 
 	return control
