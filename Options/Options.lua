@@ -6,6 +6,10 @@ local theme = addon.Options.Theme
 
 local panel
 local deferredOpen = false
+local panelPosition = {
+	xRatio = 0.5,
+	yRatio = 0.5,
+}
 
 local layoutValues = {
 	panelWidth = 800,
@@ -14,6 +18,35 @@ local layoutValues = {
 	statusBarHeight = 32,
 	sideMenuWidth = 154,
 }
+
+local function SavePanelPosition()
+	if not panel then
+		return
+	end
+
+	local parentWidthPx = addon.Utilities:ToPixels(UIParent:GetWidth())
+	local parentHeightPx = addon.Utilities:ToPixels(UIParent:GetHeight())
+	local panelWidthPx = addon.Utilities:ToPixels(panel:GetWidth())
+	local panelHeightPx = addon.Utilities:ToPixels(panel:GetHeight())
+
+	local availableWidthPx = math.max(0, parentWidthPx - panelWidthPx)
+	local availableHeightPx = math.max(0, parentHeightPx - panelHeightPx)
+
+	local leftPx = addon.Utilities:ToPixels(panel:GetLeft())
+	local bottomPx = addon.Utilities:ToPixels(panel:GetBottom())
+
+	if availableWidthPx > 0 then
+		panelPosition.xRatio = math.max(0, math.min(1, leftPx / availableWidthPx))
+	else
+		panelPosition.xRatio = 0.5
+	end
+
+	if availableHeightPx > 0 then
+		panelPosition.yRatio = math.max(0, math.min(1, bottomPx / availableHeightPx))
+	else
+		panelPosition.yRatio = 0.5
+	end
+end
 
 function Options:Initialize()
 	SLASH_MICHRAIDFRAMES1 = "/mrfnew"
@@ -79,6 +112,7 @@ function Options:Ensure()
 
 	panel:SetScript("OnDragStop", function(self)
 		self:StopMovingOrSizing()
+		SavePanelPosition()
 		Options:Snap()
 	end)
 
@@ -137,20 +171,19 @@ function Options:Snap()
 		return
 	end
 
-	local leftPx = addon.Utilities:ToPixels(panel:GetLeft())
-	local bottomPx = addon.Utilities:ToPixels(panel:GetBottom())
-	local widthPx = addon.Utilities:ToPixels(panel:GetWidth())
-	local heightPx = addon.Utilities:ToPixels(panel:GetHeight())
+	local parentWidthPx = addon.Utilities:ToPixels(UIParent:GetWidth())
+	local parentHeightPx = addon.Utilities:ToPixels(UIParent:GetHeight())
+	local panelWidthPx = addon.Utilities:ToPixels(panel:GetWidth())
+	local panelHeightPx = addon.Utilities:ToPixels(panel:GetHeight())
+
+	local availableWidthPx = math.max(0, parentWidthPx - panelWidthPx)
+	local availableHeightPx = math.max(0, parentHeightPx - panelHeightPx)
+
+	local leftPx = addon.Utilities:RoundToNearestInt(panelPosition.xRatio * availableWidthPx)
+	local bottomPx = addon.Utilities:RoundToNearestInt(panelPosition.yRatio * availableHeightPx)
 
 	panel:ClearAllPoints()
 	panel:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", addon.Utilities:ToUI(leftPx), addon.Utilities:ToUI(bottomPx))
-	panel:SetPoint(
-		"TOPRIGHT",
-		UIParent,
-		"BOTTOMLEFT",
-		addon.Utilities:ToUI(leftPx + widthPx),
-		addon.Utilities:ToUI(bottomPx + heightPx)
-	)
 end
 
 function Options:IsOpen()
