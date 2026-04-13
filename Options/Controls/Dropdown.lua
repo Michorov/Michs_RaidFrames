@@ -10,29 +10,6 @@ local theme = addon.Options.Theme
 local openDropdown
 local defaultArrowColor = { 0.72, 0.74, 0.78, 1 }
 
-local function UpdateLayout(control)
-	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
-	local fieldHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-
-	control.label:ClearAllPoints()
-	control.field:ClearAllPoints()
-
-	if control.labelVisible then
-		control:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(46)))
-		control.label:Show()
-		control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-		control.field:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -labelSpacing)
-		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -labelSpacing)
-	else
-		control:SetHeight(fieldHeight)
-		control.label:Hide()
-		control.field:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	end
-
-	control.field:SetHeight(fieldHeight)
-end
-
 local function HideOpenDropdown()
 	if not openDropdown then
 		return
@@ -94,8 +71,6 @@ local function EnsureListRows(control)
 			button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 			button.text:SetFont(theme.fonts.arialNarrow, 12, "")
 			button.text:SetJustifyH("LEFT")
-			button.text:SetPoint("LEFT", button, "LEFT", addon.Utilities:ToUI(addon.Utilities:ToPixels(10)), 0)
-			button.text:SetPoint("RIGHT", button, "RIGHT", addon.Utilities:ToUI(addon.Utilities:ToPixels(-10)), 0)
 
 			button:SetScript("OnEnter", function(self)
 				self.hoverTexture:Show()
@@ -111,6 +86,21 @@ local function EnsureListRows(control)
 		button.value = option.value
 		button.text:SetText(option.text or "")
 		button.text:SetTextColor(0.85, 0.85, 0.88, 1)
+		button.text:ClearAllPoints()
+		button.text:SetPoint(
+			"LEFT",
+			button,
+			"LEFT",
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(control.layoutValues.textInset)),
+			0
+		)
+		button.text:SetPoint(
+			"RIGHT",
+			button,
+			"RIGHT",
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(control.layoutValues.textInset)),
+			0
+		)
 		button:Show()
 
 		button:SetScript("OnClick", function(self)
@@ -129,10 +119,14 @@ local function EnsureListRows(control)
 end
 
 local function UpdateListLayout(control)
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local rowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local rowSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(2))
-	local listPadding = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
+	local borderThicknessPx = addon.Utilities:ToPixels(control.layoutValues.borderThickness)
+	local rowHeightPx = addon.Utilities:ToPixels(control.layoutValues.listRowHeight)
+	local rowSpacingPx = addon.Utilities:ToPixels(control.layoutValues.listRowSpacing)
+	local listPaddingPx = addon.Utilities:ToPixels(control.layoutValues.listPadding)
+	local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+	local rowHeight = addon.Utilities:ToUI(rowHeightPx)
+	local rowSpacing = addon.Utilities:ToUI(rowSpacingPx)
+	local listPadding = addon.Utilities:ToUI(listPaddingPx)
 	local listWidth = control:GetWidth()
 	local optionCount = #(control.options or {})
 	local listHeight = (optionCount * rowHeight) + math.max(0, optionCount - 1) * rowSpacing + (listPadding * 2)
@@ -198,12 +192,31 @@ end
 
 function Dropdown:Create(parent, labelText)
 	local control = CreateFrame("Frame", nil, parent)
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
-	local arrowInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
-	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(220))
+	control.layoutValues = {
+		width = 220,
+		fieldHeight = 24,
+		labelHeight = 16,
+		labelSpacing = 6,
+		borderThickness = 1,
+		textInset = 10,
+		arrowInset = 10,
+		arrowWidth = 8,
+		arrowHeight = 6,
+		arrowStrokeThickness = 1,
+		selectionRightInset = 24,
+		listRowHeight = 24,
+		listRowSpacing = 2,
+		listPadding = 4,
+	}
 
-	control:SetSize(width, addon.Utilities:ToUI(addon.Utilities:ToPixels(46)))
+	control:SetSize(
+		addon.Utilities:ToUI(addon.Utilities:ToPixels(control.layoutValues.width)),
+		addon.Utilities:ToUI(
+			addon.Utilities:ToPixels(
+				control.layoutValues.labelHeight + control.layoutValues.labelSpacing + control.layoutValues.fieldHeight
+			)
+		)
+	)
 	control.options = {}
 	control.value = nil
 	control.placeholder = "Select..."
@@ -222,78 +235,38 @@ function Dropdown:Create(parent, labelText)
 	control.field:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	control.field.topBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.topBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.topBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.topBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
-	control.field.topBorder:SetHeight(borderThickness)
 
 	control.field.bottomBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.bottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.bottomBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.bottomBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
 	control.field.bottomBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
-	control.field.bottomBorder:SetHeight(borderThickness)
 
 	control.field.leftBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.leftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.leftBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.leftBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.leftBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
-	control.field.leftBorder:SetWidth(borderThickness)
 
 	control.field.rightBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.rightBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.rightBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
 	control.field.rightBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
-	control.field.rightBorder:SetWidth(borderThickness)
 
 	control.selectionText = control.field:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	control.selectionText:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.selectionText:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.selectionText:SetJustifyH("LEFT")
-	control.selectionText:SetPoint("LEFT", control.field, "LEFT", textInset, 0)
-	control.selectionText:SetPoint(
-		"RIGHT",
-		control.field,
-		"RIGHT",
-		-addon.Utilities:ToUI(addon.Utilities:ToPixels(24)),
-		0
-	)
 	control.selectionText:SetText(control.placeholder)
 
 	control.arrow = CreateFrame("Frame", nil, control.field)
-	control.arrow:SetSize(
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(8)),
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
-	)
-	control.arrow:SetPoint("CENTER", control.field, "CENTER", 0, 0)
-	control.arrow:SetPoint("RIGHT", control.field, "RIGHT", -arrowInset, 0)
 
 	control.arrow.leftStroke = control.arrow:CreateLine(nil, "OVERLAY")
-	control.arrow.leftStroke:SetThickness(addon.Utilities:ToUI(addon.Utilities:ToPixels(1)))
 	control.arrow.leftStroke:SetStartPoint("TOPLEFT", control.arrow, 0, 0)
 	control.arrow.leftStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
 
 	control.arrow.rightStroke = control.arrow:CreateLine(nil, "OVERLAY")
-	control.arrow.rightStroke:SetThickness(addon.Utilities:ToUI(addon.Utilities:ToPixels(1)))
 	control.arrow.rightStroke:SetStartPoint("TOPRIGHT", control.arrow, 0, 0)
 	control.arrow.rightStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
 
@@ -311,7 +284,7 @@ function Dropdown:Create(parent, labelText)
 
 	control.field:SetScript("OnEnter", function(self)
 		self.hoverTexture:Show()
-		control:SetArrowColor(theme.colors.brand)
+		control:SetArrowColor({ theme:GetColor("brand") })
 	end)
 
 	control.field:SetScript("OnLeave", function(self)
@@ -331,36 +304,16 @@ function Dropdown:Create(parent, labelText)
 	control.list:Hide()
 
 	control.list.topBorder = control.list:CreateTexture(nil, "OVERLAY")
-	control.list.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.list.topBorder:SetColorTexture(theme:GetColor("border"))
 
 	control.list.bottomBorder = control.list:CreateTexture(nil, "OVERLAY")
-	control.list.bottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.list.bottomBorder:SetColorTexture(theme:GetColor("border"))
 
 	control.list.leftBorder = control.list:CreateTexture(nil, "OVERLAY")
-	control.list.leftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.list.leftBorder:SetColorTexture(theme:GetColor("border"))
 
 	control.list.rightBorder = control.list:CreateTexture(nil, "OVERLAY")
-	control.list.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.list.rightBorder:SetColorTexture(theme:GetColor("border"))
 
 	function control:SetOptions(options)
 		self.options = options or {}
@@ -386,25 +339,109 @@ function Dropdown:Create(parent, labelText)
 		self.label:SetText(text or "")
 	end
 
+	function control:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutHeight(height)
+		self.layoutValues.fieldHeight = height
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.fieldHeight = height
+		self:UpdateLayout()
+	end
+
 	function control:SetLabelVisible(isVisible)
 		self.labelVisible = isVisible ~= false
-		UpdateLayout(self)
+		self:UpdateLayout()
 	end
 
 	function control:SetOnValueChanged(callback)
 		self.onValueChanged = callback
 	end
 
+	function control:UpdateLayout()
+		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
+		local fieldHeightPx = addon.Utilities:ToPixels(self.layoutValues.fieldHeight)
+		local labelHeightPx = addon.Utilities:ToPixels(self.layoutValues.labelHeight)
+		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
+		local textInsetPx = addon.Utilities:ToPixels(self.layoutValues.textInset)
+		local arrowInsetPx = addon.Utilities:ToPixels(self.layoutValues.arrowInset)
+		local arrowWidthPx = addon.Utilities:ToPixels(self.layoutValues.arrowWidth)
+		local arrowHeightPx = addon.Utilities:ToPixels(self.layoutValues.arrowHeight)
+		local arrowStrokeThicknessPx = addon.Utilities:ToPixels(self.layoutValues.arrowStrokeThickness)
+		local selectionRightInsetPx = addon.Utilities:ToPixels(self.layoutValues.selectionRightInset)
+
+		local labelSpacing = addon.Utilities:ToUI(labelSpacingPx)
+		local fieldHeight = addon.Utilities:ToUI(fieldHeightPx)
+		local labelHeight = addon.Utilities:ToUI(labelHeightPx)
+		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+		local textInset = addon.Utilities:ToUI(textInsetPx)
+		local arrowInset = addon.Utilities:ToUI(arrowInsetPx)
+		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+
+		self:SetWidth(addon.Utilities:ToUI(widthPx))
+
+		self.label:ClearAllPoints()
+		self.field:ClearAllPoints()
+
+		if self.labelVisible then
+			self:SetHeight(addon.Utilities:ToUI(labelHeightPx + labelSpacingPx + fieldHeightPx))
+			self.label:Show()
+			self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+			self.label:SetHeight(labelHeight)
+			self.field:SetPoint("TOPLEFT", self.label, "BOTTOMLEFT", 0, -labelSpacing)
+			self.field:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -labelSpacing)
+		else
+			self:SetHeight(fieldHeight)
+			self.label:Hide()
+			self.field:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+			self.field:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		end
+
+		self.field:SetHeight(fieldHeight)
+
+		self.field.topBorder:SetHeight(borderThickness)
+		self.field.bottomBorder:SetHeight(borderThickness)
+		self.field.leftBorder:SetWidth(borderThickness)
+		self.field.rightBorder:SetWidth(borderThickness)
+
+		self.selectionText:ClearAllPoints()
+		self.selectionText:SetPoint("LEFT", self.field, "LEFT", textInset, 0)
+		self.selectionText:SetPoint(
+			"RIGHT",
+			self.field,
+			"RIGHT",
+			-addon.Utilities:ToUI(selectionRightInsetPx),
+			0
+		)
+
+		self.arrow:SetSize(addon.Utilities:ToUI(arrowWidthPx), addon.Utilities:ToUI(arrowHeightPx))
+		self.arrow:ClearAllPoints()
+		self.arrow:SetPoint("CENTER", self.field, "CENTER", 0, 0)
+		self.arrow:SetPoint("RIGHT", self.field, "RIGHT", -arrowInset, 0)
+		self.arrow.leftStroke:SetThickness(addon.Utilities:ToUI(arrowStrokeThicknessPx))
+		self.arrow.rightStroke:SetThickness(addon.Utilities:ToUI(arrowStrokeThicknessPx))
+
+		if openDropdown == self then
+			UpdateListLayout(self)
+		end
+	end
+
 	control.field:SetScript("OnClick", function()
 		ToggleDropdown(control)
 		if openDropdown == control then
-			control:SetArrowColor(theme.colors.brand)
+			control:SetArrowColor({ theme:GetColor("brand") })
 		else
 			control:SetArrowColor(defaultArrowColor)
 		end
 	end)
 
-	UpdateLayout(control)
+	control:UpdateLayout()
 	UpdateSelectionText(control)
 
 	return control

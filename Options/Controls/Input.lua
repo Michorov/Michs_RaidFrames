@@ -24,42 +24,22 @@ local function UpdatePlaceholder(control)
 	end
 end
 
-local function UpdateLayout(control)
-	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
-	local fieldHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-
-	control.label:ClearAllPoints()
-	control.field:ClearAllPoints()
-
-	if control.labelVisible then
-		control:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(46)))
-		control.label:Show()
-		control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-		control.field:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -labelSpacing)
-		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -labelSpacing)
-	else
-		control:SetHeight(fieldHeight)
-		control.label:Hide()
-		control.field:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-		control.field:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	end
-
-	control.field:SetHeight(fieldHeight)
-	UpdatePlaceholder(control)
-end
-
 function Input:Create(parent, labelText)
 	local control = CreateFrame("Frame", nil, parent)
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local fieldHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(24))
-	local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(10))
-	local width = addon.Utilities:ToUI(addon.Utilities:ToPixels(220))
+	control.layoutValues = {
+		width = 220,
+		fieldHeight = 24,
+		labelHeight = 16,
+		labelSpacing = 6,
+		borderThickness = 1,
+		textInset = 10,
+	}
 
-	control:SetSize(width, addon.Utilities:ToUI(addon.Utilities:ToPixels(46)))
 	control.placeholder = ""
 	control.labelVisible = true
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
 	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.label:SetJustifyH("LEFT")
@@ -70,7 +50,6 @@ function Input:Create(parent, labelText)
 	control.field:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.field:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.field:SetJustifyH("LEFT")
-	control.field:SetTextInsets(textInset, textInset, 0, 0)
 
 	control.field:SetBackdrop({
 		bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -78,48 +57,24 @@ function Input:Create(parent, labelText)
 	control.field:SetBackdropColor(theme:GetColor("controlBackground"))
 
 	control.field.topBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.topBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.topBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.topBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.topBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
-	control.field.topBorder:SetHeight(borderThickness)
 
 	control.field.bottomBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.bottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.bottomBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.bottomBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
 	control.field.bottomBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
-	control.field.bottomBorder:SetHeight(borderThickness)
 
 	control.field.leftBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.leftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.leftBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.leftBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.leftBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
-	control.field.leftBorder:SetWidth(borderThickness)
 
 	control.field.rightBorder = control.field:CreateTexture(nil, "OVERLAY")
-	control.field.rightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.field.rightBorder:SetColorTexture(theme:GetColor("border"))
 	control.field.rightBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
 	control.field.rightBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
-	control.field.rightBorder:SetWidth(borderThickness)
 
 	control.field.hoverTexture = control.field:CreateTexture(nil, "ARTWORK")
 	control.field.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
@@ -131,8 +86,6 @@ function Input:Create(parent, labelText)
 	control.placeholderText:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.placeholderText:SetTextColor(0.50, 0.52, 0.56, 1)
 	control.placeholderText:SetJustifyH("LEFT")
-	control.placeholderText:SetPoint("LEFT", control.field, "LEFT", textInset, 0)
-	control.placeholderText:SetPoint("RIGHT", control.field, "RIGHT", -textInset, 0)
 	control.placeholderText:Hide()
 
 	control.field:SetScript("OnEnter", function(self)
@@ -142,6 +95,22 @@ function Input:Create(parent, labelText)
 	control.field:SetScript("OnLeave", function(self)
 		self.hoverTexture:Hide()
 	end)
+
+	function control:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutHeight(height)
+		self.layoutValues.fieldHeight = height
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.fieldHeight = height
+		self:UpdateLayout()
+	end
 
 	function control:SetText(value)
 		self.field:SetText(value or "")
@@ -175,7 +144,55 @@ function Input:Create(parent, labelText)
 
 	function control:SetLabelVisible(isVisible)
 		self.labelVisible = isVisible ~= false
-		UpdateLayout(self)
+		self:UpdateLayout()
+	end
+
+	function control:UpdateLayout()
+		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
+		local fieldHeightPx = addon.Utilities:ToPixels(self.layoutValues.fieldHeight)
+		local labelHeightPx = addon.Utilities:ToPixels(self.layoutValues.labelHeight)
+		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
+		local textInsetPx = addon.Utilities:ToPixels(self.layoutValues.textInset)
+
+		local labelSpacing = addon.Utilities:ToUI(labelSpacingPx)
+		local fieldHeight = addon.Utilities:ToUI(fieldHeightPx)
+		local labelHeight = addon.Utilities:ToUI(labelHeightPx)
+		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+		local textInset = addon.Utilities:ToUI(textInsetPx)
+
+		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		self:SetWidth(addon.Utilities:ToUI(widthPx))
+
+		self.label:ClearAllPoints()
+		self.field:ClearAllPoints()
+
+		if self.labelVisible then
+			self:SetHeight(addon.Utilities:ToUI(labelHeightPx + labelSpacingPx + fieldHeightPx))
+			self.label:Show()
+			self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+			self.label:SetHeight(labelHeight)
+			self.field:SetPoint("TOPLEFT", self.label, "BOTTOMLEFT", 0, -labelSpacing)
+			self.field:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -labelSpacing)
+		else
+			self:SetHeight(fieldHeight)
+			self.label:Hide()
+			self.field:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+			self.field:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		end
+
+		self.field:SetHeight(fieldHeight)
+		self.field:SetTextInsets(textInset, textInset, 0, 0)
+
+		self.field.topBorder:SetHeight(borderThickness)
+		self.field.bottomBorder:SetHeight(borderThickness)
+		self.field.leftBorder:SetWidth(borderThickness)
+		self.field.rightBorder:SetWidth(borderThickness)
+
+		self.placeholderText:ClearAllPoints()
+		self.placeholderText:SetPoint("LEFT", self.field, "LEFT", textInset, 0)
+		self.placeholderText:SetPoint("RIGHT", self.field, "RIGHT", -textInset, 0)
+
+		UpdatePlaceholder(self)
 	end
 
 	control.field:SetScript("OnTextChanged", function(self, userInput)
@@ -209,7 +226,7 @@ function Input:Create(parent, labelText)
 		UpdatePlaceholder(control)
 	end)
 
-	UpdateLayout(control)
+	control:UpdateLayout()
 
 	return control
 end
