@@ -28,78 +28,6 @@ local function ParsePercentOrRaw(control, text)
 	return number
 end
 
-local function UpdateLayout()
-	if not page then
-		return
-	end
-
-	local controls = page.controls
-
-	page.header:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(32)))
-
-	page.body:SetPoint("TOPLEFT", page.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
-	page.body:SetPoint("TOPRIGHT", page.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
-
-	for _, control in pairs(controls) do
-		if control.UpdateLayout then
-			control:UpdateLayout()
-		end
-	end
-
-	controls.showSoloPartyFrameCheckbox:ClearAllPoints()
-	controls.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-
-	controls.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
-	controls.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
-		"TOPLEFT",
-		controls.showSoloPartyFrameCheckbox,
-		"BOTTOMLEFT",
-		0,
-		-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-	)
-
-	controls.hideBlizzardRaidFrameManagerCheckbox:ClearAllPoints()
-	controls.hideBlizzardRaidFrameManagerCheckbox:SetPoint(
-		"TOPLEFT",
-		controls.hideBlizzardPartyRaidFramesCheckbox,
-		"BOTTOMLEFT",
-		0,
-		-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-	)
-
-	controls.globalScaleSlider:ClearAllPoints()
-	controls.globalScaleSlider:SetPoint(
-		"TOPLEFT",
-		controls.showSoloPartyFrameCheckbox,
-		"TOPLEFT",
-		addon.Utilities:ToUI(addon.Utilities:ToPixels(291)),
-		0
-	)
-
-	controls.outOfRangeAlphaSlider:ClearAllPoints()
-	controls.outOfRangeAlphaSlider:SetPoint(
-		"TOPLEFT",
-		controls.globalScaleSlider,
-		"BOTTOMLEFT",
-		0,
-		-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-	)
-end
-
-local function UpdateState(profile)
-	if not page or not profile or not profile.core then
-		return
-	end
-
-	local controls = page.controls
-
-	controls.showSoloPartyFrameCheckbox:SetChecked(profile.core.showSoloPartyFrame == true)
-	controls.hideBlizzardPartyRaidFramesCheckbox:SetChecked(profile.core.hideBlizzardRaidFrames == true)
-	controls.hideBlizzardRaidFrameManagerCheckbox:SetChecked(profile.core.hideBlizzardRaidFrameManager == true)
-	controls.globalScaleSlider:SetValueSilently(profile.core.uiScale or 1)
-	controls.outOfRangeAlphaSlider:SetValueSilently(profile.core.outOfRangeAlpha or 1)
-end
-
 function General:Ensure(parent)
 	if page then
 		return page
@@ -183,11 +111,71 @@ function General:Ensure(parent)
 	}
 
 	function page:UpdateLayout()
-		UpdateLayout()
+		local controls = self.controls
+
+		self.header:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(32)))
+
+		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
+		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
+
+		for _, control in pairs(controls) do
+			if control.UpdateLayout then
+				control:UpdateLayout()
+			end
+		end
+
+		controls.showSoloPartyFrameCheckbox:ClearAllPoints()
+		controls.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
+
+		controls.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
+		controls.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
+			"TOPLEFT",
+			controls.showSoloPartyFrameCheckbox,
+			"BOTTOMLEFT",
+			0,
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+		)
+
+		controls.hideBlizzardRaidFrameManagerCheckbox:ClearAllPoints()
+		controls.hideBlizzardRaidFrameManagerCheckbox:SetPoint(
+			"TOPLEFT",
+			controls.hideBlizzardPartyRaidFramesCheckbox,
+			"BOTTOMLEFT",
+			0,
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+		)
+
+		controls.globalScaleSlider:ClearAllPoints()
+		controls.globalScaleSlider:SetPoint(
+			"TOPLEFT",
+			controls.showSoloPartyFrameCheckbox,
+			"TOPLEFT",
+			addon.Utilities:ToUI(addon.Utilities:ToPixels(291)),
+			0
+		)
+
+		controls.outOfRangeAlphaSlider:ClearAllPoints()
+		controls.outOfRangeAlphaSlider:SetPoint(
+			"TOPLEFT",
+			controls.globalScaleSlider,
+			"BOTTOMLEFT",
+			0,
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
+		)
 	end
 
 	function page:UpdateState(profile)
-		UpdateState(profile)
+		if not profile or not profile.core then
+			return
+		end
+
+		local controls = self.controls
+
+		controls.showSoloPartyFrameCheckbox:SetChecked(profile.core.showSoloPartyFrame == true)
+		controls.hideBlizzardPartyRaidFramesCheckbox:SetChecked(profile.core.hideBlizzardRaidFrames == true)
+		controls.hideBlizzardRaidFrameManagerCheckbox:SetChecked(profile.core.hideBlizzardRaidFrameManager == true)
+		controls.globalScaleSlider:SetValueSilently(profile.core.uiScale or 1)
+		controls.outOfRangeAlphaSlider:SetValueSilently(profile.core.outOfRangeAlpha or 1)
 	end
 
 	addon.Options.Data:RegisterForUpdates(page, function(profile)

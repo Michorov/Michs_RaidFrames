@@ -143,27 +143,22 @@ local function UpdateLayout()
 		return
 	end
 
-	local layout = addon.Options.Sections.Content:GetLayout()
-	local pagePaddingPx = layout.paddingPx
+	local controls = page.controls
 	local sectionSpacingPx = addon.Utilities:ToPixels(24)
 	local sectionControlOffsetPx = addon.Utilities:ToPixels(10)
-	local controlWidthPx = addon.Utilities:ToPixels(200)
 	local controlGapPx = addon.Utilities:ToPixels(1)
-	local buttonWidthPx = addon.Utilities:ToPixels(48)
-	local buttonHeightPx = addon.Utilities:ToPixels(24)
+
+	for _, control in pairs(controls) do
+		if control.UpdateLayout then
+			control:UpdateLayout()
+		end
+	end
 
 	page.activeSectionTitle:ClearAllPoints()
-	page.activeSectionTitle:SetPoint(
-		"TOPLEFT",
-		page,
-		"TOPLEFT",
-		addon.Utilities:ToUI(pagePaddingPx),
-		-addon.Utilities:ToUI(pagePaddingPx)
-	)
+	page.activeSectionTitle:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
 
-	page.activeProfileDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
-	page.activeProfileDropdown:ClearAllPoints()
-	page.activeProfileDropdown:SetPoint(
+	controls.activeProfileDropdown:ClearAllPoints()
+	controls.activeProfileDropdown:SetPoint(
 		"TOPLEFT",
 		page.activeSectionTitle,
 		"BOTTOMLEFT",
@@ -180,9 +175,8 @@ local function UpdateLayout()
 		-addon.Utilities:ToUI(sectionSpacingPx)
 	)
 
-	page.newProfileInput:SetWidth(addon.Utilities:ToUI(controlWidthPx))
-	page.newProfileInput:ClearAllPoints()
-	page.newProfileInput:SetPoint(
+	controls.newProfileInput:ClearAllPoints()
+	controls.newProfileInput:SetPoint(
 		"TOPLEFT",
 		page.createSectionTitle,
 		"BOTTOMLEFT",
@@ -190,11 +184,10 @@ local function UpdateLayout()
 		-addon.Utilities:ToUI(sectionControlOffsetPx)
 	)
 
-	page.createProfileButton:ClearAllPoints()
-	page.createProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
-	page.createProfileButton:SetPoint(
+	controls.createProfileButton:ClearAllPoints()
+	controls.createProfileButton:SetPoint(
 		"TOPLEFT",
-		page.newProfileInput.field,
+		controls.newProfileInput.field,
 		"TOPRIGHT",
 		addon.Utilities:ToUI(controlGapPx),
 		0
@@ -203,15 +196,14 @@ local function UpdateLayout()
 	page.copySectionTitle:ClearAllPoints()
 	page.copySectionTitle:SetPoint(
 		"TOPLEFT",
-		page.newProfileInput,
+		controls.newProfileInput,
 		"BOTTOMLEFT",
 		0,
 		-addon.Utilities:ToUI(sectionSpacingPx)
 	)
 
-	page.copyFromDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
-	page.copyFromDropdown:ClearAllPoints()
-	page.copyFromDropdown:SetPoint(
+	controls.copyFromDropdown:ClearAllPoints()
+	controls.copyFromDropdown:SetPoint(
 		"TOPLEFT",
 		page.copySectionTitle,
 		"BOTTOMLEFT",
@@ -219,26 +211,35 @@ local function UpdateLayout()
 		-addon.Utilities:ToUI(sectionControlOffsetPx)
 	)
 
-	page.copyProfileInput:SetWidth(addon.Utilities:ToUI(controlWidthPx))
-	page.copyProfileInput:ClearAllPoints()
-	page.copyProfileInput:SetPoint("TOPLEFT", page.copyFromDropdown, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
+	controls.copyProfileInput:ClearAllPoints()
+	controls.copyProfileInput:SetPoint(
+		"TOPLEFT",
+		controls.copyFromDropdown,
+		"TOPRIGHT",
+		addon.Utilities:ToUI(controlGapPx),
+		0
+	)
 
-	page.copyProfileButton:ClearAllPoints()
-	page.copyProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
-	page.copyProfileButton:SetPoint("TOPLEFT", page.copyProfileInput, "TOPRIGHT", addon.Utilities:ToUI(controlGapPx), 0)
+	controls.copyProfileButton:ClearAllPoints()
+	controls.copyProfileButton:SetPoint(
+		"TOPLEFT",
+		controls.copyProfileInput,
+		"TOPRIGHT",
+		addon.Utilities:ToUI(controlGapPx),
+		0
+	)
 
 	page.deleteSectionTitle:ClearAllPoints()
 	page.deleteSectionTitle:SetPoint(
 		"TOPLEFT",
-		page.copyFromDropdown,
+		controls.copyFromDropdown,
 		"BOTTOMLEFT",
 		0,
 		-addon.Utilities:ToUI(sectionSpacingPx)
 	)
 
-	page.deleteProfileDropdown:SetWidth(addon.Utilities:ToUI(controlWidthPx))
-	page.deleteProfileDropdown:ClearAllPoints()
-	page.deleteProfileDropdown:SetPoint(
+	controls.deleteProfileDropdown:ClearAllPoints()
+	controls.deleteProfileDropdown:SetPoint(
 		"TOPLEFT",
 		page.deleteSectionTitle,
 		"BOTTOMLEFT",
@@ -246,11 +247,10 @@ local function UpdateLayout()
 		-addon.Utilities:ToUI(sectionControlOffsetPx)
 	)
 
-	page.deleteProfileButton:ClearAllPoints()
-	page.deleteProfileButton:SetSize(addon.Utilities:ToUI(buttonWidthPx), addon.Utilities:ToUI(buttonHeightPx))
-	page.deleteProfileButton:SetPoint(
+	controls.deleteProfileButton:ClearAllPoints()
+	controls.deleteProfileButton:SetPoint(
 		"TOPLEFT",
-		page.deleteProfileDropdown,
+		controls.deleteProfileDropdown,
 		"TOPRIGHT",
 		addon.Utilities:ToUI(controlGapPx),
 		0
@@ -297,48 +297,29 @@ function Profiles:Ensure(parent)
 	page.activeSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.activeSectionTitle:SetJustifyH("LEFT")
 	page.activeSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
-	page.activeSectionTitle:SetTextColor(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	page.activeSectionTitle:SetTextColor(theme:GetColor("brand"))
 	page.activeSectionTitle:SetText("Active Profile")
 
 	page.createSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.createSectionTitle:SetJustifyH("LEFT")
 	page.createSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
-	page.createSectionTitle:SetTextColor(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	page.createSectionTitle:SetTextColor(theme:GetColor("brand"))
 	page.createSectionTitle:SetText("Create New Profile")
 
 	page.copySectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.copySectionTitle:SetJustifyH("LEFT")
 	page.copySectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
-	page.copySectionTitle:SetTextColor(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	page.copySectionTitle:SetTextColor(theme:GetColor("brand"))
 	page.copySectionTitle:SetText("Copy Profile")
 
 	page.deleteSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.deleteSectionTitle:SetJustifyH("LEFT")
 	page.deleteSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
-	page.deleteSectionTitle:SetTextColor(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	page.deleteSectionTitle:SetTextColor(theme:GetColor("brand"))
 	page.deleteSectionTitle:SetText("Delete Profile")
 
 	page.activeProfileDropdown = addon.Options.Controls.Dropdown:Create(page, "")
+	page.activeProfileDropdown:SetLayoutWidth(200)
 	page.activeProfileDropdown:SetLabelVisible(false)
 	page.activeProfileDropdown:SetOnValueChanged(function(_, value)
 		local currentProfile = addon.Database:GetCurrentProfileName() or "Default"
@@ -349,36 +330,54 @@ function Profiles:Ensure(parent)
 	end)
 
 	page.newProfileInput = addon.Options.Controls.Input:Create(page, "")
+	page.newProfileInput:SetLayoutWidth(200)
 	page.newProfileInput:SetLabelVisible(false)
 	page.newProfileInput:SetPlaceholder("New Profile Name")
 
 	page.createProfileButton = addon.Options.Controls.Button:Create(page, "Create")
+	page.createProfileButton:SetLayoutSize(48, 24)
 	page.createProfileButton:SetOnClick(function()
 		CreateProfileFromInput()
 	end)
 
 	page.copyFromDropdown = addon.Options.Controls.Dropdown:Create(page, "")
+	page.copyFromDropdown:SetLayoutWidth(200)
 	page.copyFromDropdown:SetLabelVisible(false)
 
 	page.copyProfileInput = addon.Options.Controls.Input:Create(page, "")
+	page.copyProfileInput:SetLayoutWidth(200)
 	page.copyProfileInput:SetLabelVisible(false)
 	page.copyProfileInput:SetPlaceholder("New Profile Name")
 
 	page.copyProfileButton = addon.Options.Controls.Button:Create(page, "Copy")
+	page.copyProfileButton:SetLayoutSize(48, 24)
 	page.copyProfileButton:SetOnClick(function()
 		CopyProfileFromInput()
 	end)
 
 	page.deleteProfileDropdown = addon.Options.Controls.Dropdown:Create(page, "")
+	page.deleteProfileDropdown:SetLayoutWidth(200)
 	page.deleteProfileDropdown:SetLabelVisible(false)
 
 	page.deleteProfileButton = addon.Options.Controls.Button:Create(page, "Delete")
+	page.deleteProfileButton:SetLayoutSize(48, 24)
 	page.deleteProfileButton:SetOnClick(function()
 		DeleteSelectedProfile()
 	end)
 
+	page.controls = {
+		activeProfileDropdown = page.activeProfileDropdown,
+		newProfileInput = page.newProfileInput,
+		createProfileButton = page.createProfileButton,
+		copyFromDropdown = page.copyFromDropdown,
+		copyProfileInput = page.copyProfileInput,
+		copyProfileButton = page.copyProfileButton,
+		deleteProfileDropdown = page.deleteProfileDropdown,
+		deleteProfileButton = page.deleteProfileButton,
+	}
+
 	function page:UpdateLayout()
-		--UpdateLayout()
+		UpdateLayout()
 	end
 
 	function page:UpdateState(profile)
