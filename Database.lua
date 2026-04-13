@@ -339,7 +339,6 @@ local DEFAULTS = {
 				healerOnly = false,
 				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 8,
-				borderEnabled = true,
 				borderThicknessPx = 1,
 			},
 			border = {
@@ -613,7 +612,6 @@ local DEFAULTS = {
 				healerOnly = false,
 				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 6,
-				borderEnabled = true,
 				borderThicknessPx = 1,
 			},
 			border = {

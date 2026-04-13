@@ -28,7 +28,7 @@ local function GetControllerState()
 				auras = "buffs",
 				texts = "name",
 				indicators = "readyCheck",
-				bars = "absorbs",
+				bars = "health",
 			},
 		}
 

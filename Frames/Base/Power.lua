@@ -35,7 +35,6 @@ local function UpdateSettingsCache(settings)
 		healerOnly = power.healerOnly == true,
 		texture = power.texture or "Interface\\Buttons\\WHITE8x8",
 		heightPx = addon.Utilities:ToPixels(power.height or 4),
-		borderEnabled = power.borderEnabled ~= false,
 		borderThicknessPx = addon.Utilities:ToPixels(power.borderThicknessPx or 1),
 	}
 
@@ -91,7 +90,7 @@ function Power:UpdateSettings(frame, settings)
 
 	powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)
 
-	if cachedSettings.borderEnabled and scaledBorderPx > 0 then
+	if scaledBorderPx > 0 then
 		powerBar.border:SetBackdrop({
 			edgeFile = "Interface\\Buttons\\WHITE8x8",
 			edgeSize = addon.Utilities:ToUI(scaledBorderPx),

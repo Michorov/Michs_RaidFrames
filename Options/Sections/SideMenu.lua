@@ -59,6 +59,12 @@ function SideMenu:Ensure(parent)
 		addon.Options:SetActivePage("layout")
 	end)
 
+	local frameButton = addon.Options.Controls.Button:Create(sideMenu, "Frames")
+	InitializeButton(frameButton)
+	frameButton:SetOnClick(function()
+		addon.Options:SetActivePage("frames")
+	end)
+
 	local barsButton = addon.Options.Controls.Button:Create(sideMenu, "Bars")
 	InitializeButton(barsButton)
 	barsButton:SetOnClick(function()
@@ -92,6 +98,7 @@ function SideMenu:Ensure(parent)
 	sideMenu.controls = {
 		general = generalButton,
 		layout = layoutButton,
+		frames = frameButton,
 		bars = barsButton,
 		texts = textsButton,
 		auras = aurasButton,
@@ -149,13 +156,17 @@ function SideMenu:UpdateLayout()
 	sideMenu.controls.layout:SetPoint("TOPLEFT", sideMenu.controls.general, "BOTTOMLEFT", 0, -compactSpacing)
 	sideMenu.controls.layout:SetPoint("TOPRIGHT", sideMenu.controls.general, "BOTTOMRIGHT", 0, -compactSpacing)
 
+	sideMenu.controls.frames:ClearAllPoints()
+	sideMenu.controls.frames:SetPoint("TOPLEFT", sideMenu.controls.layout, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.frames:SetPoint("TOPRIGHT", sideMenu.controls.layout, "BOTTOMRIGHT", 0, -compactSpacing)
+
 	sideMenu.controls.texts:ClearAllPoints()
 	sideMenu.controls.texts:SetPoint("TOPLEFT", sideMenu.controls.bars, "BOTTOMLEFT", 0, -compactSpacing)
 	sideMenu.controls.texts:SetPoint("TOPRIGHT", sideMenu.controls.bars, "BOTTOMRIGHT", 0, -compactSpacing)
 
 	sideMenu.controls.bars:ClearAllPoints()
-	sideMenu.controls.bars:SetPoint("TOPLEFT", sideMenu.controls.layout, "BOTTOMLEFT", 0, -compactSpacing)
-	sideMenu.controls.bars:SetPoint("TOPRIGHT", sideMenu.controls.layout, "BOTTOMRIGHT", 0, -compactSpacing)
+	sideMenu.controls.bars:SetPoint("TOPLEFT", sideMenu.controls.frames, "BOTTOMLEFT", 0, -compactSpacing)
+	sideMenu.controls.bars:SetPoint("TOPRIGHT", sideMenu.controls.frames, "BOTTOMRIGHT", 0, -compactSpacing)
 
 	sideMenu.controls.auras:ClearAllPoints()
 	sideMenu.controls.auras:SetPoint("TOPLEFT", sideMenu.controls.texts, "BOTTOMLEFT", 0, -compactSpacing)

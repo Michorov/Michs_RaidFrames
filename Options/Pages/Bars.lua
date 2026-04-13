@@ -10,9 +10,10 @@ local page
 local theme = addon.Options.Theme
 
 local subpageOptions = {
-	{ value = "absorbs", text = "Absorbs" },
+	{ value = "health", text = "Health" },
+	{ value = "power", text = "Power" },
 	{ value = "healAbsorbs", text = "Heal Absorbs" },
-	{ value = "buffOverlay", text = "Buff Overlay" },
+	{ value = "absorbs", text = "Absorbs" },
 }
 
 local function GetControllerState()
@@ -28,11 +29,24 @@ local function GetControllerState()
 				auras = "buffs",
 				texts = "name",
 				indicators = "readyCheck",
-				bars = "absorbs",
+				bars = "health",
 			},
 		}
 
 	return addon.Options.ControllerState
+end
+
+local function GetActiveSubpageKey()
+	local state = GetControllerState()
+	local subpageKey = (state.subpages or {}).bars or subpageOptions[1].value
+
+	for _, option in ipairs(subpageOptions) do
+		if option.value == subpageKey then
+			return subpageKey
+		end
+	end
+
+	return subpageOptions[1].value
 end
 
 function Bars:Ensure(parent)
@@ -67,6 +81,12 @@ function Bars:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
+		if page and page.UpdateLayout then
+			page:UpdateLayout()
+		end
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
@@ -76,31 +96,63 @@ function Bars:Ensure(parent)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.subpages.bars = value
+		if page and page.SetActiveSubpage then
+			page:SetActiveSubpage(value, addon.Database:GetProfile())
+		end
 	end)
 
-	page.description = page.body:CreateFontString(nil, "OVERLAY")
-	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-	page.description:SetJustifyH("LEFT")
-	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
-	page.description:SetTextColor(theme:GetTextColor("secondary"))
-	page.description:SetText("Testing controls for the Bars page live here for now.")
+	local healthSubpage = addon.Options.Pages.Bars.Health:Ensure(page.body)
+	local powerSubpage = addon.Options.Pages.Bars.Power:Ensure(page.body)
+	local healAbsorbsSubpage = addon.Options.Pages.Bars.HealAbsorbs:Ensure(page.body)
+	local absorbsSubpage = addon.Options.Pages.Bars.Absorbs:Ensure(page.body)
 
-	page.opacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Background Color")
-	page.opacityTestColorPicker:SetLayoutWidth(200)
-	page.opacityTestColorPicker:SetHasOpacity(true)
-	page.opacityTestColorPicker:SetColor(1, 0.62, 0.24, 0.65)
+	page.subpages = {
+		health = healthSubpage,
+		power = powerSubpage,
+		healAbsorbs = healAbsorbsSubpage,
+		absorbs = absorbsSubpage,
+	}
 
-	page.noOpacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Health Color")
-	page.noOpacityTestColorPicker:SetLayoutWidth(200)
-	page.noOpacityTestColorPicker:SetHasOpacity(false)
-	page.noOpacityTestColorPicker:SetColor(0.20, 0.85, 0.35, 1)
+	for subpageKey, subpage in pairs(page.subpages) do
+		subpage:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+		subpage:SetPoint("TOPRIGHT", page.body, "TOPRIGHT", 0, 0)
+		subpage:SetPoint("BOTTOMLEFT", page.body, "BOTTOMLEFT", 0, 0)
+		subpage:SetPoint("BOTTOMRIGHT", page.body, "BOTTOMRIGHT", 0, 0)
+		subpage:SetShown(subpageKey == GetActiveSubpageKey())
+	end
 
 	page.controls = {
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
-		opacityTestColorPicker = page.opacityTestColorPicker,
-		noOpacityTestColorPicker = page.noOpacityTestColorPicker,
 	}
+
+	function page:SetActiveSubpage(subpageKey, profile)
+		local state = GetControllerState()
+		state.subpages = state.subpages or {}
+
+		local activeSubpageKey = subpageOptions[1].value
+		for _, option in ipairs(subpageOptions) do
+			if option.value == subpageKey then
+				activeSubpageKey = subpageKey
+				break
+			end
+		end
+
+		state.subpages.bars = activeSubpageKey
+
+		for key, subpage in pairs(self.subpages) do
+			subpage:SetShown(key == activeSubpageKey)
+		end
+
+		local activeSubpage = self.subpages[activeSubpageKey]
+		if activeSubpage and activeSubpage.UpdateLayout then
+			activeSubpage:UpdateLayout()
+		end
+
+		if activeSubpage and activeSubpage.UpdateState then
+			activeSubpage:UpdateState(profile)
+		end
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
@@ -129,32 +181,26 @@ function Bars:Ensure(parent)
 			0
 		)
 
-		controls.opacityTestColorPicker:ClearAllPoints()
-		controls.opacityTestColorPicker:SetPoint(
-			"TOPLEFT",
-			self.description,
-			"BOTTOMLEFT",
-			0,
-			-addon.Utilities:ToUI(bodyRowSpacingPx)
-		)
-
-		controls.noOpacityTestColorPicker:ClearAllPoints()
-		controls.noOpacityTestColorPicker:SetPoint(
-			"TOPLEFT",
-			controls.opacityTestColorPicker,
-			"BOTTOMLEFT",
-			0,
-			-addon.Utilities:ToUI(bodyRowSpacingPx)
-		)
+		for _, subpage in pairs(self.subpages) do
+			if subpage.UpdateLayout then
+				subpage:UpdateLayout()
+			end
+		end
 	end
 
 	function page:UpdateState(profile)
 		local state = GetControllerState()
+		local activeSubpageKey = GetActiveSubpageKey()
 
 		self.modeToggle:SetValue(state.mode or "party")
 		self.subpageDropdown:SetOptions(subpageOptions)
-		self.subpageDropdown:SetValue(state.subpages.bars or subpageOptions[1].value)
+		self.subpageDropdown:SetValue(activeSubpageKey)
+		self:SetActiveSubpage(activeSubpageKey, profile)
 	end
+
+	addon.Options.Data:RegisterForUpdates(page, function(profile)
+		page:UpdateState(profile)
+	end)
 
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())

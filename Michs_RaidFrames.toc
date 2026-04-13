@@ -79,6 +79,11 @@ Options/Controls/SegmentedToggle.lua
 Options/Controls/Slider.lua
 Options/Pages/General.lua
 Options/Pages/Layout.lua
+Options/Pages/Frames.lua
+Options/Pages/Bars/Health.lua
+Options/Pages/Bars/Power.lua
+Options/Pages/Bars/HealAbsorbs.lua
+Options/Pages/Bars/Absorbs.lua
 Options/Pages/Bars.lua
 Options/Pages/Texts.lua
 Options/Pages/Auras.lua
