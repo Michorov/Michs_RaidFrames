@@ -82,7 +82,7 @@ local function UpdateLayout()
 		controls.globalScaleSlider,
 		"BOTTOMLEFT",
 		0,
-		-addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
+		-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
 	)
 end
 

@@ -89,22 +89,21 @@ end
 
 function Slider:Create(parent, text)
 	local control = CreateFrame("Frame", nil, parent)
-	local trackHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
-	local trackWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(200))
-	local thumbSize = addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-	local trackVerticalOffset = addon.Utilities:ToUI(addon.Utilities:ToPixels(4))
-	local topRowHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-	local labelSpacing = addon.Utilities:ToUI(addon.Utilities:ToPixels(6))
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(1))
-	local valueInputWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(48))
-	local valueInputGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(8))
-
-	control:SetSize(trackWidth, topRowHeight + labelSpacing + thumbSize)
-	control.trackWidth = trackWidth
+	control.layoutValues = {
+		width = 200,
+		trackHeight = 4,
+		thumbSize = 12,
+		trackVerticalOffset = 4,
+		topRowHeight = 16,
+		labelSpacing = 6,
+		borderThickness = 1,
+		valueInputWidth = 48,
+		valueInputGap = 8,
+	}
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
-	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
+	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
 	control.label:SetText(text or "Slider")
@@ -112,7 +111,6 @@ function Slider:Create(parent, text)
 	control.valueInput = CreateFrame("EditBox", nil, control)
 	control.valueInput:SetAutoFocus(false)
 	control.valueInput:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	control.valueInput:SetSize(valueInputWidth, topRowHeight)
 	control.valueInput:SetFont(theme.fonts.arialNarrow, 12, "")
 	control.valueInput:SetTextColor(0.65, 0.65, 0.68, 1)
 	control.valueInput:SetJustifyH("RIGHT")
@@ -120,95 +118,48 @@ function Slider:Create(parent, text)
 	control.valueInput:SetText("0")
 	control.valueInput:SetCursorPosition(0)
 
-	control.label:ClearAllPoints()
-	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-	control.label:SetPoint("TOPRIGHT", control.valueInput, "TOPLEFT", -valueInputGap, 0)
-	control.label:SetHeight(topRowHeight)
-
 	control.slider = CreateFrame("Slider", nil, control)
 	control.slider:SetOrientation("HORIZONTAL")
-	control.slider:SetPoint("TOPLEFT", control, "TOPLEFT", 0, -(topRowHeight + labelSpacing))
-	control.slider:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, -(topRowHeight + labelSpacing))
-	control.slider:SetHeight(thumbSize)
 	control.slider:SetMinMaxValues(0, 100)
 	control.slider:SetValueStep(1)
 	control.slider:SetObeyStepOnDrag(true)
 
 	control.track = control.slider:CreateTexture(nil, "BACKGROUND")
 	control.track:SetColorTexture(theme:GetColor("controlBackground"))
-	control.track:SetSize(trackWidth, trackHeight)
-	control.track:SetPoint("TOPLEFT", control.slider, "TOPLEFT", 0, -trackVerticalOffset)
 
 	control.trackTopBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackTopBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.trackTopBorder:SetColorTexture(theme:GetColor("border"))
 	control.trackTopBorder:SetPoint("TOPLEFT", control.track, "TOPLEFT", 0, 0)
 	control.trackTopBorder:SetPoint("TOPRIGHT", control.track, "TOPRIGHT", 0, 0)
-	control.trackTopBorder:SetHeight(borderThickness)
 
 	control.trackBottomBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackBottomBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.trackBottomBorder:SetColorTexture(theme:GetColor("border"))
 	control.trackBottomBorder:SetPoint("BOTTOMLEFT", control.track, "BOTTOMLEFT", 0, 0)
 	control.trackBottomBorder:SetPoint("BOTTOMRIGHT", control.track, "BOTTOMRIGHT", 0, 0)
-	control.trackBottomBorder:SetHeight(borderThickness)
 
 	control.trackLeftBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackLeftBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.trackLeftBorder:SetColorTexture(theme:GetColor("border"))
 	control.trackLeftBorder:SetPoint("TOPLEFT", control.track, "TOPLEFT", 0, 0)
 	control.trackLeftBorder:SetPoint("BOTTOMLEFT", control.track, "BOTTOMLEFT", 0, 0)
-	control.trackLeftBorder:SetWidth(borderThickness)
 
 	control.trackRightBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackRightBorder:SetColorTexture(
-		theme.colors.border[1],
-		theme.colors.border[2],
-		theme.colors.border[3],
-		theme.colors.border[4]
-	)
+	control.trackRightBorder:SetColorTexture(theme:GetColor("border"))
 	control.trackRightBorder:SetPoint("TOPRIGHT", control.track, "TOPRIGHT", 0, 0)
 	control.trackRightBorder:SetPoint("BOTTOMRIGHT", control.track, "BOTTOMRIGHT", 0, 0)
-	control.trackRightBorder:SetWidth(borderThickness)
 
 	control.fill = control.slider:CreateTexture(nil, "ARTWORK")
 	control.fill:SetDrawLayer("ARTWORK", 1)
-	control.fill:SetColorTexture(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
+	control.fill:SetColorTexture(theme:GetColor("brand"))
 	control.fill:SetPoint("LEFT", control.track, "LEFT", 0, 0)
-	control.fill:SetHeight(trackHeight)
 	control.fill:SetWidth(0)
 
 	control.slider:SetThumbTexture("Interface\\Buttons\\WHITE8x8")
 	control.thumb = control.slider:GetThumbTexture()
-	control.thumb:SetSize(thumbSize, thumbSize)
 	control.thumb:SetVertexColor(0, 0, 0, 0)
 
 	control.handle = control.slider:CreateTexture(nil, "OVERLAY")
 	control.handle:SetDrawLayer("OVERLAY", 2)
-	control.handle:SetColorTexture(
-		theme.colors.brand[1],
-		theme.colors.brand[2],
-		theme.colors.brand[3],
-		theme.colors.brand[4]
-	)
-	control.handle:SetSize(thumbSize, thumbSize)
+	control.handle:SetColorTexture(theme:GetColor("brand"))
 
 	function control:SetLabel(value)
 		self.label:SetText(value or "")
@@ -242,12 +193,9 @@ function Slider:Create(parent, text)
 		self.slider:SetValue(value)
 	end
 
-	function control:SetControlWidth(width)
-		local snappedWidth = addon.Utilities:ToUI(addon.Utilities:ToPixels(width))
-		self:SetWidth(snappedWidth)
-		self.trackWidth = snappedWidth
-		self.track:SetWidth(snappedWidth)
-		UpdateVisuals(self)
+	function control:SetLayoutWidth(width)
+		self.layoutValues.width = width
+		self:UpdateLayout()
 	end
 
 	function control:SetValueSilently(value)
@@ -258,6 +206,51 @@ function Slider:Create(parent, text)
 
 	function control:GetValue()
 		return self.slider:GetValue()
+	end
+
+	function control:UpdateLayout()
+		local controlWidthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local trackHeightPx = addon.Utilities:ToPixels(self.layoutValues.trackHeight)
+		local thumbSizePx = addon.Utilities:ToPixels(self.layoutValues.thumbSize)
+		local trackVerticalOffsetPx = addon.Utilities:ToPixels(self.layoutValues.trackVerticalOffset)
+		local topRowHeightPx = addon.Utilities:ToPixels(self.layoutValues.topRowHeight)
+		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
+		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
+		local valueInputWidthPx = addon.Utilities:ToPixels(self.layoutValues.valueInputWidth)
+		local valueInputGapPx = addon.Utilities:ToPixels(self.layoutValues.valueInputGap)
+		local sliderTopOffsetPx = topRowHeightPx + labelSpacingPx
+		local controlHeightPx = topRowHeightPx + labelSpacingPx + thumbSizePx
+
+		self.trackWidth = addon.Utilities:ToUI(controlWidthPx)
+
+		self:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(controlHeightPx))
+		self.valueInput:SetSize(addon.Utilities:ToUI(valueInputWidthPx), addon.Utilities:ToUI(topRowHeightPx))
+
+		self.label:ClearAllPoints()
+		self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+		self.label:SetPoint("TOPRIGHT", self.valueInput, "TOPLEFT", -addon.Utilities:ToUI(valueInputGapPx), 0)
+		self.label:SetHeight(addon.Utilities:ToUI(topRowHeightPx))
+
+		self.slider:ClearAllPoints()
+		self.slider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
+		self.slider:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
+		self.slider:SetHeight(addon.Utilities:ToUI(thumbSizePx))
+
+		self.track:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(trackHeightPx))
+		self.track:ClearAllPoints()
+		self.track:SetPoint("TOPLEFT", self.slider, "TOPLEFT", 0, -addon.Utilities:ToUI(trackVerticalOffsetPx))
+
+		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
+		self.trackTopBorder:SetHeight(borderThickness)
+		self.trackBottomBorder:SetHeight(borderThickness)
+		self.trackLeftBorder:SetWidth(borderThickness)
+		self.trackRightBorder:SetWidth(borderThickness)
+
+		self.fill:SetHeight(addon.Utilities:ToUI(trackHeightPx))
+		self.thumb:SetSize(addon.Utilities:ToUI(thumbSizePx), addon.Utilities:ToUI(thumbSizePx))
+		self.handle:SetSize(addon.Utilities:ToUI(thumbSizePx), addon.Utilities:ToUI(thumbSizePx))
+
+		UpdateVisuals(self)
 	end
 
 	control.valueInput:SetScript("OnEnterPressed", function()
@@ -299,18 +292,8 @@ function Slider:Create(parent, text)
 	end)
 
 	control.slider:SetScript("OnLeave", function()
-		control.handle:SetColorTexture(
-			theme.colors.brand[1],
-			theme.colors.brand[2],
-			theme.colors.brand[3],
-			theme.colors.brand[4]
-		)
-		control.fill:SetColorTexture(
-			theme.colors.brand[1],
-			theme.colors.brand[2],
-			theme.colors.brand[3],
-			theme.colors.brand[4]
-		)
+		control.handle:SetColorTexture(theme:GetColor("brand"))
+		control.fill:SetColorTexture(theme:GetColor("brand"))
 	end)
 
 	control.slider:SetScript("OnValueChanged", function(_, value)
@@ -326,6 +309,7 @@ function Slider:Create(parent, text)
 		end
 	end)
 
+	control:UpdateLayout()
 	control:SetValue(0)
 	UpdateValueText(control, control.slider:GetValue())
 
