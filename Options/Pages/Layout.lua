@@ -393,7 +393,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(fourthRowOffsetPx)
 	)
 
-	page.horizontalPositionSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.horizontalPositionSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.horizontalPositionSlider:ClearAllPoints()
 	page.horizontalPositionSlider:SetPoint(
 		"TOPLEFT",
@@ -403,7 +403,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.verticalPositionSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.verticalPositionSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.verticalPositionSlider:ClearAllPoints()
 	page.verticalPositionSlider:SetPoint(
 		"TOPLEFT",
@@ -413,7 +413,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.horizontalSpacingSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.horizontalSpacingSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.horizontalSpacingSlider:ClearAllPoints()
 	page.horizontalSpacingSlider:SetPoint(
 		"TOPLEFT",
@@ -423,7 +423,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.verticalSpacingSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.verticalSpacingSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.verticalSpacingSlider:ClearAllPoints()
 	page.verticalSpacingSlider:SetPoint(
 		"TOPLEFT",
@@ -433,7 +433,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.frameWidthSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.frameWidthSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.frameWidthSlider:ClearAllPoints()
 	page.frameWidthSlider:SetPoint(
 		"TOPLEFT",
@@ -443,7 +443,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.frameHeightSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.frameHeightSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.frameHeightSlider:ClearAllPoints()
 	page.frameHeightSlider:SetPoint(
 		"TOPLEFT",
@@ -453,7 +453,7 @@ function Layout:UpdateLayout()
 		-addon.Utilities:ToUI(sliderTopInsetPx)
 	)
 
-	page.frameBorderThicknessSlider:SetControlWidth(addon.Utilities:ToUI(threeColumnSlotWidthPx))
+	page.frameBorderThicknessSlider:SetControlWidthPx(threeColumnSlotWidthPx)
 	page.frameBorderThicknessSlider:ClearAllPoints()
 	page.frameBorderThicknessSlider:SetPoint(
 		"TOPLEFT",

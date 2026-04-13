@@ -32,8 +32,8 @@ function Checkbox:Create(parent, text)
 
 	checkbox.layoutValues = {
 		width = 220,
-		height = 20,
-		boxSize = 20,
+		height = 16,
+		boxSize = 16,
 		borderThickness = 1,
 		textInset = 8,
 		checkInset = 3,
@@ -131,7 +131,6 @@ function Checkbox:Create(parent, text)
 		local boxSize = addon.Utilities:ToUI(boxSizePx)
 		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		local checkInset = addon.Utilities:ToUI(checkInsetPx)
-		local textInset = addon.Utilities:ToUI(textInsetPx)
 		local boxTopInset = addon.Utilities:ToUI(boxTopInsetPx)
 		local textLeftOffset = addon.Utilities:ToUI(boxSizePx + textInsetPx)
 
