@@ -293,7 +293,6 @@ function Profiles:Ensure(parent)
 	end
 
 	page = CreateFrame("Frame", nil, parent)
-
 	page.activeSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.activeSectionTitle:SetJustifyH("LEFT")
 	page.activeSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")

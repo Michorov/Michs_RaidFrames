@@ -116,7 +116,13 @@ function General:Ensure(parent)
 		self.header:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(32)))
 
 		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
-		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
+		self.body:SetPoint(
+			"TOPRIGHT",
+			self.header,
+			"BOTTOMRIGHT",
+			0,
+			-addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
+		)
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then

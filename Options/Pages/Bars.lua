@@ -35,117 +35,42 @@ local function GetControllerState()
 	return addon.Options.ControllerState
 end
 
-local function UpdateLayout()
-	if not page then
-		return
-	end
-
-	local layout = addon.Options.Sections.Content:GetLayout()
-	local pagePaddingPx = layout.paddingPx
-	local headerControlGapPx = addon.Utilities:ToPixels(8)
-	local headerControlWidthPx = addon.Utilities:ToPixels(150)
-	local headerRowHeightPx = addon.Utilities:ToPixels(24)
-	local toggleWidthPx = addon.Utilities:ToPixels(112)
-	local firstControlOffsetPx = addon.Utilities:ToPixels(12)
-	local bodyRowSpacingPx = addon.Utilities:ToPixels(16)
-	local testControlWidthPx = layout.twoColumn.controlWidthPx
-
-	page.headerRow:ClearAllPoints()
-	page.headerRow:SetPoint(
-		"TOPLEFT",
-		page,
-		"TOPLEFT",
-		addon.Utilities:ToUI(pagePaddingPx),
-		-addon.Utilities:ToUI(pagePaddingPx)
-	)
-	page.headerRow:SetPoint(
-		"TOPRIGHT",
-		page,
-		"TOPRIGHT",
-		-addon.Utilities:ToUI(pagePaddingPx),
-		-addon.Utilities:ToUI(pagePaddingPx)
-	)
-	page.headerRow:SetHeight(addon.Utilities:ToUI(headerRowHeightPx))
-
-	page.title:ClearAllPoints()
-	page.title:SetPoint("LEFT", page.headerRow, "LEFT", 0, 0)
-
-	page.modeToggle:SetWidth(addon.Utilities:ToUI(toggleWidthPx))
-	page.modeToggle:ClearAllPoints()
-	page.modeToggle:SetPoint("RIGHT", page.headerRow, "RIGHT", 0, 0)
-
-	page.subpageDropdown:SetWidth(addon.Utilities:ToUI(headerControlWidthPx))
-	page.subpageDropdown:ClearAllPoints()
-	page.subpageDropdown:SetPoint("RIGHT", page.modeToggle, "LEFT", -addon.Utilities:ToUI(headerControlGapPx), 0)
-
-	page.body:ClearAllPoints()
-	page.body:SetPoint("TOPLEFT", page.headerRow, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
-	page.body:SetPoint("TOPRIGHT", page.headerRow, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
-	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", addon.Utilities:ToUI(pagePaddingPx), 0)
-	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", -addon.Utilities:ToUI(pagePaddingPx), 0)
-
-	page.description:ClearAllPoints()
-	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-
-	page.opacityTestColorPicker:SetWidth(addon.Utilities:ToUI(testControlWidthPx))
-	page.opacityTestColorPicker:ClearAllPoints()
-	page.opacityTestColorPicker:SetPoint(
-		"TOPLEFT",
-		page.description,
-		"BOTTOMLEFT",
-		0,
-		-addon.Utilities:ToUI(bodyRowSpacingPx)
-	)
-
-	page.noOpacityTestColorPicker:SetWidth(addon.Utilities:ToUI(testControlWidthPx))
-	page.noOpacityTestColorPicker:ClearAllPoints()
-	page.noOpacityTestColorPicker:SetPoint(
-		"TOPLEFT",
-		page.opacityTestColorPicker,
-		"BOTTOMLEFT",
-		0,
-		-addon.Utilities:ToUI(bodyRowSpacingPx)
-	)
-end
-
-local function UpdateState(profile)
-	if not page then
-		return
-	end
-
-	local state = GetControllerState()
-
-	page.modeToggle:SetValue(state.mode or "party")
-	page.subpageDropdown:SetOptions(subpageOptions)
-	page.subpageDropdown:SetValue(state.subpages.bars or subpageOptions[1].value)
-end
-
 function Bars:Ensure(parent)
 	if page then
 		return page
 	end
 
 	page = CreateFrame("Frame", nil, parent)
-	page.headerRow = CreateFrame("Frame", nil, page)
-	page.body = CreateFrame("Frame", nil, page)
 
-	page.title = page.headerRow:CreateFontString(nil, "OVERLAY")
-	page.title:SetJustifyH("LEFT")
-	page.title:SetFont(theme.fonts.arialNarrow, 20, "")
-	page.title:SetTextColor(0.88, 0.89, 0.92, 1)
-	page.title:SetText("Bars")
+	page.header = CreateFrame("Frame", nil, page)
+	page.header:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
+	page.header:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, 0)
+
+	page.body = CreateFrame("Frame", nil, page)
+	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 0, 0)
+	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", 0, 0)
+
+	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
+	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
+	page.header.title:SetJustifyH("LEFT")
+	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
+	page.header.title:SetText("Bars")
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
-		page.headerRow,
+		page.header,
 		{ value = "party", text = "Party" },
 		{ value = "raid", text = "Raid" }
 	)
+	page.modeToggle:SetLayoutSize(112, 24)
+	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
 	end)
 
-	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.headerRow, "")
+	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
+	page.subpageDropdown:SetLayoutWidth(150)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
@@ -154,25 +79,81 @@ function Bars:Ensure(parent)
 	end)
 
 	page.description = page.body:CreateFontString(nil, "OVERLAY")
+	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
 	page.description:SetJustifyH("LEFT")
 	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
-	page.description:SetTextColor(0.65, 0.65, 0.68, 1)
+	page.description:SetTextColor(theme:GetTextColor("secondary"))
 	page.description:SetText("Testing controls for the Bars page live here for now.")
 
 	page.opacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Background Color")
+	page.opacityTestColorPicker:SetLayoutWidth(200)
 	page.opacityTestColorPicker:SetHasOpacity(true)
 	page.opacityTestColorPicker:SetColor(1, 0.62, 0.24, 0.65)
 
 	page.noOpacityTestColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Health Color")
+	page.noOpacityTestColorPicker:SetLayoutWidth(200)
 	page.noOpacityTestColorPicker:SetHasOpacity(false)
 	page.noOpacityTestColorPicker:SetColor(0.20, 0.85, 0.35, 1)
 
+	page.controls = {
+		modeToggle = page.modeToggle,
+		subpageDropdown = page.subpageDropdown,
+		opacityTestColorPicker = page.opacityTestColorPicker,
+		noOpacityTestColorPicker = page.noOpacityTestColorPicker,
+	}
+
 	function page:UpdateLayout()
-		--UpdateLayout()
+		local controls = self.controls
+		local headerHeightPx = addon.Utilities:ToPixels(32)
+		local firstControlOffsetPx = addon.Utilities:ToPixels(16)
+		local headerControlGapPx = addon.Utilities:ToPixels(8)
+		local bodyRowSpacingPx = addon.Utilities:ToPixels(16)
+
+		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
+
+		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
+
+		for _, control in pairs(controls) do
+			if control.UpdateLayout then
+				control:UpdateLayout()
+			end
+		end
+
+		controls.subpageDropdown:ClearAllPoints()
+		controls.subpageDropdown:SetPoint(
+			"RIGHT",
+			controls.modeToggle,
+			"LEFT",
+			-addon.Utilities:ToUI(headerControlGapPx),
+			0
+		)
+
+		controls.opacityTestColorPicker:ClearAllPoints()
+		controls.opacityTestColorPicker:SetPoint(
+			"TOPLEFT",
+			self.description,
+			"BOTTOMLEFT",
+			0,
+			-addon.Utilities:ToUI(bodyRowSpacingPx)
+		)
+
+		controls.noOpacityTestColorPicker:ClearAllPoints()
+		controls.noOpacityTestColorPicker:SetPoint(
+			"TOPLEFT",
+			controls.opacityTestColorPicker,
+			"BOTTOMLEFT",
+			0,
+			-addon.Utilities:ToUI(bodyRowSpacingPx)
+		)
 	end
 
 	function page:UpdateState(profile)
-		UpdateState(profile)
+		local state = GetControllerState()
+
+		self.modeToggle:SetValue(state.mode or "party")
+		self.subpageDropdown:SetOptions(subpageOptions)
+		self.subpageDropdown:SetValue(state.subpages.bars or subpageOptions[1].value)
 	end
 
 	page:UpdateLayout()
