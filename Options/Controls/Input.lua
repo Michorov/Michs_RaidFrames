@@ -30,7 +30,8 @@ function Input:Create(parent, labelText)
 		width = 220,
 		fieldHeight = 24,
 		labelHeight = 16,
-		labelSpacing = 6,
+		labelSpacing = 4,
+		labelInset = 2,
 		borderThickness = 1,
 		textInset = 10,
 	}
@@ -151,12 +152,14 @@ function Input:Create(parent, labelText)
 		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
 		local fieldHeightPx = addon.Utilities:ToPixels(self.layoutValues.fieldHeight)
 		local labelHeightPx = addon.Utilities:ToPixels(self.layoutValues.labelHeight)
+		local labelInsetPx = addon.Utilities:ToPixels(self.layoutValues.labelInset)
 		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
 		local textInsetPx = addon.Utilities:ToPixels(self.layoutValues.textInset)
 
 		local labelSpacing = addon.Utilities:ToUI(labelSpacingPx)
 		local fieldHeight = addon.Utilities:ToUI(fieldHeightPx)
 		local labelHeight = addon.Utilities:ToUI(labelHeightPx)
+		local labelInset = addon.Utilities:ToUI(labelInsetPx)
 		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		local textInset = addon.Utilities:ToUI(textInsetPx)
 
@@ -169,10 +172,22 @@ function Input:Create(parent, labelText)
 		if self.labelVisible then
 			self:SetHeight(addon.Utilities:ToUI(labelHeightPx + labelSpacingPx + fieldHeightPx))
 			self.label:Show()
-			self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+			self.label:SetPoint("TOPLEFT", self, "TOPLEFT", labelInset, 0)
 			self.label:SetHeight(labelHeight)
-			self.field:SetPoint("TOPLEFT", self.label, "BOTTOMLEFT", 0, -labelSpacing)
-			self.field:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -labelSpacing)
+			self.field:SetPoint(
+				"TOPLEFT",
+				self,
+				"TOPLEFT",
+				0,
+				-addon.Utilities:ToUI(labelHeightPx + labelSpacingPx)
+			)
+			self.field:SetPoint(
+				"TOPRIGHT",
+				self,
+				"TOPRIGHT",
+				0,
+				-addon.Utilities:ToUI(labelHeightPx + labelSpacingPx)
+			)
 		else
 			self:SetHeight(fieldHeight)
 			self.label:Hide()
