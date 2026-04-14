@@ -116,6 +116,10 @@ function Options:Ensure()
 		Options:Snap()
 	end)
 
+	panel:HookScript("OnHide", function()
+		addon.FrameRegistry:DisableTestMode()
+	end)
+
 	panel.header = addon.Options.Sections.Header:Ensure(panel)
 	panel.header:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, 0)
 	panel.header:SetPoint("TOPRIGHT", panel, "TOPRIGHT", 0, 0)
