@@ -1,0 +1,421 @@
+local _, addon = ...
+
+addon.Options = addon.Options or {}
+addon.Options.Pages = addon.Options.Pages or {}
+addon.Options.Pages.Auras = addon.Options.Pages.Auras or {}
+addon.Options.Pages.Auras.Buffs = addon.Options.Pages.Auras.Buffs or {}
+
+local Buffs = addon.Options.Pages.Auras.Buffs
+
+local subpage
+
+local function GetControllerState()
+	local content = addon.Options.Sections.Content
+	if content and content.GetControllerState then
+		return content:GetControllerState()
+	end
+
+	addon.Options.ControllerState = addon.Options.ControllerState
+		or {
+			mode = "party",
+			subpages = {
+				auras = "buffs",
+				texts = "name",
+				indicators = "readyCheck",
+				bars = "health",
+			},
+		}
+
+	return addon.Options.ControllerState
+end
+
+local function GetModeKey()
+	local state = GetControllerState()
+	return state.mode == "raid" and "raid" or "party"
+end
+
+local function ResolveBoolean(value, defaultValue)
+	if value == nil then
+		return defaultValue
+	end
+
+	return value == true
+end
+
+local function GetModeDefaults()
+	return {
+		enabled = true,
+		offsetX = -2,
+		offsetY = 2,
+		iconSize = 16,
+		spacing = -1,
+		maxIcons = 6,
+		iconsPerRow = 3,
+		borderSizePx = 1,
+		showStacks = true,
+		stacksFontSize = 10,
+		showCooldown = false,
+		cooldownFontSize = 10,
+		showExternals = false,
+	}
+end
+
+local function ShowCombatLockMessage()
+	print("|cffff9900Mich's RaidFrames:|r Buff settings are disabled during combat.")
+end
+
+local function ApplyModeSetting(updateFn, notifyState)
+	if InCombatLockdown() then
+		ShowCombatLockMessage()
+		if subpage and subpage.UpdateState then
+			subpage:UpdateState(addon.Database:GetProfile())
+		end
+		return
+	end
+
+	local profile = addon.Database:GetProfile()
+	local mode = GetModeKey()
+
+	profile[mode] = profile[mode] or {}
+	updateFn(profile[mode], mode)
+
+	addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+	if notifyState then
+		addon.UpdateScheduler:Notify("aurasStateChanged")
+	end
+end
+
+local function FormatInteger(value)
+	return string.format("%d", value)
+end
+
+local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
+	slider:SetMinMaxValues(minValue, maxValue)
+	slider:SetStep(step or 1)
+	slider:SetValueFormatter(FormatInteger)
+end
+
+function Buffs:Ensure(parent)
+	if subpage then
+		return subpage
+	end
+
+	subpage = CreateFrame("Frame", nil, parent)
+
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox:SetLayoutWidth(174)
+	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.enabled = checked == true
+		end, true)
+	end)
+
+	subpage.showExternalsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show External Buffs")
+	subpage.showExternalsCheckbox:SetLayoutWidth(174)
+	subpage.showExternalsCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.showExternals = checked == true
+		end, true)
+	end)
+
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
+	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.offsetX = value
+		end)
+	end)
+
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
+	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.offsetY = value
+		end)
+	end)
+
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 64, 1)
+	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.iconSize = value
+		end)
+	end)
+
+	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, "Spacing")
+	subpage.spacingSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.spacingSlider, -10, 20, 1)
+	subpage.spacingSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.spacing = value
+		end)
+	end)
+
+	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, "Max Icons")
+	subpage.maxIconsSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 10, 1)
+	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.maxIcons = value
+		end)
+	end)
+
+	subpage.iconsPerRowSlider = addon.Options.Controls.Slider:Create(subpage, "Icons Per Row")
+	subpage.iconsPerRowSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.iconsPerRowSlider, 1, 10, 1)
+	subpage.iconsPerRowSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.iconsPerRow = value
+		end)
+	end)
+
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderSizeSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 4, 1)
+	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.borderSizePx = value
+		end)
+	end)
+
+	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Stacks")
+	subpage.showStacksCheckbox:SetLayoutWidth(174)
+	subpage.showStacksCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.showStacks = checked == true
+		end)
+	end)
+
+	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Stacks Size")
+	subpage.stacksFontSizeSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.stacksFontSizeSlider, 6, 32, 1)
+	subpage.stacksFontSizeSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.stacksFontSize = value
+		end)
+	end)
+
+	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Duration")
+	subpage.showCooldownCheckbox:SetLayoutWidth(174)
+	subpage.showCooldownCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.showCooldown = checked == true
+		end)
+	end)
+
+	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Duration Size")
+	subpage.cooldownFontSizeSlider:SetLayoutWidth(174)
+	ConfigureIntegerSlider(subpage.cooldownFontSizeSlider, 6, 32, 1)
+	subpage.cooldownFontSizeSlider:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.cooldownFontSize = value
+		end)
+	end)
+
+	subpage.controls = {
+		enabledCheckbox = subpage.enabledCheckbox,
+		showExternalsCheckbox = subpage.showExternalsCheckbox,
+		offsetXSlider = subpage.offsetXSlider,
+		offsetYSlider = subpage.offsetYSlider,
+		iconSizeSlider = subpage.iconSizeSlider,
+		spacingSlider = subpage.spacingSlider,
+		maxIconsSlider = subpage.maxIconsSlider,
+		iconsPerRowSlider = subpage.iconsPerRowSlider,
+		borderSizeSlider = subpage.borderSizeSlider,
+		showStacksCheckbox = subpage.showStacksCheckbox,
+		stacksFontSizeSlider = subpage.stacksFontSizeSlider,
+		showCooldownCheckbox = subpage.showCooldownCheckbox,
+		cooldownFontSizeSlider = subpage.cooldownFontSizeSlider,
+	}
+
+	function subpage:UpdateLayout()
+		local controls = self.controls
+		local rowStepPx = addon.Utilities:ToPixels(50)
+		local sectionGapPx = addon.Utilities:ToPixels(16)
+		local columnGapPx = addon.Utilities:ToPixels(30)
+		local columnWidthPx = addon.Utilities:ToPixels(174)
+		local secondColumnOffsetPx = columnWidthPx + columnGapPx
+		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
+		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
+		local checkboxOffsetPx =
+			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local firstRowOffsetPx = 0
+		local secondRowOffsetPx = rowStepPx
+		local thirdRowOffsetPx = rowStepPx * 2
+		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
+		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx
+		local sixthRowOffsetPx = fifthRowOffsetPx + rowStepPx
+
+		for _, control in pairs(controls) do
+			if control.UpdateLayout then
+				control:UpdateLayout()
+			end
+		end
+
+		controls.enabledCheckbox:ClearAllPoints()
+		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
+
+		controls.showExternalsCheckbox:ClearAllPoints()
+		controls.showExternalsCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(firstRowOffsetPx)
+		)
+
+		controls.offsetXSlider:ClearAllPoints()
+		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(secondRowOffsetPx))
+
+		controls.offsetYSlider:ClearAllPoints()
+		controls.offsetYSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(secondRowOffsetPx)
+		)
+
+		controls.spacingSlider:ClearAllPoints()
+		controls.spacingSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(thirdColumnOffsetPx),
+			-addon.Utilities:ToUI(secondRowOffsetPx)
+		)
+
+		controls.iconSizeSlider:ClearAllPoints()
+		controls.iconSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(thirdRowOffsetPx))
+
+		controls.maxIconsSlider:ClearAllPoints()
+		controls.maxIconsSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(thirdRowOffsetPx)
+		)
+
+		controls.iconsPerRowSlider:ClearAllPoints()
+		controls.iconsPerRowSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(thirdColumnOffsetPx),
+			-addon.Utilities:ToUI(thirdRowOffsetPx)
+		)
+
+		controls.borderSizeSlider:ClearAllPoints()
+		controls.borderSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(fourthRowOffsetPx))
+
+		controls.showStacksCheckbox:ClearAllPoints()
+		controls.showStacksCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(fifthRowOffsetPx + checkboxOffsetPx)
+		)
+
+		controls.stacksFontSizeSlider:ClearAllPoints()
+		controls.stacksFontSizeSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(fifthRowOffsetPx)
+		)
+
+		controls.showCooldownCheckbox:ClearAllPoints()
+		controls.showCooldownCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(sixthRowOffsetPx + checkboxOffsetPx)
+		)
+
+		controls.cooldownFontSizeSlider:ClearAllPoints()
+		controls.cooldownFontSizeSlider:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(sixthRowOffsetPx)
+		)
+	end
+
+	function subpage:UpdateState(profile)
+		if not profile then
+			return
+		end
+
+		local controls = self.controls
+		local mode = GetModeKey()
+		local section = profile[mode] or {}
+		local defaults = GetModeDefaults()
+		local widgets = section.widgets or {}
+		local icons = widgets.icons or {}
+		local buffs = icons.buffs or {}
+
+		controls.enabledCheckbox:SetChecked(ResolveBoolean(buffs.enabled, defaults.enabled))
+		controls.showExternalsCheckbox:SetChecked(ResolveBoolean(buffs.showExternals, defaults.showExternals))
+		controls.offsetXSlider:SetValue(buffs.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValue(buffs.offsetY or defaults.offsetY)
+		controls.iconSizeSlider:SetValue(buffs.iconSize or defaults.iconSize)
+		controls.spacingSlider:SetValue(buffs.spacing or defaults.spacing)
+		controls.maxIconsSlider:SetValue(buffs.maxIcons or defaults.maxIcons)
+		controls.iconsPerRowSlider:SetValue(buffs.iconsPerRow or defaults.iconsPerRow)
+		controls.borderSizeSlider:SetValue(buffs.borderSizePx or defaults.borderSizePx)
+		controls.showStacksCheckbox:SetChecked(ResolveBoolean(buffs.showStacks, defaults.showStacks))
+		controls.stacksFontSizeSlider:SetValue(buffs.stacksFontSize or defaults.stacksFontSize)
+		controls.showCooldownCheckbox:SetChecked(ResolveBoolean(buffs.showCooldown, defaults.showCooldown))
+		controls.cooldownFontSizeSlider:SetValue(buffs.cooldownFontSize or defaults.cooldownFontSize)
+	end
+
+	return subpage
+end

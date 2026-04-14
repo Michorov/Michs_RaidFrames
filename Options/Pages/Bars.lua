@@ -202,6 +202,15 @@ function Bars:Ensure(parent)
 		page:UpdateState(profile)
 	end)
 
+	for _, subpage in pairs(page.subpages) do
+		local registeredSubpage = subpage
+		addon.Options.Data:RegisterForUpdates(registeredSubpage, function(profile)
+			if registeredSubpage.UpdateState then
+				registeredSubpage:UpdateState(profile)
+			end
+		end)
+	end
+
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

@@ -11,9 +11,8 @@ local theme = addon.Options.Theme
 
 local subpageOptions = {
 	{ value = "readyCheck", text = "Ready Check" },
-	{ value = "pendingSummon", text = "Pending Summon" },
 	{ value = "raidMarker", text = "Raid Marker" },
-	{ value = "roleIcon", text = "Role Icon" },
+	{ value = "roleIcon", text = "Role Indicator" },
 }
 
 local function GetControllerState()
@@ -34,6 +33,19 @@ local function GetControllerState()
 		}
 
 	return addon.Options.ControllerState
+end
+
+local function GetActiveSubpageKey()
+	local state = GetControllerState()
+	local subpageKey = (state.subpages or {}).indicators or subpageOptions[1].value
+
+	for _, option in ipairs(subpageOptions) do
+		if option.value == subpageKey then
+			return subpageKey
+		end
+	end
+
+	return subpageOptions[1].value
 end
 
 function Indicators:Ensure(parent)
@@ -68,28 +80,76 @@ function Indicators:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
+		if page and page.UpdateLayout then
+			page:UpdateLayout()
+		end
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(150)
+	page.subpageDropdown:SetLayoutWidth(174)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.subpages.indicators = value
+		if page and page.SetActiveSubpage then
+			page:SetActiveSubpage(value, addon.Database:GetProfile())
+		end
 	end)
 
-	page.description = page.body:CreateFontString(nil, "OVERLAY")
-	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-	page.description:SetJustifyH("LEFT")
-	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
-	page.description:SetTextColor(theme:GetTextColor("secondary"))
-	page.description:SetText("Indicator settings will go here.")
+	local readyCheckSubpage = addon.Options.Pages.Indicators.ReadyCheck:Ensure(page.body)
+	local raidMarkerSubpage = addon.Options.Pages.Indicators.RaidMarker:Ensure(page.body)
+	local roleIndicatorSubpage = addon.Options.Pages.Indicators.RoleIndicator:Ensure(page.body)
+
+	page.subpages = {
+		readyCheck = readyCheckSubpage,
+		raidMarker = raidMarkerSubpage,
+		roleIcon = roleIndicatorSubpage,
+	}
+
+	for subpageKey, subpage in pairs(page.subpages) do
+		subpage:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+		subpage:SetPoint("TOPRIGHT", page.body, "TOPRIGHT", 0, 0)
+		subpage:SetPoint("BOTTOMLEFT", page.body, "BOTTOMLEFT", 0, 0)
+		subpage:SetPoint("BOTTOMRIGHT", page.body, "BOTTOMRIGHT", 0, 0)
+		subpage:SetShown(subpageKey == GetActiveSubpageKey())
+	end
 
 	page.controls = {
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:SetActiveSubpage(subpageKey, profile)
+		local state = GetControllerState()
+		state.subpages = state.subpages or {}
+
+		local activeSubpageKey = subpageOptions[1].value
+		for _, option in ipairs(subpageOptions) do
+			if option.value == subpageKey then
+				activeSubpageKey = subpageKey
+				break
+			end
+		end
+
+		state.subpages.indicators = activeSubpageKey
+
+		for key, subpage in pairs(self.subpages) do
+			subpage:SetShown(key == activeSubpageKey)
+		end
+
+		local activeSubpage = self.subpages[activeSubpageKey]
+		if activeSubpage and activeSubpage.UpdateLayout then
+			activeSubpage:UpdateLayout()
+		end
+
+		if activeSubpage and activeSubpage.UpdateState then
+			activeSubpage:UpdateState(profile)
+		end
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
@@ -116,14 +176,35 @@ function Indicators:Ensure(parent)
 			-addon.Utilities:ToUI(headerControlGapPx),
 			0
 		)
+
+		for _, subpage in pairs(self.subpages) do
+			if subpage.UpdateLayout then
+				subpage:UpdateLayout()
+			end
+		end
 	end
 
 	function page:UpdateState(profile)
 		local state = GetControllerState()
+		local activeSubpageKey = GetActiveSubpageKey()
 
 		self.modeToggle:SetValue(state.mode or "party")
 		self.subpageDropdown:SetOptions(subpageOptions)
-		self.subpageDropdown:SetValue(state.subpages.indicators or subpageOptions[1].value)
+		self.subpageDropdown:SetValue(activeSubpageKey)
+		self:SetActiveSubpage(activeSubpageKey, profile)
+	end
+
+	addon.Options.Data:RegisterForUpdates(page, function(profile)
+		page:UpdateState(profile)
+	end)
+
+	for _, subpage in pairs(page.subpages) do
+		local registeredSubpage = subpage
+		addon.Options.Data:RegisterForUpdates(registeredSubpage, function(profile)
+			if registeredSubpage.UpdateState then
+				registeredSubpage:UpdateState(profile)
+			end
+		end)
 	end
 
 	page:UpdateLayout()
