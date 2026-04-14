@@ -11,11 +11,20 @@ local theme = addon.Options.Theme
 
 local subpageOptions = {
 	{ value = "buffs", text = "Buffs" },
+	{ value = "buffFilters", text = "Buffs - Filters" },
+	{ value = "buffOverlay", text = "Buffs - Overlay" },
+	{ value = "buffCustomIcons", text = "Buffs - Custom Icons" },
 	{ value = "debuffs", text = "Debuffs" },
 	{ value = "dispels", text = "Dispels" },
 	{ value = "bigDefensive", text = "Big Defensive" },
 	{ value = "privateAuras", text = "Private Auras" },
 	{ value = "raidBuffReminder", text = "Raid Buff Reminder" },
+}
+
+local specHeaderSubpages = {
+	buffFilters = true,
+	buffOverlay = true,
+	buffCustomIcons = true,
 }
 
 local function GetControllerState()
@@ -36,6 +45,19 @@ local function GetControllerState()
 		}
 
 	return addon.Options.ControllerState
+end
+
+local function GetActiveSubpageKey()
+	local state = GetControllerState()
+	local subpageKey = (state.subpages or {}).auras or subpageOptions[1].value
+
+	for _, option in ipairs(subpageOptions) do
+		if option.value == subpageKey then
+			return subpageKey
+		end
+	end
+
+	return subpageOptions[1].value
 end
 
 function Auras:Ensure(parent)
@@ -70,28 +92,103 @@ function Auras:Ensure(parent)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.mode = value
+		if page and page.UpdateLayout then
+			page:UpdateLayout()
+		end
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(150)
+	page.subpageDropdown:SetLayoutWidth(174)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
 		state.subpages.auras = value
+		if page and page.SetActiveSubpage then
+			page:SetActiveSubpage(value, addon.Database:GetProfile())
+		end
 	end)
 
-	page.description = page.body:CreateFontString(nil, "OVERLAY")
-	page.description:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-	page.description:SetJustifyH("LEFT")
-	page.description:SetFont(theme.fonts.arialNarrow, 12, "")
-	page.description:SetTextColor(theme:GetTextColor("secondary"))
-	page.description:SetText("Aura settings will go here.")
+	local buffsSubpage = addon.Options.Pages.Auras.Buffs:Ensure(page.body)
+	local buffFiltersSubpage = addon.Options.Pages.Auras.BuffFilters:Ensure(page.body)
+	local buffOverlaySubpage = addon.Options.Pages.Auras.BuffOverlay:Ensure(page.body)
+	local buffCustomIconsSubpage = addon.Options.Pages.Auras.BuffCustomIcons:Ensure(page.body)
+	local debuffsSubpage = addon.Options.Pages.Auras.Debuffs:Ensure(page.body)
+	local dispelsSubpage = addon.Options.Pages.Auras.Dispels:Ensure(page.body)
+	local bigDefensiveSubpage = addon.Options.Pages.Auras.BigDefensive:Ensure(page.body)
+	local privateAurasSubpage = addon.Options.Pages.Auras.PrivateAuras:Ensure(page.body)
+	local raidBuffReminderSubpage = addon.Options.Pages.Auras.RaidBuffReminder:Ensure(page.body)
+
+	page.subpages = {
+		buffs = buffsSubpage,
+		buffFilters = buffFiltersSubpage,
+		buffOverlay = buffOverlaySubpage,
+		buffCustomIcons = buffCustomIconsSubpage,
+		debuffs = debuffsSubpage,
+		dispels = dispelsSubpage,
+		bigDefensive = bigDefensiveSubpage,
+		privateAuras = privateAurasSubpage,
+		raidBuffReminder = raidBuffReminderSubpage,
+	}
+
+	for subpageKey, subpage in pairs(page.subpages) do
+		subpage:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+		subpage:SetPoint("TOPRIGHT", page.body, "TOPRIGHT", 0, 0)
+		subpage:SetPoint("BOTTOMLEFT", page.body, "BOTTOMLEFT", 0, 0)
+		subpage:SetPoint("BOTTOMRIGHT", page.body, "BOTTOMRIGHT", 0, 0)
+		subpage:SetShown(subpageKey == GetActiveSubpageKey())
+	end
 
 	page.controls = {
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:UpdateHeaderTitle()
+		local activeSubpageKey = GetActiveSubpageKey()
+		local title = "Auras"
+		local activeSubpage = self.subpages and self.subpages[activeSubpageKey]
+		local specName = activeSubpage and activeSubpage.activeSpecName or nil
+
+		if specHeaderSubpages[activeSubpageKey] and specName then
+			title = "Auras - " .. specName
+		end
+
+		self.header.title:SetText(title)
+	end
+
+	function page:SetActiveSubpage(subpageKey, profile)
+		local state = GetControllerState()
+		state.subpages = state.subpages or {}
+
+		local activeSubpageKey = subpageOptions[1].value
+		for _, option in ipairs(subpageOptions) do
+			if option.value == subpageKey then
+				activeSubpageKey = subpageKey
+				break
+			end
+		end
+
+		state.subpages.auras = activeSubpageKey
+
+		for key, subpage in pairs(self.subpages) do
+			subpage:SetShown(key == activeSubpageKey)
+		end
+
+		local activeSubpage = self.subpages[activeSubpageKey]
+		if activeSubpage and activeSubpage.UpdateLayout then
+			activeSubpage:UpdateLayout()
+		end
+
+		if activeSubpage and activeSubpage.UpdateState then
+			activeSubpage:UpdateState(profile)
+		end
+
+		self:UpdateHeaderTitle()
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
@@ -118,14 +215,36 @@ function Auras:Ensure(parent)
 			-addon.Utilities:ToUI(headerControlGapPx),
 			0
 		)
+
+		for _, subpage in pairs(self.subpages) do
+			if subpage.UpdateLayout then
+				subpage:UpdateLayout()
+			end
+		end
 	end
 
 	function page:UpdateState(profile)
 		local state = GetControllerState()
+		local activeSubpageKey = GetActiveSubpageKey()
 
 		self.modeToggle:SetValue(state.mode or "party")
 		self.subpageDropdown:SetOptions(subpageOptions)
-		self.subpageDropdown:SetValue(state.subpages.auras or subpageOptions[1].value)
+		self.subpageDropdown:SetValue(activeSubpageKey)
+		self:SetActiveSubpage(activeSubpageKey, profile)
+		self:UpdateHeaderTitle()
+	end
+
+	addon.Options.Data:RegisterForUpdates(page, function(profile)
+		page:UpdateState(profile)
+	end)
+
+	for _, subpage in pairs(page.subpages) do
+		local registeredSubpage = subpage
+		addon.Options.Data:RegisterForUpdates(registeredSubpage, function(profile)
+			if registeredSubpage.UpdateState then
+				registeredSubpage:UpdateState(profile)
+			end
+		end)
 	end
 
 	page:UpdateLayout()

@@ -274,6 +274,14 @@ function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 
 	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
+
+	if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
+		addon.Options.Data:RefreshProfile()
+	end
+
+	if addon.Options and addon.Options.UpdateLayout then
+		addon.Options:UpdateLayout()
+	end
 end
 
 function EventHandler:UI_SCALE_CHANGED()

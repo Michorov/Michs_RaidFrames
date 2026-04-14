@@ -146,7 +146,7 @@ function FramesPage:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page.body, "Border Thickness")
+	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page.body, "Border Size")
 	page.frameBorderThicknessSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.frameBorderThicknessSlider, 0, 6, 1)
 	page.frameBorderThicknessSlider:SetOnValueChanged(function(_, value)

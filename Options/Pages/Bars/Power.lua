@@ -120,7 +120,7 @@ function Power:Ensure(parent)
 		end, "powerSettingsChanged")
 	end)
 
-	subpage.borderThicknessSlider = addon.Options.Controls.Slider:Create(subpage, "Border Thickness")
+	subpage.borderThicknessSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
 	subpage.borderThicknessSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderThicknessSlider, 0, 6, 1)
 	subpage.borderThicknessSlider:SetOnValueChanged(function(_, value)
