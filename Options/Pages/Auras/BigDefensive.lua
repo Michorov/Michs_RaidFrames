@@ -303,14 +303,14 @@ function BigDefensive:Ensure(parent)
 		local icons = widgets.icons or {}
 		local bigDefensive = icons.bigDefensive or {}
 
-		controls.offsetXSlider:SetValue(bigDefensive.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(bigDefensive.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValue(bigDefensive.iconSize or defaults.iconSize)
-		controls.borderSizeSlider:SetValue(bigDefensive.borderSizePx or defaults.borderSizePx)
+		controls.offsetXSlider:SetValueSilently(bigDefensive.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(bigDefensive.offsetY or defaults.offsetY)
+		controls.iconSizeSlider:SetValueSilently(bigDefensive.iconSize or defaults.iconSize)
+		controls.borderSizeSlider:SetValueSilently(bigDefensive.borderSizePx or defaults.borderSizePx)
 		controls.showStacksCheckbox:SetChecked(ResolveBoolean(bigDefensive.showStacks, defaults.showStacks))
-		controls.stacksFontSizeSlider:SetValue(bigDefensive.stacksFontSize or defaults.stacksFontSize)
+		controls.stacksFontSizeSlider:SetValueSilently(bigDefensive.stacksFontSize or defaults.stacksFontSize)
 		controls.showCooldownCheckbox:SetChecked(ResolveBoolean(bigDefensive.showCooldown, defaults.showCooldown))
-		controls.cooldownFontSizeSlider:SetValue(bigDefensive.cooldownFontSize or defaults.cooldownFontSize)
+		controls.cooldownFontSizeSlider:SetValueSilently(bigDefensive.cooldownFontSize or defaults.cooldownFontSize)
 	end
 
 	return subpage

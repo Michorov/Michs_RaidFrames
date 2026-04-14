@@ -224,11 +224,11 @@ function PrivateAuras:Ensure(parent)
 		local icons = widgets.icons or {}
 		local privateAuras = icons.privateAuras or {}
 
-		controls.offsetXSlider:SetValue(privateAuras.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(privateAuras.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValue(privateAuras.iconSize or defaults.iconSize)
-		controls.spacingSlider:SetValue(privateAuras.spacing or defaults.spacing)
-		controls.maxIconsSlider:SetValue(privateAuras.maxIcons or defaults.maxIcons)
+		controls.offsetXSlider:SetValueSilently(privateAuras.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(privateAuras.offsetY or defaults.offsetY)
+		controls.iconSizeSlider:SetValueSilently(privateAuras.iconSize or defaults.iconSize)
+		controls.spacingSlider:SetValueSilently(privateAuras.spacing or defaults.spacing)
+		controls.maxIconsSlider:SetValueSilently(privateAuras.maxIcons or defaults.maxIcons)
 	end
 
 	return subpage

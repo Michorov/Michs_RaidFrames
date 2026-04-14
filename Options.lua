@@ -7708,12 +7708,4 @@ function addon:RegisterOptions()
 
 	AceConfig:RegisterOptionsTable(APP_NAME, options)
 	AceConfigDialog:SetDefaultSize(APP_NAME, 980, 764)
-
-	if not addon.optionsSlashRegistered then
-		SLASH_MRF1 = "/mrf"
-		SlashCmdList["MRF"] = function()
-			addon:OpenOptions()
-		end
-		addon.optionsSlashRegistered = true
-	end
 end

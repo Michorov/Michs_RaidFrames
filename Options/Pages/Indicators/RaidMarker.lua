@@ -249,9 +249,9 @@ function RaidMarker:Ensure(parent)
 
 		controls.enabledCheckbox:SetChecked(enabled == true)
 		controls.anchorDropdown:SetValue(raidMarker.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValue(raidMarker.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(raidMarker.offsetY or defaults.offsetY)
-		controls.sizeSlider:SetValue(raidMarker.size or defaults.size)
+		controls.offsetXSlider:SetValueSilently(raidMarker.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(raidMarker.offsetY or defaults.offsetY)
+		controls.sizeSlider:SetValueSilently(raidMarker.size or defaults.size)
 	end
 
 	return subpage
