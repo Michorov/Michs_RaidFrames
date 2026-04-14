@@ -238,7 +238,7 @@ function BuffCustomIcons:Ensure(parent)
 	subpage.emptyText:Hide()
 
 	subpage.buffDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Buff")
-	subpage.buffDropdown:SetLayoutWidth(220)
+	subpage.buffDropdown:SetLayoutWidth(174)
 	subpage.buffDropdown:SetLabelVisible(false)
 	subpage.buffDropdown:SetOnValueChanged(function(_, value)
 		SetSelectedSpellId(subpage.activeSpecID, value)
@@ -340,15 +340,14 @@ function BuffCustomIcons:Ensure(parent)
 	function subpage:UpdateLayout()
 		local controls = self.controls
 		local rowStepPx = addon.Utilities:ToPixels(44)
-		local topContentGapPx = addon.Utilities:ToPixels(10)
+		local topContentGapPx = addon.Utilities:ToPixels(20)
 		local sectionGapPx = addon.Utilities:ToPixels(10)
 		local anchorToOffsetsGapPx = addon.Utilities:ToPixels(10)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local headerHeightPx = addon.Utilities:ToPixels(controls.buffDropdown.layoutValues.fieldHeight)
-		local enabledRowOffsetPx = headerHeightPx + topContentGapPx
-		local positionRowOffsetPx = enabledRowOffsetPx + rowStepPx
+		local positionRowOffsetPx = headerHeightPx + topContentGapPx
 		local offsetsRowOffsetPx = positionRowOffsetPx + rowStepPx + anchorToOffsetsGapPx
 		local iconSizeRowOffsetPx = offsetsRowOffsetPx + rowStepPx
 		local stacksRowOffsetPx = iconSizeRowOffsetPx + rowStepPx + sectionGapPx
@@ -369,6 +368,8 @@ function BuffCustomIcons:Ensure(parent)
 
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local headerCheckboxOffsetPx =
+			addon.Utilities:RoundToNearestInt(math.max(0, (headerHeightPx - checkboxHeightPx) / 2))
 		local dropdownSliderOffsetPx = addon.Utilities:ToPixels(5)
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
@@ -381,8 +382,8 @@ function BuffCustomIcons:Ensure(parent)
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(enabledRowOffsetPx + checkboxOffsetPx)
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(headerCheckboxOffsetPx)
 		)
 
 		controls.anchorDropdown:ClearAllPoints()

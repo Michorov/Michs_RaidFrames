@@ -199,11 +199,11 @@ function Dropdown:Create(parent, labelText)
 		labelSpacing = 4,
 		borderThickness = 1,
 		textInset = 10,
-		arrowInset = 10,
-		arrowWidth = 8,
-		arrowHeight = 6,
-		arrowStrokeThickness = 1,
-		selectionRightInset = 24,
+		arrowInset = 12,
+		arrowWidth = 10,
+		arrowHeight = 8,
+		arrowStrokeThickness = 2,
+		selectionRightInset = 30,
 		listRowHeight = 24,
 		listRowSpacing = 2,
 		listPadding = 4,
@@ -262,13 +262,9 @@ function Dropdown:Create(parent, labelText)
 
 	control.arrow = CreateFrame("Frame", nil, control.field)
 
-	control.arrow.leftStroke = control.arrow:CreateLine(nil, "OVERLAY")
-	control.arrow.leftStroke:SetStartPoint("TOPLEFT", control.arrow, 0, 0)
-	control.arrow.leftStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
+	control.arrow.leftStroke = control.arrow:CreateTexture(nil, "OVERLAY")
 
-	control.arrow.rightStroke = control.arrow:CreateLine(nil, "OVERLAY")
-	control.arrow.rightStroke:SetStartPoint("TOPRIGHT", control.arrow, 0, 0)
-	control.arrow.rightStroke:SetEndPoint("BOTTOM", control.arrow, 0, 0)
+	control.arrow.rightStroke = control.arrow:CreateTexture(nil, "OVERLAY")
 
 	function control:SetArrowColor(color)
 		SetArrowColor(self, color)
@@ -375,13 +371,22 @@ function Dropdown:Create(parent, labelText)
 		local arrowHeightPx = addon.Utilities:ToPixels(self.layoutValues.arrowHeight)
 		local arrowStrokeThicknessPx = addon.Utilities:ToPixels(self.layoutValues.arrowStrokeThickness)
 		local selectionRightInsetPx = addon.Utilities:ToPixels(self.layoutValues.selectionRightInset)
+		local arrowSideInsetPx = math.max(1, addon.Utilities:RoundToNearestInt(arrowStrokeThicknessPx / 2))
+		local arrowTopInsetPx = 1
+		local arrowBottomInsetPx = 1
+		local usableArrowWidthPx = math.max(2, arrowWidthPx - (arrowSideInsetPx * 2))
+		local usableArrowHeightPx = math.max(2, arrowHeightPx - arrowTopInsetPx - arrowBottomInsetPx)
+		local arrowHalfRunPx = usableArrowWidthPx / 2
+		local arrowStrokeLengthPx =
+			addon.Utilities:RoundToNearestInt(math.sqrt((arrowHalfRunPx * arrowHalfRunPx) + (usableArrowHeightPx * usableArrowHeightPx)))
+		local arrowStrokeCenterOffsetXPx = addon.Utilities:RoundToNearestInt(usableArrowWidthPx / 4)
+		local arrowStrokeRotation = math.atan2(usableArrowHeightPx, arrowHalfRunPx)
 
 		local labelSpacing = addon.Utilities:ToUI(labelSpacingPx)
 		local fieldHeight = addon.Utilities:ToUI(fieldHeightPx)
 		local labelHeight = addon.Utilities:ToUI(labelHeightPx)
 		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		local textInset = addon.Utilities:ToUI(textInsetPx)
-		local arrowInset = addon.Utilities:ToUI(arrowInsetPx)
 		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
 
 		self:SetWidth(addon.Utilities:ToUI(widthPx))
@@ -434,10 +439,40 @@ function Dropdown:Create(parent, labelText)
 
 		self.arrow:SetSize(addon.Utilities:ToUI(arrowWidthPx), addon.Utilities:ToUI(arrowHeightPx))
 		self.arrow:ClearAllPoints()
-		self.arrow:SetPoint("CENTER", self.field, "CENTER", 0, 0)
-		self.arrow:SetPoint("RIGHT", self.field, "RIGHT", -arrowInset, 0)
-		self.arrow.leftStroke:SetThickness(addon.Utilities:ToUI(arrowStrokeThicknessPx))
-		self.arrow.rightStroke:SetThickness(addon.Utilities:ToUI(arrowStrokeThicknessPx))
+		self.arrow:SetPoint(
+			"CENTER",
+			self.field,
+			"RIGHT",
+			-addon.Utilities:ToUI(arrowInsetPx + addon.Utilities:RoundToNearestInt(arrowWidthPx / 2)),
+			0
+		)
+		self.arrow.leftStroke:ClearAllPoints()
+		self.arrow.leftStroke:SetPoint(
+			"CENTER",
+			self.arrow,
+			"CENTER",
+			-addon.Utilities:ToUI(arrowStrokeCenterOffsetXPx),
+			0
+		)
+		self.arrow.leftStroke:SetSize(
+			addon.Utilities:ToUI(arrowStrokeLengthPx),
+			addon.Utilities:ToUI(arrowStrokeThicknessPx)
+		)
+		self.arrow.leftStroke:SetRotation(-arrowStrokeRotation)
+
+		self.arrow.rightStroke:ClearAllPoints()
+		self.arrow.rightStroke:SetPoint(
+			"CENTER",
+			self.arrow,
+			"CENTER",
+			addon.Utilities:ToUI(arrowStrokeCenterOffsetXPx),
+			0
+		)
+		self.arrow.rightStroke:SetSize(
+			addon.Utilities:ToUI(arrowStrokeLengthPx),
+			addon.Utilities:ToUI(arrowStrokeThicknessPx)
+		)
+		self.arrow.rightStroke:SetRotation(arrowStrokeRotation)
 
 		if openDropdown == self then
 			UpdateListLayout(self)
