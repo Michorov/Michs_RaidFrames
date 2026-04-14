@@ -339,7 +339,6 @@ local DEFAULTS = {
 				healerOnly = false,
 				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 8,
-				borderEnabled = true,
 				borderThicknessPx = 1,
 			},
 			border = {
@@ -613,7 +612,6 @@ local DEFAULTS = {
 				healerOnly = false,
 				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 6,
-				borderEnabled = true,
 				borderThicknessPx = 1,
 			},
 			border = {
@@ -858,11 +856,14 @@ function Database:GetCurrentProfileName()
 end
 
 function Database:GetProfileNames()
-	local t = {}
-	for _, name in ipairs({ self.db:GetProfiles() }) do
-		t[name] = name
+	local values = {}
+	local names = self.db:GetProfiles({})
+
+	for _, name in ipairs(names) do
+		values[name] = name
 	end
-	return t
+
+	return values
 end
 
 function Database:HasProfile(name)
@@ -918,6 +919,10 @@ function Database:Initialize()
 	local function OnProfileChanged()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
+		if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
+			addon.Options.Data:RefreshProfile()
+		end
+
 		addon.Frames.RangeChecker:UpdateSettings()
 		addon.Modules:RequestUpdateAll()
 	end
@@ -925,6 +930,7 @@ function Database:Initialize()
 	self.db:RegisterCallback("OnProfileChanged", OnProfileChanged)
 	self.db:RegisterCallback("OnProfileCopied", OnProfileChanged)
 	self.db:RegisterCallback("OnProfileReset", OnProfileChanged)
+	self.db:RegisterCallback("OnProfileDeleted", OnProfileChanged)
 
 	initialized = true
 end
