@@ -177,7 +177,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Outline")
+	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Style")
 	subpage.outlineDropdown:SetLayoutWidth(174)
 	subpage.outlineDropdown:SetOptions(outlineOptions)
 	subpage.outlineDropdown:SetOnValueChanged(function(_, value)
@@ -215,8 +215,10 @@ function HealAbsorbs:Ensure(parent)
 	function subpage:UpdateLayout()
 		local controls = self.controls
 		local rowStepPx = addon.Utilities:ToPixels(50)
+		local anchorRowGapPx = addon.Utilities:ToPixels(8)
 		local sectionGapPx = addon.Utilities:ToPixels(16)
-		local fourthRowOffsetPx = (rowStepPx * 3) + sectionGapPx
+		local thirdRowOffsetPx = (rowStepPx * 2) + anchorRowGapPx
+		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx + sectionGapPx
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
@@ -225,8 +227,13 @@ function HealAbsorbs:Ensure(parent)
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorPicker.layoutValues.pickerSize)
-		local colorPickerOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - colorPickerSizePx) / 2))
+		local dropdownFieldTopOffsetPx =
+			addon.Utilities:ToPixels(
+				controls.outlineDropdown.layoutValues.labelHeight + controls.outlineDropdown.layoutValues.labelSpacing
+			)
+		local dropdownFieldHeightPx = addon.Utilities:ToPixels(controls.outlineDropdown.layoutValues.fieldHeight)
+		local colorPickerOffsetPx = dropdownFieldTopOffsetPx
+			+ addon.Utilities:RoundToNearestInt(math.max(0, (dropdownFieldHeightPx - colorPickerSizePx) / 2))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -276,7 +283,7 @@ function HealAbsorbs:Ensure(parent)
 			self,
 			"TOPLEFT",
 			0,
-			-addon.Utilities:ToUI(rowStepPx * 2)
+			-addon.Utilities:ToUI(thirdRowOffsetPx)
 		)
 
 		controls.offsetYSlider:ClearAllPoints()
@@ -285,7 +292,7 @@ function HealAbsorbs:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(rowStepPx * 2)
+			-addon.Utilities:ToUI(thirdRowOffsetPx)
 		)
 
 		controls.outlineDropdown:ClearAllPoints()
