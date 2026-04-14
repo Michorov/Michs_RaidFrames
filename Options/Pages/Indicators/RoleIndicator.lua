@@ -249,9 +249,9 @@ function RoleIndicator:Ensure(parent)
 
 		controls.enabledCheckbox:SetChecked(enabled == true)
 		controls.anchorDropdown:SetValue(roleIcon.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValue(roleIcon.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(roleIcon.offsetY or defaults.offsetY)
-		controls.sizeSlider:SetValue(roleIcon.size or defaults.size)
+		controls.offsetXSlider:SetValueSilently(roleIcon.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(roleIcon.offsetY or defaults.offsetY)
+		controls.sizeSlider:SetValueSilently(roleIcon.size or defaults.size)
 	end
 
 	return subpage

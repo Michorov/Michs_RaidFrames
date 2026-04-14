@@ -249,9 +249,9 @@ function ReadyCheck:Ensure(parent)
 
 		controls.enabledCheckbox:SetChecked(enabled == true)
 		controls.anchorDropdown:SetValue(readyCheck.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValue(readyCheck.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(readyCheck.offsetY or defaults.offsetY)
-		controls.sizeSlider:SetValue(readyCheck.size or defaults.size)
+		controls.offsetXSlider:SetValueSilently(readyCheck.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(readyCheck.offsetY or defaults.offsetY)
+		controls.sizeSlider:SetValueSilently(readyCheck.size or defaults.size)
 	end
 
 	return subpage

@@ -329,11 +329,11 @@ function Dispels:Ensure(parent)
 		controls.anchorDropdown:SetValue(dispels.anchor or defaults.anchor)
 		controls.relativeAnchorDropdown:SetValue(dispels.relativeAnchor or defaults.relativeAnchor)
 		controls.growDirectionDropdown:SetValue(dispels.growDirection or defaults.growDirection)
-		controls.spacingSlider:SetValue(dispels.spacing or defaults.spacing)
-		controls.offsetXSlider:SetValue(dispels.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValue(dispels.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValue(dispels.iconSize or defaults.iconSize)
-		controls.maxIconsSlider:SetValue(dispels.maxIcons or defaults.maxIcons)
+		controls.spacingSlider:SetValueSilently(dispels.spacing or defaults.spacing)
+		controls.offsetXSlider:SetValueSilently(dispels.offsetX or defaults.offsetX)
+		controls.offsetYSlider:SetValueSilently(dispels.offsetY or defaults.offsetY)
+		controls.iconSizeSlider:SetValueSilently(dispels.iconSize or defaults.iconSize)
+		controls.maxIconsSlider:SetValueSilently(dispels.maxIcons or defaults.maxIcons)
 	end
 
 	return subpage
