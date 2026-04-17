@@ -72,6 +72,7 @@ end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.FrameRegistry:Initialize()
+	addon.Database:ApplyProfileForCurrentSpec()
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
@@ -273,6 +274,7 @@ function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 		return
 	end
 
+	addon.Database:ApplyProfileForCurrentSpec()
 	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 
