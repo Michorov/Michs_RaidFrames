@@ -71,11 +71,16 @@ local function BuildPlayerSpecEntries()
 	local entries = {}
 	local _, _, classID = UnitClass("player")
 
-	if not classID or not GetNumSpecializationsForClassID or not GetSpecializationInfoForClassID then
+	if
+		not classID
+		or not C_SpecializationInfo
+		or not C_SpecializationInfo.GetNumSpecializationsForClassID
+		or not GetSpecializationInfoForClassID
+	then
 		return entries
 	end
 
-	local specCount = GetNumSpecializationsForClassID(classID) or 0
+	local specCount = C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0
 
 	for specIndex = 1, specCount do
 		local specID, specName = GetSpecializationInfoForClassID(classID, specIndex)
