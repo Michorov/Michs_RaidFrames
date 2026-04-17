@@ -7492,15 +7492,16 @@ local options = {
 								return GetProfileValues(true)
 							end,
 							get = function()
-								return addon.Database:GetCurrentProfileName()
+								return addon.Database:GetBaseProfileName()
 							end,
 							set = function(_, value)
 								if InCombatLockdown() then
 									ShowCombatLockMessage()
 									return
 								end
-								addon.Database:SetProfile(value)
-								PrintProfileMsg("Switched profile to '" .. value .. "'.")
+								addon.Database:SetBaseProfileName(value)
+								addon.Database:ApplyProfileForCurrentSpec()
+								PrintProfileMsg("Set active profile to '" .. value .. "'.")
 							end,
 						},
 					},
@@ -7547,8 +7548,10 @@ local options = {
 								end
 
 								addon.Database:SetProfile(name)
+								addon.Database:SetBaseProfileName(name)
+								addon.Database:ApplyProfileForCurrentSpec()
 								profileUI.newName = ""
-								PrintProfileMsg("Created and switched to '" .. name .. "'.")
+								PrintProfileMsg("Created '" .. name .. "' and set it as the active profile.")
 							end,
 						},
 					},
@@ -7617,10 +7620,12 @@ local options = {
 
 								addon.Database:SetProfile(name)
 								addon.Database:CopyProfile(source)
+								addon.Database:SetBaseProfileName(name)
+								addon.Database:ApplyProfileForCurrentSpec()
 
 								profileUI.copyName = ""
 								profileUI.copyFrom = nil
-								PrintProfileMsg("Created '" .. name .. "' by copying '" .. source .. "'.")
+								PrintProfileMsg("Created '" .. name .. "' by copying '" .. source .. "' and set it as the active profile.")
 							end,
 						},
 					},
@@ -7675,11 +7680,16 @@ local options = {
 									return
 								end
 
-								local current = addon.Database:GetCurrentProfileName()
-								if current == target then
-									addon.Database:SetProfile("Default")
+								local currentSpecID = addon.Utilities:GetPlayerSpecID()
+								if currentSpecID and addon.Database:GetSpecProfileName(currentSpecID) == target then
+									addon.Database:ClearSpecProfileName(currentSpecID)
 								end
 
+								if addon.Database:GetBaseProfileName() == target then
+									addon.Database:SetBaseProfileName("Default")
+								end
+
+								addon.Database:ApplyProfileForCurrentSpec()
 								addon.Database:DeleteProfile(target)
 								profileUI.deleteName = nil
 								PrintProfileMsg("Deleted profile '" .. target .. "'.")

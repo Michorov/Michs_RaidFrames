@@ -20,27 +20,45 @@ local function HideOpenDropdown()
 	openDropdown = nil
 end
 
-local function GetOptionText(options, value)
+local function GetOption(options, value)
 	for _, option in ipairs(options or {}) do
 		if option.value == value then
-			return option.text
+			return option
 		end
 	end
 
 	return nil
 end
 
+local function ApplyOptionTextStyle(fontString, option, isPlaceholder)
+	if not fontString then
+		return
+	end
+
+	local fontFlags = (option and option.fontFlags) or ""
+	fontString:SetFont(theme.fonts.arialNarrow, 12, fontFlags)
+
+	if option and option.textColor then
+		fontString:SetTextColor(
+			option.textColor[1] or 1,
+			option.textColor[2] or 1,
+			option.textColor[3] or 1,
+			option.textColor[4] or 1
+		)
+	elseif isPlaceholder then
+		fontString:SetTextColor(0.50, 0.52, 0.56, 1)
+	else
+		fontString:SetTextColor(0.85, 0.85, 0.88, 1)
+	end
+end
+
 local function UpdateSelectionText(control)
-	local selectedText = GetOptionText(control.options, control.value)
+	local selectedOption = GetOption(control.options, control.value)
+	local selectedText = selectedOption and selectedOption.text or nil
 	local isPlaceholder = not selectedText
 
 	control.selectionText:SetText(selectedText or control.placeholder or "")
-
-	if isPlaceholder then
-		control.selectionText:SetTextColor(0.50, 0.52, 0.56, 1)
-	else
-		control.selectionText:SetTextColor(0.85, 0.85, 0.88, 1)
-	end
+	ApplyOptionTextStyle(control.selectionText, selectedOption, isPlaceholder)
 end
 
 local function SetArrowColor(control, color)
@@ -85,7 +103,7 @@ local function EnsureListRows(control)
 
 		button.value = option.value
 		button.text:SetText(option.text or "")
-		button.text:SetTextColor(0.85, 0.85, 0.88, 1)
+		ApplyOptionTextStyle(button.text, option, false)
 		button.text:ClearAllPoints()
 		button.text:SetPoint(
 			"LEFT",

@@ -848,11 +848,77 @@ local DEFAULTS = {
 		},
 	},
 	global = {},
-	char = {},
+	char = {
+		specProfiles = {},
+	},
 }
+
+local function EnsureCharData(database)
+	if not initialized then
+		error("Database is not initialized", 3)
+	end
+
+	local charData = database.db.char
+	charData.specProfiles = charData.specProfiles or {}
+
+	return charData
+end
+
+local function CleanupDeletedProfileReferences(savedCharacters, deletedProfile)
+	if type(savedCharacters) ~= "table" then
+		return
+	end
+
+	for _, charData in pairs(savedCharacters) do
+		if type(charData) == "table" then
+			if charData.baseProfile == deletedProfile then
+				charData.baseProfile = "Default"
+			end
+
+			local specProfiles = charData.specProfiles
+			if type(specProfiles) == "table" then
+				for specID, profileName in pairs(specProfiles) do
+					if profileName == deletedProfile then
+						specProfiles[specID] = nil
+					end
+				end
+			end
+		end
+	end
+end
 
 function Database:GetCurrentProfileName()
 	return self.db:GetCurrentProfile()
+end
+
+function Database:GetBaseProfileName()
+	local charData = EnsureCharData(self)
+	local baseProfile = charData.baseProfile
+
+	if type(baseProfile) == "string" and baseProfile ~= "" and self:HasProfile(baseProfile) then
+		return baseProfile
+	end
+
+	if self:HasProfile("Default") then
+		charData.baseProfile = "Default"
+	else
+		charData.baseProfile = self.db:GetCurrentProfile()
+	end
+
+	return charData.baseProfile
+end
+
+function Database:SetBaseProfileName(name)
+	if type(name) ~= "string" or name == "" then
+		error("Database:SetBaseProfileName requires a non-empty profile name", 2)
+	end
+
+	if not self:HasProfile(name) then
+		error(("Profile %q does not exist."):format(name), 2)
+	end
+
+	local charData = EnsureCharData(self)
+	charData.baseProfile = name
 end
 
 function Database:GetProfileNames()
@@ -885,6 +951,93 @@ end
 
 function Database:DeleteProfile(name)
 	self.db:DeleteProfile(name, true)
+	CleanupDeletedProfileReferences(self.db.sv and self.db.sv.char, name)
+end
+
+function Database:GetSpecProfileName(specID)
+	if type(specID) ~= "number" then
+		return nil
+	end
+
+	local charData = EnsureCharData(self)
+	local profileName = charData.specProfiles[specID]
+
+	if type(profileName) ~= "string" or profileName == "" then
+		if profileName ~= nil then
+			charData.specProfiles[specID] = nil
+		end
+
+		return nil
+	end
+
+	if not self:HasProfile(profileName) then
+		charData.specProfiles[specID] = nil
+		return nil
+	end
+
+	return profileName
+end
+
+function Database:SetSpecProfileName(specID, profileName)
+	if type(specID) ~= "number" then
+		error("Database:SetSpecProfileName requires a numeric specID", 2)
+	end
+
+	local charData = EnsureCharData(self)
+
+	if profileName == nil or profileName == "" then
+		charData.specProfiles[specID] = nil
+		return
+	end
+
+	if type(profileName) ~= "string" then
+		error("Database:SetSpecProfileName requires profileName to be a string or nil", 2)
+	end
+
+	if not self:HasProfile(profileName) then
+		error(("Profile %q does not exist."):format(profileName), 2)
+	end
+
+	charData.specProfiles[specID] = profileName
+end
+
+function Database:ClearSpecProfileName(specID)
+	if type(specID) ~= "number" then
+		error("Database:ClearSpecProfileName requires a numeric specID", 2)
+	end
+
+	local charData = EnsureCharData(self)
+	charData.specProfiles[specID] = nil
+end
+
+function Database:GetResolvedProfileName(specID)
+	local specProfileName = self:GetSpecProfileName(specID)
+	if specProfileName then
+		return specProfileName
+	end
+
+	return self:GetBaseProfileName()
+end
+
+function Database:ApplyProfileForSpec(specID)
+	local targetProfileName = self:GetResolvedProfileName(specID)
+	local currentProfileName = self.db:GetCurrentProfile()
+
+	if
+		type(targetProfileName) == "string"
+		and targetProfileName ~= ""
+		and targetProfileName ~= currentProfileName
+	then
+		self.db:SetProfile(targetProfileName)
+		return true
+	end
+
+	return false
+end
+
+function Database:ApplyProfileForCurrentSpec()
+	local specID = addon.Utilities and addon.Utilities.GetPlayerSpecID and addon.Utilities:GetPlayerSpecID() or nil
+	return self:ApplyProfileForSpec(specID)
 end
 
 function Database:GetProfile()
@@ -914,6 +1067,11 @@ function Database:Initialize()
 	end
 
 	self.db = AceDB:New("Michs_RaidFramesDB", DEFAULTS, true)
+
+	if self.db.char.baseProfile == nil or self.db.char.baseProfile == "" then
+		self.db.char.baseProfile = self.db:GetCurrentProfile()
+	end
+
 	SyncAllProfilesCustomAuraDefaults(self.db.profile)
 
 	local function OnProfileChanged()
