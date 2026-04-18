@@ -471,6 +471,10 @@ local DEFAULTS = {
 						spacing = 1,
 						alpha = 1.0,
 					},
+					dispelOverlay = {
+						enabled = true,
+						style = "FULL",
+					},
 					raidBuffReminder = {
 						enabled = true,
 						showInCombat = false,
@@ -743,6 +747,10 @@ local DEFAULTS = {
 						iconSize = 12,
 						spacing = 1,
 						alpha = 1.0,
+					},
+					dispelOverlay = {
+						enabled = true,
+						style = "FULL",
 					},
 					raidBuffReminder = {
 						enabled = true,
