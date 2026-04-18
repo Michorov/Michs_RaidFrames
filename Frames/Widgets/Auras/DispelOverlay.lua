@@ -1,0 +1,212 @@
+local _, addon = ...
+
+addon.Frames = addon.Frames or {}
+addon.Frames.Widgets = addon.Frames.Widgets or {}
+addon.Frames.Widgets.Auras = addon.Frames.Widgets.Auras or {}
+addon.Frames.Widgets.Auras.DispelOverlay = addon.Frames.Widgets.Auras.DispelOverlay or {}
+
+local DispelOverlay = addon.Frames.Widgets.Auras.DispelOverlay
+
+local settingsCache = setmetatable({}, { __mode = "k" })
+local OVERLAY_TEXTURE = "Interface\\Buttons\\WHITE8x8"
+local OVERLAY_STYLE_FULL = "FULL"
+local OVERLAY_STYLE_GRADIENT = "GRADIENT"
+
+local DISPEL_CURVE_DEFAULTS = {
+	None = { 0, DEBUFF_TYPE_NONE_COLOR },
+	Magic = { 1, DEBUFF_TYPE_MAGIC_COLOR },
+	Curse = { 2, DEBUFF_TYPE_CURSE_COLOR },
+	Disease = { 3, DEBUFF_TYPE_DISEASE_COLOR },
+	Poison = { 4, DEBUFF_TYPE_POISON_COLOR },
+	Enrage = { 9, DEBUFF_TYPE_BLEED_COLOR },
+	Bleed = { 11, DEBUFF_TYPE_BLEED_COLOR },
+}
+
+local dispelCurve = C_CurveUtil.CreateColorCurve()
+dispelCurve:SetType(Enum.LuaCurveType.Step)
+
+for _, data in pairs(DISPEL_CURVE_DEFAULTS) do
+	dispelCurve:AddPoint(data[1], data[2])
+end
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local dispelOverlay = icons.dispelOverlay or {}
+	local style = dispelOverlay.style
+
+	settingsCache[settings] = {
+		enabled = dispelOverlay.enabled ~= false,
+		style = style == OVERLAY_STYLE_GRADIENT and OVERLAY_STYLE_GRADIENT or OVERLAY_STYLE_FULL,
+	}
+end
+
+local function GetColorRGBA(color)
+	if not color then
+		return nil
+	end
+
+	if type(color.GetRGBA) == "function" then
+		local ok, r, g, b, a = pcall(color.GetRGBA, color)
+		if ok and r ~= nil and g ~= nil and b ~= nil then
+			return r, g, b, a
+		end
+	end
+
+	local ok, r, g, b, a = pcall(function()
+		return color.r, color.g, color.b, color.a
+	end)
+	if ok and r ~= nil and g ~= nil and b ~= nil then
+		return r, g, b, a
+	end
+
+	return nil
+end
+
+local function ApplySolidColor(texture, color)
+	if not texture or not color then
+		return false
+	end
+
+	texture:SetTexture(OVERLAY_TEXTURE)
+
+	local r, g, b = GetColorRGBA(color)
+	if r ~= nil and g ~= nil and b ~= nil then
+		texture:SetColorTexture(r, g, b, 1)
+		return true
+	end
+
+	if texture.SetGradient then
+		local ok = pcall(texture.SetGradient, texture, "VERTICAL", color, color)
+		if ok then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function ApplyGradient(texture, color)
+	if not texture or not color then
+		return false
+	end
+
+	texture:SetTexture(OVERLAY_TEXTURE)
+
+	local r, g, b = GetColorRGBA(color)
+
+	if texture.SetGradient and CreateColor then
+		if r ~= nil and g ~= nil and b ~= nil then
+			local ok = pcall(
+				texture.SetGradient,
+				texture,
+				"VERTICAL",
+				CreateColor(r, g, b, 1),
+				CreateColor(r, g, b, 0)
+			)
+			if ok then
+				return true
+			end
+		end
+
+		local ok = pcall(texture.SetGradient, texture, "VERTICAL", color, CreateColor(0, 0, 0, 0))
+		if ok then
+			return true
+		end
+	end
+
+	if texture.SetGradientAlpha and r ~= nil and g ~= nil and b ~= nil then
+		texture:SetGradientAlpha("VERTICAL", r, g, b, 1, r, g, b, 0)
+		return true
+	end
+
+	return false
+end
+
+function DispelOverlay:Ensure(frame)
+	if not frame.dispelOverlay then
+		local overlay = CreateFrame("Frame", nil, frame)
+		overlay:SetFrameLevel(6)
+		overlay:Hide()
+
+		overlay.texture = overlay:CreateTexture(nil, "ARTWORK")
+		overlay.texture:SetAllPoints(overlay)
+		overlay.texture:SetTexture(OVERLAY_TEXTURE)
+
+		overlay:SetPoint("TOPLEFT", frame.healthBar, "TOPLEFT", 0, 0)
+		overlay:SetPoint("BOTTOMRIGHT", frame.healthBar, "BOTTOMRIGHT", 0, 0)
+
+		frame.dispelOverlay = overlay
+	end
+end
+
+function DispelOverlay:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+end
+
+function DispelOverlay:UpdateState(frame, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+	local overlay = frame.dispelOverlay
+
+	if not cachedSettings.enabled or not overlay then
+		if overlay then
+			overlay:Hide()
+		end
+		return
+	end
+
+	local provider = frame.dataProvider
+	local unit = frame.unit
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
+
+	if not isTestProvider and (not unit or not UnitExists(unit) or not UnitIsVisible(unit)) then
+		overlay:Hide()
+		return
+	end
+
+	local aura
+	for _, currentAura in pairs(provider:GetUnitAuras(frame, "harmfulRaidPlayerDispellable")) do
+		aura = currentAura
+		break
+	end
+
+	if not aura then
+		overlay:Hide()
+		return
+	end
+
+	local color = provider:GetAuraDispelTypeColor(frame, aura, dispelCurve)
+	if not color then
+		overlay:Hide()
+		return
+	end
+
+	local applied = false
+	if cachedSettings.style == OVERLAY_STYLE_GRADIENT then
+		applied = ApplyGradient(overlay.texture, color)
+	end
+
+	if not applied then
+		applied = ApplySolidColor(overlay.texture, color)
+	end
+
+	if not applied then
+		overlay:Hide()
+		return
+	end
+
+	overlay:Show()
+end
+
+function DispelOverlay:Init()
+	addon.Modules:Register({
+		module = self,
+		settingsReason = "dispelOverlaySettingsChanged",
+		stateReason = "aurasStateChanged",
+	})
+end
