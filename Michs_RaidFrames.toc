@@ -46,9 +46,7 @@ Frames/Widgets/Icons/RaidBuffReminder.lua
 Frames/Widgets/Bars/Absorbs.lua
 Frames/Widgets/Bars/HealAbsorbs.lua
 Frames/Widgets/Bars/BuffOverlay.lua
-
-# Widgets Auras
-Frames/Widgets/Auras/DispelOverlay.lua
+Frames/Widgets/Bars/DispelOverlay.lua
 
 # Frames
 Frames/DataProvider.lua

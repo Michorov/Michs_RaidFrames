@@ -2,10 +2,10 @@ local _, addon = ...
 
 addon.Frames = addon.Frames or {}
 addon.Frames.Widgets = addon.Frames.Widgets or {}
-addon.Frames.Widgets.Auras = addon.Frames.Widgets.Auras or {}
-addon.Frames.Widgets.Auras.DispelOverlay = addon.Frames.Widgets.Auras.DispelOverlay or {}
+addon.Frames.Widgets.Bars = addon.Frames.Widgets.Bars or {}
+addon.Frames.Widgets.Bars.DispelOverlay = addon.Frames.Widgets.Bars.DispelOverlay or {}
 
-local DispelOverlay = addon.Frames.Widgets.Auras.DispelOverlay
+local DispelOverlay = addon.Frames.Widgets.Bars.DispelOverlay
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
