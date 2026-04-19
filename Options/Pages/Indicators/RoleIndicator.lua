@@ -49,6 +49,9 @@ end
 local function GetModeDefaults()
 	return {
 		enabled = false,
+		showTank = true,
+		showHealer = true,
+		showDps = true,
 		anchor = "TOPLEFT",
 		offsetX = 0,
 		offsetY = 0,
@@ -106,6 +109,39 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
+	subpage.showTankCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Tank")
+	subpage.showTankCheckbox:SetLayoutWidth(84)
+	subpage.showTankCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.indicators = section.widgets.indicators or {}
+			section.widgets.indicators.roleIcon = section.widgets.indicators.roleIcon or {}
+			section.widgets.indicators.roleIcon.showTank = checked == true
+		end)
+	end)
+
+	subpage.showHealerCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Healer")
+	subpage.showHealerCheckbox:SetLayoutWidth(92)
+	subpage.showHealerCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.indicators = section.widgets.indicators or {}
+			section.widgets.indicators.roleIcon = section.widgets.indicators.roleIcon or {}
+			section.widgets.indicators.roleIcon.showHealer = checked == true
+		end)
+	end)
+
+	subpage.showDpsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "DPS")
+	subpage.showDpsCheckbox:SetLayoutWidth(74)
+	subpage.showDpsCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.indicators = section.widgets.indicators or {}
+			section.widgets.indicators.roleIcon = section.widgets.indicators.roleIcon or {}
+			section.widgets.indicators.roleIcon.showDps = checked == true
+		end)
+	end)
+
 	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
@@ -156,6 +192,9 @@ function RoleIndicator:Ensure(parent)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
+		showTankCheckbox = subpage.showTankCheckbox,
+		showHealerCheckbox = subpage.showHealerCheckbox,
+		showDpsCheckbox = subpage.showDpsCheckbox,
 		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
@@ -165,18 +204,25 @@ function RoleIndicator:Ensure(parent)
 	function subpage:UpdateLayout()
 		local controls = self.controls
 		local rowStepPx = addon.Utilities:ToPixels(50)
+		local enabledRowGapPx = addon.Utilities:ToPixels(16)
+		local roleSectionGapPx = addon.Utilities:ToPixels(32)
 		local anchorRowGapPx = addon.Utilities:ToPixels(16)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
+		local roleCheckboxGapPx = addon.Utilities:ToPixels(14)
+		local showTankWidthPx = addon.Utilities:ToPixels(controls.showTankCheckbox.layoutValues.width)
+		local showHealerWidthPx = addon.Utilities:ToPixels(controls.showHealerCheckbox.layoutValues.width)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
-		local checkboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local enabledControlsOffsetPx = 0
-		local anchorControlsOffsetPx = rowStepPx
+		local roleFiltersOffsetPx = enabledControlsOffsetPx + enabledRowGapPx + checkboxHeightPx
+		local anchorControlsOffsetPx = roleFiltersOffsetPx + checkboxHeightPx + roleSectionGapPx
 		local offsetControlsOffsetPx = anchorControlsOffsetPx + rowStepPx + anchorRowGapPx
 		local sizeControlsOffsetPx = offsetControlsOffsetPx + rowStepPx
+		local showHealerOffsetPx = showTankWidthPx + roleCheckboxGapPx
+		local showDpsOffsetPx = showHealerOffsetPx + showHealerWidthPx + roleCheckboxGapPx
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -193,23 +239,38 @@ function RoleIndicator:Ensure(parent)
 			-addon.Utilities:ToUI(enabledControlsOffsetPx + checkboxOffsetPx)
 		)
 
-		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint(
+		controls.showTankCheckbox:ClearAllPoints()
+		controls.showTankCheckbox:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
 			0,
-			-addon.Utilities:ToUI(anchorControlsOffsetPx)
+			-addon.Utilities:ToUI(roleFiltersOffsetPx + checkboxOffsetPx)
 		)
 
-		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint(
+		controls.showHealerCheckbox:ClearAllPoints()
+		controls.showHealerCheckbox:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(offsetControlsOffsetPx)
+			addon.Utilities:ToUI(showHealerOffsetPx),
+			-addon.Utilities:ToUI(roleFiltersOffsetPx + checkboxOffsetPx)
 		)
+
+		controls.showDpsCheckbox:ClearAllPoints()
+		controls.showDpsCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(showDpsOffsetPx),
+			-addon.Utilities:ToUI(roleFiltersOffsetPx + checkboxOffsetPx)
+		)
+
+		controls.anchorDropdown:ClearAllPoints()
+		controls.anchorDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(anchorControlsOffsetPx))
+
+		controls.offsetXSlider:ClearAllPoints()
+		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(offsetControlsOffsetPx))
 
 		controls.offsetYSlider:ClearAllPoints()
 		controls.offsetYSlider:SetPoint(
@@ -221,13 +282,7 @@ function RoleIndicator:Ensure(parent)
 		)
 
 		controls.sizeSlider:ClearAllPoints()
-		controls.sizeSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(sizeControlsOffsetPx)
-		)
+		controls.sizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(sizeControlsOffsetPx))
 	end
 
 	function subpage:UpdateState(profile)
@@ -246,8 +301,23 @@ function RoleIndicator:Ensure(parent)
 		if enabled == nil then
 			enabled = defaults.enabled
 		end
+		local showTank = roleIcon.showTank
+		if showTank == nil then
+			showTank = defaults.showTank
+		end
+		local showHealer = roleIcon.showHealer
+		if showHealer == nil then
+			showHealer = defaults.showHealer
+		end
+		local showDps = roleIcon.showDps
+		if showDps == nil then
+			showDps = defaults.showDps
+		end
 
 		controls.enabledCheckbox:SetChecked(enabled == true)
+		controls.showTankCheckbox:SetChecked(showTank == true)
+		controls.showHealerCheckbox:SetChecked(showHealer == true)
+		controls.showDpsCheckbox:SetChecked(showDps == true)
 		controls.anchorDropdown:SetValue(roleIcon.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(roleIcon.offsetX or defaults.offsetX)
 		controls.offsetYSlider:SetValueSilently(roleIcon.offsetY or defaults.offsetY)
