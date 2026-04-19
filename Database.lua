@@ -569,6 +569,9 @@ local DEFAULTS = {
 					},
 					roleIcon = {
 						enabled = false,
+						showTank = true,
+						showHealer = true,
+						showDps = true,
 						anchor = "TOPLEFT",
 						offsetX = 0,
 						offsetY = 0,
@@ -850,6 +853,9 @@ local DEFAULTS = {
 					},
 					roleIcon = {
 						enabled = false,
+						showTank = true,
+						showHealer = true,
+						showDps = true,
 						anchor = "TOPLEFT",
 						offsetX = 0,
 						offsetY = 0,

@@ -17,6 +17,9 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = roleIcon.enabled == true,
+		showTank = roleIcon.showTank ~= false,
+		showHealer = roleIcon.showHealer ~= false,
+		showDps = roleIcon.showDps ~= false,
 		anchor = roleIcon.anchor or "TOPLEFT",
 		sizePx = addon.Utilities:ToPixels(roleIcon.size or 16),
 		offsetXPx = addon.Utilities:ToPixels(roleIcon.offsetX or 0),
@@ -38,6 +41,22 @@ local function ApplyRoleAtlas(texture, role)
 	end
 
 	return true
+end
+
+local function IsRoleEnabled(cachedSettings, role)
+	if role == "TANK" then
+		return cachedSettings.showTank
+	end
+
+	if role == "HEALER" then
+		return cachedSettings.showHealer
+	end
+
+	if role == "DAMAGER" then
+		return cachedSettings.showDps
+	end
+
+	return false
 end
 
 function RoleIcon:Ensure(frame)
@@ -98,6 +117,11 @@ function RoleIcon:UpdateState(frame, settings)
 
 	local role = provider:GetRole(frame)
 	if role ~= "TANK" and role ~= "HEALER" and role ~= "DAMAGER" then
+		container:Hide()
+		return
+	end
+
+	if not IsRoleEnabled(cachedSettings, role) then
 		container:Hide()
 		return
 	end
