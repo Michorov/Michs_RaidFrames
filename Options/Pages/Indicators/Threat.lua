@@ -91,7 +91,7 @@ function Threat:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Size")
 	subpage.borderSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 8, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
