@@ -472,8 +472,8 @@ local DEFAULTS = {
 						alpha = 1.0,
 					},
 					dispelOverlay = {
-						enabled = true,
-						style = "FULL",
+						enabled = false,
+						style = "GRADIENT",
 					},
 					raidBuffReminder = {
 						enabled = true,
@@ -749,8 +749,8 @@ local DEFAULTS = {
 						alpha = 1.0,
 					},
 					dispelOverlay = {
-						enabled = true,
-						style = "FULL",
+						enabled = false,
+						style = "GRADIENT",
 					},
 					raidBuffReminder = {
 						enabled = true,

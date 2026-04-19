@@ -122,7 +122,7 @@ function Dispels:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Indicator Icons")
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -133,7 +133,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged", true)
 	end)
 
-	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Overlay")
 	subpage.overlayEnabledCheckbox:SetLayoutWidth(174)
 	subpage.overlayEnabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -144,7 +144,7 @@ function Dispels:Ensure(parent)
 		end, "dispelOverlaySettingsChanged")
 	end)
 
-	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Style")
+	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Overlay Style")
 	subpage.overlayStyleDropdown:SetLayoutWidth(174)
 	subpage.overlayStyleDropdown:SetOptions(overlayStyleOptions)
 	subpage.overlayStyleDropdown:SetOnValueChanged(function(_, value)
@@ -279,7 +279,7 @@ function Dispels:Ensure(parent)
 		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
 		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx + sectionGapPx
 		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
-		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx
+		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx + addon.Utilities:ToPixels(10)
 		local overlayCheckboxOffsetPx = fifthRowOffsetPx
 			+ addon.Utilities:ToPixels(
 				controls.overlayStyleDropdown.layoutValues.labelHeight + controls.overlayStyleDropdown.layoutValues.labelSpacing

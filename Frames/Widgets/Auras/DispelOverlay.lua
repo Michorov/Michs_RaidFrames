@@ -8,7 +8,10 @@ addon.Frames.Widgets.Auras.DispelOverlay = addon.Frames.Widgets.Auras.DispelOver
 local DispelOverlay = addon.Frames.Widgets.Auras.DispelOverlay
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+
 local OVERLAY_TEXTURE = "Interface\\Buttons\\WHITE8x8"
+local OVERLAY_MASK_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\VerticalGradientMask"
+local OVERLAY_MASK_EDGE_TEXCOORD = 0.0625
 local OVERLAY_STYLE_FULL = "FULL"
 local OVERLAY_STYLE_GRADIENT = "GRADIENT"
 
@@ -65,61 +68,24 @@ local function GetColorRGBA(color)
 	return nil
 end
 
-local function ApplySolidColor(texture, color)
-	if not texture or not color then
+local function ApplyColor(texture, color)
+	if not color then
 		return false
 	end
-
-	texture:SetTexture(OVERLAY_TEXTURE)
 
 	local r, g, b = GetColorRGBA(color)
 	if r ~= nil and g ~= nil and b ~= nil then
 		texture:SetColorTexture(r, g, b, 1)
+		texture:SetAlpha(1)
 		return true
 	end
 
 	if texture.SetGradient then
 		local ok = pcall(texture.SetGradient, texture, "VERTICAL", color, color)
 		if ok then
+			texture:SetAlpha(1)
 			return true
 		end
-	end
-
-	return false
-end
-
-local function ApplyGradient(texture, color)
-	if not texture or not color then
-		return false
-	end
-
-	texture:SetTexture(OVERLAY_TEXTURE)
-
-	local r, g, b = GetColorRGBA(color)
-
-	if texture.SetGradient and CreateColor then
-		if r ~= nil and g ~= nil and b ~= nil then
-			local ok = pcall(
-				texture.SetGradient,
-				texture,
-				"VERTICAL",
-				CreateColor(r, g, b, 1),
-				CreateColor(r, g, b, 0)
-			)
-			if ok then
-				return true
-			end
-		end
-
-		local ok = pcall(texture.SetGradient, texture, "VERTICAL", color, CreateColor(0, 0, 0, 0))
-		if ok then
-			return true
-		end
-	end
-
-	if texture.SetGradientAlpha and r ~= nil and g ~= nil and b ~= nil then
-		texture:SetGradientAlpha("VERTICAL", r, g, b, 1, r, g, b, 0)
-		return true
 	end
 
 	return false
@@ -135,8 +101,23 @@ function DispelOverlay:Ensure(frame)
 		overlay.texture:SetAllPoints(overlay)
 		overlay.texture:SetTexture(OVERLAY_TEXTURE)
 
+		overlay.gradientTexture = overlay:CreateTexture(nil, "ARTWORK")
+		overlay.gradientTexture:SetAllPoints(overlay)
+		overlay.gradientTexture:SetTexture(OVERLAY_TEXTURE)
+		overlay.gradientTexture:Hide()
+
+		if overlay.CreateMaskTexture and overlay.gradientTexture.AddMaskTexture then
+			overlay.gradientMask = overlay:CreateMaskTexture(nil, "ARTWORK")
+			overlay.gradientMask:SetAllPoints(overlay.gradientTexture)
+			overlay.gradientMask:SetTexture(OVERLAY_MASK_TEXTURE)
+			overlay.gradientMask:SetTexCoord(OVERLAY_MASK_EDGE_TEXCOORD, 1 - OVERLAY_MASK_EDGE_TEXCOORD, 0, 1)
+			overlay.gradientTexture:AddMaskTexture(overlay.gradientMask)
+		end
+
 		overlay:SetPoint("TOPLEFT", frame.healthBar, "TOPLEFT", 0, 0)
 		overlay:SetPoint("BOTTOMRIGHT", frame.healthBar, "BOTTOMRIGHT", 0, 0)
+
+		overlay.activeTexture = overlay.texture
 
 		frame.dispelOverlay = overlay
 	end
@@ -144,6 +125,21 @@ end
 
 function DispelOverlay:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
+
+	local overlay = frame.dispelOverlay
+	local cachedSettings = settingsCache[settings]
+	local activeTexture = overlay.texture
+	local inactiveTexture = overlay.gradientTexture
+
+	if cachedSettings.style == OVERLAY_STYLE_GRADIENT and overlay.gradientTexture and overlay.gradientMask then
+		activeTexture = overlay.gradientTexture
+		inactiveTexture = overlay.texture
+	end
+
+	overlay.activeTexture = activeTexture
+
+	activeTexture:Show()
+	inactiveTexture:Hide()
 end
 
 function DispelOverlay:UpdateState(frame, settings)
@@ -153,10 +149,8 @@ function DispelOverlay:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 	local overlay = frame.dispelOverlay
 
-	if not cachedSettings.enabled or not overlay then
-		if overlay then
-			overlay:Hide()
-		end
+	if not cachedSettings.enabled then
+		overlay:Hide()
 		return
 	end
 
@@ -186,16 +180,8 @@ function DispelOverlay:UpdateState(frame, settings)
 		return
 	end
 
-	local applied = false
-	if cachedSettings.style == OVERLAY_STYLE_GRADIENT then
-		applied = ApplyGradient(overlay.texture, color)
-	end
-
-	if not applied then
-		applied = ApplySolidColor(overlay.texture, color)
-	end
-
-	if not applied then
+	local activeTexture = overlay.activeTexture
+	if not ApplyColor(activeTexture, color) then
 		overlay:Hide()
 		return
 	end
