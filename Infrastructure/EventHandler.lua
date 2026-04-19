@@ -29,6 +29,8 @@ function EventHandler:Initialize()
 	self:RegisterEvent("RAID_TARGET_UPDATE")
 	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
 	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 
 	self:RegisterEvent("UNIT_MAXHEALTH")
 	self:RegisterEvent("UNIT_HEALTH")
@@ -305,4 +307,16 @@ end
 
 function EventHandler:PLAYER_ROLES_ASSIGNED()
 	addon.UpdateScheduler:Notify("roleIconStateChanged")
+end
+
+function EventHandler:UNIT_THREAT_SITUATION_UPDATE(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.UpdateScheduler:Notify("threatStateChanged", unit)
+end
+
+function EventHandler:UNIT_THREAT_LIST_UPDATE()
+	addon.UpdateScheduler:Notify("threatStateChanged")
 end

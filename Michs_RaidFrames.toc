@@ -32,6 +32,7 @@ Frames/Widgets/Indicators/ReadyCheck.lua
 Frames/Widgets/Indicators/PendingSummon.lua
 Frames/Widgets/Indicators/RaidMarker.lua
 Frames/Widgets/Indicators/RoleIcon.lua
+Frames/Widgets/Indicators/Threat.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua
@@ -102,6 +103,7 @@ Options/Pages/Auras.lua
 Options/Pages/Indicators/ReadyCheck.lua
 Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
+Options/Pages/Indicators/Threat.lua
 Options/Pages/Indicators.lua
 Options/Pages/Profiles.lua
 Options/Sections/Header.lua
