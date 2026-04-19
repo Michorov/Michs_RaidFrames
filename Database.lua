@@ -574,6 +574,10 @@ local DEFAULTS = {
 						offsetY = 0,
 						size = 16,
 					},
+					threat = {
+						enabled = true,
+						borderSize = 2,
+					},
 				},
 			},
 		},
@@ -850,6 +854,10 @@ local DEFAULTS = {
 						offsetX = 0,
 						offsetY = 0,
 						size = 16,
+					},
+					threat = {
+						enabled = true,
+						borderSize = 2,
 					},
 				},
 			},

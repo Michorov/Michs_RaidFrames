@@ -485,6 +485,33 @@ function DataProvider.Test:GetRole(frame)
 	return nil
 end
 
+function DataProvider.Live:GetThreatStatus(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	return UnitThreatSituation(unit)
+end
+
+function DataProvider.Test:GetThreatStatus(frame)
+	local threatSamples = {
+		nil,
+		nil,
+		1,
+		2,
+		3,
+		nil,
+		1,
+		2,
+	}
+
+	local index = frame and frame.testIndex or 1
+	index = ((index - 1) % #threatSamples) + 1
+
+	return threatSamples[index]
+end
+
 function DataProvider.Live:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
 	local unit = frame and frame.unit
 	local auraInstanceID = aura and aura.auraInstanceID

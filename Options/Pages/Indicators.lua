@@ -13,6 +13,7 @@ local subpageOptions = {
 	{ value = "readyCheck", text = "Ready Check" },
 	{ value = "raidMarker", text = "Raid Marker" },
 	{ value = "roleIcon", text = "Role Indicator" },
+	{ value = "threat", text = "Threat" },
 }
 
 local function GetControllerState()
@@ -103,11 +104,13 @@ function Indicators:Ensure(parent)
 	local readyCheckSubpage = addon.Options.Pages.Indicators.ReadyCheck:Ensure(page.body)
 	local raidMarkerSubpage = addon.Options.Pages.Indicators.RaidMarker:Ensure(page.body)
 	local roleIndicatorSubpage = addon.Options.Pages.Indicators.RoleIndicator:Ensure(page.body)
+	local threatSubpage = addon.Options.Pages.Indicators.Threat:Ensure(page.body)
 
 	page.subpages = {
 		readyCheck = readyCheckSubpage,
 		raidMarker = raidMarkerSubpage,
 		roleIcon = roleIndicatorSubpage,
+		threat = threatSubpage,
 	}
 
 	for subpageKey, subpage in pairs(page.subpages) do
