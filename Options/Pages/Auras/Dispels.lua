@@ -26,6 +26,11 @@ local growDirectionOptions = {
 	{ value = "RIGHT", text = "Right" },
 }
 
+local overlayStyleOptions = {
+	{ value = "FULL", text = "Full Bar" },
+	{ value = "GRADIENT", text = "Gradient" },
+}
+
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
 	if content and content.GetControllerState then
@@ -62,6 +67,8 @@ end
 local function GetModeDefaults()
 	return {
 		enabled = true,
+		overlayEnabled = true,
+		overlayStyle = "FULL",
 		anchor = "TOPRIGHT",
 		relativeAnchor = "TOPRIGHT",
 		growDirection = "LEFT",
@@ -77,7 +84,7 @@ local function ShowCombatLockMessage()
 	print("|cffff9900Mich's RaidFrames:|r Dispel settings are disabled during combat.")
 end
 
-local function ApplyModeSetting(updateFn, notifyState)
+local function ApplyModeSetting(updateFn, settingsReason, notifyState)
 	if InCombatLockdown() then
 		ShowCombatLockMessage()
 		if subpage and subpage.UpdateState then
@@ -92,7 +99,7 @@ local function ApplyModeSetting(updateFn, notifyState)
 	profile[mode] = profile[mode] or {}
 	updateFn(profile[mode], mode)
 
-	addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+	addon.UpdateScheduler:Notify(settingsReason or "dispelsSettingsChanged")
 	if notifyState then
 		addon.UpdateScheduler:Notify("aurasStateChanged")
 	end
@@ -115,7 +122,7 @@ function Dispels:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Indicator Icons")
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -123,7 +130,30 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.enabled = checked == true
-		end, true)
+		end, "dispelsSettingsChanged", true)
+	end)
+
+	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Overlay")
+	subpage.overlayEnabledCheckbox:SetLayoutWidth(174)
+	subpage.overlayEnabledCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.dispelOverlay = section.widgets.icons.dispelOverlay or {}
+			section.widgets.icons.dispelOverlay.enabled = checked == true
+		end, "dispelOverlaySettingsChanged")
+	end)
+
+	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Overlay Style")
+	subpage.overlayStyleDropdown:SetLayoutWidth(174)
+	subpage.overlayStyleDropdown:SetOptions(overlayStyleOptions)
+	subpage.overlayStyleDropdown:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.dispelOverlay = section.widgets.icons.dispelOverlay or {}
+			section.widgets.icons.dispelOverlay.style = value
+		end, "dispelOverlaySettingsChanged")
 	end)
 
 	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
@@ -135,7 +165,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.anchor = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.relativeAnchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "To Frame")
@@ -147,7 +177,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.relativeAnchor = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.growDirectionDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Grow Direction")
@@ -159,7 +189,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.growDirection = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, "Spacing")
@@ -171,7 +201,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.spacing = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
@@ -183,7 +213,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.offsetX = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
@@ -195,7 +225,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.offsetY = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
@@ -207,7 +237,7 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.iconSize = value
-		end)
+		end, "dispelsSettingsChanged")
 	end)
 
 	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, "Max Icons")
@@ -219,11 +249,13 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.maxIcons = value
-		end, true)
+		end, "dispelsSettingsChanged", true)
 	end)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
+		overlayEnabledCheckbox = subpage.overlayEnabledCheckbox,
+		overlayStyleDropdown = subpage.overlayStyleDropdown,
 		anchorDropdown = subpage.anchorDropdown,
 		relativeAnchorDropdown = subpage.relativeAnchorDropdown,
 		growDirectionDropdown = subpage.growDirectionDropdown,
@@ -247,6 +279,11 @@ function Dispels:Ensure(parent)
 		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
 		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx + sectionGapPx
 		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
+		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx + addon.Utilities:ToPixels(10)
+		local overlayCheckboxOffsetPx = fifthRowOffsetPx
+			+ addon.Utilities:ToPixels(
+				controls.overlayStyleDropdown.layoutValues.labelHeight + controls.overlayStyleDropdown.layoutValues.labelSpacing
+			)
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -310,6 +347,24 @@ function Dispels:Ensure(parent)
 			addon.Utilities:ToUI(secondColumnOffsetPx),
 			-addon.Utilities:ToUI(fourthRowOffsetPx)
 		)
+
+		controls.overlayEnabledCheckbox:ClearAllPoints()
+		controls.overlayEnabledCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(overlayCheckboxOffsetPx)
+		)
+
+		controls.overlayStyleDropdown:ClearAllPoints()
+		controls.overlayStyleDropdown:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(fifthRowOffsetPx)
+		)
 	end
 
 	function subpage:UpdateState(profile)
@@ -324,8 +379,11 @@ function Dispels:Ensure(parent)
 		local widgets = section.widgets or {}
 		local icons = widgets.icons or {}
 		local dispels = icons.dispels or {}
+		local dispelOverlay = icons.dispelOverlay or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(dispels.enabled, defaults.enabled))
+		controls.overlayEnabledCheckbox:SetChecked(ResolveBoolean(dispelOverlay.enabled, defaults.overlayEnabled))
+		controls.overlayStyleDropdown:SetValue(dispelOverlay.style or defaults.overlayStyle)
 		controls.anchorDropdown:SetValue(dispels.anchor or defaults.anchor)
 		controls.relativeAnchorDropdown:SetValue(dispels.relativeAnchor or defaults.relativeAnchor)
 		controls.growDirectionDropdown:SetValue(dispels.growDirection or defaults.growDirection)
