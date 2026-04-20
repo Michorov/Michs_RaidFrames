@@ -35,8 +35,7 @@ local function ApplyOptionTextStyle(fontString, option, isPlaceholder)
 		return
 	end
 
-	local fontFlags = (option and option.fontFlags) or ""
-	fontString:SetFont(theme.fonts.arialNarrow, 12, fontFlags)
+	fontString:SetFont(theme.fonts.arialNarrow, 12, "")
 
 	if option and option.textColor then
 		fontString:SetTextColor(
