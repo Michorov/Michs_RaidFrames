@@ -38,6 +38,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Indicators.PendingSummon,
 		addon.Frames.Widgets.Indicators.RaidMarker,
 		addon.Frames.Widgets.Indicators.RoleIcon,
+		addon.Frames.Widgets.Indicators.GroupStatus,
 		addon.Frames.Widgets.Indicators.Threat,
 		addon.Frames.Widgets.Bars.Absorbs,
 		addon.Frames.Widgets.Bars.HealAbsorbs,

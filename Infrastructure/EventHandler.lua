@@ -19,6 +19,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
+	self:RegisterEvent("PARTY_LEADER_CHANGED")
 
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -103,6 +104,10 @@ function EventHandler:GROUP_ROSTER_UPDATE()
 	end
 
 	QueueLateRosterRefresh()
+end
+
+function EventHandler:PARTY_LEADER_CHANGED()
+	addon.UpdateScheduler:Notify("groupStatusStateChanged")
 end
 
 function EventHandler:PLAYER_REGEN_ENABLED()

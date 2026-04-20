@@ -616,6 +616,15 @@ local DEFAULTS = {
 						offsetY = 0,
 						size = 16,
 					},
+					groupStatus = {
+						enabled = false,
+						showLeader = true,
+						showAssistant = true,
+						anchor = "TOPLEFT",
+						offsetX = 1,
+						offsetY = 8,
+						size = 14,
+					},
 					threat = {
 						enabled = false,
 						borderSize = 2,
@@ -899,6 +908,15 @@ local DEFAULTS = {
 						offsetX = 0,
 						offsetY = 0,
 						size = 16,
+					},
+					groupStatus = {
+						enabled = false,
+						showLeader = true,
+						showAssistant = true,
+						anchor = "TOPLEFT",
+						offsetX = 1,
+						offsetY = 8,
+						size = 14,
 					},
 					threat = {
 						enabled = false,
