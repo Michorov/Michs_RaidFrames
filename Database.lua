@@ -617,7 +617,7 @@ local DEFAULTS = {
 						size = 16,
 					},
 					threat = {
-						enabled = true,
+						enabled = false,
 						borderSize = 2,
 					},
 				},
@@ -901,7 +901,7 @@ local DEFAULTS = {
 						size = 16,
 					},
 					threat = {
-						enabled = true,
+						enabled = false,
 						borderSize = 2,
 					},
 				},
@@ -1084,11 +1084,7 @@ function Database:ApplyProfileForSpec(specID)
 	local targetProfileName = self:GetResolvedProfileName(specID)
 	local currentProfileName = self.db:GetCurrentProfile()
 
-	if
-		type(targetProfileName) == "string"
-		and targetProfileName ~= ""
-		and targetProfileName ~= currentProfileName
-	then
+	if type(targetProfileName) == "string" and targetProfileName ~= "" and targetProfileName ~= currentProfileName then
 		self.db:SetProfile(targetProfileName)
 		return true
 	end
