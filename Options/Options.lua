@@ -51,7 +51,14 @@ end
 function Options:Initialize()
 	SLASH_MICHRAIDFRAMES1 = "/mrf"
 
-	SlashCmdList["MICHRAIDFRAMES"] = function()
+	SlashCmdList["MICHRAIDFRAMES"] = function(msg)
+		local normalizedMessage = (msg or ""):match("^%s*(.-)%s*$")
+
+		if normalizedMessage ~= "" then
+			print("|cffff9900Mich's RaidFrames:|r Unknown command. Use /mrf")
+			return
+		end
+
 		if Options:IsOpen() then
 			Options:Close()
 			return
