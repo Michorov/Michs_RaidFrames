@@ -21,7 +21,7 @@ local anchorOptions = {
 }
 
 local outlineOptions = {
-	{ value = "NONE", text = "None" },
+	{ value = "", text = "None" },
 	{ value = "OUTLINE", text = "Outline" },
 	{ value = "THICKOUTLINE", text = "Thick Outline" },
 	{ value = "MONOCHROME", text = "Monochrome" },
@@ -61,7 +61,7 @@ local function GetModeDefaults(mode)
 			offsetY = -2,
 			classColor = false,
 			color = { r = 0, g = 0, b = 0, a = 1 },
-			outline = "NONE",
+			outline = "",
 			truncate = false,
 			maxLength = 12,
 		}
@@ -74,7 +74,7 @@ local function GetModeDefaults(mode)
 		offsetY = -2,
 		classColor = false,
 		color = { r = 0, g = 0, b = 0, a = 1 },
-		outline = "NONE",
+		outline = "",
 		truncate = false,
 		maxLength = 12,
 	}
@@ -400,8 +400,9 @@ function Name:Ensure(parent)
 			(name.color or defaults.color).b,
 			(name.color or defaults.color).a
 		)
+		local outline = addon.Utilities:NormalizeFontOutline(name.outline, defaults.outline)
 		controls.outlineDropdown:SetOptions(outlineOptions)
-		controls.outlineDropdown:SetValue(name.outline or defaults.outline)
+		controls.outlineDropdown:SetValue(outline)
 		controls.truncateCheckbox:SetChecked(truncate == true)
 		controls.maxLengthSlider:SetValueSilently(name.maxLength or defaults.maxLength)
 	end

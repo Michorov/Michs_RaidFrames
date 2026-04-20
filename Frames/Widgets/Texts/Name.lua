@@ -30,7 +30,7 @@ local function UpdateSettingsCache(settings)
 		},
 		font = name.font or "Interface\\AddOns\\Michs_RaidFrames\\Media\\Fonts\\Roboto-Bold.ttf",
 		size = name.size or 12,
-		outline = name.outline or "NONE",
+		outline = addon.Utilities:NormalizeFontOutline(name.outline),
 		truncate = name.truncate == true,
 		maxLength = name.maxLength or 12,
 	}
@@ -77,12 +77,7 @@ function Name:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	local fontFlags = cachedSettings.outline
-	if fontFlags == "NONE" then
-		fontFlags = ""
-	end
-
-	nameText:SetFont(cachedSettings.font, scaledFontSize, fontFlags)
+	nameText:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
 	nameText:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 

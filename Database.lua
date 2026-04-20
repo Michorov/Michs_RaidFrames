@@ -298,6 +298,45 @@ local function SyncAllProfilesCustomAuraDefaults(profile)
 	SyncProfileCustomAuraDefaults(profile.raid)
 end
 
+local function NormalizeProfileTextSettings(profileSection)
+	if type(profileSection) ~= "table" then
+		return
+	end
+
+	local widgets = profileSection.widgets
+	if type(widgets) ~= "table" then
+		return
+	end
+
+	local texts = widgets.texts
+	if type(texts) ~= "table" then
+		return
+	end
+
+	if type(texts.name) == "table" then
+		local outline = texts.name.outline
+		if outline ~= nil then
+			texts.name.outline = addon.Utilities:NormalizeFontOutline(outline)
+		end
+	end
+
+	if type(texts.healAbsorbs) == "table" then
+		local outline = texts.healAbsorbs.outline
+		if outline ~= nil then
+			texts.healAbsorbs.outline = addon.Utilities:NormalizeFontOutline(outline, "OUTLINE")
+		end
+	end
+end
+
+local function NormalizeCurrentProfileFontSettings(profile)
+	if type(profile) ~= "table" then
+		return
+	end
+
+	NormalizeProfileTextSettings(profile.party)
+	NormalizeProfileTextSettings(profile.raid)
+end
+
 function Database:GetCustomAuraDefaults()
 	return CUSTOM_AURA_DEFAULTS
 end
@@ -362,7 +401,7 @@ local DEFAULTS = {
 						},
 						font = "Fonts\\ARIALN.TTF",
 						size = 12,
-						outline = "NONE",
+						outline = "",
 						truncate = false,
 						maxLength = 12,
 					},
@@ -646,7 +685,7 @@ local DEFAULTS = {
 						},
 						font = "Fonts\\ARIALN.TTF",
 						size = 10,
-						outline = "NONE",
+						outline = "",
 						truncate = false,
 						maxLength = 12,
 					},
@@ -1095,9 +1134,11 @@ function Database:Initialize()
 	end
 
 	SyncAllProfilesCustomAuraDefaults(self.db.profile)
+	NormalizeCurrentProfileFontSettings(self.db.profile)
 
 	local function OnProfileChanged()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
+		NormalizeCurrentProfileFontSettings(self.db.profile)
 
 		if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
 			addon.Options.Data:RefreshProfile()

@@ -53,7 +53,6 @@ local function BuildSpecProfileOptions()
 			value = nil,
 			text = "Use Active",
 			textColor = { theme:GetTextColor("placeholder") },
-			fontFlags = "ITALIC",
 		},
 	}
 

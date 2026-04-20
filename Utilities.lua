@@ -4,6 +4,16 @@ local Utilities = {}
 addon.Utilities = Utilities
 
 local cachedPixelStep
+local ALLOWED_FONT_OUTLINE_VALUES = {
+	[""] = true,
+	["OUTLINE"] = true,
+	["THICKOUTLINE"] = true,
+	["MONOCHROME"] = true,
+	["MONOCHROME,OUTLINE"] = true,
+	["OUTLINE,MONOCHROME"] = true,
+	["MONOCHROME,THICKOUTLINE"] = true,
+	["THICKOUTLINE,MONOCHROME"] = true,
+}
 
 function Utilities:RoundToNearestInt(value)
 	value = value or 0
@@ -63,6 +73,23 @@ end
 
 function Utilities:ScaleFont(size)
 	return math.max(1, self:Scale(size))
+end
+
+function Utilities:NormalizeFontOutline(outline, fallback)
+	local normalizedFallback = fallback
+	if normalizedFallback == "NONE" or normalizedFallback == nil then
+		normalizedFallback = ""
+	end
+
+	if outline == nil or outline == "NONE" then
+		return normalizedFallback
+	end
+
+	if ALLOWED_FONT_OUTLINE_VALUES[outline] then
+		return outline
+	end
+
+	return normalizedFallback
 end
 
 function Utilities:GetUnitClassColor(unit, fallbackColor)
