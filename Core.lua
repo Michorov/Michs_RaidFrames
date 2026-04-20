@@ -8,7 +8,6 @@ local function InitializeAddon()
 	local flushCallback = addon.Updater:CreateFlushCallback()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
-	addon:RegisterOptions()
 	addon.Options:Initialize()
 
 	addon.Modules:Initialize()

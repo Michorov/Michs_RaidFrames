@@ -110,15 +110,6 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 		addon.Options:Open()
 	end
 
-	if addon.optionsDeferredOpen then
-		addon.optionsDeferredOpen = false
-		C_Timer.After(0, function()
-			if addon.OpenOptions then
-				addon:OpenOptions()
-			end
-		end)
-	end
-
 	if addon.FrameRegistry.restoreLiveDriversAfterCombat then
 		addon.FrameRegistry:UpdateStateDrivers()
 	end
@@ -138,10 +129,6 @@ end
 function EventHandler:PLAYER_REGEN_DISABLED()
 	if addon.Options:IsOpen() then
 		addon.Options:Close()
-	end
-
-	if addon.IsOptionsOpen and addon:IsOptionsOpen() then
-		addon:CloseOptions()
 	end
 
 	addon.UpdateScheduler:Notify("combatStarted")
