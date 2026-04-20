@@ -47,6 +47,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.RoleIcon:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.groupStatusSettingsChanged then
+			addon.Frames.Widgets.Indicators.GroupStatus:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.threatSettingsChanged then
 			addon.Frames.Widgets.Indicators.Threat:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Indicators.Threat:UpdateState(frame, settings)
@@ -159,6 +163,14 @@ local function BuildStateUpdater(updateReasons)
 			or updateReasons.roleIconSettingsChanged
 		then
 			addon.Frames.Widgets.Indicators.RoleIcon:UpdateState(frame, settings)
+		end
+
+		if
+			updateReasons.rosterChanged
+			or updateReasons.groupStatusStateChanged
+			or updateReasons.groupStatusSettingsChanged
+		then
+			addon.Frames.Widgets.Indicators.GroupStatus:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged or updateReasons.threatStateChanged then
