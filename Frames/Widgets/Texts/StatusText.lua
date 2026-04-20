@@ -15,7 +15,7 @@ function StatusText:Ensure(frame)
 
 		local text = statusFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 		text:SetPoint("CENTER", statusFrame, "CENTER", 0, 0)
-		text:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(16), "NONE")
+		text:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(16), "")
 		text:SetTextColor(0.55, 0.55, 0.55, 1)
 		text:SetShadowColor(0, 0, 0, 0.9)
 		text:SetShadowOffset(1, -1)

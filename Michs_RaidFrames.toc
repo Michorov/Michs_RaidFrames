@@ -1,4 +1,4 @@
-## Interface: 120000, 120001
+## Interface: 120000, 120001, 120005
 ## Title: Mich's RaidFrames
 ## Notes: Addon that manages custom Party/Raid frames
 ## Author: Mich

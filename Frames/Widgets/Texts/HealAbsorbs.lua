@@ -25,7 +25,7 @@ local function UpdateSettingsCache(settings)
 		positionY = addon.Utilities:ToPixels(position.y or 0),
 		font = healAbsorbs.font or "Fonts\\FRIZQT__.TTF",
 		size = healAbsorbs.size or 10,
-		outline = healAbsorbs.outline or "OUTLINE",
+		outline = addon.Utilities:NormalizeFontOutline(healAbsorbs.outline, "OUTLINE"),
 		color = {
 			r = color.r or 1,
 			g = color.g or 1,
@@ -67,12 +67,7 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	local fontFlags = cachedSettings.outline
-	if fontFlags == "NONE" then
-		fontFlags = ""
-	end
-
-	text:SetFont(cachedSettings.font, scaledFontSize, fontFlags)
+	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
 
 	local c = cachedSettings.color
 	text:SetTextColor(c.r, c.g, c.b, c.a)

@@ -22,7 +22,7 @@ local anchorOptions = {
 }
 
 local outlineOptions = {
-	{ value = "NONE", text = "None" },
+	{ value = "", text = "None" },
 	{ value = "OUTLINE", text = "Outline" },
 	{ value = "THICKOUTLINE", text = "Thick Outline" },
 	{ value = "MONOCHROME", text = "Monochrome" },
@@ -345,8 +345,9 @@ function HealAbsorbs:Ensure(parent)
 		controls.sizeSlider:SetValueSilently(healAbsorbs.size or defaults.size)
 		controls.offsetXSlider:SetValueSilently(position.x or defaults.offsetX)
 		controls.offsetYSlider:SetValueSilently(position.y or defaults.offsetY)
+		local outline = addon.Utilities:NormalizeFontOutline(healAbsorbs.outline, defaults.outline)
 		controls.outlineDropdown:SetOptions(outlineOptions)
-		controls.outlineDropdown:SetValue(healAbsorbs.outline or defaults.outline)
+		controls.outlineDropdown:SetValue(outline)
 		controls.colorPicker:SetColor(color.r, color.g, color.b, color.a)
 	end
 
