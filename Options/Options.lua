@@ -51,27 +51,7 @@ end
 function Options:Initialize()
 	SLASH_MICHRAIDFRAMES1 = "/mrf"
 
-	SlashCmdList["MICHRAIDFRAMES"] = function(msg)
-		local normalizedMessage = string.lower((msg or ""):match("^%s*(.-)%s*$"))
-
-		if normalizedMessage == "legacy" then
-			if Options:IsOpen() then
-				Options:Close()
-			end
-
-			if addon:IsOptionsOpen() then
-				addon:CloseOptions()
-			else
-				addon:OpenOptions()
-			end
-
-			return
-		end
-
-		if addon:IsOptionsOpen() then
-			addon:CloseOptions()
-		end
-
+	SlashCmdList["MICHRAIDFRAMES"] = function()
 		if Options:IsOpen() then
 			Options:Close()
 			return
