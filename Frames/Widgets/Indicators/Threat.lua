@@ -14,10 +14,12 @@ local function UpdateSettingsCache(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local indicators = widgets.indicators or {}
 	local threat = indicators.threat or {}
+	local border = (settings and settings.border) or {}
 
 	settingsCache[settings] = {
 		enabled = threat.enabled == true,
 		borderSizePx = addon.Utilities:ToPixels(threat.borderSize or 2),
+		frameBorderSizePx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 	}
 end
 
@@ -75,7 +77,8 @@ function Threat:UpdateSettings(frame, settings)
 
 	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
 	local uiBorderSize = addon.Utilities:ToUI(scaledBorderSizePx)
-	local insetPx = addon.Utilities:Scale(1)
+	local scaledFrameBorderSizePx = addon.Utilities:Scale(cachedSettings.frameBorderSizePx)
+	local insetPx = scaledFrameBorderSizePx > 0 and scaledFrameBorderSizePx or 0
 	local inset = addon.Utilities:ToUI(insetPx)
 
 	container.left:ClearAllPoints()
