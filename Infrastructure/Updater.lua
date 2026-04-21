@@ -51,7 +51,7 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.GroupStatus:UpdateSettings(frame, settings)
 		end
 
-		if updateReasons.threatSettingsChanged then
+		if updateReasons.threatSettingsChanged or updateReasons.borderSettingsChanged then
 			addon.Frames.Widgets.Indicators.Threat:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Indicators.Threat:UpdateState(frame, settings)
 		end

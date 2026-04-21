@@ -9,6 +9,16 @@ local PrivateAuras = addon.Frames.Widgets.Icons.PrivateAuras
 
 PrivateAuras.needsUpdateAfterCombat = false
 
+local TEST_PRIVATE_AURA_SAMPLES = {
+	{ spellID = 407221, dispelType = "Magic", duration = 8 },
+	{ spellID = 418720, dispelType = "Curse", duration = 12 },
+	{ spellID = 421828, dispelType = "Disease", duration = 6 },
+	{ spellID = 428970, dispelType = "Poison", duration = 10 },
+	{ spellID = 406317, dispelType = "None", duration = 14 },
+}
+
+local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable() or nil
+
 local function GetPrivateAurasSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
@@ -40,11 +50,122 @@ local function RemovePrivateAuraAnchors(frame)
 	wipe(frame.privateAurasAnchorIDs)
 end
 
+local function CreateTestPrivateAuraPreviewIcon(container)
+	local icon = CreateFrame("Frame", nil, container)
+	icon:SetFrameLevel(container:GetFrameLevel() + 1)
+	icon:Hide()
+
+	icon.texture = icon:CreateTexture(nil, "ARTWORK")
+	icon.texture:SetAllPoints(icon)
+	icon.texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+	icon.cooldown = CreateFrame("Cooldown", nil, icon, "CooldownFrameTemplate")
+	icon.cooldown:SetAllPoints(icon)
+	icon.cooldown:SetReverse(true)
+	icon.cooldown:SetDrawBling(false)
+	icon.cooldown:SetDrawEdge(false)
+	icon.cooldown:SetHideCountdownNumbers(true)
+	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
+
+	icon.border = icon:CreateTexture(nil, "OVERLAY")
+	icon.border:SetPoint("CENTER")
+	icon.border:SetDrawLayer("OVERLAY", 1)
+
+	return icon
+end
+
+local function GetTestPrivateAuraTexture(sample)
+	if not sample then
+		return "Interface\\Icons\\INV_Misc_QuestionMark"
+	end
+
+	local texture = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(sample.spellID) or nil
+	return texture or "Interface\\Icons\\INV_Misc_QuestionMark"
+end
+
+local function ApplyTestPrivateAuraBorder(icon, iconSize)
+	local displayInfo = DEBUFF_DISPLAY_INFO and DEBUFF_DISPLAY_INFO[icon.dispelType or "None"]
+	if not displayInfo and DEBUFF_DISPLAY_INFO then
+		displayInfo = DEBUFF_DISPLAY_INFO.None
+	end
+
+	local atlas = displayInfo and (displayInfo.dispelAtlas or displayInfo.basicAtlas) or nil
+	if atlas and icon.border.SetAtlas then
+		local borderScale = iconSize / 32 * 2
+		local borderSize = iconSize + (5 * borderScale)
+		icon.border:SetAtlas(atlas)
+		icon.border:SetSize(borderSize, borderSize)
+		icon.border:Show()
+	else
+		icon.border:Hide()
+	end
+end
+
+local function ApplyTestPrivateAuraCooldown(icon, duration)
+	local expirationTime = GetTime() + duration
+
+	if icon.cooldown.SetCooldownFromExpirationTime then
+		icon.cooldown:SetCooldownFromExpirationTime(expirationTime, duration)
+	else
+		icon.cooldown:SetCooldown(expirationTime - duration, duration)
+	end
+
+	icon.cooldown:Show()
+end
+
+local function EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
+	local container = frame.privateAurasContainer
+	if not container then
+		return
+	end
+
+	frame.privateAurasPreviewIcons = frame.privateAurasPreviewIcons or {}
+
+	local previewIcons = frame.privateAurasPreviewIcons
+	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	local iconSize = addon.Utilities:ToUI(iconSizePx)
+
+	for auraIndex = 1, privateAuraSettings.maxIcons do
+		local icon = previewIcons[auraIndex]
+		if not icon then
+			icon = CreateTestPrivateAuraPreviewIcon(container)
+			previewIcons[auraIndex] = icon
+		end
+
+		local sample = TEST_PRIVATE_AURA_SAMPLES[((auraIndex - 1) % #TEST_PRIVATE_AURA_SAMPLES) + 1]
+		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
+
+		icon.dispelType = sample.dispelType
+
+		icon:ClearAllPoints()
+		icon:SetPoint("LEFT", container, "LEFT", addon.Utilities:ToUI(xOffsetPx), 0)
+		icon:SetSize(iconSize, iconSize)
+
+		icon.texture:SetTexture(GetTestPrivateAuraTexture(sample))
+		ApplyTestPrivateAuraBorder(icon, iconSize)
+		ApplyTestPrivateAuraCooldown(icon, sample.duration)
+		icon:Show()
+	end
+
+	for auraIndex = privateAuraSettings.maxIcons + 1, #previewIcons do
+		local icon = previewIcons[auraIndex]
+		if icon then
+			icon:Hide()
+		end
+	end
+
+	container:Show()
+end
+
 local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	local container = frame.privateAurasContainer
 	if not container then
 		return
 	end
+
+	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
+	RemovePrivateAuraAnchors(frame)
 
 	local unit = frame.unit
 
@@ -55,10 +176,6 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 		container:Hide()
 		return
 	end
-
-	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
-
-	RemovePrivateAuraAnchors(frame)
 
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
 
@@ -101,10 +218,8 @@ function PrivateAuras:Ensure(frame)
 	end
 end
 
-function PrivateAuras:UpdateSettings(frame, settings)
+local function ApplyContainerLayout(frame, privateAuraSettings)
 	local container = frame.privateAurasContainer
-
-	local privateAuraSettings = GetPrivateAurasSettings(settings)
 
 	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
@@ -123,6 +238,18 @@ function PrivateAuras:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(offsetYPx)
 	)
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+end
+
+function PrivateAuras:UpdateSettings(frame, settings)
+	local privateAuraSettings = GetPrivateAurasSettings(settings)
+	local isTestProvider = frame.dataProvider == addon.Frames.DataProvider.Test
+
+	ApplyContainerLayout(frame, privateAuraSettings)
+
+	if isTestProvider then
+		EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
+		return
+	end
 
 	EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 end
