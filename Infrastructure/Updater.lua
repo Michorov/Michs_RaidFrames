@@ -103,7 +103,7 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
-		if updateReasons.privateAurasSettingsChanged then
+		if updateReasons.rosterChanged or updateReasons.privateAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 		end
 
@@ -188,10 +188,6 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.rosterChanged or updateReasons.statusStateChanged then
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
-		end
-
-		if updateReasons.rosterChanged then
-			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 		end
 
 		if updateReasons.rosterChanged then
