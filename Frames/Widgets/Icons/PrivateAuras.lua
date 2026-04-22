@@ -178,6 +178,7 @@ local function EnsurePrivateAuraAnchorFrames(frame, privateAuraSettings)
 	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
+	local stepPx = iconSizePx + spacingPx
 
 	for auraIndex = 1, privateAuraSettings.maxIcons do
 		local anchorFrame = anchorFrames[auraIndex]
@@ -186,14 +187,13 @@ local function EnsurePrivateAuraAnchorFrames(frame, privateAuraSettings)
 			anchorFrames[auraIndex] = anchorFrame
 		end
 
-		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
-
+		local xOffsetPx = (auraIndex - 1) * stepPx
 		anchorFrame:ClearAllPoints()
 		anchorFrame:SetPoint("LEFT", container, "LEFT", addon.Utilities:ToUI(xOffsetPx), 0)
 		anchorFrame:SetSize(iconSize, iconSize)
 		anchorFrame:Show()
 	end
-
+ 
 	for auraIndex = privateAuraSettings.maxIcons + 1, #anchorFrames do
 		local anchorFrame = anchorFrames[auraIndex]
 		if anchorFrame then
@@ -215,44 +215,45 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 
 	local unit = frame.unit
 
-	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
-
 	if not unit or not C_UnitAuras or not C_UnitAuras.AddPrivateAuraAnchor then
 		container:Hide()
 		return
 	end
 
 	local anchorFrames = EnsurePrivateAuraAnchorFrames(frame, privateAuraSettings)
-	local iconSize = addon.Utilities:ToUI(iconSizePx)
+	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(privateAuraSettings.iconSizePx))
+	local auraAnchor = {
+		unitToken = unit,
+		auraIndex = 1,
+		showCountdownFrame = true,
+		showCountdownNumbers = false,
+		isContainer = false,
+		iconInfo = {
+			iconWidth = iconSize,
+			iconHeight = iconSize,
+			borderScale = 1.0,
+			iconAnchor = {
+				point = "CENTER",
+				relativePoint = "CENTER",
+				offsetX = 0,
+				offsetY = 0,
+			},
+		},
+	}
+	local iconAnchor = auraAnchor.iconInfo.iconAnchor
 
 	for auraIndex = 1, privateAuraSettings.maxIcons do
 		local anchorFrame = anchorFrames[auraIndex]
+		auraAnchor.parent = anchorFrame
+		iconAnchor.relativeTo = anchorFrame
 
-		local ok, anchorID = pcall(C_UnitAuras.AddPrivateAuraAnchor, {
-			unitToken = unit,
-			auraIndex = auraIndex,
-			parent = anchorFrame,
-			showCountdownFrame = true,
-			showCountdownNumbers = false,
-			isContainer = false,
-			durationAnchor = nil,
-			iconInfo = {
-				iconWidth = iconSize,
-				iconHeight = iconSize,
-				borderScale = 1.0,
-				iconAnchor = {
-					point = "CENTER",
-					relativeTo = anchorFrame,
-					relativePoint = "CENTER",
-					offsetX = 0,
-					offsetY = 0,
-				},
-			},
-		})
+		local ok, anchorID = pcall(C_UnitAuras.AddPrivateAuraAnchor, auraAnchor)
 
 		if ok and anchorID then
 			table.insert(frame.privateAurasAnchorIDs, anchorID)
 		end
+
+		auraAnchor.auraIndex = auraAnchor.auraIndex + 1
 	end
 
 	container:SetShown(#frame.privateAurasAnchorIDs > 0)
