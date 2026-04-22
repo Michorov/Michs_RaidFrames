@@ -17,7 +17,8 @@ local TEST_PRIVATE_AURA_SAMPLES = {
 	{ spellID = 406317, dispelType = "None", duration = 14 },
 }
 
-local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable() or nil
+local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable()
+	or nil
 
 local function GetPrivateAurasSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
@@ -188,6 +189,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 			parent = container,
 			showCountdownFrame = true,
 			showCountdownNumbers = false,
+			isContainer = false,
 			durationAnchor = nil,
 			iconInfo = {
 				iconWidth = iconSize,
