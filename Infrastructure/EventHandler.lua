@@ -99,10 +99,6 @@ function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
 
-	if InCombatLockdown() then
-		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = true
-	end
-
 	QueueLateRosterRefresh()
 end
 
@@ -121,11 +117,6 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 
 	if addon.FrameRegistry.needsLayoutUpdateAfterCombat then
 		addon.UpdateScheduler:Notify("layoutChanged")
-	end
-
-	if addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat then
-		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = false
-		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 	end
 
 	addon.UpdateScheduler:Notify("combatEnded")
