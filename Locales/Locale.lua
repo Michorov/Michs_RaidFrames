@@ -3,7 +3,6 @@ local addonName, addon = ...
 addon.Locale = addon.Locale or {}
 local Locale = addon.Locale
 
-local AceLocale = LibStub("AceLocale-3.0")
 local registeredLocales = Locale.registeredLocales or {}
 local subscribers = Locale.subscribers or {}
 local currentLocale = Locale.currentLocale
@@ -166,7 +165,7 @@ local function SetResolvedLocale(locale)
 	return currentLocale
 end
 
-local function CreateWriteProxy(target, aceProxy)
+local function CreateWriteProxy(target)
 	return setmetatable({}, {
 		__index = function(_, key)
 			return target[key]
@@ -174,10 +173,6 @@ local function CreateWriteProxy(target, aceProxy)
 		__newindex = function(_, key, value)
 			local storedValue = value == true and key or value
 			target[key] = storedValue
-
-			if aceProxy then
-				aceProxy[key] = storedValue
-			end
 		end,
 	})
 end
@@ -193,9 +188,7 @@ function Locale:NewLocale(application, locale, isDefault, silent)
 	end
 
 	registeredLocales[normalizedLocale] = registeredLocales[normalizedLocale] or {}
-
-	local aceProxy = AceLocale:NewLocale(application, normalizedLocale, isDefault, silent)
-	return CreateWriteProxy(registeredLocales[normalizedLocale], aceProxy)
+	return CreateWriteProxy(registeredLocales[normalizedLocale])
 end
 
 function Locale:Initialize()
