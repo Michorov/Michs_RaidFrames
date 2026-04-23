@@ -8,6 +8,7 @@ addon.Options.Pages.Auras.BuffFilters = addon.Options.Pages.Auras.BuffFilters or
 local BuffFilters = addon.Options.Pages.Auras.BuffFilters
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -36,7 +37,15 @@ local function GetModeKey()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Buff filters are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Buff filters are disabled during combat."])
+end
+
+local function GetAuraDisplayName(spellId, fallbackName)
+	if addon.Locale and addon.Locale.GetAuraDisplayName then
+		return addon.Locale:GetAuraDisplayName(spellId, fallbackName)
+	end
+
+	return fallbackName
 end
 
 local function GetCurrentAuraEntries(profile)
@@ -72,10 +81,12 @@ local function GetCurrentAuraEntries(profile)
 	end
 
 	for spellId, auraData in pairs(specValues) do
+		local fallbackName = auraData.name or ("Spell " .. tostring(spellId))
+
 		table.insert(entries, {
 			specID = specID,
 			spellId = spellId,
-			name = auraData.name or ("Spell " .. tostring(spellId)),
+			name = GetAuraDisplayName(spellId, fallbackName),
 			enabled = auraData.enabled == true,
 		})
 	end
@@ -176,10 +187,15 @@ function BuffFilters:Ensure(parent)
 
 	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
-	subpage.emptyText:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(subpage.emptyText, "arialNarrow", 14, "")
 	subpage.emptyText:SetTextColor(theme:GetTextColor("secondary"))
-	subpage.emptyText:SetText("No filter found for this specialization")
+	subpage.emptyText:SetText(L["No filter found for this specialization"])
 	subpage.emptyText:Hide()
+
+	function subpage:UpdateLocale()
+		self.emptyText:SetText(L["No filter found for this specialization"])
+		RefreshDynamicCheckboxes(addon.Database:GetProfile())
+	end
 
 	function subpage:UpdateLayout()
 		local rowStepPx = addon.Utilities:ToPixels(24)
@@ -211,6 +227,8 @@ function BuffFilters:Ensure(parent)
 	function subpage:UpdateState(profile)
 		RefreshDynamicCheckboxes(profile)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

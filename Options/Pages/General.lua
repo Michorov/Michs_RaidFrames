@@ -7,7 +7,27 @@ addon.Options.Pages.General = addon.Options.Pages.General or {}
 local General = addon.Options.Pages.General
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
+
+local function GetLanguageOptions()
+	local options = {
+		{
+			value = nil,
+			text = L["Automatic"],
+			textColor = { theme:GetTextColor("placeholder") },
+		},
+	}
+
+	for _, locale in ipairs(addon.Locale:GetAvailableLocales()) do
+		table.insert(options, {
+			value = locale,
+			text = addon.Locale:GetLocaleDisplayName(locale),
+		})
+	end
+
+	return options
+end
 
 local function ParsePercentOrRaw(control, text)
 	local sanitizedText = (text or ""):gsub("%s+", ""):gsub(",", ".")
@@ -45,11 +65,11 @@ function General:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("General")
+	page.header.title:SetText(L["General"])
 
-	local showSoloPartyFrameCheckbox = addon.Options.Controls.Checkbox:Create(page.body, "Show Solo Party Frame")
+	local showSoloPartyFrameCheckbox = addon.Options.Controls.Checkbox:Create(page.body, L["Show Solo Party Frame"])
 	showSoloPartyFrameCheckbox:SetChecked(false)
 	showSoloPartyFrameCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -58,7 +78,7 @@ function General:Ensure(parent)
 	end)
 
 	local hideBlizzardPartyRaidFramesCheckbox =
-		addon.Options.Controls.Checkbox:Create(page.body, "Hide Blizzard Party/Raid Frames")
+		addon.Options.Controls.Checkbox:Create(page.body, L["Hide Blizzard Party/Raid Frames"])
 	hideBlizzardPartyRaidFramesCheckbox:SetChecked(false)
 	hideBlizzardPartyRaidFramesCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -67,7 +87,7 @@ function General:Ensure(parent)
 	end)
 
 	local hideBlizzardRaidFrameManagerCheckbox =
-		addon.Options.Controls.Checkbox:Create(page.body, "Hide Blizzard Raid Frame Manager")
+		addon.Options.Controls.Checkbox:Create(page.body, L["Hide Blizzard Raid Frame Manager"])
 	hideBlizzardRaidFrameManagerCheckbox:SetChecked(false)
 	hideBlizzardRaidFrameManagerCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
@@ -75,7 +95,7 @@ function General:Ensure(parent)
 		addon.UpdateScheduler:Notify("layoutChanged")
 	end)
 
-	local globalScaleSlider = addon.Options.Controls.Slider:Create(page.body, "Global Scale")
+	local globalScaleSlider = addon.Options.Controls.Slider:Create(page.body, L["Global Scale"])
 	globalScaleSlider:SetMinMaxValues(0.5, 2.0)
 	globalScaleSlider:SetStep(0.01)
 	globalScaleSlider:SetValueFormatter(function(value)
@@ -89,7 +109,7 @@ function General:Ensure(parent)
 		addon.Modules:RequestUpdateSettings()
 	end)
 
-	local outOfRangeAlphaSlider = addon.Options.Controls.Slider:Create(page.body, "Out of Range Alpha")
+	local outOfRangeAlphaSlider = addon.Options.Controls.Slider:Create(page.body, L["Out of Range Alpha"])
 	outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
 	outOfRangeAlphaSlider:SetStep(0.05)
 	outOfRangeAlphaSlider:SetValueFormatter(function(value)
@@ -102,12 +122,20 @@ function General:Ensure(parent)
 		addon.UpdateScheduler:Notify("outOfRangeAlphaSettingChanged")
 	end)
 
+	local languageDropdown = addon.Options.Controls.Dropdown:Create(page.body, L["Language"])
+	languageDropdown:SetLayoutWidth(174)
+	languageDropdown:SetOptions(GetLanguageOptions())
+	languageDropdown:SetOnValueChanged(function(_, value)
+		addon.Locale:SetLocaleOverride(value)
+	end)
+
 	page.controls = {
 		showSoloPartyFrameCheckbox = showSoloPartyFrameCheckbox,
 		hideBlizzardPartyRaidFramesCheckbox = hideBlizzardPartyRaidFramesCheckbox,
 		hideBlizzardRaidFrameManagerCheckbox = hideBlizzardRaidFrameManagerCheckbox,
 		globalScaleSlider = globalScaleSlider,
 		outOfRangeAlphaSlider = outOfRangeAlphaSlider,
+		languageDropdown = languageDropdown,
 	}
 
 	function page:UpdateLayout()
@@ -130,8 +158,25 @@ function General:Ensure(parent)
 			end
 		end
 
+		local languageSectionGapPx = addon.Utilities:ToPixels(28)
+		local languageControlHeightPx = addon.Utilities:ToPixels(
+			controls.languageDropdown.layoutValues.labelHeight
+				+ controls.languageDropdown.layoutValues.labelSpacing
+				+ controls.languageDropdown.layoutValues.fieldHeight
+		)
+		local mainControlsTopOffsetPx = languageControlHeightPx + languageSectionGapPx
+
+		controls.languageDropdown:ClearAllPoints()
+		controls.languageDropdown:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
+
 		controls.showSoloPartyFrameCheckbox:ClearAllPoints()
-		controls.showSoloPartyFrameCheckbox:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
+		controls.showSoloPartyFrameCheckbox:SetPoint(
+			"TOPLEFT",
+			self.body,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(mainControlsTopOffsetPx)
+		)
 
 		controls.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
 		controls.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
@@ -182,12 +227,29 @@ function General:Ensure(parent)
 		controls.hideBlizzardRaidFrameManagerCheckbox:SetChecked(profile.core.hideBlizzardRaidFrameManager == true)
 		controls.globalScaleSlider:SetValueSilently(profile.core.uiScale or 1)
 		controls.outOfRangeAlphaSlider:SetValueSilently(profile.core.outOfRangeAlpha or 1)
+		controls.languageDropdown:SetOptions(GetLanguageOptions())
+		controls.languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
+	end
+
+	function page:UpdateLocale()
+		local controls = self.controls
+
+		self.header.title:SetText(L["General"])
+		controls.showSoloPartyFrameCheckbox:SetText(L["Show Solo Party Frame"])
+		controls.hideBlizzardPartyRaidFramesCheckbox:SetText(L["Hide Blizzard Party/Raid Frames"])
+		controls.hideBlizzardRaidFrameManagerCheckbox:SetText(L["Hide Blizzard Raid Frame Manager"])
+		controls.globalScaleSlider:SetLabel(L["Global Scale"])
+		controls.outOfRangeAlphaSlider:SetLabel(L["Out of Range Alpha"])
+		controls.languageDropdown:SetLabel(L["Language"])
+		controls.languageDropdown:SetOptions(GetLanguageOptions())
+		controls.languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
 	end
 
 	addon.Options.Data:RegisterForUpdates(page, function(profile)
 		page:UpdateState(profile)
 	end)
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

@@ -7,13 +7,14 @@ addon.Options.Pages.Bars = addon.Options.Pages.Bars or {}
 local Bars = addon.Options.Pages.Bars
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local subpageOptions = {
-	{ value = "health", text = "Health" },
-	{ value = "power", text = "Power" },
-	{ value = "healAbsorbs", text = "Heal Absorbs" },
-	{ value = "absorbs", text = "Absorbs" },
+	{ value = "health", text = L["Health"] },
+	{ value = "power", text = L["Power"] },
+	{ value = "healAbsorbs", text = L["Heal Absorbs"] },
+	{ value = "absorbs", text = L["Absorbs"] },
 }
 
 local function GetControllerState()
@@ -67,16 +68,15 @@ function Bars:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Bars")
+	page.header.title:SetText(L["Bars"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -90,7 +90,7 @@ function Bars:Ensure(parent)
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(150)
+	page.subpageDropdown:SetLayoutWidth(186)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
@@ -125,6 +125,25 @@ function Bars:Ensure(parent)
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:UpdateLocale()
+		subpageOptions[1].text = L["Health"]
+		subpageOptions[2].text = L["Power"]
+		subpageOptions[3].text = L["Heal Absorbs"]
+		subpageOptions[4].text = L["Absorbs"]
+
+		self.header.title:SetText(L["Bars"])
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+
+		for _, subpage in pairs(self.subpages or {}) do
+			if subpage.UpdateLocale then
+				subpage:UpdateLocale()
+			end
+		end
+	end
 
 	function page:SetActiveSubpage(subpageKey, profile)
 		local state = GetControllerState()
@@ -211,6 +230,7 @@ function Bars:Ensure(parent)
 		end)
 	end
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

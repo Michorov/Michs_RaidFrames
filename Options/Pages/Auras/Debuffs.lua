@@ -8,6 +8,7 @@ addon.Options.Pages.Auras.Debuffs = addon.Options.Pages.Auras.Debuffs or {}
 local Debuffs = addon.Options.Pages.Auras.Debuffs
 
 local subpage
+local L = addon.L
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -61,7 +62,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Debuff settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Debuff settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyState)
@@ -102,7 +103,7 @@ function Debuffs:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -114,7 +115,7 @@ function Debuffs:Ensure(parent)
 	end)
 
 	subpage.borderColorByDebuffTypeCheckbox =
-		addon.Options.Controls.Checkbox:Create(subpage, "Color By Debuff Type")
+		addon.Options.Controls.Checkbox:Create(subpage, L["Color By Debuff Type"])
 	subpage.borderColorByDebuffTypeCheckbox:SetLayoutWidth(174)
 	subpage.borderColorByDebuffTypeCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -125,7 +126,7 @@ function Debuffs:Ensure(parent)
 		end, true)
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -137,7 +138,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -149,7 +150,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 64, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -161,7 +162,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, "Spacing")
+	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, L["Spacing"])
 	subpage.spacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.spacingSlider, -10, 20, 1)
 	subpage.spacingSlider:SetOnValueChanged(function(_, value)
@@ -173,7 +174,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, "Max Icons")
+	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Icons"])
 	subpage.maxIconsSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 10, 1)
 	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
@@ -185,7 +186,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconsPerRowSlider = addon.Options.Controls.Slider:Create(subpage, "Icons Per Row")
+	subpage.iconsPerRowSlider = addon.Options.Controls.Slider:Create(subpage, L["Icons Per Row"])
 	subpage.iconsPerRowSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconsPerRowSlider, 1, 10, 1)
 	subpage.iconsPerRowSlider:SetOnValueChanged(function(_, value)
@@ -197,7 +198,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 4, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
@@ -209,7 +210,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Stacks")
+	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Stacks"])
 	subpage.showStacksCheckbox:SetLayoutWidth(174)
 	subpage.showStacksCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -220,7 +221,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Stacks Size")
+	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Stacks Size"])
 	subpage.stacksFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.stacksFontSizeSlider, 6, 32, 1)
 	subpage.stacksFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -232,7 +233,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Duration")
+	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Duration"])
 	subpage.showCooldownCheckbox:SetLayoutWidth(174)
 	subpage.showCooldownCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -243,7 +244,7 @@ function Debuffs:Ensure(parent)
 		end)
 	end)
 
-	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Duration Size")
+	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Duration Size"])
 	subpage.cooldownFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.cooldownFontSizeSlider, 6, 32, 1)
 	subpage.cooldownFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -270,6 +271,22 @@ function Debuffs:Ensure(parent)
 		showCooldownCheckbox = subpage.showCooldownCheckbox,
 		cooldownFontSizeSlider = subpage.cooldownFontSizeSlider,
 	}
+
+	function subpage:UpdateLocale()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.borderColorByDebuffTypeCheckbox:SetText(L["Color By Debuff Type"])
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.spacingSlider:SetLabel(L["Spacing"])
+		self.maxIconsSlider:SetLabel(L["Max Icons"])
+		self.iconsPerRowSlider:SetLabel(L["Icons Per Row"])
+		self.borderSizeSlider:SetLabel(L["Border Size"])
+		self.showStacksCheckbox:SetText(L["Show Stacks"])
+		self.stacksFontSizeSlider:SetLabel(L["Stacks Size"])
+		self.showCooldownCheckbox:SetText(L["Show Duration"])
+		self.cooldownFontSizeSlider:SetLabel(L["Duration Size"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -419,6 +436,8 @@ function Debuffs:Ensure(parent)
 		controls.showCooldownCheckbox:SetChecked(ResolveBoolean(debuffs.showCooldown, defaults.showCooldown))
 		controls.cooldownFontSizeSlider:SetValueSilently(debuffs.cooldownFontSize or defaults.cooldownFontSize)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

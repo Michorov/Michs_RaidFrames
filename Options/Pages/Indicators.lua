@@ -7,14 +7,15 @@ addon.Options.Pages.Indicators = addon.Options.Pages.Indicators or {}
 local Indicators = addon.Options.Pages.Indicators
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local subpageOptions = {
-	{ value = "readyCheck", text = "Ready Check" },
-	{ value = "raidMarker", text = "Raid Marker" },
-	{ value = "roleIcon", text = "Role Indicator" },
-	{ value = "groupStatus", text = "Group Leader" },
-	{ value = "threat", text = "Threat" },
+	{ value = "readyCheck", text = L["Ready Check"] },
+	{ value = "raidMarker", text = L["Raid Marker"] },
+	{ value = "roleIcon", text = L["Role Indicator"] },
+	{ value = "groupStatus", text = L["Group Leader"] },
+	{ value = "threat", text = L["Threat"] },
 }
 
 local function GetControllerState()
@@ -68,16 +69,15 @@ function Indicators:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Indicators")
+	page.header.title:SetText(L["Indicators"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -91,7 +91,7 @@ function Indicators:Ensure(parent)
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(174)
+	page.subpageDropdown:SetLayoutWidth(186)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
@@ -128,6 +128,26 @@ function Indicators:Ensure(parent)
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:UpdateLocale()
+		subpageOptions[1].text = L["Ready Check"]
+		subpageOptions[2].text = L["Raid Marker"]
+		subpageOptions[3].text = L["Role Indicator"]
+		subpageOptions[4].text = L["Group Leader"]
+		subpageOptions[5].text = L["Threat"]
+
+		self.header.title:SetText(L["Indicators"])
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+
+		for _, subpage in pairs(self.subpages or {}) do
+			if subpage.UpdateLocale then
+				subpage:UpdateLocale()
+			end
+		end
+	end
 
 	function page:SetActiveSubpage(subpageKey, profile)
 		local state = GetControllerState()
@@ -213,6 +233,7 @@ function Indicators:Ensure(parent)
 		end)
 	end
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

@@ -7,11 +7,12 @@ addon.Options.Pages.Texts = addon.Options.Pages.Texts or {}
 local Texts = addon.Options.Pages.Texts
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local subpageOptions = {
-	{ value = "name", text = "Name" },
-	{ value = "healAbsorbs", text = "Heal Absorbs" },
+	{ value = "name", text = L["Name"] },
+	{ value = "healAbsorbs", text = L["Heal Absorbs"] },
 }
 
 local function GetControllerState()
@@ -65,16 +66,15 @@ function Texts:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Texts")
+	page.header.title:SetText(L["Texts"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -88,7 +88,7 @@ function Texts:Ensure(parent)
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(150)
+	page.subpageDropdown:SetLayoutWidth(186)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
@@ -119,6 +119,23 @@ function Texts:Ensure(parent)
 		modeToggle = page.modeToggle,
 		subpageDropdown = page.subpageDropdown,
 	}
+
+	function page:UpdateLocale()
+		subpageOptions[1].text = L["Name"]
+		subpageOptions[2].text = L["Heal Absorbs"]
+
+		self.header.title:SetText(L["Texts"])
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+
+		for _, subpage in pairs(self.subpages or {}) do
+			if subpage.UpdateLocale then
+				subpage:UpdateLocale()
+			end
+		end
+	end
 
 	function page:SetActiveSubpage(subpageKey, profile)
 		local state = GetControllerState()
@@ -204,6 +221,7 @@ function Texts:Ensure(parent)
 		end)
 	end
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

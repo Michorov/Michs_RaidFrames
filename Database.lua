@@ -970,6 +970,32 @@ function Database:GetCurrentProfileName()
 	return self.db:GetCurrentProfile()
 end
 
+function Database:GetLocaleOverride()
+	if not initialized then
+		return nil
+	end
+
+	local value = self.db.global and self.db.global.localeOverride or nil
+	if type(value) ~= "string" or value == "" then
+		return nil
+	end
+
+	return value
+end
+
+function Database:SetLocaleOverride(locale)
+	if not initialized then
+		error("Database is not initialized", 2)
+	end
+
+	if locale ~= nil and (type(locale) ~= "string" or locale == "") then
+		error("Database:SetLocaleOverride requires locale to be a string or nil", 2)
+	end
+
+	self.db.global = self.db.global or {}
+	self.db.global.localeOverride = locale
+end
+
 function Database:GetBaseProfileName()
 	local charData = EnsureCharData(self)
 	local baseProfile = charData.baseProfile

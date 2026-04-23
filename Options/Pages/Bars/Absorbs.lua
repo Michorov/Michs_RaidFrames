@@ -8,12 +8,18 @@ addon.Options.Pages.Bars.Absorbs = addon.Options.Pages.Bars.Absorbs or {}
 local Absorbs = addon.Options.Pages.Bars.Absorbs
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local textureOptions = {
-	{ value = "Flat", text = "Flat" },
-	{ value = "Striped", text = "Striped" },
+	{ value = "Flat", text = L["Flat"] },
+	{ value = "Striped", text = L["Striped"] },
 }
+
+local function UpdateTextureOptions()
+	textureOptions[1].text = L["Flat"]
+	textureOptions[2].text = L["Striped"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -48,7 +54,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Absorbs settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Absorbs settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyEvent)
@@ -76,7 +82,7 @@ function Absorbs:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.textureDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Shield Texture")
+	subpage.textureDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Shield Texture"])
 	subpage.textureDropdown:SetLayoutWidth(174)
 	subpage.textureDropdown:SetOptions(textureOptions)
 	subpage.textureDropdown:SetOnValueChanged(function(_, value)
@@ -88,8 +94,8 @@ function Absorbs:Ensure(parent)
 		end, "absorbsSettingsChanged")
 	end)
 
-	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Shield Color")
-	subpage.colorPicker:SetLayoutWidth(174)
+	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Shield Color"])
+	subpage.colorPicker:SetLayoutWidth(190)
 	subpage.colorPicker:SetHasOpacity(true)
 	subpage.colorPicker:SetOnValueChanged(function(_, r, g, b, a)
 		ApplyModeSetting(function(section)
@@ -104,6 +110,13 @@ function Absorbs:Ensure(parent)
 		textureDropdown = subpage.textureDropdown,
 		colorPicker = subpage.colorPicker,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateTextureOptions()
+		self.textureDropdown:SetLabel(L["Shield Texture"])
+		self.textureDropdown:SetOptions(textureOptions)
+		self.colorPicker:SetLabel(L["Shield Color"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -154,6 +167,8 @@ function Absorbs:Ensure(parent)
 		controls.textureDropdown:SetValue(absorbs.texture or defaults.texture)
 		controls.colorPicker:SetColor(color.r, color.g, color.b, color.a)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

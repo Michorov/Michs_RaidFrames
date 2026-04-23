@@ -8,28 +8,51 @@ addon.Options.Pages.Auras.Dispels = addon.Options.Pages.Auras.Dispels or {}
 local Dispels = addon.Options.Pages.Auras.Dispels
 
 local subpage
+local L = addon.L
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
 
 local growDirectionOptions = {
-	{ value = "LEFT", text = "Left" },
-	{ value = "RIGHT", text = "Right" },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "RIGHT", text = L["Right"] },
 }
 
 local overlayStyleOptions = {
-	{ value = "FULL", text = "Full Bar" },
-	{ value = "GRADIENT", text = "Gradient" },
+	{ value = "FULL", text = L["Full Bar"] },
+	{ value = "GRADIENT", text = L["Gradient"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
+
+local function UpdateGrowDirectionOptions()
+	growDirectionOptions[1].text = L["Left"]
+	growDirectionOptions[2].text = L["Right"]
+end
+
+local function UpdateOverlayStyleOptions()
+	overlayStyleOptions[1].text = L["Full Bar"]
+	overlayStyleOptions[2].text = L["Gradient"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -81,7 +104,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Dispel settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Dispel settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, settingsReason, notifyState)
@@ -122,7 +145,7 @@ function Dispels:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Indicator Icons")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Indicator Icons"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -133,7 +156,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged", true)
 	end)
 
-	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Overlay")
+	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Overlay"])
 	subpage.overlayEnabledCheckbox:SetLayoutWidth(174)
 	subpage.overlayEnabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -144,7 +167,7 @@ function Dispels:Ensure(parent)
 		end, "dispelOverlaySettingsChanged")
 	end)
 
-	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Overlay Style")
+	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Overlay Style"])
 	subpage.overlayStyleDropdown:SetLayoutWidth(174)
 	subpage.overlayStyleDropdown:SetOptions(overlayStyleOptions)
 	subpage.overlayStyleDropdown:SetOnValueChanged(function(_, value)
@@ -156,7 +179,7 @@ function Dispels:Ensure(parent)
 		end, "dispelOverlaySettingsChanged")
 	end)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -168,7 +191,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.relativeAnchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "To Frame")
+	subpage.relativeAnchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["To Frame"])
 	subpage.relativeAnchorDropdown:SetLayoutWidth(174)
 	subpage.relativeAnchorDropdown:SetOptions(anchorOptions)
 	subpage.relativeAnchorDropdown:SetOnValueChanged(function(_, value)
@@ -180,7 +203,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.growDirectionDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Grow Direction")
+	subpage.growDirectionDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Grow Direction"])
 	subpage.growDirectionDropdown:SetLayoutWidth(174)
 	subpage.growDirectionDropdown:SetOptions(growDirectionOptions)
 	subpage.growDirectionDropdown:SetOnValueChanged(function(_, value)
@@ -192,7 +215,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, "Spacing")
+	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, L["Spacing"])
 	subpage.spacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.spacingSlider, 0, 12, 1)
 	subpage.spacingSlider:SetOnValueChanged(function(_, value)
@@ -204,7 +227,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -216,7 +239,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -228,7 +251,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 6, 32, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -240,7 +263,7 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, "Max Icons")
+	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Icons"])
 	subpage.maxIconsSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 6, 1)
 	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
@@ -265,6 +288,27 @@ function Dispels:Ensure(parent)
 		iconSizeSlider = subpage.iconSizeSlider,
 		maxIconsSlider = subpage.maxIconsSlider,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		UpdateGrowDirectionOptions()
+		UpdateOverlayStyleOptions()
+		self.enabledCheckbox:SetText(L["Indicator Icons"])
+		self.overlayEnabledCheckbox:SetText(L["Overlay"])
+		self.overlayStyleDropdown:SetLabel(L["Overlay Style"])
+		self.overlayStyleDropdown:SetOptions(overlayStyleOptions)
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.relativeAnchorDropdown:SetLabel(L["To Frame"])
+		self.relativeAnchorDropdown:SetOptions(anchorOptions)
+		self.growDirectionDropdown:SetLabel(L["Grow Direction"])
+		self.growDirectionDropdown:SetOptions(growDirectionOptions)
+		self.spacingSlider:SetLabel(L["Spacing"])
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.maxIconsSlider:SetLabel(L["Max Icons"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -393,6 +437,8 @@ function Dispels:Ensure(parent)
 		controls.iconSizeSlider:SetValueSilently(dispels.iconSize or defaults.iconSize)
 		controls.maxIconsSlider:SetValueSilently(dispels.maxIcons or defaults.maxIcons)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

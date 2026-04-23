@@ -8,6 +8,7 @@ addon.Options.Pages.Indicators.Threat = addon.Options.Pages.Indicators.Threat or
 local Threat = addon.Options.Pages.Indicators.Threat
 
 local subpage
+local L = addon.L
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -42,7 +43,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Threat settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Threat settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn)
@@ -80,7 +81,7 @@ function Threat:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -91,7 +92,7 @@ function Threat:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Size")
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 8, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
@@ -107,6 +108,11 @@ function Threat:Ensure(parent)
 		enabledCheckbox = subpage.enabledCheckbox,
 		borderSizeSlider = subpage.borderSizeSlider,
 	}
+
+	function subpage:UpdateLocale()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.borderSizeSlider:SetLabel(L["Size"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -163,6 +169,8 @@ function Threat:Ensure(parent)
 		controls.enabledCheckbox:SetChecked(enabled == true)
 		controls.borderSizeSlider:SetValueSilently(threat.borderSize or defaults.borderSize)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

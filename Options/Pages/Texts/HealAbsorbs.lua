@@ -8,25 +8,45 @@ addon.Options.Pages.Texts.HealAbsorbs = addon.Options.Pages.Texts.HealAbsorbs or
 local HealAbsorbs = addon.Options.Pages.Texts.HealAbsorbs
 
 local subpage
+local L = addon.L
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
 
 local outlineOptions = {
-	{ value = "", text = "None" },
-	{ value = "OUTLINE", text = "Outline" },
-	{ value = "THICKOUTLINE", text = "Thick Outline" },
-	{ value = "MONOCHROME", text = "Monochrome" },
+	{ value = "", text = L["None"] },
+	{ value = "OUTLINE", text = L["Outline"] },
+	{ value = "THICKOUTLINE", text = L["Thick Outline"] },
+	{ value = "MONOCHROME", text = L["Monochrome"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
+
+local function UpdateOutlineOptions()
+	outlineOptions[1].text = L["None"]
+	outlineOptions[2].text = L["Outline"]
+	outlineOptions[3].text = L["Thick Outline"]
+	outlineOptions[4].text = L["Monochrome"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -67,7 +87,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Heal Absorbs text settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Heal Absorbs text settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyEvent)
@@ -105,7 +125,7 @@ function HealAbsorbs:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -116,7 +136,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.abbreviateCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Abbreviate Numbers")
+	subpage.abbreviateCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Abbreviate Numbers"])
 	subpage.abbreviateCheckbox:SetLayoutWidth(174)
 	subpage.abbreviateCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -127,7 +147,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -139,7 +159,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, "Font Size")
+	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Font Size"])
 	subpage.sizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.sizeSlider, 6, 32, 1)
 	subpage.sizeSlider:SetOnValueChanged(function(_, value)
@@ -151,7 +171,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -164,7 +184,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -177,7 +197,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Style")
+	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Style"])
 	subpage.outlineDropdown:SetLayoutWidth(174)
 	subpage.outlineDropdown:SetOptions(outlineOptions)
 	subpage.outlineDropdown:SetOnValueChanged(function(_, value)
@@ -189,7 +209,7 @@ function HealAbsorbs:Ensure(parent)
 		end, "healAbsorbsTextSettingsChanged")
 	end)
 
-	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Color")
+	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
 	subpage.colorPicker:SetLayoutWidth(174)
 	subpage.colorPicker:SetHasOpacity(false)
 	subpage.colorPicker:SetOnValueChanged(function(_, r, g, b, a)
@@ -211,6 +231,21 @@ function HealAbsorbs:Ensure(parent)
 		outlineDropdown = subpage.outlineDropdown,
 		colorPicker = subpage.colorPicker,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		UpdateOutlineOptions()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.abbreviateCheckbox:SetText(L["Abbreviate Numbers"])
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.sizeSlider:SetLabel(L["Font Size"])
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.outlineDropdown:SetLabel(L["Style"])
+		self.outlineDropdown:SetOptions(outlineOptions)
+		self.colorPicker:SetLabel(L["Color"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -350,6 +385,8 @@ function HealAbsorbs:Ensure(parent)
 		controls.outlineDropdown:SetValue(outline)
 		controls.colorPicker:SetColor(color.r, color.g, color.b, color.a)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

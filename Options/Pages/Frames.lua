@@ -7,6 +7,7 @@ addon.Options.Pages.Frames = addon.Options.Pages.Frames or {}
 local FramesPage = addon.Options.Pages.Frames
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -55,7 +56,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Frame changes are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Frame changes are disabled during combat."])
 end
 
 local function FormatInteger(value)
@@ -104,16 +105,15 @@ function FramesPage:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Frames")
+	page.header.title:SetText(L["Frames"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -126,7 +126,7 @@ function FramesPage:Ensure(parent)
 		end
 	end)
 
-	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page.body, "Frame Width")
+	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Width"])
 	page.frameWidthSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.frameWidthSlider, 25, 300, 1)
 	page.frameWidthSlider:SetOnValueChanged(function(_, value)
@@ -136,7 +136,7 @@ function FramesPage:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.frameHeightSlider = addon.Options.Controls.Slider:Create(page.body, "Frame Height")
+	page.frameHeightSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Height"])
 	page.frameHeightSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.frameHeightSlider, 25, 300, 1)
 	page.frameHeightSlider:SetOnValueChanged(function(_, value)
@@ -146,7 +146,7 @@ function FramesPage:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page.body, "Border Size")
+	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page.body, L["Border Size"])
 	page.frameBorderThicknessSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.frameBorderThicknessSlider, 0, 6, 1)
 	page.frameBorderThicknessSlider:SetOnValueChanged(function(_, value)
@@ -156,7 +156,7 @@ function FramesPage:Ensure(parent)
 		end, "borderSettingsChanged")
 	end)
 
-	page.backgroundColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Background Color")
+	page.backgroundColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, L["Background Color"])
 	page.backgroundColorPicker:SetLayoutWidth(174)
 	page.backgroundColorPicker:SetHasOpacity(true)
 	page.backgroundColorPicker:SetOnValueChanged(function(_, r, g, b, a)
@@ -166,7 +166,7 @@ function FramesPage:Ensure(parent)
 		end, "backgroundSettingsChanged")
 	end)
 
-	page.borderColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, "Border Color")
+	page.borderColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, L["Border Color"])
 	page.borderColorPicker:SetLayoutWidth(174)
 	page.borderColorPicker:SetHasOpacity(true)
 	page.borderColorPicker:SetOnValueChanged(function(_, r, g, b, a)
@@ -184,6 +184,19 @@ function FramesPage:Ensure(parent)
 		backgroundColorPicker = page.backgroundColorPicker,
 		borderColorPicker = page.borderColorPicker,
 	}
+
+	function page:UpdateLocale()
+		self.header.title:SetText(L["Frames"])
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+		self.frameWidthSlider:SetLabel(L["Frame Width"])
+		self.frameHeightSlider:SetLabel(L["Frame Height"])
+		self.frameBorderThicknessSlider:SetLabel(L["Border Size"])
+		self.backgroundColorPicker:SetLabel(L["Background Color"])
+		self.borderColorPicker:SetLabel(L["Border Color"])
+	end
 
 	function page:UpdateLayout()
 		local controls = self.controls
@@ -288,6 +301,7 @@ function FramesPage:Ensure(parent)
 		page:UpdateState(profile)
 	end)
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 
