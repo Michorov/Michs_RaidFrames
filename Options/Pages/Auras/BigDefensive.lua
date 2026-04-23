@@ -8,6 +8,7 @@ addon.Options.Pages.Auras.BigDefensive = addon.Options.Pages.Auras.BigDefensive 
 local BigDefensive = addon.Options.Pages.Auras.BigDefensive
 
 local subpage
+local L = addon.L
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -69,7 +70,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Big Defensive settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Big Defensive settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn)
@@ -107,7 +108,7 @@ function BigDefensive:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -119,7 +120,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -131,7 +132,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 128, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -143,7 +144,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderSizeSlider, 0, 6, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
@@ -155,7 +156,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Stacks")
+	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Stacks"])
 	subpage.showStacksCheckbox:SetLayoutWidth(174)
 	subpage.showStacksCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -166,7 +167,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Stacks Size")
+	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Stacks Size"])
 	subpage.stacksFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.stacksFontSizeSlider, 6, 32, 1)
 	subpage.stacksFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -178,7 +179,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Duration")
+	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Duration"])
 	subpage.showCooldownCheckbox:SetLayoutWidth(174)
 	subpage.showCooldownCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -189,7 +190,7 @@ function BigDefensive:Ensure(parent)
 		end)
 	end)
 
-	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Duration Size")
+	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Duration Size"])
 	subpage.cooldownFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.cooldownFontSizeSlider, 6, 32, 1)
 	subpage.cooldownFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -211,6 +212,17 @@ function BigDefensive:Ensure(parent)
 		showCooldownCheckbox = subpage.showCooldownCheckbox,
 		cooldownFontSizeSlider = subpage.cooldownFontSizeSlider,
 	}
+
+	function subpage:UpdateLocale()
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.borderSizeSlider:SetLabel(L["Border Size"])
+		self.showStacksCheckbox:SetText(L["Show Stacks"])
+		self.stacksFontSizeSlider:SetLabel(L["Stacks Size"])
+		self.showCooldownCheckbox:SetText(L["Show Duration"])
+		self.cooldownFontSizeSlider:SetLabel(L["Duration Size"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -312,6 +324,8 @@ function BigDefensive:Ensure(parent)
 		controls.showCooldownCheckbox:SetChecked(ResolveBoolean(bigDefensive.showCooldown, defaults.showCooldown))
 		controls.cooldownFontSizeSlider:SetValueSilently(bigDefensive.cooldownFontSize or defaults.cooldownFontSize)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

@@ -7,6 +7,7 @@ addon.Options.Sections.Header = addon.Options.Sections.Header or {}
 local Header = addon.Options.Sections.Header
 
 local header
+local L = addon.L
 local theme = addon.Options.Theme
 
 function Header:Ensure(parent)
@@ -18,14 +19,14 @@ function Header:Ensure(parent)
 
 	header.title = header:CreateFontString(nil, "OVERLAY")
 	header.title:SetJustifyH("LEFT")
-	header.title:SetFont(theme.fonts.philosopherBold, 22, "")
-	header.title:SetText("Mich's Raid Frames")
+	theme:ApplyFont(header.title, "philosopherBold", 22, "")
+	header.title:SetText(L["Mich's Raid Frames"])
 	header.title:SetTextColor(theme:GetColor("brand"))
 
 	local closeButton = addon.Options.Controls.Button:Create(header, "X")
 	closeButton:SetLayoutSize(24, 24)
 	closeButton:SetLayoutBorderSize(0)
-	closeButton.text:SetFont(theme.fonts.arialNarrow, 16, "")
+	theme:ApplyFont(closeButton.text, "arialNarrow", 16, "")
 	closeButton.text:SetTextColor(theme:GetTextColor("secondary"))
 	closeButton:SetBackdropColor(0, 0, 0, 0)
 
@@ -45,9 +46,18 @@ function Header:Ensure(parent)
 		closeButton = closeButton,
 	}
 
+	self:UpdateLocale()
 	self:UpdateLayout()
 
 	return header
+end
+
+function Header:UpdateLocale()
+	if not header then
+		return
+	end
+
+	header.title:SetText(L["Mich's Raid Frames"])
 end
 
 function Header:UpdateLayout()

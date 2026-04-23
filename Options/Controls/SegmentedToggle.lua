@@ -5,7 +5,11 @@ addon.Options.Controls = addon.Options.Controls or {}
 addon.Options.Controls.SegmentedToggle = addon.Options.Controls.SegmentedToggle or {}
 
 local SegmentedToggle = addon.Options.Controls.SegmentedToggle
+local L = addon.L
 local theme = addon.Options.Theme
+
+SegmentedToggle.defaultWidth = 152
+SegmentedToggle.defaultHeight = 24
 
 local function ApplyVisualState(control)
 	local activeBg = { theme:GetColor("brand") }
@@ -86,6 +90,7 @@ end
 
 local function CreateSegment(control, option, side)
 	local segment = CreateFrame("Button", nil, control)
+	segment.option = option
 
 	segment.hoverTexture = segment:CreateTexture(nil, "ARTWORK")
 	segment.hoverTexture:SetPoint("TOPLEFT", segment, "TOPLEFT", 0, 0)
@@ -94,10 +99,10 @@ local function CreateSegment(control, option, side)
 
 	segment.text = segment:CreateFontString(nil, "OVERLAY")
 	segment.text:SetPoint("CENTER", segment, "CENTER", 0, 0)
-	segment.text:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(segment.text, "arialNarrow", 12, "")
 	segment.text:SetShadowOffset(0, 0)
 	segment.text:SetShadowColor(0, 0, 0, 0)
-	segment.text:SetText(option.text or "")
+	segment.text:SetText(segment.option.text or "")
 
 	segment:SetScript("OnEnter", function(self)
 		control.hoveredSegment = self
@@ -109,17 +114,17 @@ local function CreateSegment(control, option, side)
 		ApplyVisualState(control)
 	end)
 
-	segment:SetScript("OnClick", function()
+	segment:SetScript("OnClick", function(self)
 		addon.Options.Controls.Dropdown:CloseOpenDropdown()
 
-		if control.value == option.value then
+		if control.value == self.option.value then
 			return
 		end
 
-		control:SetValue(option.value)
+		control:SetValue(self.option.value)
 
 		if control.onValueChanged then
-			control.onValueChanged(control, option.value)
+			control.onValueChanged(control, self.option.value)
 		end
 	end)
 
@@ -129,13 +134,13 @@ end
 function SegmentedToggle:Create(parent, leftOption, rightOption)
 	local control = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	control.layoutValues = {
-		width = 112,
-		height = 24,
+		width = SegmentedToggle.defaultWidth,
+		height = SegmentedToggle.defaultHeight,
 		borderThickness = 1,
 	}
 
-	control.leftOption = leftOption or { value = "left", text = "Left" }
-	control.rightOption = rightOption or { value = "right", text = "Right" }
+	control.leftOption = leftOption or { value = "left", text = L["Left"] }
+	control.rightOption = rightOption or { value = "right", text = L["Right"] }
 	control.value = control.leftOption.value
 
 	control:SetBackdrop({
@@ -186,6 +191,22 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 
 	function control:SetValue(value)
 		self.value = value
+		ApplyVisualState(self)
+	end
+
+	function control:SetOptions(leftOption, rightOption)
+		self.leftOption = leftOption or self.leftOption
+		self.rightOption = rightOption or self.rightOption
+
+		self.leftSegment.option = self.leftOption
+		self.rightSegment.option = self.rightOption
+		self.leftSegment.text:SetText(self.leftOption.text or "")
+		self.rightSegment.text:SetText(self.rightOption.text or "")
+
+		if self.value ~= self.leftOption.value and self.value ~= self.rightOption.value then
+			self.value = self.leftOption.value
+		end
+
 		ApplyVisualState(self)
 	end
 

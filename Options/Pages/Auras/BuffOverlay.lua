@@ -8,6 +8,7 @@ addon.Options.Pages.Auras.BuffOverlay = addon.Options.Pages.Auras.BuffOverlay or
 local BuffOverlay = addon.Options.Pages.Auras.BuffOverlay
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -36,7 +37,15 @@ local function GetModeKey()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Buff overlay settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Buff overlay settings are disabled during combat."])
+end
+
+local function GetAuraDisplayName(spellId, fallbackName)
+	if addon.Locale and addon.Locale.GetAuraDisplayName then
+		return addon.Locale:GetAuraDisplayName(spellId, fallbackName)
+	end
+
+	return fallbackName
 end
 
 local function GetCurrentSpecOverlayData(profile)
@@ -73,9 +82,11 @@ local function GetCurrentSpecOverlayData(profile)
 
 	local spellEntries = {}
 	for spellId, auraData in pairs(specAuras) do
+		local fallbackName = auraData.name or ("Spell " .. tostring(spellId))
+
 		table.insert(spellEntries, {
 			spellId = spellId,
-			name = auraData.name or ("Spell " .. tostring(spellId)),
+			name = GetAuraDisplayName(spellId, fallbackName),
 		})
 	end
 
@@ -85,7 +96,7 @@ local function GetCurrentSpecOverlayData(profile)
 
 	local spellOptions = {
 		{
-			text = "None",
+			text = L["None"],
 			value = 0,
 		},
 	}
@@ -130,7 +141,7 @@ local function EnsureRowPool(targetCount)
 	while #subpage.dynamicRows < targetCount do
 		local row = {}
 
-		row.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+		row.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 		row.enabledCheckbox:SetLayoutWidth(110)
 		row.enabledCheckbox:SetOnValueChanged(function(self, checked)
 			if InCombatLockdown() then
@@ -169,7 +180,7 @@ local function EnsureRowPool(targetCount)
 			addon.UpdateScheduler:Notify("aurasStateChanged")
 		end)
 
-		row.spellDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Buff")
+		row.spellDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Buff"])
 		row.spellDropdown:SetLayoutWidth(174)
 		row.spellDropdown:SetLabelVisible(false)
 		row.spellDropdown:SetOnValueChanged(function(self, value)
@@ -209,7 +220,7 @@ local function EnsureRowPool(targetCount)
 			addon.UpdateScheduler:Notify("aurasStateChanged")
 		end)
 
-		row.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Color")
+		row.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
 		row.colorPicker:SetLayoutWidth(96)
 		row.colorPicker:SetOnValueChanged(function(self, r, g, b)
 			if InCombatLockdown() then
@@ -315,10 +326,22 @@ function BuffOverlay:Ensure(parent)
 
 	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
-	subpage.emptyText:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(subpage.emptyText, "arialNarrow", 14, "")
 	subpage.emptyText:SetTextColor(theme:GetTextColor("secondary"))
-	subpage.emptyText:SetText("No overlays available for this specialization")
+	subpage.emptyText:SetText(L["No overlays available for this specialization"])
 	subpage.emptyText:Hide()
+
+	function subpage:UpdateLocale()
+		self.emptyText:SetText(L["No overlays available for this specialization"])
+
+		for _, row in ipairs(self.dynamicRows or {}) do
+			row.enabledCheckbox:SetText(L["Enabled"])
+			row.spellDropdown:SetLabel(L["Buff"])
+			row.colorPicker:SetLabel(L["Color"])
+		end
+
+		RefreshDynamicRows(addon.Database:GetProfile())
+	end
 
 	function subpage:UpdateLayout()
 		local rowStepPx = addon.Utilities:ToPixels(40)
@@ -387,6 +410,8 @@ function BuffOverlay:Ensure(parent)
 	function subpage:UpdateState(profile)
 		RefreshDynamicRows(profile)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

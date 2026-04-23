@@ -8,19 +8,32 @@ addon.Options.Pages.Auras.BuffCustomIcons = addon.Options.Pages.Auras.BuffCustom
 local BuffCustomIcons = addon.Options.Pages.Auras.BuffCustomIcons
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top Center" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom Center" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top Center"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom Center"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top Center"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom Center"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -48,7 +61,15 @@ local function GetModeKey()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Custom buff settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Custom buff settings are disabled during combat."])
+end
+
+local function GetAuraDisplayName(spellId, fallbackName)
+	if addon.Locale and addon.Locale.GetAuraDisplayName then
+		return addon.Locale:GetAuraDisplayName(spellId, fallbackName)
+	end
+
+	return fallbackName
 end
 
 local function FormatInteger(value)
@@ -107,9 +128,11 @@ local function GetCurrentSpecBuffEntries(profile)
 	end
 
 	for spellId, buffData in pairs(specBuffs) do
+		local fallbackName = buffData.name or ("Spell " .. tostring(spellId))
+
 		table.insert(entries, {
 			spellId = spellId,
-			name = buffData.name or ("Spell " .. tostring(spellId)),
+			name = GetAuraDisplayName(spellId, fallbackName),
 		})
 	end
 
@@ -232,12 +255,12 @@ function BuffCustomIcons:Ensure(parent)
 
 	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
-	subpage.emptyText:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(subpage.emptyText, "arialNarrow", 14, "")
 	subpage.emptyText:SetTextColor(theme:GetTextColor("secondary"))
-	subpage.emptyText:SetText("No custom icons available for this specialization")
+	subpage.emptyText:SetText(L["No custom icons available for this specialization"])
 	subpage.emptyText:Hide()
 
-	subpage.buffDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Buff")
+	subpage.buffDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Buff"])
 	subpage.buffDropdown:SetLayoutWidth(174)
 	subpage.buffDropdown:SetLabelVisible(false)
 	subpage.buffDropdown:SetOnValueChanged(function(_, value)
@@ -246,7 +269,7 @@ function BuffCustomIcons:Ensure(parent)
 		subpage:UpdateState(addon.Database:GetProfile())
 	end)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplySelectedBuffSetting(function(settings)
@@ -254,7 +277,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -263,7 +286,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 64, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -272,7 +295,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -281,7 +304,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -290,7 +313,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Stacks")
+	subpage.showStacksCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Stacks"])
 	subpage.showStacksCheckbox:SetLayoutWidth(174)
 	subpage.showStacksCheckbox:SetOnValueChanged(function(_, checked)
 		ApplySelectedBuffSetting(function(settings)
@@ -298,7 +321,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Stacks Size")
+	subpage.stacksFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Stacks Size"])
 	subpage.stacksFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.stacksFontSizeSlider, 6, 32, 1)
 	subpage.stacksFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -307,7 +330,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show Duration")
+	subpage.showCooldownCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Duration"])
 	subpage.showCooldownCheckbox:SetLayoutWidth(174)
 	subpage.showCooldownCheckbox:SetOnValueChanged(function(_, checked)
 		ApplySelectedBuffSetting(function(settings)
@@ -315,7 +338,7 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
-	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Duration Size")
+	subpage.cooldownFontSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Duration Size"])
 	subpage.cooldownFontSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.cooldownFontSizeSlider, 6, 32, 1)
 	subpage.cooldownFontSizeSlider:SetOnValueChanged(function(_, value)
@@ -336,6 +359,23 @@ function BuffCustomIcons:Ensure(parent)
 		showCooldownCheckbox = subpage.showCooldownCheckbox,
 		cooldownFontSizeSlider = subpage.cooldownFontSizeSlider,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		self.emptyText:SetText(L["No custom icons available for this specialization"])
+		self.buffDropdown:SetLabel(L["Buff"])
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.showStacksCheckbox:SetText(L["Show Stacks"])
+		self.stacksFontSizeSlider:SetLabel(L["Stacks Size"])
+		self.showCooldownCheckbox:SetText(L["Show Duration"])
+		self.cooldownFontSizeSlider:SetLabel(L["Duration Size"])
+		RefreshSelectionState(addon.Database:GetProfile())
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -484,6 +524,8 @@ function BuffCustomIcons:Ensure(parent)
 			control:Show()
 		end
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

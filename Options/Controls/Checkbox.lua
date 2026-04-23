@@ -80,7 +80,7 @@ function Checkbox:Create(parent, text)
 
 	checkbox.text = checkbox:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	checkbox.text:SetJustifyH("LEFT")
-	checkbox.text:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(checkbox.text, "arialNarrow", 12, "")
 	checkbox.text:SetTextColor(theme:GetTextColor("primary"))
 	checkbox.text:SetText(text or "Checkbox")
 

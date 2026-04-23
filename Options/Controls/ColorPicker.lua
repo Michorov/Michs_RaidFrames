@@ -109,7 +109,7 @@ function ColorPicker:Create(parent, labelText)
 	control.a = 1
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", 12, "")
 	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")

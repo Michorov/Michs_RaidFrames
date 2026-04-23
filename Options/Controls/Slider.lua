@@ -97,12 +97,12 @@ function Slider:Create(parent, text)
 		topRowHeight = 16,
 		labelSpacing = 6,
 		borderThickness = 1,
-		valueInputWidth = 48,
-		valueInputGap = 8,
+		valueInputWidth = 40,
+		valueInputGap = 6,
 	}
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", 12, "")
 	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
@@ -111,7 +111,7 @@ function Slider:Create(parent, text)
 	control.valueInput = CreateFrame("EditBox", nil, control)
 	control.valueInput:SetAutoFocus(false)
 	control.valueInput:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	control.valueInput:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(control.valueInput, "arialNarrow", 12, "")
 	control.valueInput:SetTextColor(0.65, 0.65, 0.68, 1)
 	control.valueInput:SetJustifyH("RIGHT")
 	control.valueInput:SetTextInsets(0, 0, 0, 0)

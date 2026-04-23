@@ -63,6 +63,18 @@ function Content:Ensure(parent)
 	return content
 end
 
+function Content:UpdateLocale()
+	if not content then
+		return
+	end
+
+	for _, page in pairs(content.pages or {}) do
+		if page.UpdateLocale then
+			page:UpdateLocale()
+		end
+	end
+end
+
 function Content:UpdateLayout()
 	if not content then
 		return

@@ -2,6 +2,7 @@ local _, addon = ...
 
 addon.Options = addon.Options or {}
 local Options = addon.Options
+local L = addon.L
 local theme = addon.Options.Theme
 
 local panel
@@ -51,11 +52,15 @@ end
 function Options:Initialize()
 	SLASH_MICHRAIDFRAMES1 = "/mrf"
 
+	addon.Locale:RegisterForUpdates("options", function()
+		Options:UpdateLocale()
+	end)
+
 	SlashCmdList["MICHRAIDFRAMES"] = function(msg)
 		local normalizedMessage = (msg or ""):match("^%s*(.-)%s*$")
 
 		if normalizedMessage ~= "" then
-			print("|cffff9900Mich's RaidFrames:|r Unknown command. Use /mrf")
+			print("|cffff9900Mich's RaidFrames:|r " .. L["Unknown command. Use /mrf"])
 			return
 		end
 
@@ -145,6 +150,7 @@ function Options:Ensure()
 	panel.content:SetPoint("BOTTOMRIGHT", panel.statusBar, "TOPRIGHT", 0, 0)
 
 	self:UpdateLayout()
+	self:UpdateLocale()
 	self:SetActivePage(addon.Options.Sections.Content:GetActivePage())
 end
 
@@ -208,7 +214,7 @@ end
 function Options:Open()
 	if InCombatLockdown() then
 		deferredOpen = true
-		print("|cffff9900Mich's RaidFrames:|r Options will open after combat.")
+		print("|cffff9900Mich's RaidFrames:|r " .. L["Options will open after combat."])
 		return
 	end
 
@@ -224,6 +230,21 @@ function Options:Close()
 	end
 
 	panel:Hide()
+end
+
+function Options:UpdateLocale()
+	if not panel then
+		return
+	end
+
+	addon.Options.Controls.Dropdown:CloseOpenDropdown()
+	addon.Options.Theme:RefreshFonts()
+
+	addon.Options.Sections.Header:UpdateLocale()
+	addon.Options.Sections.StatusBar:UpdateLocale()
+	addon.Options.Sections.SideMenu:UpdateLocale()
+	addon.Options.Sections.Content:UpdateLocale()
+	addon.Options.Data:RefreshProfile()
 end
 
 function Options:SetActivePage(pageKey)

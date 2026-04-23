@@ -8,6 +8,7 @@ addon.Options.Pages.Auras.PrivateAuras = addon.Options.Pages.Auras.PrivateAuras 
 local PrivateAuras = addon.Options.Pages.Auras.PrivateAuras
 
 local subpage
+local L = addon.L
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -55,7 +56,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Private Auras settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Private Auras settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn)
@@ -93,7 +94,7 @@ function PrivateAuras:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -200, 200, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -105,7 +106,7 @@ function PrivateAuras:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -200, 200, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -117,7 +118,7 @@ function PrivateAuras:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 64, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -129,7 +130,7 @@ function PrivateAuras:Ensure(parent)
 		end)
 	end)
 
-	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, "Spacing")
+	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, L["Spacing"])
 	subpage.spacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.spacingSlider, 0, 20, 1)
 	subpage.spacingSlider:SetOnValueChanged(function(_, value)
@@ -141,7 +142,7 @@ function PrivateAuras:Ensure(parent)
 		end)
 	end)
 
-	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, "Max Icons")
+	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Icons"])
 	subpage.maxIconsSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 10, 1)
 	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
@@ -160,6 +161,14 @@ function PrivateAuras:Ensure(parent)
 		spacingSlider = subpage.spacingSlider,
 		maxIconsSlider = subpage.maxIconsSlider,
 	}
+
+	function subpage:UpdateLocale()
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.spacingSlider:SetLabel(L["Spacing"])
+		self.maxIconsSlider:SetLabel(L["Max Icons"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -230,6 +239,8 @@ function PrivateAuras:Ensure(parent)
 		controls.spacingSlider:SetValueSilently(privateAuras.spacing or defaults.spacing)
 		controls.maxIconsSlider:SetValueSilently(privateAuras.maxIcons or defaults.maxIcons)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

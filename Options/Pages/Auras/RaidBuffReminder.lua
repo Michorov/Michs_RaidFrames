@@ -8,18 +8,31 @@ addon.Options.Pages.Auras.RaidBuffReminder = addon.Options.Pages.Auras.RaidBuffR
 local RaidBuffReminder = addon.Options.Pages.Auras.RaidBuffReminder
 
 local subpage
+local L = addon.L
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -81,7 +94,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Raid Buff Reminder settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Raid Buff Reminder settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn)
@@ -119,7 +132,7 @@ function RaidBuffReminder:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -130,7 +143,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.showInCombatCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Show in Combat")
+	subpage.showInCombatCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show in Combat"])
 	subpage.showInCombatCheckbox:SetLayoutWidth(174)
 	subpage.showInCombatCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -141,7 +154,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -153,7 +166,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -165,7 +178,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -177,7 +190,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Icon Size")
+	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
 	subpage.iconSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 128, 1)
 	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
@@ -189,7 +202,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderSizeSlider, 0, 6, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
@@ -201,7 +214,7 @@ function RaidBuffReminder:Ensure(parent)
 		end)
 	end)
 
-	subpage.borderColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Border Color")
+	subpage.borderColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Border Color"])
 	subpage.borderColorPicker:SetLayoutWidth(174)
 	subpage.borderColorPicker:SetHasOpacity(false)
 	subpage.borderColorPicker:SetOnValueChanged(function(_, r, g, b)
@@ -223,6 +236,19 @@ function RaidBuffReminder:Ensure(parent)
 		borderSizeSlider = subpage.borderSizeSlider,
 		borderColorPicker = subpage.borderColorPicker,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.showInCombatCheckbox:SetText(L["Show in Combat"])
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.iconSizeSlider:SetLabel(L["Icon Size"])
+		self.borderSizeSlider:SetLabel(L["Border Size"])
+		self.borderColorPicker:SetLabel(L["Border Color"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -317,6 +343,8 @@ function RaidBuffReminder:Ensure(parent)
 		controls.borderSizeSlider:SetValueSilently(raidBuffReminder.borderSizePx or defaults.borderSizePx)
 		controls.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

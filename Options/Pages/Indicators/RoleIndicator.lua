@@ -8,18 +8,31 @@ addon.Options.Pages.Indicators.RoleIndicator = addon.Options.Pages.Indicators.Ro
 local RoleIndicator = addon.Options.Pages.Indicators.RoleIndicator
 
 local subpage
+local L = addon.L
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top Center" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom Center" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top Center"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom Center"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top Center"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom Center"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -60,7 +73,7 @@ local function GetModeDefaults()
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Role Indicator settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Role Indicator settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn)
@@ -98,7 +111,7 @@ function RoleIndicator:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -109,7 +122,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.showTankCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Tank")
+	subpage.showTankCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Tank"])
 	subpage.showTankCheckbox:SetLayoutWidth(84)
 	subpage.showTankCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -120,7 +133,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.showHealerCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Healer")
+	subpage.showHealerCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Healer"])
 	subpage.showHealerCheckbox:SetLayoutWidth(92)
 	subpage.showHealerCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -131,7 +144,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.showDpsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "DPS")
+	subpage.showDpsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["DPS"])
 	subpage.showDpsCheckbox:SetLayoutWidth(74)
 	subpage.showDpsCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -142,7 +155,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -154,7 +167,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -166,7 +179,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -178,7 +191,7 @@ function RoleIndicator:Ensure(parent)
 		end)
 	end)
 
-	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, "Size")
+	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Size"])
 	subpage.sizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.sizeSlider, 8, 64, 1)
 	subpage.sizeSlider:SetOnValueChanged(function(_, value)
@@ -200,6 +213,19 @@ function RoleIndicator:Ensure(parent)
 		offsetYSlider = subpage.offsetYSlider,
 		sizeSlider = subpage.sizeSlider,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.showTankCheckbox:SetText(L["Tank"])
+		self.showHealerCheckbox:SetText(L["Healer"])
+		self.showDpsCheckbox:SetText(L["DPS"])
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.sizeSlider:SetLabel(L["Size"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -323,6 +349,8 @@ function RoleIndicator:Ensure(parent)
 		controls.offsetYSlider:SetValueSilently(roleIcon.offsetY or defaults.offsetY)
 		controls.sizeSlider:SetValueSilently(roleIcon.size or defaults.size)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

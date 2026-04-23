@@ -8,6 +8,7 @@ addon.Options.Pages.Bars.Health = addon.Options.Pages.Bars.Health or {}
 local Health = addon.Options.Pages.Bars.Health
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -50,7 +51,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Health settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Health settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyEvent)
@@ -78,7 +79,7 @@ function Health:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.useClassColorCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Use Class Color")
+	subpage.useClassColorCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Use Class Color"])
 	subpage.useClassColorCheckbox:SetLayoutWidth(174)
 	subpage.useClassColorCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -87,8 +88,8 @@ function Health:Ensure(parent)
 		end, "healthSettingsChanged")
 	end)
 
-	subpage.healthColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Health Color")
-	subpage.healthColorPicker:SetLayoutWidth(174)
+	subpage.healthColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Health Color"])
+	subpage.healthColorPicker:SetLayoutWidth(190)
 	subpage.healthColorPicker:SetHasOpacity(true)
 	subpage.healthColorPicker:SetOnValueChanged(function(_, r, g, b, a)
 		ApplyModeSetting(function(section)
@@ -101,6 +102,11 @@ function Health:Ensure(parent)
 		useClassColorCheckbox = subpage.useClassColorCheckbox,
 		healthColorPicker = subpage.healthColorPicker,
 	}
+
+	function subpage:UpdateLocale()
+		self.useClassColorCheckbox:SetText(L["Use Class Color"])
+		self.healthColorPicker:SetLabel(L["Health Color"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -160,6 +166,8 @@ function Health:Ensure(parent)
 		controls.useClassColorCheckbox:SetChecked(healthClassColor == true)
 		controls.healthColorPicker:SetColor(healthColor.r, healthColor.g, healthColor.b, healthColor.a)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

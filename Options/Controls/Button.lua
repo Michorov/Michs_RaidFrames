@@ -48,7 +48,7 @@ function Button:Create(parent, text)
 
 	button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	button.text:SetPoint("CENTER", button, "CENTER", 0, 0)
-	button.text:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(button.text, "arialNarrow", 14, "")
 	button.text:SetText(text or "Button")
 	button.text:SetTextColor(theme:GetTextColor("primary"))
 
@@ -72,6 +72,10 @@ function Button:Create(parent, text)
 				self.onClickCallback(self)
 			end
 		end)
+	end
+
+	function button:SetText(value)
+		self.text:SetText(value or "")
 	end
 
 	function button:SetLayoutWidth(width)

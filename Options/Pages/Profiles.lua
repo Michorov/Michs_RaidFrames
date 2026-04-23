@@ -7,10 +7,21 @@ addon.Options.Pages.Profiles = addon.Options.Pages.Profiles or {}
 local Profiles = addon.Options.Pages.Profiles
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
+local actionButtonWidth = 88
+local actionButtonHeight = 24
 
 local function PrintProfileMsg(message)
 	print("|cffff9900Mich's RaidFrames:|r " .. message)
+end
+
+local function GetDisplayProfileName(name)
+	if name == "Default" then
+		return L["Default"]
+	end
+
+	return name
 end
 
 local function RefreshProfilesPage()
@@ -35,7 +46,7 @@ local function BuildProfileOptions(includeDefault)
 		if includeDefault or value ~= "Default" then
 			table.insert(options, {
 				value = value,
-				text = text,
+				text = GetDisplayProfileName(text),
 			})
 		end
 	end
@@ -51,7 +62,7 @@ local function BuildSpecProfileOptions()
 	local options = {
 		{
 			value = nil,
-			text = "Use Active",
+			text = L["Use Active"],
 			textColor = { theme:GetTextColor("placeholder") },
 		},
 	}
@@ -64,6 +75,14 @@ local function BuildSpecProfileOptions()
 	end
 
 	return options
+end
+
+local function GetSpecDisplayName(specEntry)
+	if not specEntry then
+		return ""
+	end
+
+	return addon.Locale:GetSpecializationDisplayName(specEntry.specID, specEntry.fallbackName or specEntry.name)
 end
 
 local function BuildPlayerSpecEntries()
@@ -86,7 +105,7 @@ local function BuildPlayerSpecEntries()
 		if specID and specName then
 			table.insert(entries, {
 				specID = specID,
-				name = specName,
+				fallbackName = specName,
 			})
 		end
 	end
@@ -102,12 +121,12 @@ local function CreateProfileFromInput()
 	local name = Trim(page.newProfileInput:GetText())
 
 	if name == "" then
-		PrintProfileMsg("Enter a profile name first.")
+		PrintProfileMsg(L["Enter a profile name first."])
 		return
 	end
 
 	if addon.Database:HasProfile(name) then
-		PrintProfileMsg("Profile '" .. name .. "' already exists.")
+		PrintProfileMsg((L["Profile '%s' already exists."]):format(name))
 		return
 	end
 
@@ -116,7 +135,7 @@ local function CreateProfileFromInput()
 	addon.Database:ApplyProfileForCurrentSpec()
 	RefreshProfilesPage()
 	page.newProfileInput:SetText("")
-	PrintProfileMsg("Created '" .. name .. "' and set it as the active profile.")
+	PrintProfileMsg((L["Created '%s' and set it as the active profile."]):format(name))
 end
 
 local function CopyProfileFromInput()
@@ -125,7 +144,7 @@ local function CopyProfileFromInput()
 	end
 
 	if InCombatLockdown() then
-		PrintProfileMsg("Layout changes are disabled during combat.")
+		PrintProfileMsg(L["Layout changes are disabled during combat."])
 		return
 	end
 
@@ -133,17 +152,17 @@ local function CopyProfileFromInput()
 	local name = Trim(page.copyProfileInput:GetText())
 
 	if not source or source == "" then
-		PrintProfileMsg("Select a source profile.")
+		PrintProfileMsg(L["Select a source profile."])
 		return
 	end
 
 	if name == "" then
-		PrintProfileMsg("Enter a new profile name.")
+		PrintProfileMsg(L["Enter a new profile name."])
 		return
 	end
 
 	if addon.Database:HasProfile(name) then
-		PrintProfileMsg("Profile '" .. name .. "' already exists.")
+		PrintProfileMsg((L["Profile '%s' already exists."]):format(name))
 		return
 	end
 
@@ -156,7 +175,7 @@ local function CopyProfileFromInput()
 	page.copyProfileInput:SetText("")
 	page.copyFromDropdown:SetValue(nil)
 
-	PrintProfileMsg("Created '" .. name .. "' by copying '" .. source .. "' and set it as the active profile.")
+	PrintProfileMsg((L["Created '%s' by copying '%s' and set it as the active profile."]):format(name, source))
 end
 
 local function DeleteSelectedProfile()
@@ -165,24 +184,24 @@ local function DeleteSelectedProfile()
 	end
 
 	if InCombatLockdown() then
-		PrintProfileMsg("Layout changes are disabled during combat.")
+		PrintProfileMsg(L["Layout changes are disabled during combat."])
 		return
 	end
 
 	local target = page.deleteProfileDropdown:GetValue()
 
 	if not target or target == "" then
-		PrintProfileMsg("Select a profile to delete.")
+		PrintProfileMsg(L["Select a profile to delete."])
 		return
 	end
 
 	if target == "Default" then
-		PrintProfileMsg("Default profile cannot be deleted.")
+		PrintProfileMsg(L["Default profile cannot be deleted."])
 		return
 	end
 
 	if not addon.Database:HasProfile(target) then
-		PrintProfileMsg("Profile '" .. target .. "' does not exist.")
+		PrintProfileMsg((L["Profile '%s' does not exist."]):format(target))
 		return
 	end
 
@@ -199,7 +218,7 @@ local function DeleteSelectedProfile()
 	addon.Database:DeleteProfile(target)
 	page.deleteProfileDropdown:SetValue(nil)
 
-	PrintProfileMsg("Deleted profile '" .. target .. "'.")
+	PrintProfileMsg((L["Deleted profile '%s'."]):format(target))
 end
 
 local function UpdateLayout()
@@ -405,33 +424,33 @@ function Profiles:Ensure(parent)
 	page = CreateFrame("Frame", nil, parent)
 	page.activeSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.activeSectionTitle:SetJustifyH("LEFT")
-	page.activeSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(page.activeSectionTitle, "arialNarrow", 14, "")
 	page.activeSectionTitle:SetTextColor(theme:GetColor("brand"))
-	page.activeSectionTitle:SetText("Active Profile")
+	page.activeSectionTitle:SetText(L["Active Profile"])
 
 	page.createSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.createSectionTitle:SetJustifyH("LEFT")
-	page.createSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(page.createSectionTitle, "arialNarrow", 14, "")
 	page.createSectionTitle:SetTextColor(theme:GetColor("brand"))
-	page.createSectionTitle:SetText("Create New Profile")
+	page.createSectionTitle:SetText(L["Create New Profile"])
 
 	page.copySectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.copySectionTitle:SetJustifyH("LEFT")
-	page.copySectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(page.copySectionTitle, "arialNarrow", 14, "")
 	page.copySectionTitle:SetTextColor(theme:GetColor("brand"))
-	page.copySectionTitle:SetText("Copy Profile")
+	page.copySectionTitle:SetText(L["Copy Profile"])
 
 	page.deleteSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.deleteSectionTitle:SetJustifyH("LEFT")
-	page.deleteSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(page.deleteSectionTitle, "arialNarrow", 14, "")
 	page.deleteSectionTitle:SetTextColor(theme:GetColor("brand"))
-	page.deleteSectionTitle:SetText("Delete Profile")
+	page.deleteSectionTitle:SetText(L["Delete Profile"])
 
 	page.specOverridesSectionTitle = page:CreateFontString(nil, "OVERLAY")
 	page.specOverridesSectionTitle:SetJustifyH("LEFT")
-	page.specOverridesSectionTitle:SetFont(theme.fonts.arialNarrow, 14, "")
+	theme:ApplyFont(page.specOverridesSectionTitle, "arialNarrow", 14, "")
 	page.specOverridesSectionTitle:SetTextColor(theme:GetColor("brand"))
-	page.specOverridesSectionTitle:SetText("Override Active per Specialization")
+	page.specOverridesSectionTitle:SetText(L["Override Active per Specialization"])
 
 	page.activeProfileDropdown = addon.Options.Controls.Dropdown:Create(page, "")
 	page.activeProfileDropdown:SetLayoutWidth(200)
@@ -448,10 +467,10 @@ function Profiles:Ensure(parent)
 	page.newProfileInput = addon.Options.Controls.Input:Create(page, "")
 	page.newProfileInput:SetLayoutWidth(200)
 	page.newProfileInput:SetLabelVisible(false)
-	page.newProfileInput:SetPlaceholder("New Profile Name")
+	page.newProfileInput:SetPlaceholder(L["New Profile Name"])
 
-	page.createProfileButton = addon.Options.Controls.Button:Create(page, "Create")
-	page.createProfileButton:SetLayoutSize(48, 24)
+	page.createProfileButton = addon.Options.Controls.Button:Create(page, L["Create"])
+	page.createProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	page.createProfileButton:SetOnClick(function()
 		CreateProfileFromInput()
 	end)
@@ -463,10 +482,10 @@ function Profiles:Ensure(parent)
 	page.copyProfileInput = addon.Options.Controls.Input:Create(page, "")
 	page.copyProfileInput:SetLayoutWidth(200)
 	page.copyProfileInput:SetLabelVisible(false)
-	page.copyProfileInput:SetPlaceholder("New Profile Name")
+	page.copyProfileInput:SetPlaceholder(L["New Profile Name"])
 
-	page.copyProfileButton = addon.Options.Controls.Button:Create(page, "Copy")
-	page.copyProfileButton:SetLayoutSize(48, 24)
+	page.copyProfileButton = addon.Options.Controls.Button:Create(page, L["Copy"])
+	page.copyProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	page.copyProfileButton:SetOnClick(function()
 		CopyProfileFromInput()
 	end)
@@ -475,24 +494,26 @@ function Profiles:Ensure(parent)
 	page.deleteProfileDropdown:SetLayoutWidth(200)
 	page.deleteProfileDropdown:SetLabelVisible(false)
 
-	page.deleteProfileButton = addon.Options.Controls.Button:Create(page, "Delete")
-	page.deleteProfileButton:SetLayoutSize(48, 24)
+	page.deleteProfileButton = addon.Options.Controls.Button:Create(page, L["Delete"])
+	page.deleteProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	page.deleteProfileButton:SetOnClick(function()
 		DeleteSelectedProfile()
 	end)
 
 	page.specEntries = BuildPlayerSpecEntries()
 	for _, specEntry in ipairs(page.specEntries) do
-		local dropdown = addon.Options.Controls.Dropdown:Create(page, specEntry.name)
+		local dropdown = addon.Options.Controls.Dropdown:Create(page, GetSpecDisplayName(specEntry))
 		dropdown:SetLayoutWidth(140)
-		dropdown:SetPlaceholder("Use Active")
+		dropdown:SetPlaceholder(L["Use Active"])
 		dropdown:SetOnValueChanged(function(_, value)
+			local specName = GetSpecDisplayName(specEntry)
+
 			if value == nil then
 				addon.Database:ClearSpecProfileName(specEntry.specID)
-				PrintProfileMsg(specEntry.name .. " will use the active profile.")
+				PrintProfileMsg((L["%s will use the active profile."]):format(specName))
 			else
 				addon.Database:SetSpecProfileName(specEntry.specID, value)
-				PrintProfileMsg(specEntry.name .. " will use profile '" .. value .. "'.")
+				PrintProfileMsg((L["%s will use profile '%s'."]):format(specName, value))
 			end
 
 			if addon.Utilities:GetPlayerSpecID() == specEntry.specID then
@@ -524,6 +545,24 @@ function Profiles:Ensure(parent)
 		UpdateLayout()
 	end
 
+	function page:UpdateLocale()
+		self.activeSectionTitle:SetText(L["Active Profile"])
+		self.createSectionTitle:SetText(L["Create New Profile"])
+		self.copySectionTitle:SetText(L["Copy Profile"])
+		self.deleteSectionTitle:SetText(L["Delete Profile"])
+		self.specOverridesSectionTitle:SetText(L["Override Active per Specialization"])
+		self.newProfileInput:SetPlaceholder(L["New Profile Name"])
+		self.createProfileButton:SetText(L["Create"])
+		self.copyProfileInput:SetPlaceholder(L["New Profile Name"])
+		self.copyProfileButton:SetText(L["Copy"])
+		self.deleteProfileButton:SetText(L["Delete"])
+
+		for _, specEntry in ipairs(self.specEntries or {}) do
+			specEntry.dropdown:SetLabel(GetSpecDisplayName(specEntry))
+			specEntry.dropdown:SetPlaceholder(L["Use Active"])
+		end
+	end
+
 	function page:UpdateState(profile)
 		UpdateState(profile)
 	end
@@ -532,6 +571,7 @@ function Profiles:Ensure(parent)
 		page:UpdateState(profile)
 	end)
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 
