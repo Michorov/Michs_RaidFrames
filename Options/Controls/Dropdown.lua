@@ -35,7 +35,7 @@ local function ApplyOptionTextStyle(fontString, option, isPlaceholder)
 		return
 	end
 
-	fontString:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(fontString, "arialNarrow", 12, "")
 
 	if option and option.textColor then
 		fontString:SetTextColor(
@@ -86,7 +86,7 @@ local function EnsureListRows(control)
 			button.hoverTexture:Hide()
 
 			button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-			button.text:SetFont(theme.fonts.arialNarrow, 12, "")
+			theme:ApplyFont(button.text, "arialNarrow", 12, "")
 			button.text:SetJustifyH("LEFT")
 
 			button:SetScript("OnEnter", function(self)
@@ -240,7 +240,7 @@ function Dropdown:Create(parent, labelText)
 	control.labelVisible = true
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.label:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", 12, "")
 	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.label:SetJustifyH("LEFT")
 	control.label:SetText(labelText or "Dropdown")
@@ -272,7 +272,7 @@ function Dropdown:Create(parent, labelText)
 	control.field.rightBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
 
 	control.selectionText = control.field:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	control.selectionText:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(control.selectionText, "arialNarrow", 12, "")
 	control.selectionText:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.selectionText:SetJustifyH("LEFT")
 	control.selectionText:SetText(control.placeholder)

@@ -7,6 +7,7 @@ addon.Options.Pages.Layout = addon.Options.Pages.Layout or {}
 local Layout = addon.Options.Pages.Layout
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -66,7 +67,14 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Layout changes are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Layout changes are disabled during combat."])
+end
+
+local function GetOrientationOptions()
+	return {
+		{ value = "HORIZONTAL", text = L["Horizontal"] },
+		{ value = "VERTICAL", text = L["Vertical"] },
+	}
 end
 
 local function FormatInteger(value)
@@ -131,16 +139,15 @@ function Layout:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Layout")
+	page.header.title:SetText(L["Layout"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -153,7 +160,7 @@ function Layout:Ensure(parent)
 		end
 	end)
 
-	page.horizontalPositionSlider = addon.Options.Controls.Slider:Create(page.body, "Horizontal Position")
+	page.horizontalPositionSlider = addon.Options.Controls.Slider:Create(page.body, L["Horizontal Position"])
 	page.horizontalPositionSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.horizontalPositionSlider, -2000, 2000, 1)
 	page.horizontalPositionSlider:SetOnValueChanged(function(_, value)
@@ -163,7 +170,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.verticalPositionSlider = addon.Options.Controls.Slider:Create(page.body, "Vertical Position")
+	page.verticalPositionSlider = addon.Options.Controls.Slider:Create(page.body, L["Vertical Position"])
 	page.verticalPositionSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.verticalPositionSlider, -2000, 2000, 1)
 	page.verticalPositionSlider:SetOnValueChanged(function(_, value)
@@ -173,7 +180,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.horizontalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, "Horizontal Spacing")
+	page.horizontalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, L["Horizontal Spacing"])
 	page.horizontalSpacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.horizontalSpacingSlider, -25, 25, 1)
 	page.horizontalSpacingSlider:SetOnValueChanged(function(_, value)
@@ -183,7 +190,7 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.verticalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, "Vertical Spacing")
+	page.verticalSpacingSlider = addon.Options.Controls.Slider:Create(page.body, L["Vertical Spacing"])
 	page.verticalSpacingSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.verticalSpacingSlider, -25, 25, 1)
 	page.verticalSpacingSlider:SetOnValueChanged(function(_, value)
@@ -193,19 +200,16 @@ function Layout:Ensure(parent)
 		end, "layoutChanged")
 	end)
 
-	page.orientationDropdown = addon.Options.Controls.Dropdown:Create(page.body, "Orientation")
+	page.orientationDropdown = addon.Options.Controls.Dropdown:Create(page.body, L["Orientation"])
 	page.orientationDropdown:SetLayoutWidth(174)
-	page.orientationDropdown:SetOptions({
-		{ value = "HORIZONTAL", text = "Horizontal" },
-		{ value = "VERTICAL", text = "Vertical" },
-	})
+	page.orientationDropdown:SetOptions(GetOrientationOptions())
 	page.orientationDropdown:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
 			section.direction = value
 		end, "layoutChanged")
 	end)
 
-	page.reverseGroupOrderCheckbox = addon.Options.Controls.Checkbox:Create(page.body, "Reverse Group Order")
+	page.reverseGroupOrderCheckbox = addon.Options.Controls.Checkbox:Create(page.body, L["Reverse Group Order"])
 	page.reverseGroupOrderCheckbox:SetLayoutWidth(174)
 	page.reverseGroupOrderCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyRaidSetting(function(section)
@@ -215,7 +219,7 @@ function Layout:Ensure(parent)
 
 	page.raidGroupCheckboxes = {}
 	for groupIndex = 1, 8 do
-		local checkbox = addon.Options.Controls.Checkbox:Create(page.body, "Group " .. groupIndex)
+		local checkbox = addon.Options.Controls.Checkbox:Create(page.body, (L["Group %d"]):format(groupIndex))
 		checkbox:SetLayoutWidth(87)
 		checkbox:SetOnValueChanged(function(_, checked)
 			ApplyRaidSetting(function(section)
@@ -239,6 +243,25 @@ function Layout:Ensure(parent)
 
 	for groupIndex, checkbox in ipairs(page.raidGroupCheckboxes) do
 		page.controls["raidGroupCheckbox" .. groupIndex] = checkbox
+	end
+
+	function page:UpdateLocale()
+		self.header.title:SetText(L["Layout"])
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+		self.horizontalPositionSlider:SetLabel(L["Horizontal Position"])
+		self.verticalPositionSlider:SetLabel(L["Vertical Position"])
+		self.horizontalSpacingSlider:SetLabel(L["Horizontal Spacing"])
+		self.verticalSpacingSlider:SetLabel(L["Vertical Spacing"])
+		self.orientationDropdown:SetLabel(L["Orientation"])
+		self.orientationDropdown:SetOptions(GetOrientationOptions())
+		self.reverseGroupOrderCheckbox:SetText(L["Reverse Group Order"])
+
+		for groupIndex, checkbox in ipairs(self.raidGroupCheckboxes or {}) do
+			checkbox:SetText((L["Group %d"]):format(groupIndex))
+		end
 	end
 
 	function page:UpdateLayout()
@@ -393,6 +416,7 @@ function Layout:Ensure(parent)
 		page:UpdateState(profile)
 	end)
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

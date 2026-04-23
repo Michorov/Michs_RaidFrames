@@ -2,6 +2,7 @@ local addonName, addon = ...
 
 local function InitializeAddon()
 	addon.Database:Initialize()
+	addon.Locale:Initialize()
 
 	addon.Utilities:RefreshPixelGrid()
 

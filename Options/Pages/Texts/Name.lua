@@ -7,25 +7,45 @@ addon.Options.Pages.Texts.Name = addon.Options.Pages.Texts.Name or {}
 
 local Name = addon.Options.Pages.Texts.Name
 local subpage
+local L = addon.L
 
 local anchorOptions = {
-	{ value = "TOPLEFT", text = "Top Left" },
-	{ value = "TOP", text = "Top Center" },
-	{ value = "TOPRIGHT", text = "Top Right" },
-	{ value = "LEFT", text = "Left" },
-	{ value = "CENTER", text = "Center" },
-	{ value = "RIGHT", text = "Right" },
-	{ value = "BOTTOMLEFT", text = "Bottom Left" },
-	{ value = "BOTTOM", text = "Bottom Center" },
-	{ value = "BOTTOMRIGHT", text = "Bottom Right" },
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOP", text = L["Top Center"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "CENTER", text = L["Center"] },
+	{ value = "RIGHT", text = L["Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOM", text = L["Bottom Center"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
 }
 
 local outlineOptions = {
-	{ value = "", text = "None" },
-	{ value = "OUTLINE", text = "Outline" },
-	{ value = "THICKOUTLINE", text = "Thick Outline" },
-	{ value = "MONOCHROME", text = "Monochrome" },
+	{ value = "", text = L["None"] },
+	{ value = "OUTLINE", text = L["Outline"] },
+	{ value = "THICKOUTLINE", text = L["Thick Outline"] },
+	{ value = "MONOCHROME", text = L["Monochrome"] },
 }
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top Center"]
+	anchorOptions[3].text = L["Top Right"]
+	anchorOptions[4].text = L["Left"]
+	anchorOptions[5].text = L["Center"]
+	anchorOptions[6].text = L["Right"]
+	anchorOptions[7].text = L["Bottom Left"]
+	anchorOptions[8].text = L["Bottom Center"]
+	anchorOptions[9].text = L["Bottom Right"]
+end
+
+local function UpdateOutlineOptions()
+	outlineOptions[1].text = L["None"]
+	outlineOptions[2].text = L["Outline"]
+	outlineOptions[3].text = L["Thick Outline"]
+	outlineOptions[4].text = L["Monochrome"]
+end
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -81,7 +101,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Name text settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Name text settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyEvent)
@@ -119,7 +139,7 @@ function Name:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Anchor")
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
 	subpage.anchorDropdown:SetLayoutWidth(174)
 	subpage.anchorDropdown:SetOptions(anchorOptions)
 	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
@@ -131,7 +151,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, "Font Size")
+	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Font Size"])
 	subpage.sizeSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.sizeSlider, 6, 32, 1)
 	subpage.sizeSlider:SetOnValueChanged(function(_, value)
@@ -143,7 +163,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, "Offset X")
+	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
 	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
@@ -156,7 +176,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, "Offset Y")
+	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
 	subpage.offsetYSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
 	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
@@ -169,7 +189,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.classColorCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Use Class Color")
+	subpage.classColorCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Use Class Color"])
 	subpage.classColorCheckbox:SetLayoutWidth(174)
 	subpage.classColorCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -180,7 +200,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, "Color")
+	subpage.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
 	subpage.colorPicker:SetLayoutWidth(174)
 	subpage.colorPicker:SetHasOpacity(true)
 	subpage.colorPicker:SetOnValueChanged(function(_, r, g, b, a)
@@ -192,7 +212,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, "Style")
+	subpage.outlineDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Style"])
 	subpage.outlineDropdown:SetLayoutWidth(174)
 	subpage.outlineDropdown:SetOptions(outlineOptions)
 	subpage.outlineDropdown:SetOnValueChanged(function(_, value)
@@ -204,7 +224,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.truncateCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Truncate")
+	subpage.truncateCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Truncate"])
 	subpage.truncateCheckbox:SetLayoutWidth(174)
 	subpage.truncateCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -215,7 +235,7 @@ function Name:Ensure(parent)
 		end, "nameSettingsChanged")
 	end)
 
-	subpage.maxLengthSlider = addon.Options.Controls.Slider:Create(subpage, "Max Length")
+	subpage.maxLengthSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Length"])
 	subpage.maxLengthSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.maxLengthSlider, 1, 32, 1)
 	subpage.maxLengthSlider:SetOnValueChanged(function(_, value)
@@ -238,6 +258,22 @@ function Name:Ensure(parent)
 		truncateCheckbox = subpage.truncateCheckbox,
 		maxLengthSlider = subpage.maxLengthSlider,
 	}
+
+	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		UpdateOutlineOptions()
+		self.anchorDropdown:SetLabel(L["Anchor"])
+		self.anchorDropdown:SetOptions(anchorOptions)
+		self.sizeSlider:SetLabel(L["Font Size"])
+		self.offsetXSlider:SetLabel(L["Offset X"])
+		self.offsetYSlider:SetLabel(L["Offset Y"])
+		self.classColorCheckbox:SetText(L["Use Class Color"])
+		self.colorPicker:SetLabel(L["Color"])
+		self.outlineDropdown:SetLabel(L["Style"])
+		self.outlineDropdown:SetOptions(outlineOptions)
+		self.truncateCheckbox:SetText(L["Truncate"])
+		self.maxLengthSlider:SetLabel(L["Max Length"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -406,6 +442,8 @@ function Name:Ensure(parent)
 		controls.truncateCheckbox:SetChecked(truncate == true)
 		controls.maxLengthSlider:SetValueSilently(name.maxLength or defaults.maxLength)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

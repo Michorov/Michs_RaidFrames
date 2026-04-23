@@ -7,16 +7,25 @@ addon.Options.Sections.StatusBar = addon.Options.Sections.StatusBar or {}
 local StatusBar = addon.Options.Sections.StatusBar
 
 local statusBar
+local L = addon.L
 local theme = addon.Options.Theme
 local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
 local layoutValues = {
 	textLeftInset = 10,
 	textRightGap = 10,
 	horizontalInset = 8,
-	buttonWidth = 90,
+	buttonWidth = 116,
 	buttonHeight = 22,
 	buttonSpacing = 2,
 }
+
+local function GetDisplayProfileName(name)
+	if name == "Default" then
+		return L["Default"]
+	end
+
+	return name
+end
 
 function StatusBar:Ensure(parent)
 	if statusBar then
@@ -28,19 +37,19 @@ function StatusBar:Ensure(parent)
 
 	statusBar.text = statusBar:CreateFontString(nil, "OVERLAY")
 	statusBar.text:SetJustifyH("LEFT")
-	statusBar.text:SetFont(theme.fonts.arialNarrow, 12, "")
+	theme:ApplyFont(statusBar.text, "arialNarrow", 12, "")
 	statusBar.text:SetTextColor(0.65, 0.65, 0.68, 1)
 
 	statusBar.topBorder = statusBar:CreateTexture(nil, "OVERLAY")
 	statusBar.topBorder:SetColorTexture(theme:GetColor("border"))
 
-	statusBar.partyTestButton = addon.Options.Controls.Button:Create(statusBar, "Party Test")
+	statusBar.partyTestButton = addon.Options.Controls.Button:Create(statusBar, L["Party Test"])
 	statusBar.partyTestButton:SetLayoutSize(layoutValues.buttonWidth, layoutValues.buttonHeight)
 	statusBar.partyTestButton:SetOnClick(function()
 		addon.FrameRegistry:ToggleTestMode("party")
 	end)
 
-	statusBar.raidTestButton = addon.Options.Controls.Button:Create(statusBar, "Raid Test")
+	statusBar.raidTestButton = addon.Options.Controls.Button:Create(statusBar, L["Raid Test"])
 	statusBar.raidTestButton:SetLayoutSize(layoutValues.buttonWidth, layoutValues.buttonHeight)
 	statusBar.raidTestButton:SetOnClick(function()
 		addon.FrameRegistry:ToggleTestMode("raid")
@@ -53,10 +62,21 @@ function StatusBar:Ensure(parent)
 		StatusBar:UpdateState()
 	end)
 
+	self:UpdateLocale()
 	self:UpdateLayout()
 	self:UpdateState()
 
 	return statusBar
+end
+
+function StatusBar:UpdateLocale()
+	if not statusBar then
+		return
+	end
+
+	statusBar.partyTestButton:SetText(L["Party Test"])
+	statusBar.raidTestButton:SetText(L["Raid Test"])
+	self:UpdateState()
 end
 
 function StatusBar:UpdateLayout()
@@ -121,7 +141,7 @@ function StatusBar:UpdateState()
 		return
 	end
 
-	local profileName = addon.Database:GetCurrentProfileName() or "Default"
+	local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
 
-	statusBar.text:SetText(("Version %s | Active Profile: |cff00ff00%s|r"):format(addonVersion, profileName))
+	statusBar.text:SetText((L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName))
 end

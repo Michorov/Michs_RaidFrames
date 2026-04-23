@@ -8,6 +8,7 @@ addon.Options.Pages.Bars.Power = addon.Options.Pages.Bars.Power or {}
 local Power = addon.Options.Pages.Bars.Power
 
 local subpage
+local L = addon.L
 local theme = addon.Options.Theme
 
 local function GetControllerState()
@@ -54,7 +55,7 @@ local function GetModeDefaults(mode)
 end
 
 local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r Power settings are disabled during combat.")
+	print("|cffff9900Mich's RaidFrames:|r " .. L["Power settings are disabled during combat."])
 end
 
 local function ApplyModeSetting(updateFn, notifyEvent)
@@ -92,7 +93,7 @@ function Power:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Enabled")
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -101,7 +102,7 @@ function Power:Ensure(parent)
 		end, "powerSettingsChanged")
 	end)
 
-	subpage.healerOnlyCheckbox = addon.Options.Controls.Checkbox:Create(subpage, "Healers Only")
+	subpage.healerOnlyCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Healers Only"])
 	subpage.healerOnlyCheckbox:SetLayoutWidth(174)
 	subpage.healerOnlyCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -110,7 +111,7 @@ function Power:Ensure(parent)
 		end, "powerSettingsChanged")
 	end)
 
-	subpage.heightSlider = addon.Options.Controls.Slider:Create(subpage, "Height")
+	subpage.heightSlider = addon.Options.Controls.Slider:Create(subpage, L["Height"])
 	subpage.heightSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.heightSlider, 1, 20, 1)
 	subpage.heightSlider:SetOnValueChanged(function(_, value)
@@ -120,7 +121,7 @@ function Power:Ensure(parent)
 		end, "powerSettingsChanged")
 	end)
 
-	subpage.borderThicknessSlider = addon.Options.Controls.Slider:Create(subpage, "Border Size")
+	subpage.borderThicknessSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderThicknessSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(subpage.borderThicknessSlider, 0, 6, 1)
 	subpage.borderThicknessSlider:SetOnValueChanged(function(_, value)
@@ -136,6 +137,13 @@ function Power:Ensure(parent)
 		heightSlider = subpage.heightSlider,
 		borderThicknessSlider = subpage.borderThicknessSlider,
 	}
+
+	function subpage:UpdateLocale()
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.healerOnlyCheckbox:SetText(L["Healers Only"])
+		self.heightSlider:SetLabel(L["Height"])
+		self.borderThicknessSlider:SetLabel(L["Border Size"])
+	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
@@ -207,6 +215,8 @@ function Power:Ensure(parent)
 		controls.heightSlider:SetValueSilently(power.height or defaults.height)
 		controls.borderThicknessSlider:SetValueSilently(power.borderThicknessPx or defaults.borderThickness)
 	end
+
+	subpage:UpdateLocale()
 
 	return subpage
 end

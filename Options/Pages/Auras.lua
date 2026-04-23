@@ -7,18 +7,19 @@ addon.Options.Pages.Auras = addon.Options.Pages.Auras or {}
 local Auras = addon.Options.Pages.Auras
 
 local page
+local L = addon.L
 local theme = addon.Options.Theme
 
 local subpageOptions = {
-	{ value = "buffs", text = "Buffs" },
-	{ value = "buffFilters", text = "Buffs - Filters" },
-	{ value = "buffOverlay", text = "Buffs - Overlay" },
-	{ value = "buffCustomIcons", text = "Buffs - Custom Icons" },
-	{ value = "debuffs", text = "Debuffs" },
-	{ value = "dispels", text = "Dispels" },
-	{ value = "bigDefensive", text = "Big Defensive" },
-	{ value = "privateAuras", text = "Private Auras" },
-	{ value = "raidBuffReminder", text = "Raid Buff Reminder" },
+	{ value = "buffs", text = L["Buffs"] },
+	{ value = "buffFilters", text = L["Buffs - Filters"] },
+	{ value = "buffOverlay", text = L["Buffs - Overlay"] },
+	{ value = "buffCustomIcons", text = L["Buffs - Custom Icons"] },
+	{ value = "debuffs", text = L["Debuffs"] },
+	{ value = "dispels", text = L["Dispels"] },
+	{ value = "bigDefensive", text = L["Big Defensive"] },
+	{ value = "privateAuras", text = L["Private Auras"] },
+	{ value = "raidBuffReminder", text = L["Raid Buff Reminder"] },
 }
 
 local specHeaderSubpages = {
@@ -78,16 +79,15 @@ function Auras:Ensure(parent)
 	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
 	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
 	page.header.title:SetJustifyH("LEFT")
-	page.header.title:SetFont(theme.fonts.arialNarrow, 20, "")
+	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
 	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText("Auras")
+	page.header.title:SetText(L["Auras"])
 
 	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
 		page.header,
-		{ value = "party", text = "Party" },
-		{ value = "raid", text = "Raid" }
+		{ value = "party", text = L["Party"] },
+		{ value = "raid", text = L["Raid"] }
 	)
-	page.modeToggle:SetLayoutSize(112, 24)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
 		local state = GetControllerState()
@@ -101,7 +101,7 @@ function Auras:Ensure(parent)
 	end)
 
 	page.subpageDropdown = addon.Options.Controls.Dropdown:Create(page.header, "")
-	page.subpageDropdown:SetLayoutWidth(174)
+	page.subpageDropdown:SetLayoutWidth(186)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
@@ -147,14 +147,39 @@ function Auras:Ensure(parent)
 		subpageDropdown = page.subpageDropdown,
 	}
 
+	function page:UpdateLocale()
+		subpageOptions[1].text = L["Buffs"]
+		subpageOptions[2].text = L["Buffs - Filters"]
+		subpageOptions[3].text = L["Buffs - Overlay"]
+		subpageOptions[4].text = L["Buffs - Custom Icons"]
+		subpageOptions[5].text = L["Debuffs"]
+		subpageOptions[6].text = L["Dispels"]
+		subpageOptions[7].text = L["Big Defensive"]
+		subpageOptions[8].text = L["Private Auras"]
+		subpageOptions[9].text = L["Raid Buff Reminder"]
+
+		self.modeToggle:SetOptions(
+			{ value = "party", text = L["Party"] },
+			{ value = "raid", text = L["Raid"] }
+		)
+
+		for _, subpage in pairs(self.subpages or {}) do
+			if subpage.UpdateLocale then
+				subpage:UpdateLocale()
+			end
+		end
+
+		self:UpdateHeaderTitle()
+	end
+
 	function page:UpdateHeaderTitle()
 		local activeSubpageKey = GetActiveSubpageKey()
-		local title = "Auras"
+		local title = L["Auras"]
 		local activeSubpage = self.subpages and self.subpages[activeSubpageKey]
 		local specName = activeSubpage and activeSubpage.activeSpecName or nil
 
 		if specHeaderSubpages[activeSubpageKey] and specName then
-			title = "Auras - " .. specName
+			title = (L["Auras - %s"]):format(specName)
 		end
 
 		self.header.title:SetText(title)
@@ -247,6 +272,7 @@ function Auras:Ensure(parent)
 		end)
 	end
 
+	page:UpdateLocale()
 	page:UpdateLayout()
 	page:UpdateState(addon.Database:GetProfile())
 

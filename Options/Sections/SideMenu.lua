@@ -7,6 +7,7 @@ addon.Options.Sections.SideMenu = addon.Options.Sections.SideMenu or {}
 local SideMenu = addon.Options.Sections.SideMenu
 
 local sideMenu
+local L = addon.L
 local theme = addon.Options.Theme
 local activePage
 
@@ -16,7 +17,7 @@ local function InitializeButton(button)
 	button:SetLayoutHeight(32)
 
 	button.text:SetJustifyH("LEFT")
-	button.text:SetFont(theme.fonts.arialNarrow, 16, "")
+	theme:ApplyFont(button.text, "arialNarrow", 16, "")
 
 	button.hoverTexture = button:CreateTexture(nil, "BACKGROUND")
 	button.hoverTexture:SetColorTexture(theme:GetColor("controlHoverOverlay"))
@@ -47,49 +48,49 @@ function SideMenu:Ensure(parent)
 
 	sideMenu = CreateFrame("Frame", nil, parent)
 
-	local generalButton = addon.Options.Controls.Button:Create(sideMenu, "General")
+	local generalButton = addon.Options.Controls.Button:Create(sideMenu, L["General"])
 	InitializeButton(generalButton)
 	generalButton:SetOnClick(function()
 		addon.Options:SetActivePage("general")
 	end)
 
-	local layoutButton = addon.Options.Controls.Button:Create(sideMenu, "Layout")
+	local layoutButton = addon.Options.Controls.Button:Create(sideMenu, L["Layout"])
 	InitializeButton(layoutButton)
 	layoutButton:SetOnClick(function()
 		addon.Options:SetActivePage("layout")
 	end)
 
-	local frameButton = addon.Options.Controls.Button:Create(sideMenu, "Frames")
+	local frameButton = addon.Options.Controls.Button:Create(sideMenu, L["Frames"])
 	InitializeButton(frameButton)
 	frameButton:SetOnClick(function()
 		addon.Options:SetActivePage("frames")
 	end)
 
-	local barsButton = addon.Options.Controls.Button:Create(sideMenu, "Bars")
+	local barsButton = addon.Options.Controls.Button:Create(sideMenu, L["Bars"])
 	InitializeButton(barsButton)
 	barsButton:SetOnClick(function()
 		addon.Options:SetActivePage("bars")
 	end)
 
-	local textsButton = addon.Options.Controls.Button:Create(sideMenu, "Texts")
+	local textsButton = addon.Options.Controls.Button:Create(sideMenu, L["Texts"])
 	InitializeButton(textsButton)
 	textsButton:SetOnClick(function()
 		addon.Options:SetActivePage("texts")
 	end)
 
-	local aurasButton = addon.Options.Controls.Button:Create(sideMenu, "Auras")
+	local aurasButton = addon.Options.Controls.Button:Create(sideMenu, L["Auras"])
 	InitializeButton(aurasButton)
 	aurasButton:SetOnClick(function()
 		addon.Options:SetActivePage("auras")
 	end)
 
-	local indicatorsButton = addon.Options.Controls.Button:Create(sideMenu, "Indicators")
+	local indicatorsButton = addon.Options.Controls.Button:Create(sideMenu, L["Indicators"])
 	InitializeButton(indicatorsButton)
 	indicatorsButton:SetOnClick(function()
 		addon.Options:SetActivePage("indicators")
 	end)
 
-	local profilesButton = addon.Options.Controls.Button:Create(sideMenu, "Profiles")
+	local profilesButton = addon.Options.Controls.Button:Create(sideMenu, L["Profiles"])
 	InitializeButton(profilesButton)
 	profilesButton:SetOnClick(function()
 		addon.Options:SetActivePage("profiles")
@@ -109,9 +110,29 @@ function SideMenu:Ensure(parent)
 	sideMenu.rightBorder = sideMenu:CreateTexture(nil, "OVERLAY")
 	sideMenu.rightBorder:SetColorTexture(theme:GetColor("border"))
 
+	self:UpdateLocale()
 	self:UpdateLayout()
 
 	return sideMenu
+end
+
+function SideMenu:UpdateLocale()
+	if not sideMenu then
+		return
+	end
+
+	sideMenu.controls.general:SetText(L["General"])
+	sideMenu.controls.layout:SetText(L["Layout"])
+	sideMenu.controls.frames:SetText(L["Frames"])
+	sideMenu.controls.bars:SetText(L["Bars"])
+	sideMenu.controls.texts:SetText(L["Texts"])
+	sideMenu.controls.auras:SetText(L["Auras"])
+	sideMenu.controls.indicators:SetText(L["Indicators"])
+	sideMenu.controls.profiles:SetText(L["Profiles"])
+
+	if activePage then
+		self:SetActivePage(activePage)
+	end
 end
 
 function SideMenu:SetActivePage(pageKey)
