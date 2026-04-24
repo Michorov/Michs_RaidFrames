@@ -141,6 +141,7 @@ end
 
 function EventHandler:READY_CHECK()
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
+	addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
 end
 
 function EventHandler:READY_CHECK_CONFIRM()
