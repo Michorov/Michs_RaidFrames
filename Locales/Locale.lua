@@ -70,6 +70,7 @@ local specializationLocaleKeys = {
 	[1467] = "Spec: Devastation",
 	[1468] = "Spec: Preservation",
 	[1473] = "Spec: Augmentation",
+	[1480] = "Spec: Devourer",
 }
 
 local auraLocaleKeys = {
