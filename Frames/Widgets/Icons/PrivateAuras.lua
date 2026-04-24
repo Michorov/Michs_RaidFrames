@@ -19,6 +19,36 @@ local TEST_PRIVATE_AURA_SAMPLES = {
 
 local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable() or nil
 
+local function ReportPrivateAuraDiagnostic(message, ...)
+	local errorHandler = geterrorhandler and geterrorhandler() or nil
+	local ok, formattedMessage = pcall(string.format, message, ...)
+
+	if not ok then
+		formattedMessage = tostring(message)
+	end
+
+	if type(errorHandler) == "function" then
+		errorHandler(formattedMessage)
+	else
+		print(formattedMessage)
+	end
+end
+
+local function GetFrameDebugName(frame)
+	if not frame then
+		return "nil"
+	end
+
+	if frame.GetName then
+		local name = frame:GetName()
+		if name and name ~= "" then
+			return name
+		end
+	end
+
+	return tostring(frame)
+end
+
 local function GetPrivateAurasSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
@@ -43,7 +73,17 @@ local function RemovePrivateAuraAnchors(frame)
 	for i = 1, #frame.privateAurasAnchorIDs do
 		local anchorID = frame.privateAurasAnchorIDs[i]
 		if anchorID then
-			pcall(C_UnitAuras.RemovePrivateAuraAnchor, anchorID)
+			local ok, err = pcall(C_UnitAuras.RemovePrivateAuraAnchor, anchorID)
+			if not ok then
+				ReportPrivateAuraDiagnostic(
+					"Michs_RaidFrames: RemovePrivateAuraAnchor failed for frame=%s unit=%s anchorID=%s inCombat=%s: %s",
+					GetFrameDebugName(frame),
+					tostring(frame.unit),
+					tostring(anchorID),
+					tostring(InCombatLockdown and InCombatLockdown()),
+					tostring(err)
+				)
+			end
 		end
 	end
 
@@ -51,19 +91,22 @@ local function RemovePrivateAuraAnchors(frame)
 end
 
 local function ReportAddPrivateAuraAnchorError(unit, auraIndex, err)
-	local errorHandler = geterrorhandler and geterrorhandler() or nil
-	local message = string.format(
+	ReportPrivateAuraDiagnostic(
 		"Michs_RaidFrames: AddPrivateAuraAnchor failed for unit=%s auraIndex=%d: %s",
 		tostring(unit),
 		tonumber(auraIndex) or 0,
 		tostring(err)
 	)
+end
 
-	if type(errorHandler) == "function" then
-		errorHandler(message)
-	else
-		print(message)
-	end
+local function ReportAddPrivateAuraAnchorNil(frame, unit, auraIndex)
+	ReportPrivateAuraDiagnostic(
+		"Michs_RaidFrames: AddPrivateAuraAnchor returned nil for frame=%s unit=%s auraIndex=%d inCombat=%s",
+		GetFrameDebugName(frame),
+		tostring(unit),
+		tonumber(auraIndex) or 0,
+		tostring(InCombatLockdown and InCombatLockdown())
+	)
 end
 
 local function CreateTestPrivateAuraPreviewIcon(container)
@@ -222,6 +265,8 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 
 		if ok and anchorIDOrError then
 			table.insert(frame.privateAurasAnchorIDs, anchorIDOrError)
+		elseif ok then
+			ReportAddPrivateAuraAnchorNil(frame, unit, auraIndex)
 		elseif not ok then
 			ReportAddPrivateAuraAnchorError(unit, auraIndex, anchorIDOrError)
 		end
