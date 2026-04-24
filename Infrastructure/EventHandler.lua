@@ -141,7 +141,12 @@ end
 
 function EventHandler:READY_CHECK()
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
-	addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+
+	if InCombatLockdown() then
+		addon.Frames.Widgets.Icons.PrivateAuras.needsUpdateAfterCombat = true
+	else
+		addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+	end
 end
 
 function EventHandler:READY_CHECK_CONFIRM()
