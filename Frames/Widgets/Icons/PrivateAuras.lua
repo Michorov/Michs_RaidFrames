@@ -7,8 +7,6 @@ addon.Frames.Widgets.Icons.PrivateAuras = addon.Frames.Widgets.Icons.PrivateAura
 
 local PrivateAuras = addon.Frames.Widgets.Icons.PrivateAuras
 
-PrivateAuras.needsUpdateAfterCombat = false
-
 local TEST_PRIVATE_AURA_SAMPLES = {
 	{ spellID = 407221, dispelType = "Magic", duration = 8 },
 	{ spellID = 418720, dispelType = "Curse", duration = 12 },
@@ -17,37 +15,8 @@ local TEST_PRIVATE_AURA_SAMPLES = {
 	{ spellID = 406317, dispelType = "None", duration = 14 },
 }
 
-local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable() or nil
-
-local function ReportPrivateAuraDiagnostic(message, ...)
-	local errorHandler = geterrorhandler and geterrorhandler() or nil
-	local ok, formattedMessage = pcall(string.format, message, ...)
-
-	if not ok then
-		formattedMessage = tostring(message)
-	end
-
-	if type(errorHandler) == "function" then
-		errorHandler(formattedMessage)
-	else
-		print(formattedMessage)
-	end
-end
-
-local function GetFrameDebugName(frame)
-	if not frame then
-		return "nil"
-	end
-
-	if frame.GetName then
-		local name = frame:GetName()
-		if name and name ~= "" then
-			return name
-		end
-	end
-
-	return tostring(frame)
-end
+local DEBUFF_DISPLAY_INFO = AuraUtil and AuraUtil.GetDebuffDisplayInfoTable and AuraUtil.GetDebuffDisplayInfoTable()
+	or nil
 
 local function GetPrivateAurasSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
@@ -63,50 +32,6 @@ local function GetPrivateAurasSettings(settings)
 		iconSizePx = addon.Utilities:ToPixels(privateAuras.iconSize or 20),
 		spacingPx = addon.Utilities:ToPixels(privateAuras.spacing or 1),
 	}
-end
-
-local function RemovePrivateAuraAnchors(frame)
-	if not frame or not frame.privateAurasAnchorIDs or not C_UnitAuras or not C_UnitAuras.RemovePrivateAuraAnchor then
-		return
-	end
-
-	for i = 1, #frame.privateAurasAnchorIDs do
-		local anchorID = frame.privateAurasAnchorIDs[i]
-		if anchorID then
-			local ok, err = pcall(C_UnitAuras.RemovePrivateAuraAnchor, anchorID)
-			if not ok then
-				ReportPrivateAuraDiagnostic(
-					"Michs_RaidFrames: RemovePrivateAuraAnchor failed for frame=%s unit=%s anchorID=%s inCombat=%s: %s",
-					GetFrameDebugName(frame),
-					tostring(frame.unit),
-					tostring(anchorID),
-					tostring(InCombatLockdown and InCombatLockdown()),
-					tostring(err)
-				)
-			end
-		end
-	end
-
-	wipe(frame.privateAurasAnchorIDs)
-end
-
-local function ReportAddPrivateAuraAnchorError(unit, auraIndex, err)
-	ReportPrivateAuraDiagnostic(
-		"Michs_RaidFrames: AddPrivateAuraAnchor failed for unit=%s auraIndex=%d: %s",
-		tostring(unit),
-		tonumber(auraIndex) or 0,
-		tostring(err)
-	)
-end
-
-local function ReportAddPrivateAuraAnchorNil(frame, unit, auraIndex)
-	ReportPrivateAuraDiagnostic(
-		"Michs_RaidFrames: AddPrivateAuraAnchor returned nil for frame=%s unit=%s auraIndex=%d inCombat=%s",
-		GetFrameDebugName(frame),
-		tostring(unit),
-		tonumber(auraIndex) or 0,
-		tostring(InCombatLockdown and InCombatLockdown())
-	)
 end
 
 local function CreateTestPrivateAuraPreviewIcon(container)
@@ -223,10 +148,21 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 		return
 	end
 
-	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
-	RemovePrivateAuraAnchors(frame)
-
 	local unit = frame.unit
+
+	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
+
+	if frame.privateAurasAnchoredUnit == unit and #frame.privateAurasAnchorIDs > 0 then
+		return
+	end
+
+	if C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor then
+		for _, anchorID in ipairs(frame.privateAurasAnchorIDs) do
+			C_UnitAuras.RemovePrivateAuraAnchor(anchorID)
+		end
+	end
+	wipe(frame.privateAurasAnchorIDs)
+	frame.privateAurasAnchoredUnit = nil
 
 	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
@@ -241,7 +177,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	for auraIndex = 1, privateAuraSettings.maxIcons do
 		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
 
-		local ok, anchorIDOrError = pcall(C_UnitAuras.AddPrivateAuraAnchor, {
+		local anchorID = C_UnitAuras.AddPrivateAuraAnchor({
 			unitToken = unit,
 			auraIndex = auraIndex,
 			parent = container,
@@ -263,22 +199,23 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 			},
 		})
 
-		if ok and anchorIDOrError then
-			table.insert(frame.privateAurasAnchorIDs, anchorIDOrError)
-		elseif ok then
-			ReportAddPrivateAuraAnchorNil(frame, unit, auraIndex)
-		elseif not ok then
-			ReportAddPrivateAuraAnchorError(unit, auraIndex, anchorIDOrError)
+		if anchorID then
+			table.insert(frame.privateAurasAnchorIDs, anchorID)
 		end
 	end
 
-	container:SetShown(#frame.privateAurasAnchorIDs > 0)
+	local anchored = #frame.privateAurasAnchorIDs > 0
+	container:SetShown(anchored)
+	if anchored then
+		frame.privateAurasAnchoredUnit = unit
+	end
 end
 
 function PrivateAuras:Ensure(frame)
 	if not frame.privateAurasContainer then
 		frame.privateAurasContainer =
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
+		frame.privateAurasContainer:SetFrameStrata("HIGH")
 	end
 end
 

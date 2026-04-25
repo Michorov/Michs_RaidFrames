@@ -38,6 +38,10 @@ local testRaidGroup = {
 
 local unitFrameMap = {}
 
+local function IsSupportedUnit(unit)
+	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
+end
+
 function MRF_OnUnitFrameLoad(frame)
 	frame.dataProvider = addon.Frames.DataProvider.Live
 
@@ -61,15 +65,27 @@ function MRF_OnUnitFrameLoad(frame)
 end
 
 function MRF_OnUnitChanged(frame, unit)
+	for k, v in pairs(unitFrameMap) do
+		if v == frame then
+			unitFrameMap[k] = nil
+		end
+	end
+
 	if unit then
 		unitFrameMap[unit] = frame
-	else
-		for k, v in pairs(unitFrameMap) do
-			if v == frame then
-				unitFrameMap[k] = nil
-				break
-			end
-		end
+	end
+
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	if frame.privateAurasAnchoredUnit == unit then
+		return
+	end
+
+	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
+	if settings then
+		addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 	end
 end
 
@@ -338,6 +354,7 @@ end
 function FrameRegistry:IsInitialized()
 	return initialized
 end
+
 
 function FrameRegistry:CreateTestGroup(groupType)
 	local group
