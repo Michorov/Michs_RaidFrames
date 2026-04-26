@@ -48,7 +48,6 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
-
 	if not self.rangeTicker then
 		addon.Frames.RangeChecker:UpdateSettings()
 
@@ -135,24 +134,18 @@ function EventHandler:READY_CHECK()
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
 end
 
-function EventHandler:READY_CHECK_CONFIRM()
-	addon.UpdateScheduler:Notify("readyCheckStateChanged")
+function EventHandler:READY_CHECK_CONFIRM(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.FrameRegistry:UpdateUnit(unit, function(frame, settings)
+		addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
+	end)
 end
 
 function EventHandler:READY_CHECK_FINISHED()
-	local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
-	ReadyCheck.lastFinishedAt = GetTime()
-
-	if ReadyCheck.hideTimer then
-		ReadyCheck.hideTimer:Cancel()
-	end
-
-	ReadyCheck.hideTimer = C_Timer.NewTimer(5, function()
-		addon.UpdateScheduler:Notify("readyCheckStateChanged")
-		ReadyCheck.hideTimer = nil
-	end)
-
-	addon.UpdateScheduler:Notify("readyCheckStateChanged")
+	addon.UpdateScheduler:Notify("readyCheckStateFinished")
 end
 
 function EventHandler:INCOMING_SUMMON_CHANGED(event, unit)
