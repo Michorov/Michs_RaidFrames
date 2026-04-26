@@ -11,6 +11,8 @@ local settingsCache = setmetatable({}, { __mode = "k" })
 
 local READY_CHECK_HOLD = 5
 
+local hideTimer = nil
+
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -30,19 +32,6 @@ local function UpdateSettingsCache(settings)
 	}
 
 	settingsCache[settings] = result
-end
-
-local function GetTextureForStatus(status, settings)
-	if status == "ready" then
-		return settings.readyTexture
-	end
-	if status == "notready" then
-		return settings.notReadyTexture
-	end
-	if status == "waiting" then
-		return settings.waitingTexture
-	end
-	return nil
 end
 
 function ReadyCheck:Ensure(frame)
@@ -106,23 +95,37 @@ function ReadyCheck:UpdateState(frame, settings)
 
 	local status = GetReadyCheckStatus(unit)
 	if not status then
-		local lastFinishedTime = self.lastFinishedAt or 0
-		if (GetTime() - lastFinishedTime) > READY_CHECK_HOLD then
-			container:Hide()
-		else
+		if hideTimer then
 			container:Show()
+		else
+			container:Hide()
 		end
 		return
 	end
 
-	local tex = GetTextureForStatus(status, cachedSettings)
-	if not tex then
+	if status == "ready" then
+		container.texture:SetTexture(cachedSettings.readyTexture)
+	elseif status == "notready" then
+		container.texture:SetTexture(cachedSettings.notReadyTexture)
+	elseif status == "waiting" then
+		container.texture:SetTexture(cachedSettings.waitingTexture)
+	else
 		container:Hide()
 		return
 	end
 
-	container.texture:SetTexture(tex)
 	container:Show()
+end
+
+function ReadyCheck:StartHold()
+	if hideTimer then
+		hideTimer:Cancel()
+	end
+
+	hideTimer = C_Timer.NewTimer(READY_CHECK_HOLD, function()
+		hideTimer = nil
+		addon.UpdateScheduler:Notify("readyCheckStateChanged")
+	end)
 end
 
 function ReadyCheck:Init()
