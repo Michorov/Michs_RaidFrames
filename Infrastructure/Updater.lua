@@ -119,6 +119,10 @@ local function BuildSettingsUpdater(updateReasons)
 end
 
 local function BuildStateUpdater(updateReasons)
+	if updateReasons.readyCheckStateFinished then
+		addon.Frames.Widgets.Indicators.ReadyCheck:StartHold()
+	end
+
 	return function(frame, settings)
 		if updateReasons.rosterChanged or updateReasons.healthStateChanged then
 			addon.Frames.Base.Health:UpdateState(frame, settings)
@@ -140,6 +144,7 @@ local function BuildStateUpdater(updateReasons)
 		if
 			updateReasons.rosterChanged
 			or updateReasons.readyCheckStateChanged
+			or updateReasons.readyCheckStateFinished
 			or updateReasons.readyCheckSettingsChanged
 		then
 			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
