@@ -14,13 +14,15 @@
                     if not self.unit then
                         return
                     end
-                    
+
                     local unit = self.unit
                     C_Timer.After(0, function()
-                        if not UnitExists(unit) then return end
+                        if not self:IsMouseOver() or not UnitExists(unit) then
+                            return
+                        end
+
                         GameTooltip_SetDefaultAnchor(GameTooltip, self)
                         GameTooltip:SetUnit(unit)
-                        GameTooltip:Show()
                     end)
                 end)
 
