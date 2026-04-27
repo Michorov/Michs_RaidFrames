@@ -11,13 +11,20 @@
                 self:RegisterForClicks("AnyUp")
 
                 self:HookScript("OnEnter", function(self)
-                    if not self.unit then return end
-                    GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                    GameTooltip:SetUnit(self.unit)
-                    GameTooltip:Show()
+                    if not self.unit then
+                        return
+                    end
+                    
+                    local unit = self.unit
+                    C_Timer.After(0, function()
+                        if not UnitExists(unit) then return end
+                        GameTooltip_SetDefaultAnchor(GameTooltip, self)
+                        GameTooltip:SetUnit(unit)
+                        GameTooltip:Show()
+                    end)
                 end)
 
-                self:HookScript("OnLeave", function()
+                self:HookScript("OnLeave", function(self)
                     GameTooltip:Hide()
                 end)
 
