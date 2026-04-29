@@ -396,28 +396,28 @@ local function UpdatePartyHeaderLayout(group, settings)
 	local header = group.container
 	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
 
-	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(layout.frameWidthPx))
-	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(layout.frameHeightPx))
-	local spacingX = addon.Utilities:ToUI(addon.Utilities:Scale(layout.spacingXPx))
-	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(layout.spacingYPx))
-	local posX = addon.Utilities:ToUI(addon.Utilities:Scale(layout.positionX))
-	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(layout.positionY))
+	local frameWidthPx = addon.Utilities:ScaleEven(layout.frameWidthPx)
+	local frameHeightPx = addon.Utilities:ScaleEven(layout.frameHeightPx)
+	local spacingXPx = addon.Utilities:Scale(layout.spacingXPx)
+	local spacingYPx = addon.Utilities:Scale(layout.spacingYPx)
+	local positionXPx = addon.Utilities:Scale(layout.positionX)
+	local positionYPx = addon.Utilities:Scale(layout.positionY)
 	local isHorizontal = layout.isHorizontal
 
 	if isHorizontal then
 		header:SetAttribute("point", "LEFT")
-		header:SetAttribute("xOffset", spacingX)
+		header:SetAttribute("xOffset", addon.Utilities:ToUI(spacingXPx))
 		header:SetAttribute("yOffset", 0)
-		header:SetAttribute("columnSpacing", spacingX)
+		header:SetAttribute("columnSpacing", addon.Utilities:ToUI(spacingXPx))
 		header:SetAttribute("columnAnchorPoint", "LEFT")
 	else
 		header:SetAttribute("point", "TOP")
 		header:SetAttribute("xOffset", 0)
-		header:SetAttribute("yOffset", -spacingY)
+		header:SetAttribute("yOffset", -addon.Utilities:ToUI(spacingYPx))
 	end
 
-	header:SetAttribute("frameWidth", frameWidth)
-	header:SetAttribute("frameHeight", frameHeight)
+	header:SetAttribute("frameWidth", addon.Utilities:ToUI(frameWidthPx))
+	header:SetAttribute("frameHeight", addon.Utilities:ToUI(frameHeightPx))
 
 	for i = 1, 5 do
 		local child = header:GetAttribute("child" .. i)
@@ -431,18 +431,18 @@ local function UpdatePartyHeaderLayout(group, settings)
 	for i = 1, 5 do
 		local child = header:GetAttribute("child" .. i)
 		if child then
-			child:SetSize(frameWidth, frameHeight)
+			child:SetSize(addon.Utilities:ToUI(frameWidthPx), addon.Utilities:ToUI(frameHeightPx))
 		end
 	end
 
 	if isHorizontal then
-		local totalWidth = (5 * frameWidth) + (4 * spacingX)
+		local totalWidthPx = (5 * frameWidthPx) + (4 * spacingXPx)
 		header:ClearAllPoints()
-		header:SetPoint("LEFT", UIParent, "CENTER", posX - totalWidth / 2, posY)
+		header:SetPoint("LEFT", UIParent, "CENTER", addon.Utilities:ToUI(positionXPx - totalWidthPx / 2), addon.Utilities:ToUI(positionYPx))
 	else
-		local totalHeight = (5 * frameHeight) + (4 * spacingY)
+		local totalHeightPx = (5 * frameHeightPx) + (4 * spacingYPx)
 		header:ClearAllPoints()
-		header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)
+		header:SetPoint("TOP", UIParent, "CENTER", addon.Utilities:ToUI(positionXPx), addon.Utilities:ToUI(positionYPx + totalHeightPx / 2))
 	end
 end
 
