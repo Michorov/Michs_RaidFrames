@@ -242,12 +242,12 @@ local function UpdateRaidHeaderLayout(group, settings)
 
 	local layout = GetLayoutSettings(settings, 112, 56, "HORIZONTAL")
 
-	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(layout.frameWidthPx))
-	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(layout.frameHeightPx))
-	local spacingX = addon.Utilities:ToUI(addon.Utilities:Scale(layout.spacingXPx))
-	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(layout.spacingYPx))
-	local posX = addon.Utilities:ToUI(addon.Utilities:Scale(layout.positionX))
-	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(layout.positionY))
+	local frameWidthPx = addon.Utilities:ScaleEven(layout.frameWidthPx)
+	local frameHeightPx = addon.Utilities:ScaleEven(layout.frameHeightPx)
+	local spacingXPx = addon.Utilities:Scale(layout.spacingXPx)
+	local spacingYPx = addon.Utilities:Scale(layout.spacingYPx)
+	local positionXPx = addon.Utilities:Scale(layout.positionX)
+	local positionYPx = addon.Utilities:Scale(layout.positionY)
 	local isVertical = not layout.isHorizontal
 
 	local enabled = layout.enabled
@@ -271,30 +271,37 @@ local function UpdateRaidHeaderLayout(group, settings)
 
 	local groupCount = #orderedGroups
 
-	local totalWidth = isVertical and ((5 * frameWidth) + (4 * spacingX))
-		or (groupCount * frameWidth + math.max(0, groupCount - 1) * spacingX)
+	local totalWidthPx = isVertical and ((5 * frameWidthPx) + (4 * spacingXPx))
+		or (groupCount * frameWidthPx + math.max(0, groupCount - 1) * spacingXPx)
 
-	local totalHeight = isVertical and (groupCount * frameHeight + math.max(0, groupCount - 1) * spacingY)
-		or ((5 * frameHeight) + (4 * spacingY))
+	local totalHeightPx = isVertical and (groupCount * frameHeightPx + math.max(0, groupCount - 1) * spacingYPx)
+		or ((5 * frameHeightPx) + (4 * spacingYPx))
 
-	local originX = posX - totalWidth / 2
-	local originY = posY + totalHeight / 2
+	if totalWidthPx % 2 ~= 0 then
+		totalWidthPx = totalWidthPx + 1
+	end
+	if totalHeightPx % 2 ~= 0 then
+		totalHeightPx = totalHeightPx + 1
+	end
+
+	local originXPx = positionXPx - totalWidthPx / 2
+	local originYPx = positionYPx + totalHeightPx / 2
 
 	local groupPos = 0
 	for _, subgroup in ipairs(orderedGroups) do
 		local header = group.containers[subgroup]
 		if header then
-			header:SetAttribute("frameWidth", frameWidth)
-			header:SetAttribute("frameHeight", frameHeight)
+			header:SetAttribute("frameWidth", addon.Utilities:ToUI(frameWidthPx))
+			header:SetAttribute("frameHeight", addon.Utilities:ToUI(frameHeightPx))
 			if isVertical then
 				header:SetAttribute("point", "LEFT")
-				header:SetAttribute("xOffset", spacingX)
+				header:SetAttribute("xOffset", addon.Utilities:ToUI(spacingXPx))
 				header:SetAttribute("yOffset", 0)
 				header:SetAttribute("columnAnchorPoint", "TOPLEFT")
 			else
 				header:SetAttribute("point", "TOP")
 				header:SetAttribute("xOffset", 0)
-				header:SetAttribute("yOffset", -spacingY)
+				header:SetAttribute("yOffset", -addon.Utilities:ToUI(spacingYPx))
 				header:SetAttribute("columnAnchorPoint", "TOPLEFT")
 			end
 
@@ -309,20 +316,26 @@ local function UpdateRaidHeaderLayout(group, settings)
 			for i = 1, 5 do
 				local child = header:GetAttribute("child" .. i)
 				if child then
-					child:SetSize(frameWidth, frameHeight)
+					child:SetSize(addon.Utilities:ToUI(frameWidthPx), addon.Utilities:ToUI(frameHeightPx))
 				end
 			end
 
 			header:ClearAllPoints()
 			if isVertical then
-				header:SetPoint("TOPLEFT", UIParent, "CENTER", originX, originY - groupPos * (frameHeight + spacingY))
+				header:SetPoint(
+					"TOPLEFT",
+					UIParent,
+					"CENTER",
+					addon.Utilities:ToUI(originXPx),
+					addon.Utilities:ToUI(originYPx - groupPos * (frameHeightPx + spacingYPx))
+				)
 			else
 				header:SetPoint(
 					"TOP",
 					UIParent,
 					"CENTER",
-					originX + groupPos * (frameWidth + spacingX) + frameWidth / 2,
-					originY
+					addon.Utilities:ToUI(originXPx + groupPos * (frameWidthPx + spacingXPx) + frameWidthPx / 2),
+					addon.Utilities:ToUI(originYPx)
 				)
 			end
 
