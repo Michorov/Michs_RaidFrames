@@ -118,3 +118,50 @@ function Frames:CreateTestFrame(group, frameIndex)
 
 	return frame
 end
+
+function Frames:CreatePreviewFrame(parent)
+	if not parent then
+		error("Frames:CreatePreviewFrame requires parent", 2)
+	end
+
+	local frame = CreateFrame("Button", nil, parent)
+
+	frame.unit = nil
+	frame.previewWidgetVisibility = {
+		power = false,
+		readyCheck = false,
+		pendingSummon = false,
+		raidMarker = false,
+		roleIcon = false,
+		groupStatus = false,
+		threat = false,
+		name = false,
+		statusText = false,
+		absorbs = false,
+		healAbsorbs = false,
+		healAbsorbsText = false,
+		buffs = false,
+		customBuffs = false,
+		buffOverlay = false,
+		debuffs = false,
+		bigDefensive = false,
+		raidBuffReminder = false,
+		privateAuras = false,
+		dispels = false,
+		dispelOverlay = false,
+	}
+
+	frame.testIndex = 1
+	frame.testClassIndex = 5
+	frame.testHealthIndex = 1
+	frame.testPowerIndex = 2
+	frame.testAbsorbIndex = 3
+	frame.testHealAbsorbIndex = 1
+
+	frame.dataProvider = addon.Frames.DataProvider.Test
+
+	frame:RegisterForClicks("AnyUp")
+	frame:SetSize(1, 1)
+
+	return frame
+end

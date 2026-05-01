@@ -128,7 +128,7 @@ function FramesPage:Ensure(parent)
 
 	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Width"])
 	page.frameWidthSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameWidthSlider, 25, 300, 1)
+	ConfigureIntegerSlider(page.frameWidthSlider, 25, 200, 1)
 	page.frameWidthSlider:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
 			section.size = section.size or {}
@@ -138,7 +138,7 @@ function FramesPage:Ensure(parent)
 
 	page.frameHeightSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Height"])
 	page.frameHeightSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameHeightSlider, 25, 300, 1)
+	ConfigureIntegerSlider(page.frameHeightSlider, 25, 200, 1)
 	page.frameHeightSlider:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
 			section.size = section.size or {}
@@ -187,10 +187,7 @@ function FramesPage:Ensure(parent)
 
 	function page:UpdateLocale()
 		self.header.title:SetText(L["Frames"])
-		self.modeToggle:SetOptions(
-			{ value = "party", text = L["Party"] },
-			{ value = "raid", text = L["Raid"] }
-		)
+		self.modeToggle:SetOptions({ value = "party", text = L["Party"] }, { value = "raid", text = L["Raid"] })
 		self.frameWidthSlider:SetLabel(L["Frame Width"])
 		self.frameHeightSlider:SetLabel(L["Frame Height"])
 		self.frameBorderThicknessSlider:SetLabel(L["Border Size"])
@@ -215,13 +212,7 @@ function FramesPage:Ensure(parent)
 		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
 
 		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
-		self.body:SetPoint(
-			"TOPRIGHT",
-			self.header,
-			"BOTTOMRIGHT",
-			0,
-			-addon.Utilities:ToUI(firstControlOffsetPx)
-		)
+		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
