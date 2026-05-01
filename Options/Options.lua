@@ -13,11 +13,12 @@ local panelPosition = {
 }
 
 local layoutValues = {
-	panelWidth = 800,
+	panelWidth = 1020,
 	panelHeight = 500,
 	headerHeight = 40,
 	statusBarHeight = 32,
 	sideMenuWidth = 154,
+	previewWidth = 220,
 }
 
 local function SavePanelPosition()
@@ -144,10 +145,14 @@ function Options:Ensure()
 	panel.sideMenu:SetPoint("TOPLEFT", panel.header, "BOTTOMLEFT", 0, 0)
 	panel.sideMenu:SetPoint("BOTTOMLEFT", panel.statusBar, "TOPLEFT", 0, 0)
 
+	panel.preview = addon.Options.Sections.Preview:Ensure(panel)
+	panel.preview:SetPoint("TOPRIGHT", panel.header, "BOTTOMRIGHT", 0, 0)
+	panel.preview:SetPoint("BOTTOMRIGHT", panel.statusBar, "TOPRIGHT", 0, 0)
+
 	panel.content = addon.Options.Sections.Content:Ensure(panel)
 	panel.content:SetPoint("TOPLEFT", panel.sideMenu, "TOPRIGHT", 0, 0)
-	panel.content:SetPoint("TOPRIGHT", panel.header, "BOTTOMRIGHT", 0, 0)
-	panel.content:SetPoint("BOTTOMRIGHT", panel.statusBar, "TOPRIGHT", 0, 0)
+	panel.content:SetPoint("TOPRIGHT", panel.preview, "TOPLEFT", 0, 0)
+	panel.content:SetPoint("BOTTOMRIGHT", panel.preview, "BOTTOMLEFT", 0, 0)
 
 	self:UpdateLayout()
 	self:UpdateLocale()
@@ -179,6 +184,9 @@ function Options:UpdateLayout()
 
 	panel.sideMenu:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.sideMenuWidth)))
 	addon.Options.Sections.SideMenu:UpdateLayout()
+
+	panel.preview:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.previewWidth)))
+	addon.Options.Sections.Preview:UpdateLayout()
 
 	addon.Options.Sections.Content:UpdateLayout()
 end
@@ -243,6 +251,7 @@ function Options:UpdateLocale()
 	addon.Options.Sections.Header:UpdateLocale()
 	addon.Options.Sections.StatusBar:UpdateLocale()
 	addon.Options.Sections.SideMenu:UpdateLocale()
+	addon.Options.Sections.Preview:UpdateLocale()
 	addon.Options.Sections.Content:UpdateLocale()
 	addon.Options.Data:RefreshProfile()
 end

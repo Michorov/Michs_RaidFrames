@@ -36,6 +36,11 @@ local testRaidGroup = {
 	frames = {},
 }
 
+local previewFrames = {
+	party = nil,
+	raid = nil,
+}
+
 local unitFrameMap = {}
 
 local function IsSupportedUnit(unit)
@@ -323,6 +328,17 @@ function FrameRegistry:UpdateLayout()
 		addon.Frames:UpdateLayout(testRaidGroup, profile.raid or {})
 	end
 
+	local previewSection = addon.Options and addon.Options.Sections and addon.Options.Sections.Preview
+	if previewSection and previewSection.UpdateFrameLayout then
+		if previewFrames.party then
+			previewSection:UpdateFrameLayout(previewFrames.party, partySettings)
+		end
+
+		if previewFrames.raid then
+			previewSection:UpdateFrameLayout(previewFrames.raid, profile.raid or {})
+		end
+	end
+
 	addon.Frames:UpdateLayout(partyHeader, partySettings)
 	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
 end
@@ -355,6 +371,43 @@ function FrameRegistry:IsInitialized()
 	return initialized
 end
 
+local function InitializePreviewFrame(frame, settings)
+	if not frame then
+		return
+	end
+
+	addon.Frames.Base.Background:Ensure(frame)
+	addon.Frames.Base.Background:UpdateSettings(frame, settings)
+
+	addon.Frames.Base.Health:Ensure(frame)
+	addon.Frames.Base.Health:UpdateSettings(frame, settings)
+	addon.Frames.Base.Health:UpdateState(frame, settings)
+
+	addon.Frames.Base.Border:Ensure(frame)
+	addon.Frames.Base.Border:UpdateSettings(frame, settings)
+end
+
+function FrameRegistry:CreatePreviewFrames(parent)
+	if not parent then
+		error("FrameRegistry:CreatePreviewFrames requires parent", 2)
+	end
+
+	local profile = addon.Database:GetProfile()
+	local partySettings = profile.party or {}
+	local raidSettings = profile.raid or {}
+
+	if not previewFrames.party then
+		previewFrames.party = addon.Frames:CreatePreviewFrame(parent)
+		InitializePreviewFrame(previewFrames.party, partySettings)
+	end
+
+	if not previewFrames.raid then
+		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent)
+		InitializePreviewFrame(previewFrames.raid, raidSettings)
+	end
+
+	return previewFrames.party, previewFrames.raid
+end
 
 function FrameRegistry:CreateTestGroup(groupType)
 	local group
