@@ -267,6 +267,14 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 	if testRaidGroup.isActive then
 		UpdateTestGroup(testRaidGroup, profile.raid or {})
 	end
+
+	if previewFrames.party then
+		UpdateFrame(previewFrames.party, partySettings)
+	end
+
+	if previewFrames.raid then
+		UpdateFrame(previewFrames.raid, profile.raid or {})
+	end
 end
 
 function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
