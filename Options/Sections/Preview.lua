@@ -7,6 +7,7 @@ addon.Options.Sections.Preview = addon.Options.Sections.Preview or {}
 local Preview = addon.Options.Sections.Preview
 
 local preview
+local activeMode = (addon.Options.ControllerState and addon.Options.ControllerState.mode) or "party"
 local L = addon.L
 local theme = addon.Options.Theme
 
@@ -14,57 +15,9 @@ local layoutValues = {
 	outerInset = 8,
 	titleInset = 10,
 	titleHeight = 24,
-	bodyTopGap = 10,
-	frameGap = 24,
+	bodyTopGap = 20,
+	bodyWidth = 200,
 }
-
-local function GetBodySize()
-	local bodyWidthPx = addon.Utilities:ToPixels(preview.body:GetWidth())
-	local bodyHeightPx = addon.Utilities:ToPixels(preview.body:GetHeight())
-
-	if bodyWidthPx <= 0 then
-		bodyWidthPx = addon.Utilities:ToPixels(200)
-	end
-
-	if bodyHeightPx <= 0 then
-		bodyHeightPx = addon.Utilities:ToPixels(360)
-	end
-
-	return bodyWidthPx, bodyHeightPx
-end
-
-local function PositionPreviewFrame(frame, widthPx, topOffsetPx, bodyWidthPx)
-	if not frame or widthPx <= 0 then
-		return
-	end
-
-	local offsetXPx = addon.Utilities:RoundToNearestInt((bodyWidthPx - widthPx) / 2)
-
-	frame:ClearAllPoints()
-	frame:SetPoint(
-		"TOPLEFT",
-		preview.body,
-		"TOPLEFT",
-		addon.Utilities:ToUI(offsetXPx),
-		-addon.Utilities:ToUI(topOffsetPx)
-	)
-end
-
-local function GetFrameTopOffset(frame, heightPx, bodyHeightPx)
-	if not preview.partyFrame or not preview.raidFrame then
-		return addon.Utilities:RoundToNearestInt(math.max(0, (bodyHeightPx - heightPx) / 2))
-	end
-
-	local frameGapPx = addon.Utilities:ToPixels(layoutValues.frameGap)
-	local slotHeightPx = addon.Utilities:RoundToNearestInt(math.max(0, (bodyHeightPx - frameGapPx) / 2))
-	local slotOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (slotHeightPx - heightPx) / 2))
-
-	if frame == preview.raidFrame then
-		return slotHeightPx + frameGapPx + slotOffsetPx
-	end
-
-	return slotOffsetPx
-end
 
 function Preview:Ensure(parent)
 	if preview then
@@ -87,6 +40,7 @@ function Preview:Ensure(parent)
 
 	self:UpdateLocale()
 	self:UpdateLayout()
+	self:SetMode(activeMode)
 
 	return preview
 end
@@ -105,16 +59,33 @@ function Preview:UpdateLocale()
 	end
 end
 
+function Preview:SetMode(mode)
+	activeMode = mode or activeMode
+
+	if not preview then
+		return
+	end
+
+	if preview.partyFrame then
+		preview.partyFrame:SetShown(activeMode == "party")
+	end
+
+	if preview.raidFrame then
+		preview.raidFrame:SetShown(activeMode == "raid")
+	end
+end
+
 function Preview:UpdateFrameLayout(frame, settings)
 	if not preview or not frame then
 		return
 	end
 
-	local frameWidthPx, frameHeightPx = addon.Frames:UpdatePreviewFrameLayout(frame, settings)
-	local bodyWidthPx, bodyHeightPx = GetBodySize()
-	local topOffsetPx = GetFrameTopOffset(frame, frameHeightPx, bodyHeightPx)
+	local frameWidthPx = addon.Frames:UpdatePreviewFrameLayout(frame, settings)
+	local bodyWidthPx = addon.Utilities:ToPixels(layoutValues.bodyWidth)
+	local offsetXPx = addon.Utilities:RoundToNearestInt((bodyWidthPx - frameWidthPx) / 2)
 
-	PositionPreviewFrame(frame, frameWidthPx, topOffsetPx, bodyWidthPx)
+	frame:ClearAllPoints()
+	frame:SetPoint("TOPLEFT", preview.body, "TOPLEFT", addon.Utilities:ToUI(offsetXPx), 0)
 end
 
 function Preview:UpdateLayout()

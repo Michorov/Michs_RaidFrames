@@ -150,8 +150,7 @@ function Layout:Ensure(parent)
 	)
 	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
 	page.modeToggle:SetOnValueChanged(function(_, value)
-		local state = GetControllerState()
-		state.mode = value
+		addon.Options.Sections.Content:SetMode(value)
 		if page and page.UpdateLayout then
 			page:UpdateLayout()
 		end
