@@ -26,6 +26,42 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
+local RAID_BUFF_REMINDER_CLASS_BUFFS = {
+	DRUID = { 1126 }, -- Mark of the Wild
+	MAGE = { 1459 }, -- Arcane Intellect
+	WARRIOR = { 6673 }, -- Battle Shout
+	PRIEST = { 21562 }, -- Power Word: Fortitude
+	SHAMAN = { 462854 }, -- Skyfury
+	-- EVOKER = { 369459 }, -- Source of Magic
+	-- DRUID - { 474753 }, -- Symbiotic Relationship
+}
+
+local RAID_BUFF_REMINDER_BLESSING_OF_THE_BRONZE = {
+	381732, -- Death Knight
+	381741, -- Demon Hunter
+	381746, -- Druid
+	381748, -- Evoker
+	381749, -- Hunter
+	381750, -- Mage
+	381751, -- Monk
+	381752, -- Paladin
+	381753, -- Priest
+	381754, -- Rogue
+	381756, -- Shaman
+	381757, -- Warlock
+	381758, -- Warrior
+}
+
+local function GetPlayerRaidBuffReminderSpellIds()
+	local playerClass = addon.Utilities:GetPlayerClassFileName()
+
+	if playerClass == "EVOKER" then
+		return nil, RAID_BUFF_REMINDER_BLESSING_OF_THE_BRONZE
+	end
+
+	return RAID_BUFF_REMINDER_CLASS_BUFFS[playerClass], nil
+end
+
 local function BuildCustomHelpfulTestAuras()
 	local defaults = addon.Database:GetCustomAuraDefaults()
 	local classFileName = addon.Utilities:GetPlayerClassFileName()
@@ -612,6 +648,20 @@ function DataProvider.Live:GetUnitAuras(frame, collectionKey)
 	end
 
 	return addon.AuraHandler:GetUnitAuras(unit, collectionKey)
+end
+
+function DataProvider.Live:GetRaidBuffReminderSpellIds(frame)
+	return GetPlayerRaidBuffReminderSpellIds()
+end
+
+function DataProvider.Test:GetRaidBuffReminderSpellIds(frame)
+	local classBuffSpellIds, blessingOfTheBronzeSpellIds = GetPlayerRaidBuffReminderSpellIds()
+
+	if classBuffSpellIds or blessingOfTheBronzeSpellIds then
+		return classBuffSpellIds, blessingOfTheBronzeSpellIds
+	end
+
+	return RAID_BUFF_REMINDER_CLASS_BUFFS.DRUID, nil
 end
 
 function DataProvider.Test:GetUnitAuras(frame, filter)
