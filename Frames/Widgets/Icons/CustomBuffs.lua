@@ -109,6 +109,13 @@ end
 function CustomBuffs:UpdateState(frame, settings)
 	local customBuffs = frame.customBuffs
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.customBuffs ~= true then
+		for _, icon in pairs(customBuffs) do
+			icon:Hide()
+		end
+		return
+	end
+
 	local unit = frame.unit
 	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test

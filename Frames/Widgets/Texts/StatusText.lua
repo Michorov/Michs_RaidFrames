@@ -28,6 +28,12 @@ end
 
 function StatusText:UpdateState(frame)
 	local text = frame.statusText.text
+
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.statusText ~= true then
+		text:Hide()
+		return
+	end
+
 	local unit = frame.unit
 
 	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then

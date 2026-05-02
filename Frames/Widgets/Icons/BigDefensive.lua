@@ -101,6 +101,11 @@ function BigDefensive:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.bigDefensive ~= true then
+		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
+		return
+	end
+
 	local unit = frame.unit
 	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test

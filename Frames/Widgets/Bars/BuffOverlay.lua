@@ -65,6 +65,13 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.buffOverlay ~= true then
+		for _, overlay in pairs(frame.buffOverlays) do
+			overlay:Hide()
+		end
+		return
+	end
+
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
 		for _, overlay in pairs(frame.buffOverlays) do

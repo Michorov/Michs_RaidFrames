@@ -101,6 +101,11 @@ function RaidBuffReminder:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.raidBuffReminder ~= true then
+		frame.raidBuffReminderIcon:Hide()
+		return
+	end
+
 	if not cachedSettings.enabled then
 		frame.raidBuffReminderIcon:Hide()
 		return

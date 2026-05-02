@@ -89,6 +89,7 @@ function Dispels:Ensure(frame)
 			icon.border:SetTexture(DISPEL_BORDER_TEXTURE)
 			icon.border:SetVertexColor(0, 0, 0, 1)
 
+			icon:Hide()
 			container.icons[i] = icon
 		end
 	end
@@ -143,6 +144,7 @@ function Dispels:UpdateSettings(frame, settings)
 			icon.border:SetTexture(DISPEL_BORDER_TEXTURE)
 			icon.border:SetVertexColor(0, 0, 0, 1)
 
+			icon:Hide()
 			container.icons[i] = icon
 		end
 
@@ -176,6 +178,17 @@ function Dispels:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 	local container = frame.dispelsContainer
+
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.dispels ~= true then
+		for i = 1, cachedSettings.maxIcons do
+			local icon = container.icons[i]
+			if icon then
+				icon:Hide()
+			end
+		end
+		container:Hide()
+		return
+	end
 
 	if not cachedSettings.enabled then
 		for i = 1, cachedSettings.maxIcons do
