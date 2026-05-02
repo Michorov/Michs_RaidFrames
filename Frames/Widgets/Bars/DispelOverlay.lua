@@ -149,6 +149,11 @@ function DispelOverlay:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 	local overlay = frame.dispelOverlay
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.dispelOverlay ~= true then
+		overlay:Hide()
+		return
+	end
+
 	if not cachedSettings.enabled then
 		overlay:Hide()
 		return

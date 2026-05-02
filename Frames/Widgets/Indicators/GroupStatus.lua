@@ -71,6 +71,11 @@ end
 function GroupStatus:UpdateState(frame, settings)
 	local container = frame.groupStatus
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.groupStatus ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

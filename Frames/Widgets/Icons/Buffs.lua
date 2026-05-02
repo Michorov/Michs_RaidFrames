@@ -123,6 +123,11 @@ function Buffs:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.buffs ~= true then
+		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
+		return
+	end
+
 	if not cachedSettings.enabled then
 		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
 		return

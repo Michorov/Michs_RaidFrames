@@ -105,6 +105,11 @@ end
 function Threat:UpdateState(frame, settings)
 	local container = frame.threat
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.threat ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

@@ -82,6 +82,11 @@ end
 function PendingSummon:UpdateState(frame, settings)
 	local container = frame.pendingSummon
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.pendingSummon ~= true then
+		container:Hide()
+		return
+	end
+
 	local unit = frame.unit
 	if not unit or not UnitExists(unit) then
 		container:Hide()

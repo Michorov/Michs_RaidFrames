@@ -79,6 +79,11 @@ function HealAbsorbs:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.healAbsorbsText ~= true then
+		frame.healAbsorbText.text:Hide()
+		return
+	end
+
 	if not cachedSettings.enabled then
 		frame.healAbsorbText.text:Hide()
 		return

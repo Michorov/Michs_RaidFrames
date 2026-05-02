@@ -245,6 +245,17 @@ function PrivateAuras:UpdateSettings(frame, settings)
 	local privateAuraSettings = GetPrivateAurasSettings(settings)
 	local isTestProvider = frame.dataProvider == addon.Frames.DataProvider.Test
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.privateAuras ~= true then
+		if frame.privateAurasPreviewIcons then
+			for _, icon in ipairs(frame.privateAurasPreviewIcons) do
+				icon:Hide()
+			end
+		end
+
+		frame.privateAurasContainer:Hide()
+		return
+	end
+
 	ApplyContainerLayout(frame, privateAuraSettings)
 
 	if isTestProvider then

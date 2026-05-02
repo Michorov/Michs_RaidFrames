@@ -67,6 +67,11 @@ end
 function RaidMarker:UpdateState(frame, settings)
 	local container = frame.raidMarker
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.raidMarker ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

@@ -77,6 +77,11 @@ end
 function ReadyCheck:UpdateState(frame, settings)
 	local container = frame.readyCheck
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.readyCheck ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

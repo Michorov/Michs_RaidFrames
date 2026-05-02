@@ -24,6 +24,9 @@ local layoutValues = {
 }
 
 local previewWidgetFlags = {
+	background = { label = "Background", enabled = false, updateStateReason = "backgroundSettingsChanged" },
+	health = { label = "Health", enabled = false, updateStateReason = "healthStateChanged" },
+	border = { label = "Border", enabled = false, updateStateReason = "borderSettingsChanged" },
 	power = { label = "Power Bar", enabled = false, updateStateReason = "powerStateChanged" },
 	readyCheck = { label = "Ready Check", enabled = false, updateStateReason = "readyCheckStateChanged" },
 	pendingSummon = { label = "Summon", enabled = false, updateStateReason = "pendingSummonStateChanged" },
@@ -58,13 +61,17 @@ local previewWidgetFlags = {
 }
 
 local previewPageWidgets = {
-	general = { enabled = { "power", "name" }, controls = {}, testData = {} },
-	layout = { enabled = { "power", "name" }, controls = {}, testData = {} },
-	frames = { enabled = { "power", "name" }, controls = {}, testData = {} },
-	bars = { enabled = { "name" }, controls = { "power", "absorbs", "healAbsorbs" }, testData = {} },
-	texts = { enabled = { "power", "name" }, controls = { "name", "statusText", "healAbsorbsText" }, testData = {} },
+	general = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
+	layout = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
+	frames = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
+	bars = { enabled = { "background", "health", "border", "name" }, controls = { "power", "absorbs", "healAbsorbs" }, testData = {} },
+	texts = {
+		enabled = { "background", "health", "border", "power", "name" },
+		controls = { "name", "statusText", "healAbsorbsText" },
+		testData = {},
+	},
 	auras = {
-		enabled = { "power", "name" },
+		enabled = { "background", "health", "border", "power", "name" },
 		controls = {
 			"buffs",
 			"debuffs",
@@ -76,11 +83,11 @@ local previewPageWidgets = {
 		testData = {},
 	},
 	indicators = {
-		enabled = { "power", "name" },
+		enabled = { "background", "health", "border", "power", "name" },
 		controls = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
 		testData = {},
 	},
-	profiles = { enabled = { "power", "name" }, controls = {}, testData = {} },
+	profiles = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
 }
 
 Preview.WidgetFlags = previewWidgetFlags
