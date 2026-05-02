@@ -30,7 +30,7 @@ function StatusText:UpdateState(frame)
 	local text = frame.statusText.text
 	local unit = frame.unit
 
-	if not UnitExists(unit) then
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
 		text:Hide()
 		return
 	end
