@@ -599,6 +599,13 @@ local DEFAULTS = {
 						offsetY = 0,
 						size = 36,
 					},
+					pendingSummon = {
+						enabled = true,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						size = 32,
+					},
 					raidMarker = {
 						enabled = true,
 						anchor = "TOP",
@@ -891,6 +898,13 @@ local DEFAULTS = {
 						offsetX = 0,
 						offsetY = 0,
 						size = 36,
+					},
+					pendingSummon = {
+						enabled = true,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						size = 32,
 					},
 					raidMarker = {
 						enabled = true,

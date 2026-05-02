@@ -86,16 +86,17 @@ function GroupStatus:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+	local provider = frame.dataProvider
+	if not provider then
 		container:Hide()
 		return
 	end
 
 	local texturePath
-	if UnitIsGroupLeader(unit) and cachedSettings.showLeader then
+	local status = provider:GetGroupStatus(frame)
+	if status == "leader" and (frame.previewWidgetVisibility or cachedSettings.showLeader) then
 		texturePath = LEADER_ICON
-	elseif UnitIsGroupAssistant(unit) and cachedSettings.showAssistant then
+	elseif status == "assistant" and (frame.previewWidgetVisibility or cachedSettings.showAssistant) then
 		texturePath = ASSISTANT_ICON
 	end
 

@@ -12,6 +12,7 @@ local theme = addon.Options.Theme
 
 local subpageOptions = {
 	{ value = "readyCheck", text = L["Ready Check"] },
+	{ value = "pendingSummon", text = L["Summon"] },
 	{ value = "raidMarker", text = L["Raid Marker"] },
 	{ value = "roleIcon", text = L["Role Indicator"] },
 	{ value = "groupStatus", text = L["Group Leader"] },
@@ -102,6 +103,7 @@ function Indicators:Ensure(parent)
 	end)
 
 	local readyCheckSubpage = addon.Options.Pages.Indicators.ReadyCheck:Ensure(page.body)
+	local pendingSummonSubpage = addon.Options.Pages.Indicators.PendingSummon:Ensure(page.body)
 	local raidMarkerSubpage = addon.Options.Pages.Indicators.RaidMarker:Ensure(page.body)
 	local roleIndicatorSubpage = addon.Options.Pages.Indicators.RoleIndicator:Ensure(page.body)
 	local groupStatusSubpage = addon.Options.Pages.Indicators.GroupStatus:Ensure(page.body)
@@ -109,6 +111,7 @@ function Indicators:Ensure(parent)
 
 	page.subpages = {
 		readyCheck = readyCheckSubpage,
+		pendingSummon = pendingSummonSubpage,
 		raidMarker = raidMarkerSubpage,
 		roleIcon = roleIndicatorSubpage,
 		groupStatus = groupStatusSubpage,
@@ -130,10 +133,11 @@ function Indicators:Ensure(parent)
 
 	function page:UpdateLocale()
 		subpageOptions[1].text = L["Ready Check"]
-		subpageOptions[2].text = L["Raid Marker"]
-		subpageOptions[3].text = L["Role Indicator"]
-		subpageOptions[4].text = L["Group Leader"]
-		subpageOptions[5].text = L["Threat"]
+		subpageOptions[2].text = L["Summon"]
+		subpageOptions[3].text = L["Raid Marker"]
+		subpageOptions[4].text = L["Role Indicator"]
+		subpageOptions[5].text = L["Group Leader"]
+		subpageOptions[6].text = L["Threat"]
 
 		self.header.title:SetText(L["Indicators"])
 		self.modeToggle:SetOptions(

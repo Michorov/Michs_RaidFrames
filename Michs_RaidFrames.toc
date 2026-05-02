@@ -113,6 +113,7 @@ Options/Pages/Auras/PrivateAuras.lua
 Options/Pages/Auras/RaidBuffReminder.lua
 Options/Pages/Auras.lua
 Options/Pages/Indicators/ReadyCheck.lua
+Options/Pages/Indicators/PendingSummon.lua
 Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
 Options/Pages/Indicators/GroupStatus.lua

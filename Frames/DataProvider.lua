@@ -522,7 +522,7 @@ function DataProvider.Live:GetRole(frame)
 end
 
 function DataProvider.Test:GetRole(frame)
-	return nil
+	return "DAMAGER"
 end
 
 function DataProvider.Live:GetThreatStatus(frame)
@@ -534,22 +534,99 @@ function DataProvider.Live:GetThreatStatus(frame)
 	return UnitThreatSituation(unit)
 end
 
+function DataProvider.Live:GetReadyCheckStatus(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	return GetReadyCheckStatus(unit)
+end
+
+function DataProvider.Test:GetReadyCheckStatus(frame)
+	return "ready"
+end
+
+function DataProvider.Live:GetIncomingSummonStatus(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	if
+		not C_IncomingSummon
+		or not C_IncomingSummon.HasIncomingSummon
+		or not C_IncomingSummon.IncomingSummonStatus
+		or not Enum
+		or not Enum.SummonStatus
+	then
+		return nil
+	end
+
+	if not C_IncomingSummon.HasIncomingSummon(unit) then
+		return nil
+	end
+
+	local status = C_IncomingSummon.IncomingSummonStatus(unit)
+	if not status or status == Enum.SummonStatus.None then
+		return nil
+	end
+
+	if status == Enum.SummonStatus.Accepted then
+		return "accepted"
+	end
+
+	if status == Enum.SummonStatus.Declined then
+		return "declined"
+	end
+
+	if status == Enum.SummonStatus.Pending then
+		return "pending"
+	end
+
+	return nil
+end
+
+function DataProvider.Test:GetIncomingSummonStatus(frame)
+	return "pending"
+end
+
+function DataProvider.Live:GetRaidTargetIndex(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	return GetRaidTargetIndex(unit)
+end
+
+function DataProvider.Test:GetRaidTargetIndex(frame)
+	return 8
+end
+
+function DataProvider.Live:GetGroupStatus(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	if UnitIsGroupLeader(unit) then
+		return "leader"
+	end
+
+	if UnitIsGroupAssistant(unit) then
+		return "assistant"
+	end
+
+	return nil
+end
+
+function DataProvider.Test:GetGroupStatus(frame)
+	return "leader"
+end
+
 function DataProvider.Test:GetThreatStatus(frame)
-	local threatSamples = {
-		nil,
-		nil,
-		1,
-		2,
-		3,
-		nil,
-		1,
-		2,
-	}
-
-	local index = frame and frame.testIndex or 1
-	index = ((index - 1) % #threatSamples) + 1
-
-	return threatSamples[index]
+	return 3
 end
 
 function DataProvider.Live:GetAuraApplicationDisplayCount(frame, aura, minCount, maxCount)
