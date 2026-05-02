@@ -120,7 +120,7 @@ local function ApplyPreviewWidgetFlag(widgetKey)
 	end
 
 	for _, frame in ipairs({ preview.partyFrame, preview.raidFrame }) do
-		if frame and frame.previewWidgetVisibility and frame.previewWidgetVisibility[widgetKey] ~= nil then
+		if frame and frame.previewWidgetVisibility then
 			frame.previewWidgetVisibility[widgetKey] = flag.enabled == true
 		end
 	end
@@ -254,6 +254,10 @@ function Preview:SetActivePage(pageKey)
 			changedWidgets[widgetKey] = true
 		end
 
+		if enabled then
+			changedWidgets[widgetKey] = true
+		end
+
 		flag.enabled = enabled
 
 		if flag.checkbox then
@@ -264,8 +268,7 @@ function Preview:SetActivePage(pageKey)
 
 	for _, frame in ipairs({ preview.partyFrame, preview.raidFrame }) do
 		if frame and frame.previewWidgetVisibility then
-			for key in pairs(frame.previewWidgetVisibility) do
-				local flag = previewWidgetFlags[key]
+			for key, flag in pairs(previewWidgetFlags) do
 				frame.previewWidgetVisibility[key] = flag and flag.enabled == true
 			end
 		end

@@ -51,7 +51,11 @@ local function CreateTestPrivateAuraPreviewIcon(container)
 	icon.cooldown:SetHideCountdownNumbers(true)
 	icon.cooldown:SetFrameLevel(icon:GetFrameLevel() + 1)
 
-	icon.border = icon:CreateTexture(nil, "OVERLAY")
+	icon.borderFrame = CreateFrame("Frame", nil, icon)
+	icon.borderFrame:SetAllPoints(icon)
+	icon.borderFrame:SetFrameLevel(icon:GetFrameLevel() + 2)
+
+	icon.border = icon.borderFrame:CreateTexture(nil, "OVERLAY")
 	icon.border:SetPoint("CENTER")
 	icon.border:SetDrawLayer("OVERLAY", 1)
 
@@ -215,8 +219,18 @@ function PrivateAuras:Ensure(frame)
 	if not frame.privateAurasContainer then
 		frame.privateAurasContainer =
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
+	end
+
+	if frame.previewWidgetVisibility then
+		local frameStrata = frame.GetFrameStrata and frame:GetFrameStrata()
+		if frameStrata then
+			frame.privateAurasContainer:SetFrameStrata(frameStrata)
+		end
+	else
 		frame.privateAurasContainer:SetFrameStrata("HIGH")
 	end
+
+	frame.privateAurasContainer:SetFrameLevel(100)
 end
 
 local function ApplyContainerLayout(frame, privateAuraSettings)
@@ -245,18 +259,12 @@ function PrivateAuras:UpdateSettings(frame, settings)
 	local privateAuraSettings = GetPrivateAurasSettings(settings)
 	local isTestProvider = frame.dataProvider == addon.Frames.DataProvider.Test
 
-	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.privateAuras ~= true then
-		if frame.privateAurasPreviewIcons then
-			for _, icon in ipairs(frame.privateAurasPreviewIcons) do
-				icon:Hide()
-			end
-		end
+	ApplyContainerLayout(frame, privateAuraSettings)
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.privateAuras ~= true then
 		frame.privateAurasContainer:Hide()
 		return
 	end
-
-	ApplyContainerLayout(frame, privateAuraSettings)
 
 	if isTestProvider then
 		EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
