@@ -126,7 +126,7 @@ function RoleIcon:UpdateState(frame, settings)
 		return
 	end
 
-	if not IsRoleEnabled(cachedSettings, role) then
+	if not frame.previewWidgetVisibility and not IsRoleEnabled(cachedSettings, role) then
 		container:Hide()
 		return
 	end
