@@ -80,6 +80,11 @@ end
 function Absorbs:UpdateState(frame)
 	local bar = frame.absorbBar
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.absorbs ~= true then
+		bar:Hide()
+		return
+	end
+
 	local absorbValue, maxHealth = frame.dataProvider:GetAbsorbs(frame)
 	if absorbValue == nil or maxHealth == nil then
 		bar:Hide()

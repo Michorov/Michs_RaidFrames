@@ -379,22 +379,6 @@ function FrameRegistry:IsInitialized()
 	return initialized
 end
 
-local function InitializePreviewFrame(frame, settings)
-	if not frame then
-		return
-	end
-
-	addon.Frames.Base.Background:Ensure(frame)
-	addon.Frames.Base.Background:UpdateSettings(frame, settings)
-
-	addon.Frames.Base.Health:Ensure(frame)
-	addon.Frames.Base.Health:UpdateSettings(frame, settings)
-	addon.Frames.Base.Health:UpdateState(frame, settings)
-
-	addon.Frames.Base.Border:Ensure(frame)
-	addon.Frames.Base.Border:UpdateSettings(frame, settings)
-end
-
 function FrameRegistry:CreatePreviewFrames(parent)
 	if not parent then
 		error("FrameRegistry:CreatePreviewFrames requires parent", 2)
@@ -406,12 +390,14 @@ function FrameRegistry:CreatePreviewFrames(parent)
 
 	if not previewFrames.party then
 		previewFrames.party = addon.Frames:CreatePreviewFrame(parent)
-		InitializePreviewFrame(previewFrames.party, partySettings)
+		addon.Modules:EnsureFrame(previewFrames.party, partySettings)
+		addon.Modules:UpdateSettingsFrame(previewFrames.party, partySettings)
 	end
 
 	if not previewFrames.raid then
 		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent)
-		InitializePreviewFrame(previewFrames.raid, raidSettings)
+		addon.Modules:EnsureFrame(previewFrames.raid, raidSettings)
+		addon.Modules:UpdateSettingsFrame(previewFrames.raid, raidSettings)
 	end
 
 	return previewFrames.party, previewFrames.raid

@@ -127,6 +127,15 @@ function Frames:CreatePreviewFrame(parent)
 	local frame = CreateFrame("Button", nil, parent)
 
 	frame.unit = nil
+	frame.testName = UnitName("player") or ""
+
+	frame.testIndex = 1
+	frame.testClassIndex = 5
+	frame.testHealthIndex = 1
+	frame.testPowerIndex = 2
+	frame.testAbsorbIndex = 7
+	frame.testHealAbsorbIndex = 7
+
 	frame.previewWidgetVisibility = {
 		power = false,
 		readyCheck = false,

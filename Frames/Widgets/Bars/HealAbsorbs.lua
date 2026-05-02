@@ -79,6 +79,11 @@ end
 function HealAbsorbs:UpdateState(frame)
 	local bar = frame.healAbsorbBar
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.healAbsorbs ~= true then
+		bar:Hide()
+		return
+	end
+
 	local healAbsorbValue = frame.dataProvider:GetHealAbsorbs(frame)
 	if healAbsorbValue == nil then
 		bar:Hide()
