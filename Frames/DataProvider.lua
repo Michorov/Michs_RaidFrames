@@ -314,10 +314,10 @@ function DataProvider.Test:GetPower(frame)
 		EVOKER = "ESSENCE",
 	}
 
-	local healthIndex = frame and frame.testHealthIndex or 1
-	healthIndex = ((healthIndex - 1) % #powerSamples) + 1
+	local powerIndex = frame and frame.testPowerIndex or 1
+	powerIndex = ((powerIndex - 1) % #powerSamples) + 1
 
-	local sample = powerSamples[healthIndex]
+	local sample = powerSamples[powerIndex]
 	if self:IsHealer(frame) then
 		return sample.current, sample.max, "MANA"
 	end

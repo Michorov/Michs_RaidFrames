@@ -61,14 +61,18 @@ local previewWidgetFlags = {
 }
 
 local previewPageWidgets = {
-	general = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
-	layout = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
-	frames = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
-	bars = { enabled = { "background", "health", "border", "name" }, controls = { "power", "absorbs", "healAbsorbs" }, testData = {} },
+	general = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
+	layout = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
+	frames = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = { testHealthIndex = 3, testPowerIndex = 1 } },
+	bars = {
+		enabled = { "background", "health", "border", "name" },
+		controls = { "power", "absorbs", "healAbsorbs" },
+		testData = { testHealthIndex = 1, testPowerIndex = 8 },
+	},
 	texts = {
 		enabled = { "background", "health", "border", "power", "name" },
 		controls = { "name", "statusText", "healAbsorbsText" },
-		testData = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	auras = {
 		enabled = { "background", "health", "border", "power", "name" },
@@ -80,14 +84,14 @@ local previewPageWidgets = {
 			"dispels",
 			"raidBuffReminder",
 		},
-		testData = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	indicators = {
 		enabled = { "background", "health", "border", "power", "name" },
 		controls = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
-		testData = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
-	profiles = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = {} },
+	profiles = { enabled = { "background", "health", "border", "power", "name" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
 }
 
 Preview.WidgetFlags = previewWidgetFlags
