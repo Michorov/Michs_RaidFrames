@@ -130,6 +130,10 @@ function DataProvider.Live:GetName(frame)
 end
 
 function DataProvider.Test:GetName(frame)
+	if frame and frame.testName then
+		return frame.testName
+	end
+
 	local names = {
 		"Aelrin",
 		"Brakka",

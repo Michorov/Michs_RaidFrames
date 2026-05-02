@@ -21,8 +21,6 @@ local layoutValues = {
 	bodyWidth = 200,
 	checkboxTopOffset = 220,
 	checkboxGap = 8,
-	checkboxColumnGap = 8,
-	checkboxRowsPerColumn = 6,
 }
 
 local previewWidgetFlags = {
@@ -60,30 +58,40 @@ local previewWidgetFlags = {
 }
 
 local previewPageWidgets = {
-	general = {},
-	layout = {},
-	frames = {},
-	bars = { "power", "absorbs", "healAbsorbs" },
-	texts = { "name", "statusText", "healAbsorbsText" },
+	general = { enabled = { "power", "name" }, controls = {}, testData = {} },
+	layout = { enabled = { "power", "name" }, controls = {}, testData = {} },
+	frames = { enabled = { "power", "name" }, controls = {}, testData = {} },
+	bars = { enabled = { "name" }, controls = { "power", "absorbs", "healAbsorbs" }, testData = {} },
+	texts = { enabled = { "power", "name" }, controls = { "name", "statusText", "healAbsorbsText" }, testData = {} },
 	auras = {
-		"buffs",
-		"debuffs",
-		"bigDefensive",
-		"privateAuras",
-		"dispels",
-		"raidBuffReminder",
+		enabled = { "power", "name" },
+		controls = {
+			"buffs",
+			"debuffs",
+			"bigDefensive",
+			"privateAuras",
+			"dispels",
+			"raidBuffReminder",
+		},
+		testData = {},
 	},
-	indicators = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
-	profiles = {},
+	indicators = {
+		enabled = { "power", "name" },
+		controls = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
+		testData = {},
+	},
+	profiles = { enabled = { "power", "name" }, controls = {}, testData = {} },
 }
 
 Preview.WidgetFlags = previewWidgetFlags
 Preview.PageWidgets = previewPageWidgets
 
-local function NotifyPreviewStateChanged()
+local function NotifyPreviewStateChanged(changedWidgets)
 	local notifiedReasons = {}
 
-	for _, flag in pairs(previewWidgetFlags) do
+	for widgetKey in pairs(changedWidgets or {}) do
+		local flag = previewWidgetFlags[widgetKey]
+
 		if flag.updateStateReason and not notifiedReasons[flag.updateStateReason] then
 			notifiedReasons[flag.updateStateReason] = true
 			addon.UpdateScheduler:Notify(flag.updateStateReason)
@@ -129,7 +137,11 @@ function Preview:Ensure(parent)
 
 	preview.body = CreateFrame("Frame", nil, preview)
 	preview.frameAreaBackground = preview.body:CreateTexture(nil, "BACKGROUND")
-	preview.frameAreaBackground:SetTexture("Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\Absorb", "REPEAT", "REPEAT")
+	preview.frameAreaBackground:SetTexture(
+		"Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\Absorb",
+		"REPEAT",
+		"REPEAT"
+	)
 	preview.frameAreaBackground:SetHorizTile(true)
 	preview.frameAreaBackground:SetVertTile(true)
 	preview.frameAreaBackground:SetVertexColor(theme:GetColor("buttonBackgroundHover", 0.45))
@@ -197,7 +209,28 @@ function Preview:SetActivePage(pageKey)
 
 	local activeWidgets = {}
 	local visibleWidgets = {}
-	for _, widgetKey in ipairs(previewPageWidgets[activePage] or {}) do
+	local changedWidgets = {}
+	local pageWidgets = previewPageWidgets[activePage] or {}
+	local hasTestData = next(pageWidgets.testData or {}) ~= nil
+
+	for _, frame in ipairs({ preview.partyFrame, preview.raidFrame }) do
+		if frame then
+			for key, value in pairs(pageWidgets.testData or {}) do
+				frame[key] = value
+			end
+		end
+	end
+
+	for _, widgetKey in ipairs(pageWidgets.enabled or {}) do
+		activeWidgets[widgetKey] = true
+
+		local flag = previewWidgetFlags[widgetKey]
+		for _, linkedWidgetKey in ipairs((flag and flag.linkedWidgets) or {}) do
+			activeWidgets[linkedWidgetKey] = true
+		end
+	end
+
+	for _, widgetKey in ipairs(pageWidgets.controls or {}) do
 		activeWidgets[widgetKey] = true
 		visibleWidgets[widgetKey] = true
 
@@ -208,7 +241,13 @@ function Preview:SetActivePage(pageKey)
 	end
 
 	for widgetKey, flag in pairs(previewWidgetFlags) do
-		flag.enabled = activeWidgets[widgetKey] == true
+		local enabled = activeWidgets[widgetKey] == true
+
+		if flag.enabled ~= enabled or (enabled and hasTestData) then
+			changedWidgets[widgetKey] = true
+		end
+
+		flag.enabled = enabled
 
 		if flag.checkbox then
 			flag.checkbox:SetChecked(flag.enabled)
@@ -225,7 +264,7 @@ function Preview:SetActivePage(pageKey)
 		end
 	end
 
-	NotifyPreviewStateChanged()
+	NotifyPreviewStateChanged(changedWidgets)
 	self:UpdateLayout()
 end
 
@@ -294,8 +333,6 @@ function Preview:UpdateLayout()
 	local bodyWidthPx = addon.Utilities:ToPixels(layoutValues.bodyWidth)
 	local checkboxTopOffsetPx = addon.Utilities:ToPixels(layoutValues.checkboxTopOffset)
 	local checkboxGapPx = addon.Utilities:ToPixels(layoutValues.checkboxGap)
-	local checkboxColumnGapPx = addon.Utilities:ToPixels(layoutValues.checkboxColumnGap)
-	local checkboxWidthPx = addon.Utilities:RoundToNearestInt((bodyWidthPx - checkboxColumnGapPx) / 2)
 
 	preview.leftBorder:ClearAllPoints()
 	preview.leftBorder:SetPoint("TOPLEFT", preview, "TOPLEFT", 0, -outerInset)
@@ -324,7 +361,7 @@ function Preview:UpdateLayout()
 
 	for _, control in pairs(preview.controls) do
 		if control.layoutValues then
-			control.layoutValues.width = addon.Utilities:ToUI(checkboxWidthPx)
+			control.layoutValues.width = addon.Utilities:ToUI(bodyWidthPx)
 		end
 
 		if control.UpdateLayout then
@@ -336,25 +373,16 @@ function Preview:UpdateLayout()
 		end
 	end
 
-	for _, widgetKey in ipairs(previewPageWidgets[activePage] or {}) do
+	for _, widgetKey in ipairs((previewPageWidgets[activePage] or {}).controls or {}) do
 		local flag = previewWidgetFlags[widgetKey]
 		local checkbox = flag and flag.checkbox
 
 		if checkbox then
 			local checkboxHeightPx = addon.Utilities:ToPixels(checkbox.layoutValues.height)
-			local columnIndex = checkboxIndex >= layoutValues.checkboxRowsPerColumn and 1 or 0
-			local rowIndex = checkboxIndex - (columnIndex * layoutValues.checkboxRowsPerColumn)
-			local offsetXPx = columnIndex * (checkboxWidthPx + checkboxColumnGapPx)
-			local offsetYPx = checkboxTopOffsetPx + (rowIndex * (checkboxHeightPx + checkboxGapPx))
+			local offsetYPx = checkboxTopOffsetPx + (checkboxIndex * (checkboxHeightPx + checkboxGapPx))
 
 			checkbox:ClearAllPoints()
-			checkbox:SetPoint(
-				"TOPLEFT",
-				preview.body,
-				"TOPLEFT",
-				addon.Utilities:ToUI(offsetXPx),
-				-addon.Utilities:ToUI(offsetYPx)
-			)
+			checkbox:SetPoint("TOPLEFT", preview.body, "TOPLEFT", 0, -addon.Utilities:ToUI(offsetYPx))
 			checkbox:SetChecked(flag.enabled == true)
 			checkbox:Show()
 
