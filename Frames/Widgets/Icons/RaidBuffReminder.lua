@@ -9,32 +9,6 @@ local RaidBuffReminder = addon.Frames.Widgets.Icons.RaidBuffReminder
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local CLASS_BUFFS = {
-	DRUID = { 1126 }, -- Mark of the Wild
-	MAGE = { 1459 }, -- Arcane Intellect
-	WARRIOR = { 6673 }, -- Battle Shout
-	PRIEST = { 21562 }, -- Power Word: Fortitude
-	SHAMAN = { 462854 }, -- Skyfury
-	-- EVOKER = { 369459 }, -- Source of Magic
-	-- DRUID - { 474753 }, -- Symbiotic Relationship
-}
-
-local BLESSING_OF_THE_BRONZE = {
-	381732, -- Death Knight
-	381741, -- Demon Hunter
-	381746, -- Druid
-	381748, -- Evoker
-	381749, -- Hunter
-	381750, -- Mage
-	381751, -- Monk
-	381752, -- Paladin
-	381753, -- Priest
-	381754, -- Rogue
-	381756, -- Shaman
-	381757, -- Warlock
-	381758, -- Warrior
-}
-
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -116,17 +90,15 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		return
 	end
 
-	local playerClass = addon.Utilities:GetPlayerClassFileName()
-	local classBuffSpellIds = CLASS_BUFFS[playerClass]
-
-	if not classBuffSpellIds and playerClass ~= "EVOKER" then
-		frame.raidBuffReminderIcon:Hide()
-		return
-	end
-
 	local unit = frame.unit
 	local provider = frame.dataProvider
 	local isTestProvider = provider == addon.Frames.DataProvider.Test
+	local classBuffSpellIds, blessingOfTheBronzeSpellIds = provider:GetRaidBuffReminderSpellIds(frame)
+
+	if not classBuffSpellIds and not blessingOfTheBronzeSpellIds then
+		frame.raidBuffReminderIcon:Hide()
+		return
+	end
 
 	if not isTestProvider and (not unit or not UnitExists(unit) or not UnitIsVisible(unit)) then
 		frame.raidBuffReminderIcon:Hide()
@@ -146,12 +118,12 @@ function RaidBuffReminder:UpdateState(frame, settings)
 	local icon = frame.raidBuffReminderIcon
 	local auras = provider:GetUnitAuras(frame, "helpful")
 
-	if playerClass == "EVOKER" then
+	if blessingOfTheBronzeSpellIds then
 		local hasBlessingOfTheBronze = false
 		for _, aura in pairs(auras) do
 			local auraSpellId = aura.spellId
 			if auraSpellId and not issecretvalue(auraSpellId) then
-				for _, bronzeSpellId in ipairs(BLESSING_OF_THE_BRONZE) do
+				for _, bronzeSpellId in ipairs(blessingOfTheBronzeSpellIds) do
 					if auraSpellId == bronzeSpellId then
 						hasBlessingOfTheBronze = true
 						break
@@ -165,7 +137,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 
 		if not hasBlessingOfTheBronze then
 			addon.Frames.Managers.IconManager:ApplyIconState(icon, {
-				texture = C_Spell.GetSpellTexture(BLESSING_OF_THE_BRONZE[1]),
+				texture = C_Spell.GetSpellTexture(blessingOfTheBronzeSpellIds[1]),
 			})
 		else
 			icon:Hide()
