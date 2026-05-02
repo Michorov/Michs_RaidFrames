@@ -151,13 +151,6 @@ function Frames:CreatePreviewFrame(parent)
 		dispelOverlay = false,
 	}
 
-	frame.testIndex = 1
-	frame.testClassIndex = 5
-	frame.testHealthIndex = 1
-	frame.testPowerIndex = 2
-	frame.testAbsorbIndex = 3
-	frame.testHealAbsorbIndex = 1
-
 	frame.dataProvider = addon.Frames.DataProvider.Test
 
 	frame:RegisterForClicks("AnyUp")
