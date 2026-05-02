@@ -129,7 +129,7 @@ function Frames:CreatePreviewFrame(parent)
 	frame.unit = nil
 	frame.testName = UnitName("player") or ""
 
-	frame.testIndex = 1
+	frame.testIndex = 2
 	frame.testClassIndex = 5
 	frame.testHealthIndex = 1
 	frame.testPowerIndex = 2
