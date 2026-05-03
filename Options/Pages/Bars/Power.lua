@@ -209,9 +209,19 @@ function Power:Ensure(parent)
 		local section = profile[mode] or {}
 		local defaults = GetModeDefaults(mode)
 		local power = section.power or {}
+		local enabled = power.enabled
+		local healerOnly = power.healerOnly
 
-		controls.enabledCheckbox:SetChecked((power.enabled ~= nil and power.enabled or defaults.enabled) == true)
-		controls.healerOnlyCheckbox:SetChecked((power.healerOnly ~= nil and power.healerOnly or defaults.healerOnly) == true)
+		if enabled == nil then
+			enabled = defaults.enabled
+		end
+
+		if healerOnly == nil then
+			healerOnly = defaults.healerOnly
+		end
+
+		controls.enabledCheckbox:SetChecked(enabled == true)
+		controls.healerOnlyCheckbox:SetChecked(healerOnly == true)
 		controls.heightSlider:SetValueSilently(power.height or defaults.height)
 		controls.borderThicknessSlider:SetValueSilently(power.borderThicknessPx or defaults.borderThickness)
 	end

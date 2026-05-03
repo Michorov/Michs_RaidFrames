@@ -184,6 +184,24 @@ local function UpdateTestRaidLayout(group, settings)
 	end
 end
 
+function Frames:UpdatePreviewFrameLayout(frame, settings)
+	local size = (settings and settings.size) or {}
+	local widthPx = addon.Utilities:ToPixels(size.width)
+	local heightPx = addon.Utilities:ToPixels(size.height)
+
+	if (widthPx % 2) ~= 0 then
+		widthPx = widthPx + 1
+	end
+
+	if (heightPx % 2) ~= 0 then
+		heightPx = heightPx + 1
+	end
+
+	frame:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+
+	return widthPx, heightPx
+end
+
 local function UpdateRaidHeaderLayoutArena(group, partySettings)
 	for i = 2, 8 do
 		local header = group.containers[i]
@@ -438,11 +456,23 @@ local function UpdatePartyHeaderLayout(group, settings)
 	if isHorizontal then
 		local totalWidthPx = (5 * frameWidthPx) + (4 * spacingXPx)
 		header:ClearAllPoints()
-		header:SetPoint("LEFT", UIParent, "CENTER", addon.Utilities:ToUI(positionXPx - totalWidthPx / 2), addon.Utilities:ToUI(positionYPx))
+		header:SetPoint(
+			"LEFT",
+			UIParent,
+			"CENTER",
+			addon.Utilities:ToUI(positionXPx - totalWidthPx / 2),
+			addon.Utilities:ToUI(positionYPx)
+		)
 	else
 		local totalHeightPx = (5 * frameHeightPx) + (4 * spacingYPx)
 		header:ClearAllPoints()
-		header:SetPoint("TOP", UIParent, "CENTER", addon.Utilities:ToUI(positionXPx), addon.Utilities:ToUI(positionYPx + totalHeightPx / 2))
+		header:SetPoint(
+			"TOP",
+			UIParent,
+			"CENTER",
+			addon.Utilities:ToUI(positionXPx),
+			addon.Utilities:ToUI(positionYPx + totalHeightPx / 2)
+		)
 	end
 end
 

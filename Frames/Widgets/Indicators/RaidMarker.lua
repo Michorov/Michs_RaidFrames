@@ -67,6 +67,11 @@ end
 function RaidMarker:UpdateState(frame, settings)
 	local container = frame.raidMarker
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.raidMarker ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -77,13 +82,13 @@ function RaidMarker:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame.dataProvider
+	if not provider then
 		container:Hide()
 		return
 	end
 
-	local raidTargetIndex = GetRaidTargetIndex(unit)
+	local raidTargetIndex = provider:GetRaidTargetIndex(frame)
 	if not raidTargetIndex or not container.texture.SetSpriteSheetCell then
 		container:Hide()
 		return

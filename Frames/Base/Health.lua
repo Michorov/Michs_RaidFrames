@@ -35,6 +35,10 @@ local function GetHealthColor(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if cachedSettings.classColor then
+		if frame.previewWidgetVisibility then
+			return addon.Utilities:GetUnitClassColor("player", cachedSettings.color)
+		end
+
 		return frame.dataProvider:GetClassColor(frame, cachedSettings.color)
 	end
 

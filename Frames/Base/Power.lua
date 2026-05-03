@@ -41,6 +41,22 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
+local function IsPowerBarEnabled(frame, cachedSettings)
+	if not cachedSettings.enabled then
+		return false
+	end
+
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.power ~= true then
+		return false
+	end
+
+	if cachedSettings.healerOnly then
+		return frame.dataProvider:IsHealer(frame)
+	end
+
+	return true
+end
+
 function Power:Ensure(frame)
 	if not frame.powerBar then
 		local powerBar = CreateFrame("StatusBar", nil, frame)
@@ -71,17 +87,6 @@ function Power:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local powerBar = frame.powerBar
-
-	local powerBarEnabled = cachedSettings.enabled
-	if powerBarEnabled and cachedSettings.healerOnly then
-		powerBarEnabled = frame.dataProvider:IsHealer(frame)
-	end
-
-	if not powerBarEnabled then
-		powerBar:Hide()
-		return
-	end
-
 	local scaledHeightPx = math.max(1, addon.Utilities:Scale(cachedSettings.heightPx))
 	local scaledBorderPx = addon.Utilities:Scale(cachedSettings.borderThicknessPx)
 
@@ -100,8 +105,6 @@ function Power:UpdateSettings(frame, settings)
 	else
 		powerBar.border:Hide()
 	end
-
-	powerBar:Show()
 end
 
 function Power:UpdateState(frame, settings)
@@ -112,12 +115,7 @@ function Power:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 	local powerBar = frame.powerBar
 
-	if not cachedSettings.enabled then
-		powerBar:Hide()
-		return
-	end
-
-	if cachedSettings.healerOnly and not frame.dataProvider:IsHealer(frame) then
+	if not IsPowerBarEnabled(frame, cachedSettings) then
 		powerBar:Hide()
 		return
 	end

@@ -77,6 +77,11 @@ end
 function ReadyCheck:UpdateState(frame, settings)
 	local container = frame.readyCheck
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.readyCheck ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -87,13 +92,13 @@ function ReadyCheck:UpdateState(frame, settings)
 		return
 	end
 
-	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	local provider = frame.dataProvider
+	if not provider then
 		container:Hide()
 		return
 	end
 
-	local status = GetReadyCheckStatus(unit)
+	local status = provider:GetReadyCheckStatus(frame)
 	if not status then
 		if hideTimer then
 			container:Show()

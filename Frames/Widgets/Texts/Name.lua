@@ -40,6 +40,10 @@ end
 
 local function GetNameColor(frame, cachedSettings)
 	if cachedSettings.classColor then
+		if frame.previewWidgetVisibility then
+			return addon.Utilities:GetUnitClassColor("player", cachedSettings.color)
+		end
+
 		return frame.dataProvider:GetClassColor(frame, cachedSettings.color)
 	end
 
@@ -87,6 +91,12 @@ function Name:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.name ~= true then
+		frame.nameText.text:SetText("")
+		frame.nameText:Hide()
+		return
+	end
+
 	local name = frame.dataProvider:GetName(frame) or ""
 
 	if cachedSettings.truncate then
@@ -98,6 +108,7 @@ function Name:UpdateState(frame, settings)
 
 	frame.nameText.text:SetText(name)
 	frame.nameText.text:SetTextColor(GetNameColor(frame, cachedSettings))
+	frame.nameText:Show()
 end
 
 function Name:Init()

@@ -99,6 +99,11 @@ end
 function RoleIcon:UpdateState(frame, settings)
 	local container = frame.roleIcon
 
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.roleIcon ~= true then
+		container:Hide()
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -121,7 +126,7 @@ function RoleIcon:UpdateState(frame, settings)
 		return
 	end
 
-	if not IsRoleEnabled(cachedSettings, role) then
+	if not frame.previewWidgetVisibility and not IsRoleEnabled(cachedSettings, role) then
 		container:Hide()
 		return
 	end

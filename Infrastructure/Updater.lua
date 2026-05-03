@@ -150,7 +150,11 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.pendingSummonStateChanged then
+		if
+			updateReasons.rosterChanged
+			or updateReasons.pendingSummonStateChanged
+			or updateReasons.pendingSummonSettingsChanged
+		then
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateState(frame, settings)
 		end
 

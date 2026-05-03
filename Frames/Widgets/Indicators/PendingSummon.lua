@@ -16,6 +16,7 @@ local function UpdateSettingsCache(settings)
 	local pendingSummon = indicators.pendingSummon or {}
 
 	local result = {
+		enabled = pendingSummon.enabled ~= false,
 		sizePx = addon.Utilities:ToPixels(pendingSummon.size or 36),
 		alpha = pendingSummon.alpha or 1,
 		anchor = pendingSummon.anchor or "CENTER",
@@ -57,6 +58,11 @@ function PendingSummon:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
+	if not cachedSettings.enabled then
+		container:Hide()
+		return
+	end
+
 	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
 	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
@@ -66,7 +72,7 @@ function PendingSummon:UpdateSettings(frame, settings)
 	container:SetPoint(
 		cachedSettings.anchor,
 		frame,
-		cachedSettings.relativeAnchor,
+		cachedSettings.anchor,
 		addon.Utilities:ToUI(offsetX),
 		addon.Utilities:ToUI(offsetY)
 	)
@@ -75,38 +81,20 @@ function PendingSummon:UpdateSettings(frame, settings)
 	container.icon:SetTexture(cachedSettings.texture)
 
 	container.statusIcon:ClearAllPoints()
-	container.statusIcon:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+	container.statusIcon:SetPoint(
+		"BOTTOMRIGHT",
+		container,
+		"BOTTOMRIGHT",
+		-addon.Utilities:ToUI(statusSizePx * 0.15),
+		addon.Utilities:ToUI(statusSizePx * 0.15)
+	)
 	container.statusIcon:SetSize(addon.Utilities:ToUI(statusSizePx), addon.Utilities:ToUI(statusSizePx))
 end
 
 function PendingSummon:UpdateState(frame, settings)
 	local container = frame.pendingSummon
 
-	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
-		container:Hide()
-		return
-	end
-
-	if
-		not C_IncomingSummon
-		or not C_IncomingSummon.HasIncomingSummon
-		or not C_IncomingSummon.IncomingSummonStatus
-		or not Enum
-		or not Enum.SummonStatus
-	then
-		container:Hide()
-		return
-	end
-
-	local hasIncomingSummon = C_IncomingSummon.HasIncomingSummon(unit)
-	if not hasIncomingSummon then
-		container:Hide()
-		return
-	end
-
-	local status = C_IncomingSummon.IncomingSummonStatus(unit)
-	if not status or status == Enum.SummonStatus.None then
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.pendingSummon ~= true then
 		container:Hide()
 		return
 	end
@@ -116,16 +104,33 @@ function PendingSummon:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	if not cachedSettings.enabled then
+		container:Hide()
+		return
+	end
+
+	local provider = frame.dataProvider
+	if not provider or type(provider.GetIncomingSummonStatus) ~= "function" then
+		container:Hide()
+		return
+	end
+
+	local status = provider:GetIncomingSummonStatus(frame)
+	if not status then
+		container:Hide()
+		return
+	end
+
 	container.icon:SetTexture(cachedSettings.texture)
 	container:Show()
 
-	if status == Enum.SummonStatus.Accepted then
+	if status == "accepted" then
 		container.statusIcon:SetTexture(cachedSettings.acceptedTexture)
 		container.statusIcon:Show()
-	elseif status == Enum.SummonStatus.Declined then
+	elseif status == "declined" then
 		container.statusIcon:SetTexture(cachedSettings.declinedTexture)
 		container.statusIcon:Show()
-	elseif status == Enum.SummonStatus.Pending then
+	elseif status == "pending" then
 		container.statusIcon:SetTexture(cachedSettings.pendingTexture)
 		container.statusIcon:Show()
 	else

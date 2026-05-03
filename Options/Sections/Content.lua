@@ -136,10 +136,22 @@ function Content:SetActivePage(pageKey)
 	if page.UpdateState then
 		page:UpdateState(addon.Database:GetProfile())
 	end
+
+	if addon.Options.Sections.Preview and addon.Options.Sections.Preview.SetActivePage then
+		addon.Options.Sections.Preview:SetActivePage(pageKey)
+	end
 end
 
 function Content:GetActivePage()
 	return activePage
+end
+
+function Content:SetMode(mode)
+	controllerState.mode = mode == "raid" and "raid" or "party"
+
+	if addon.Options.Sections.Preview and addon.Options.Sections.Preview.SetMode then
+		addon.Options.Sections.Preview:SetMode(controllerState.mode)
+	end
 end
 
 function Content:GetControllerState()

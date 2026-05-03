@@ -65,8 +65,24 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
+	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.buffOverlay ~= true then
+		for _, overlay in pairs(frame.buffOverlays) do
+			overlay:Hide()
+		end
+		return
+	end
+
+	local provider = frame.dataProvider
+	if not provider then
+		for _, overlay in pairs(frame.buffOverlays) do
+			overlay:Hide()
+		end
+		return
+	end
+
+	local isTestProvider = provider == addon.Frames.DataProvider.Test
 	local unit = frame.unit
-	if not unit or not UnitExists(unit) then
+	if not isTestProvider and (not unit or not UnitExists(unit)) then
 		for _, overlay in pairs(frame.buffOverlays) do
 			overlay:Hide()
 		end
@@ -83,8 +99,7 @@ function BuffOverlay:UpdateState(frame, settings)
 	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
 	local specAuras = classAuras[specID] or {}
 
-	local provider = frame.dataProvider
-	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
+	local auras = isTestProvider and nil or provider:GetUnitAuras(frame, "helpfulPlayer")
 
 	for index = 1, #cachedSettings.overlayKeys do
 		local overlayKey = cachedSettings.overlayKeys[index]
@@ -108,20 +123,22 @@ function BuffOverlay:UpdateState(frame, settings)
 				isAllowedAura = false
 			end
 
-			if not enabled or spellId == 0 or not color or not isAllowedAura then
+			if not enabled or not color or (not isTestProvider and (spellId == 0 or not isAllowedAura)) then
 				overlay:Hide()
 			else
-				local hasBuff = false
+				local hasBuff = isTestProvider
 
-				for _, aura in pairs(auras) do
-					local matchesSpell = false
-					local ok = pcall(function()
-						matchesSpell = aura.spellId == spellId
-					end)
+				if not isTestProvider then
+					for _, aura in pairs(auras) do
+						local matchesSpell = false
+						local ok = pcall(function()
+							matchesSpell = aura.spellId == spellId
+						end)
 
-					if ok and matchesSpell then
-						hasBuff = true
-						break
+						if ok and matchesSpell then
+							hasBuff = true
+							break
+						end
 					end
 				end
 
