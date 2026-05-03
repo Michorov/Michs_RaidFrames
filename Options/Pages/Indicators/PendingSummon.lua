@@ -89,7 +89,6 @@ local function ApplyModeSetting(updateFn)
 	updateFn(profile[mode], mode)
 
 	addon.UpdateScheduler:Notify("pendingSummonSettingsChanged")
-	addon.UpdateScheduler:Notify("pendingSummonStateChanged")
 end
 
 local function FormatInteger(value)
