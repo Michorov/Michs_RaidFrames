@@ -104,8 +104,10 @@ end
 
 local function EnsureCheckboxPool(targetCount)
 	subpage.dynamicCheckboxes = subpage.dynamicCheckboxes or {}
+	subpage.controls = subpage.controls or {}
 
 	while #subpage.dynamicCheckboxes < targetCount do
+		local index = #subpage.dynamicCheckboxes + 1
 		local checkbox = addon.Options.Controls.Checkbox:Create(subpage, "")
 		checkbox:SetLayoutWidth(174)
 		checkbox:SetOnValueChanged(function(self, checked)
@@ -143,6 +145,7 @@ local function EnsureCheckboxPool(targetCount)
 		end)
 
 		table.insert(subpage.dynamicCheckboxes, checkbox)
+		subpage.controls["filterCheckbox" .. tostring(index)] = checkbox
 	end
 end
 
@@ -184,6 +187,7 @@ function BuffFilters:Ensure(parent)
 	end
 
 	subpage = CreateFrame("Frame", nil, parent)
+	subpage.controls = {}
 
 	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
@@ -198,6 +202,7 @@ function BuffFilters:Ensure(parent)
 	end
 
 	function subpage:UpdateLayout()
+		local controls = self.controls
 		local rowStepPx = addon.Utilities:ToPixels(24)
 
 		RefreshDynamicCheckboxes(addon.Database:GetProfile())
@@ -205,11 +210,14 @@ function BuffFilters:Ensure(parent)
 		self.emptyText:ClearAllPoints()
 		self.emptyText:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 
+		for _, control in pairs(controls) do
+			if control.UpdateLayout then
+				control:UpdateLayout()
+			end
+		end
+
 		for index, checkbox in ipairs(self.dynamicCheckboxes or {}) do
 			local entry = self.activeEntries[index]
-			if checkbox.UpdateLayout then
-				checkbox:UpdateLayout()
-			end
 
 			if entry then
 				checkbox:ClearAllPoints()
