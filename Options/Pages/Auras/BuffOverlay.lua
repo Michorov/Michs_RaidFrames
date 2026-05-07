@@ -137,8 +137,10 @@ end
 
 local function EnsureRowPool(targetCount)
 	subpage.dynamicRows = subpage.dynamicRows or {}
+	subpage.controls = subpage.controls or {}
 
 	while #subpage.dynamicRows < targetCount do
+		local index = #subpage.dynamicRows + 1
 		local row = {}
 
 		row.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
@@ -264,6 +266,9 @@ local function EnsureRowPool(targetCount)
 		end)
 
 		table.insert(subpage.dynamicRows, row)
+		subpage.controls["overlayEnabledCheckbox" .. tostring(index)] = row.enabledCheckbox
+		subpage.controls["overlaySpellDropdown" .. tostring(index)] = row.spellDropdown
+		subpage.controls["overlayColorPicker" .. tostring(index)] = row.colorPicker
 	end
 end
 
@@ -323,6 +328,7 @@ function BuffOverlay:Ensure(parent)
 	end
 
 	subpage = CreateFrame("Frame", nil, parent)
+	subpage.controls = {}
 
 	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
@@ -344,6 +350,7 @@ function BuffOverlay:Ensure(parent)
 	end
 
 	function subpage:UpdateLayout()
+		local controls = self.controls
 		local rowStepPx = addon.Utilities:ToPixels(40)
 		local checkboxToDropdownGapPx = addon.Utilities:ToPixels(12)
 		local dropdownToColorGapPx = addon.Utilities:ToPixels(10)
@@ -353,18 +360,14 @@ function BuffOverlay:Ensure(parent)
 		self.emptyText:ClearAllPoints()
 		self.emptyText:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
 
+		for _, control in pairs(controls) do
+			if control.UpdateLayout then
+				control:UpdateLayout()
+			end
+		end
+
 		for index, row in ipairs(self.dynamicRows or {}) do
 			local entry = self.activeRows[index]
-
-			if row.enabledCheckbox.UpdateLayout then
-				row.enabledCheckbox:UpdateLayout()
-			end
-			if row.spellDropdown.UpdateLayout then
-				row.spellDropdown:UpdateLayout()
-			end
-			if row.colorPicker.UpdateLayout then
-				row.colorPicker:UpdateLayout()
-			end
 
 			if entry then
 				local checkboxHeightPx = addon.Utilities:ToPixels(row.enabledCheckbox.layoutValues.height)
