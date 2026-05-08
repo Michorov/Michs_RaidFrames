@@ -157,7 +157,6 @@ function Frames:CreatePreviewFrame(parent)
 		raidBuffReminder = false,
 		privateAuras = false,
 		dispels = false,
-		dispelOverlay = false,
 	}
 
 	frame.dataProvider = addon.Frames.DataProvider.Test

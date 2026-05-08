@@ -10,50 +10,6 @@ local Dispels = addon.Options.Pages.Auras.Dispels
 local subpage
 local L = addon.L
 
-local anchorOptions = {
-	{ value = "TOPLEFT", text = L["Top Left"] },
-	{ value = "TOP", text = L["Top"] },
-	{ value = "TOPRIGHT", text = L["Top Right"] },
-	{ value = "LEFT", text = L["Left"] },
-	{ value = "CENTER", text = L["Center"] },
-	{ value = "RIGHT", text = L["Right"] },
-	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
-	{ value = "BOTTOM", text = L["Bottom"] },
-	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
-}
-
-local growDirectionOptions = {
-	{ value = "LEFT", text = L["Left"] },
-	{ value = "RIGHT", text = L["Right"] },
-}
-
-local overlayStyleOptions = {
-	{ value = "FULL", text = L["Full Bar"] },
-	{ value = "GRADIENT", text = L["Gradient"] },
-}
-
-local function UpdateAnchorOptions()
-	anchorOptions[1].text = L["Top Left"]
-	anchorOptions[2].text = L["Top"]
-	anchorOptions[3].text = L["Top Right"]
-	anchorOptions[4].text = L["Left"]
-	anchorOptions[5].text = L["Center"]
-	anchorOptions[6].text = L["Right"]
-	anchorOptions[7].text = L["Bottom Left"]
-	anchorOptions[8].text = L["Bottom"]
-	anchorOptions[9].text = L["Bottom Right"]
-end
-
-local function UpdateGrowDirectionOptions()
-	growDirectionOptions[1].text = L["Left"]
-	growDirectionOptions[2].text = L["Right"]
-end
-
-local function UpdateOverlayStyleOptions()
-	overlayStyleOptions[1].text = L["Full Bar"]
-	overlayStyleOptions[2].text = L["Gradient"]
-end
-
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
 	if content and content.GetControllerState then
@@ -90,16 +46,7 @@ end
 local function GetModeDefaults()
 	return {
 		enabled = true,
-		overlayEnabled = true,
-		overlayStyle = "FULL",
-		anchor = "TOPRIGHT",
-		relativeAnchor = "TOPRIGHT",
-		growDirection = "LEFT",
-		spacing = 1,
-		offsetX = -2,
-		offsetY = -2,
-		iconSize = 12,
-		maxIcons = 4,
+		showOnlyPlayerDispellable = true,
 	}
 end
 
@@ -128,16 +75,6 @@ local function ApplyModeSetting(updateFn, settingsReason, notifyState)
 	end
 end
 
-local function FormatInteger(value)
-	return string.format("%d", value)
-end
-
-local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
-	slider:SetMinMaxValues(minValue, maxValue)
-	slider:SetStep(step or 1)
-	slider:SetValueFormatter(FormatInteger)
-end
-
 function Dispels:Ensure(parent)
 	if subpage then
 		return subpage
@@ -145,7 +82,7 @@ function Dispels:Ensure(parent)
 
 	subpage = CreateFrame("Frame", nil, parent)
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Indicator Icons"])
+	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
 	subpage.enabledCheckbox:SetLayoutWidth(174)
 	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
@@ -153,181 +90,35 @@ function Dispels:Ensure(parent)
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
 			section.widgets.icons.dispels.enabled = checked == true
-		end, "dispelsSettingsChanged", true)
-	end)
-
-	subpage.overlayEnabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Overlay"])
-	subpage.overlayEnabledCheckbox:SetLayoutWidth(174)
-	subpage.overlayEnabledCheckbox:SetOnValueChanged(function(_, checked)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispelOverlay = section.widgets.icons.dispelOverlay or {}
-			section.widgets.icons.dispelOverlay.enabled = checked == true
-		end, "dispelOverlaySettingsChanged")
-	end)
-
-	subpage.overlayStyleDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Overlay Style"])
-	subpage.overlayStyleDropdown:SetLayoutWidth(174)
-	subpage.overlayStyleDropdown:SetOptions(overlayStyleOptions)
-	subpage.overlayStyleDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispelOverlay = section.widgets.icons.dispelOverlay or {}
-			section.widgets.icons.dispelOverlay.style = value
-		end, "dispelOverlaySettingsChanged")
-	end)
-
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
-	subpage.anchorDropdown:SetLayoutWidth(174)
-	subpage.anchorDropdown:SetOptions(anchorOptions)
-	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.anchor = value
 		end, "dispelsSettingsChanged")
 	end)
 
-	subpage.relativeAnchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["To Frame"])
-	subpage.relativeAnchorDropdown:SetLayoutWidth(174)
-	subpage.relativeAnchorDropdown:SetOptions(anchorOptions)
-	subpage.relativeAnchorDropdown:SetOnValueChanged(function(_, value)
+	subpage.showOnlyPlayerDispellableCheckbox =
+		addon.Options.Controls.Checkbox:Create(subpage, L["Only Dispellable By Me"])
+	subpage.showOnlyPlayerDispellableCheckbox:SetLayoutWidth(174)
+	subpage.showOnlyPlayerDispellableCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.relativeAnchor = value
+			section.widgets.icons.dispels.showOnlyPlayerDispellable = checked == true
 		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.growDirectionDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Grow Direction"])
-	subpage.growDirectionDropdown:SetLayoutWidth(174)
-	subpage.growDirectionDropdown:SetOptions(growDirectionOptions)
-	subpage.growDirectionDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.growDirection = value
-		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, L["Spacing"])
-	subpage.spacingSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.spacingSlider, 0, 12, 1)
-	subpage.spacingSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.spacing = value
-		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
-	subpage.offsetXSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
-	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.offsetX = value
-		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
-	subpage.offsetYSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
-	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.offsetY = value
-		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
-	subpage.iconSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.iconSizeSlider, 6, 32, 1)
-	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.iconSize = value
-		end, "dispelsSettingsChanged")
-	end)
-
-	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Icons"])
-	subpage.maxIconsSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 6, 1)
-	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
-			section.widgets.icons.dispels.maxIcons = value
-		end, "dispelsSettingsChanged", true)
 	end)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
-		overlayEnabledCheckbox = subpage.overlayEnabledCheckbox,
-		overlayStyleDropdown = subpage.overlayStyleDropdown,
-		anchorDropdown = subpage.anchorDropdown,
-		relativeAnchorDropdown = subpage.relativeAnchorDropdown,
-		growDirectionDropdown = subpage.growDirectionDropdown,
-		spacingSlider = subpage.spacingSlider,
-		offsetXSlider = subpage.offsetXSlider,
-		offsetYSlider = subpage.offsetYSlider,
-		iconSizeSlider = subpage.iconSizeSlider,
-		maxIconsSlider = subpage.maxIconsSlider,
+		showOnlyPlayerDispellableCheckbox = subpage.showOnlyPlayerDispellableCheckbox,
 	}
 
 	function subpage:UpdateLocale()
-		UpdateAnchorOptions()
-		UpdateGrowDirectionOptions()
-		UpdateOverlayStyleOptions()
-		self.enabledCheckbox:SetText(L["Indicator Icons"])
-		self.overlayEnabledCheckbox:SetText(L["Overlay"])
-		self.overlayStyleDropdown:SetLabel(L["Overlay Style"])
-		self.overlayStyleDropdown:SetOptions(overlayStyleOptions)
-		self.anchorDropdown:SetLabel(L["Anchor"])
-		self.anchorDropdown:SetOptions(anchorOptions)
-		self.relativeAnchorDropdown:SetLabel(L["To Frame"])
-		self.relativeAnchorDropdown:SetOptions(anchorOptions)
-		self.growDirectionDropdown:SetLabel(L["Grow Direction"])
-		self.growDirectionDropdown:SetOptions(growDirectionOptions)
-		self.spacingSlider:SetLabel(L["Spacing"])
-		self.offsetXSlider:SetLabel(L["Offset X"])
-		self.offsetYSlider:SetLabel(L["Offset Y"])
-		self.iconSizeSlider:SetLabel(L["Icon Size"])
-		self.maxIconsSlider:SetLabel(L["Max Icons"])
+		self.enabledCheckbox:SetText(L["Enabled"])
+		self.showOnlyPlayerDispellableCheckbox:SetText(L["Only Dispellable By Me"])
 	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(50)
-		local topRowAdjustmentPx = addon.Utilities:ToPixels(8)
-		local sectionGapPx = addon.Utilities:ToPixels(16)
-		local columnGapPx = addon.Utilities:ToPixels(30)
-		local columnWidthPx = addon.Utilities:ToPixels(174)
-		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
 		local firstRowOffsetPx = 0
-		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
-		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx + sectionGapPx
-		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
-		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx + addon.Utilities:ToPixels(10)
-		local overlayCheckboxOffsetPx = fifthRowOffsetPx
-			+ addon.Utilities:ToPixels(
-				controls.overlayStyleDropdown.layoutValues.labelHeight + controls.overlayStyleDropdown.layoutValues.labelSpacing
-			)
+		local secondColumnOffsetPx = addon.Utilities:ToPixels(204)
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -338,76 +129,13 @@ function Dispels:Ensure(parent)
 		controls.enabledCheckbox:ClearAllPoints()
 		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
 
-		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(secondRowOffsetPx))
-
-		controls.relativeAnchorDropdown:ClearAllPoints()
-		controls.relativeAnchorDropdown:SetPoint(
+		controls.showOnlyPlayerDispellableCheckbox:ClearAllPoints()
+		controls.showOnlyPlayerDispellableCheckbox:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(secondRowOffsetPx)
-		)
-
-		controls.growDirectionDropdown:ClearAllPoints()
-		controls.growDirectionDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(thirdColumnOffsetPx),
-			-addon.Utilities:ToUI(secondRowOffsetPx)
-		)
-
-		controls.spacingSlider:ClearAllPoints()
-		controls.spacingSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(thirdColumnOffsetPx),
-			-addon.Utilities:ToUI(thirdRowOffsetPx)
-		)
-
-		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(thirdRowOffsetPx))
-
-		controls.offsetYSlider:ClearAllPoints()
-		controls.offsetYSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(thirdRowOffsetPx)
-		)
-
-		controls.iconSizeSlider:ClearAllPoints()
-		controls.iconSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(fourthRowOffsetPx))
-
-		controls.maxIconsSlider:ClearAllPoints()
-		controls.maxIconsSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(fourthRowOffsetPx)
-		)
-
-		controls.overlayEnabledCheckbox:ClearAllPoints()
-		controls.overlayEnabledCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(overlayCheckboxOffsetPx)
-		)
-
-		controls.overlayStyleDropdown:ClearAllPoints()
-		controls.overlayStyleDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(fifthRowOffsetPx)
+			-addon.Utilities:ToUI(firstRowOffsetPx)
 		)
 	end
 
@@ -423,19 +151,11 @@ function Dispels:Ensure(parent)
 		local widgets = section.widgets or {}
 		local icons = widgets.icons or {}
 		local dispels = icons.dispels or {}
-		local dispelOverlay = icons.dispelOverlay or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(dispels.enabled, defaults.enabled))
-		controls.overlayEnabledCheckbox:SetChecked(ResolveBoolean(dispelOverlay.enabled, defaults.overlayEnabled))
-		controls.overlayStyleDropdown:SetValue(dispelOverlay.style or defaults.overlayStyle)
-		controls.anchorDropdown:SetValue(dispels.anchor or defaults.anchor)
-		controls.relativeAnchorDropdown:SetValue(dispels.relativeAnchor or defaults.relativeAnchor)
-		controls.growDirectionDropdown:SetValue(dispels.growDirection or defaults.growDirection)
-		controls.spacingSlider:SetValueSilently(dispels.spacing or defaults.spacing)
-		controls.offsetXSlider:SetValueSilently(dispels.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValueSilently(dispels.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValueSilently(dispels.iconSize or defaults.iconSize)
-		controls.maxIconsSlider:SetValueSilently(dispels.maxIcons or defaults.maxIcons)
+		controls.showOnlyPlayerDispellableCheckbox:SetChecked(
+			ResolveBoolean(dispels.showOnlyPlayerDispellable, defaults.showOnlyPlayerDispellable)
+		)
 	end
 
 	subpage:UpdateLocale()
