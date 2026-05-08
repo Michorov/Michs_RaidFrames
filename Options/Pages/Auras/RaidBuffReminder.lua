@@ -258,7 +258,6 @@ function RaidBuffReminder:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local colorPickerSizePx = addon.Utilities:ToPixels(controls.borderColorPicker.layoutValues.pickerSize)
 		local colorPickerOffsetPx =
@@ -333,9 +332,7 @@ function RaidBuffReminder:Ensure(parent)
 		local borderColor = raidBuffReminder.borderColor or defaults.borderColor
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(raidBuffReminder.enabled, defaults.enabled))
-		controls.showInCombatCheckbox:SetChecked(
-			ResolveBoolean(raidBuffReminder.showInCombat, defaults.showInCombat)
-		)
+		controls.showInCombatCheckbox:SetChecked(ResolveBoolean(raidBuffReminder.showInCombat, defaults.showInCombat))
 		controls.anchorDropdown:SetValue(raidBuffReminder.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(raidBuffReminder.offsetX or defaults.offsetX)
 		controls.offsetYSlider:SetValueSilently(raidBuffReminder.offsetY or defaults.offsetY)
