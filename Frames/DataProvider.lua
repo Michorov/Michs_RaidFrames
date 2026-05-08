@@ -26,6 +26,8 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
+local TEST_SHAMAN_CLASS_COLOR = { r = 0.00, g = 0.28, b = 0.65 }
+
 local RAID_BUFF_REMINDER_CLASS_BUFFS = {
 	DRUID = { 1126 }, -- Mark of the Wild
 	MAGE = { 1459 }, -- Arcane Intellect
@@ -50,6 +52,14 @@ local RAID_BUFF_REMINDER_BLESSING_OF_THE_BRONZE = {
 	381756, -- Shaman
 	381757, -- Warlock
 	381758, -- Warrior
+}
+
+local DISPEL_PREVIEW_AURAS = {
+	{ auraInstanceID = 6001, dispelName = "Magic", atlas = "RaidFrame-Icon-DebuffMagic" },
+	{ auraInstanceID = 6002, dispelName = "Poison", atlas = "RaidFrame-Icon-DebuffPoison" },
+	{ auraInstanceID = 6003, dispelName = "Disease", atlas = "RaidFrame-Icon-DebuffDisease" },
+	{ auraInstanceID = 6004, dispelName = "Curse", atlas = "RaidFrame-Icon-DebuffCurse" },
+	{ auraInstanceID = 6005, dispelName = "Bleed", atlas = "RaidFrame-Icon-DebuffBleed" },
 }
 
 local function GetPlayerRaidBuffReminderSpellIds()
@@ -147,14 +157,20 @@ function DataProvider.Test:GetClassColor(frame, fallbackColor)
 	local index = frame and frame.testClassIndex or 1
 	index = ((index - 1) % #CLASS_SAMPLES) + 1
 
+	local fallback = fallbackColor or {}
+	local fa = fallback.a or 1
 	local classToken = CLASS_SAMPLES[index]
-	local color = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
 
-	if color then
-		return color.r, color.g, color.b, 1
+	if classToken == "SHAMAN" then
+		return TEST_SHAMAN_CLASS_COLOR.r, TEST_SHAMAN_CLASS_COLOR.g, TEST_SHAMAN_CLASS_COLOR.b, fa
 	end
 
-	return fallbackColor.r or 1, fallbackColor.g or 1, fallbackColor.b or 1, fallbackColor.a or 1
+	local color = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
+	if color then
+		return color.r, color.g, color.b, fa
+	end
+
+	return fallback.r or 1, fallback.g or 1, fallback.b or 1, fa
 end
 
 function DataProvider.Live:GetName(frame)
@@ -716,6 +732,14 @@ function DataProvider.Test:GetAuraDispelTypeColor(frame, aura, curve)
 	end
 
 	return DEBUFF_TYPE_NONE_COLOR
+end
+
+function DataProvider.Live:GetDispelPreviewAuras(frame)
+	return {}
+end
+
+function DataProvider.Test:GetDispelPreviewAuras(frame)
+	return DISPEL_PREVIEW_AURAS
 end
 
 function DataProvider.Live:GetUnitAuras(frame, collectionKey)

@@ -499,6 +499,7 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
+						showOnlyPlayerDispellable = true,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
 						growDirection = "LEFT",
@@ -509,10 +510,6 @@ local DEFAULTS = {
 						iconSize = 12,
 						spacing = 1,
 						alpha = 1.0,
-					},
-					dispelOverlay = {
-						enabled = false,
-						style = "GRADIENT",
 					},
 					raidBuffReminder = {
 						enabled = true,
@@ -799,6 +796,7 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
+						showOnlyPlayerDispellable = true,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
 						growDirection = "LEFT",
@@ -809,10 +807,6 @@ local DEFAULTS = {
 						iconSize = 12,
 						spacing = 1,
 						alpha = 1.0,
-					},
-					dispelOverlay = {
-						enabled = false,
-						style = "GRADIENT",
 					},
 					raidBuffReminder = {
 						enabled = true,
@@ -945,6 +939,48 @@ local DEFAULTS = {
 		specProfiles = {},
 	},
 }
+
+local PRUNE_PROFILE_DEFAULTS_SKIP_PATHS = {
+	["party.widgets.icons.buffs.customAuraValues"] = true,
+	["party.widgets.icons.customBuffs"] = true,
+	["raid.widgets.icons.buffs.customAuraValues"] = true,
+	["raid.widgets.icons.customBuffs"] = true,
+}
+
+local function JoinProfileDefaultsPath(path, key)
+	if path == "" then
+		return tostring(key)
+	end
+
+	return path .. "." .. tostring(key)
+end
+
+local function PruneValuesMissingFromDefaults(currentValues, defaultValues, path)
+	if type(currentValues) ~= "table" or type(defaultValues) ~= "table" then
+		return
+	end
+
+	path = path or ""
+	if PRUNE_PROFILE_DEFAULTS_SKIP_PATHS[path] then
+		return
+	end
+
+	for key, value in pairs(currentValues) do
+		local childPath = JoinProfileDefaultsPath(path, key)
+		local defaultValue = defaultValues[key]
+		if PRUNE_PROFILE_DEFAULTS_SKIP_PATHS[childPath] then
+			-- Dynamic aura tables are normalized by their own sync functions.
+		elseif defaultValue == nil then
+			currentValues[key] = nil
+		elseif type(value) == "table" and type(defaultValue) == "table" then
+			PruneValuesMissingFromDefaults(value, defaultValue, childPath)
+		end
+	end
+end
+
+local function PruneProfileValuesMissingFromDefaults(profile)
+	PruneValuesMissingFromDefaults(profile, DEFAULTS.profile, "")
+end
 
 local function EnsureCharData(database)
 	if not initialized then
@@ -1187,10 +1223,12 @@ function Database:Initialize()
 		self.db.char.baseProfile = self.db:GetCurrentProfile()
 	end
 
+	PruneProfileValuesMissingFromDefaults(self.db.profile)
 	SyncAllProfilesCustomAuraDefaults(self.db.profile)
 	NormalizeCurrentProfileFontSettings(self.db.profile)
 
 	local function OnProfileChanged()
+		PruneProfileValuesMissingFromDefaults(self.db.profile)
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 		NormalizeCurrentProfileFontSettings(self.db.profile)
 

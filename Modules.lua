@@ -53,7 +53,6 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Icons.Dispels,
 		addon.Frames.Widgets.Icons.RaidBuffReminder,
 		addon.Frames.Widgets.Bars.BuffOverlay,
-		addon.Frames.Widgets.Bars.DispelOverlay,
 	}
 
 	for _, module in ipairs(modulesToInit) do

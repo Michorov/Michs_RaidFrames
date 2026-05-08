@@ -15,6 +15,8 @@ local ALLOWED_FONT_OUTLINE_VALUES = {
 	["THICKOUTLINE,MONOCHROME"] = true,
 }
 
+local SHAMAN_CLASS_COLOR = { r = 0.00, g = 0.28, b = 0.65 }
+
 function Utilities:RoundToNearestInt(value)
 	value = value or 0
 
@@ -106,6 +108,10 @@ function Utilities:GetUnitClassColor(unit, fallbackColor)
 	local classFilename = select(2, UnitClass(unit))
 	if not classFilename then
 		return fr, fg, fb, fa
+	end
+
+	if classFilename == "SHAMAN" then
+		return SHAMAN_CLASS_COLOR.r, SHAMAN_CLASS_COLOR.g, SHAMAN_CLASS_COLOR.b, fa
 	end
 
 	local classColor = RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFilename]
