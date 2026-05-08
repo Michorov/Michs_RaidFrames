@@ -107,13 +107,8 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 		end
 
-		if updateReasons.dispelsSettingsChanged then
+		if updateReasons.rosterChanged or updateReasons.dispelsSettingsChanged then
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
-		end
-
-		if updateReasons.dispelOverlaySettingsChanged then
-			addon.Frames.Widgets.Bars.DispelOverlay:UpdateSettings(frame, settings)
-			addon.Frames.Widgets.Bars.DispelOverlay:UpdateState(frame, settings)
 		end
 	end
 end
@@ -208,8 +203,6 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.Dispels:UpdateState(frame, settings)
-			addon.Frames.Widgets.Bars.DispelOverlay:UpdateState(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end

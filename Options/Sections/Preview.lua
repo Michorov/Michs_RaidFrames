@@ -54,10 +54,8 @@ local previewWidgetFlags = {
 	dispels = {
 		label = "Dispels",
 		enabled = false,
-		updateStateReason = "aurasStateChanged",
-		linkedWidgets = { "dispelOverlay" },
+		updateStateReason = "dispelsSettingsChanged",
 	},
-	dispelOverlay = { label = "Dispel Overlay", enabled = false, updateStateReason = "aurasStateChanged" },
 }
 
 local previewPageWidgets = {
