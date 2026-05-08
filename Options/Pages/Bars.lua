@@ -132,10 +132,7 @@ function Bars:Ensure(parent)
 		subpageOptions[4].text = L["Absorbs"]
 
 		self.header.title:SetText(L["Bars"])
-		self.modeToggle:SetOptions(
-			{ value = "party", text = L["Party"] },
-			{ value = "raid", text = L["Raid"] }
-		)
+		self.modeToggle:SetOptions({ value = "party", text = L["Party"] }, { value = "raid", text = L["Raid"] })
 
 		for _, subpage in pairs(self.subpages or {}) do
 			if subpage.UpdateLocale then
@@ -177,7 +174,6 @@ function Bars:Ensure(parent)
 		local headerHeightPx = addon.Utilities:ToPixels(32)
 		local firstControlOffsetPx = addon.Utilities:ToPixels(16)
 		local headerControlGapPx = addon.Utilities:ToPixels(8)
-		local bodyRowSpacingPx = addon.Utilities:ToPixels(16)
 
 		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
 

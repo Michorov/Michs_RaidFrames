@@ -9,7 +9,6 @@ local Absorbs = addon.Options.Pages.Bars.Absorbs
 
 local subpage
 local L = addon.L
-local theme = addon.Options.Theme
 
 local textureOptions = {
 	{ value = "Flat", text = L["Flat"] },

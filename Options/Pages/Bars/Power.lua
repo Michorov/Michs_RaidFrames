@@ -9,7 +9,6 @@ local Power = addon.Options.Pages.Bars.Power
 
 local subpage
 local L = addon.L
-local theme = addon.Options.Theme
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -153,8 +152,7 @@ function Power:Ensure(parent)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
-		local checkboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -163,13 +161,7 @@ function Power:Ensure(parent)
 		end
 
 		controls.enabledCheckbox:ClearAllPoints()
-		controls.enabledCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(checkboxOffsetPx)
-		)
+		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(checkboxOffsetPx))
 
 		controls.healerOnlyCheckbox:ClearAllPoints()
 		controls.healerOnlyCheckbox:SetPoint(
@@ -181,13 +173,7 @@ function Power:Ensure(parent)
 		)
 
 		controls.heightSlider:ClearAllPoints()
-		controls.heightSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(rowStepPx)
-		)
+		controls.heightSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(rowStepPx))
 
 		controls.borderThicknessSlider:ClearAllPoints()
 		controls.borderThicknessSlider:SetPoint(

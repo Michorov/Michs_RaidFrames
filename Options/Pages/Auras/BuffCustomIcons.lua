@@ -199,11 +199,12 @@ local function ApplySelectedBuffSetting(updateFn)
 	profile[mode].widgets = profile[mode].widgets or {}
 	profile[mode].widgets.icons = profile[mode].widgets.icons or {}
 	profile[mode].widgets.icons.customBuffs = profile[mode].widgets.icons.customBuffs or {}
-	profile[mode].widgets.icons.customBuffs[classFileName] = profile[mode].widgets.icons.customBuffs[classFileName] or {}
-	profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID] =
-		profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID] or {}
-	profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID][subpage.selectedSpellId] =
-		profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID][subpage.selectedSpellId] or {}
+	profile[mode].widgets.icons.customBuffs[classFileName] = profile[mode].widgets.icons.customBuffs[classFileName]
+		or {}
+	profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID] = profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID]
+		or {}
+	profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID][subpage.selectedSpellId] = profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID][subpage.selectedSpellId]
+		or {}
 
 	updateFn(profile[mode].widgets.icons.customBuffs[classFileName][subpage.activeSpecID][subpage.selectedSpellId])
 
@@ -410,9 +411,7 @@ function BuffCustomIcons:Ensure(parent)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local headerCheckboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (headerHeightPx - checkboxHeightPx) / 2))
-		local dropdownSliderOffsetPx = addon.Utilities:ToPixels(5)
-		local checkboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 
 		controls.buffDropdown:ClearAllPoints()
 		controls.buffDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
@@ -430,13 +429,7 @@ function BuffCustomIcons:Ensure(parent)
 		controls.anchorDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(positionRowOffsetPx))
 
 		controls.iconSizeSlider:ClearAllPoints()
-		controls.iconSizeSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(iconSizeRowOffsetPx)
-		)
+		controls.iconSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(iconSizeRowOffsetPx))
 
 		controls.offsetXSlider:ClearAllPoints()
 		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(offsetsRowOffsetPx))
@@ -504,8 +497,8 @@ function BuffCustomIcons:Ensure(parent)
 
 		local mode = GetModeKey()
 		local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
-		local settings = (((((profile[mode] or {}).widgets or {}).icons or {}).customBuffs or {})[classFileName] or {})
-			[self.activeSpecID] or {}
+		local settings = (((((profile[mode] or {}).widgets or {}).icons or {}).customBuffs or {})[classFileName] or {})[self.activeSpecID]
+			or {}
 		settings = settings[self.selectedSpellId] or {}
 		local defaults = GetBuffDefaults()
 

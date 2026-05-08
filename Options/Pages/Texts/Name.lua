@@ -285,13 +285,11 @@ function Name:Ensure(parent)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
 		local dropdownSliderOffsetPx = addon.Utilities:ToPixels(5)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorPicker.layoutValues.pickerSize)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.classColorCheckbox.layoutValues.height)
-		local dropdownFieldTopOffsetPx =
-			addon.Utilities:ToPixels(
-				controls.outlineDropdown.layoutValues.labelHeight + controls.outlineDropdown.layoutValues.labelSpacing
-			)
+		local dropdownFieldTopOffsetPx = addon.Utilities:ToPixels(
+			controls.outlineDropdown.layoutValues.labelHeight + controls.outlineDropdown.layoutValues.labelSpacing
+		)
 		local dropdownFieldHeightPx = addon.Utilities:ToPixels(controls.outlineDropdown.layoutValues.fieldHeight)
 		local colorPickerOffsetPx = dropdownFieldTopOffsetPx
 			+ addon.Utilities:RoundToNearestInt(math.max(0, (dropdownFieldHeightPx - colorPickerSizePx) / 2))
@@ -306,9 +304,7 @@ function Name:Ensure(parent)
 			) / 2
 		)
 		local maxLengthSliderOffsetPx =
-			addon.Utilities:RoundToNearestInt(
-				math.max(0, checkboxCenterOffsetPx - maxLengthControlCenterOffsetPx)
-			)
+			addon.Utilities:RoundToNearestInt(math.max(0, checkboxCenterOffsetPx - maxLengthControlCenterOffsetPx))
 		local positionControlsOffsetPx = 0
 		local positionSecondRowOffsetPx = positionControlsOffsetPx + rowStepPx + firstSectionRowGapPx
 		local styleControlsOffsetPx = positionSecondRowOffsetPx + rowStepPx + sectionGapPx
@@ -320,13 +316,7 @@ function Name:Ensure(parent)
 		end
 
 		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(positionControlsOffsetPx)
-		)
+		controls.anchorDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(positionControlsOffsetPx))
 
 		controls.sizeSlider:ClearAllPoints()
 		controls.sizeSlider:SetPoint(
@@ -338,13 +328,7 @@ function Name:Ensure(parent)
 		)
 
 		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(positionSecondRowOffsetPx)
-		)
+		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(positionSecondRowOffsetPx))
 
 		controls.offsetYSlider:ClearAllPoints()
 		controls.offsetYSlider:SetPoint(
@@ -356,13 +340,7 @@ function Name:Ensure(parent)
 		)
 
 		controls.outlineDropdown:ClearAllPoints()
-		controls.outlineDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(styleControlsOffsetPx)
-		)
+		controls.outlineDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(styleControlsOffsetPx))
 
 		controls.colorPicker:ClearAllPoints()
 		controls.colorPicker:SetPoint(

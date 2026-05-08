@@ -9,7 +9,6 @@ local Health = addon.Options.Pages.Bars.Health
 
 local subpage
 local L = addon.L
-local theme = addon.Options.Theme
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -110,7 +109,6 @@ function Health:Ensure(parent)
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(50)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
@@ -119,8 +117,7 @@ function Health:Ensure(parent)
 		local colorPickerOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - colorPickerSizePx) / 2))
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.useClassColorCheckbox.layoutValues.height)
-		local checkboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -129,13 +126,7 @@ function Health:Ensure(parent)
 		end
 
 		controls.useClassColorCheckbox:ClearAllPoints()
-		controls.useClassColorCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(checkboxOffsetPx)
-		)
+		controls.useClassColorCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(checkboxOffsetPx))
 
 		controls.healthColorPicker:ClearAllPoints()
 		controls.healthColorPicker:SetPoint(
