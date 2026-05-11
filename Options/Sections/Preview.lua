@@ -35,6 +35,7 @@ local previewWidgetFlags = {
 	groupStatus = { label = "Group Leader", enabled = false, updateStateReason = "groupStatusStateChanged" },
 	threat = { label = "Threat", enabled = false, updateStateReason = "threatStateChanged" },
 	name = { label = "Name", enabled = false, updateStateReason = "nameStateChanged" },
+	away = { label = "Away", enabled = false, updateStateReason = "awayStateChanged" },
 	statusText = { label = "Status", enabled = false, updateStateReason = "statusStateChanged" },
 	absorbs = { label = "Absorbs", enabled = false, updateStateReason = "absorbsStateChanged" },
 	healAbsorbs = { label = "Heal Absorbs", enabled = false, updateStateReason = "healAbsorbsStateChanged" },
@@ -69,7 +70,7 @@ local previewPageWidgets = {
 	},
 	texts = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
-		controls = { "name", "healAbsorbsText" },
+		controls = { "name", "away", "healAbsorbsText" },
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	auras = {
