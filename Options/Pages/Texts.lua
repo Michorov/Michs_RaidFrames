@@ -12,6 +12,7 @@ local theme = addon.Options.Theme
 
 local subpageOptions = {
 	{ value = "name", text = L["Name"] },
+	{ value = "away", text = L["Away"] },
 	{ value = "healAbsorbs", text = L["Heal Absorbs"] },
 }
 
@@ -99,10 +100,12 @@ function Texts:Ensure(parent)
 	end)
 
 	local nameSubpage = addon.Options.Pages.Texts.Name:Ensure(page.body)
+	local awaySubpage = addon.Options.Pages.Texts.Away:Ensure(page.body)
 	local healAbsorbsSubpage = addon.Options.Pages.Texts.HealAbsorbs:Ensure(page.body)
 
 	page.subpages = {
 		name = nameSubpage,
+		away = awaySubpage,
 		healAbsorbs = healAbsorbsSubpage,
 	}
 
@@ -121,13 +124,21 @@ function Texts:Ensure(parent)
 
 	function page:UpdateLocale()
 		subpageOptions[1].text = L["Name"]
-		subpageOptions[2].text = L["Heal Absorbs"]
+		subpageOptions[2].text = L["Away"]
+		subpageOptions[3].text = L["Heal Absorbs"]
 
 		self.header.title:SetText(L["Texts"])
 		self.modeToggle:SetOptions(
 			{ value = "party", text = L["Party"] },
 			{ value = "raid", text = L["Raid"] }
 		)
+		self.subpageDropdown:SetOptions(subpageOptions)
+
+		for _, control in pairs(self.controls or {}) do
+			if control.UpdateLocale then
+				control:UpdateLocale()
+			end
+		end
 
 		for _, subpage in pairs(self.subpages or {}) do
 			if subpage.UpdateLocale then
