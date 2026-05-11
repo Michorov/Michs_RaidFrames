@@ -37,6 +37,7 @@ Frames/Managers/IconManager.lua
 # Widgets Text
 Frames/Widgets/Texts/Name.lua
 Frames/Widgets/Texts/StatusText.lua
+Frames/Widgets/Texts/Away.lua
 Frames/Widgets/Texts/HealAbsorbs.lua
 
 # Widgets Indicators

@@ -326,6 +326,13 @@ local function NormalizeProfileTextSettings(profileSection)
 			texts.healAbsorbs.outline = addon.Utilities:NormalizeFontOutline(outline, "OUTLINE")
 		end
 	end
+
+	if type(texts.away) == "table" then
+		local outline = texts.away.outline
+		if outline ~= nil then
+			texts.away.outline = addon.Utilities:NormalizeFontOutline(outline, "OUTLINE")
+		end
+	end
 end
 
 local function NormalizeCurrentProfileFontSettings(profile)
@@ -412,6 +419,22 @@ local DEFAULTS = {
 						position = {
 							x = 0,
 							y = 0,
+						},
+						size = 10,
+						outline = "OUTLINE",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
+					},
+					away = {
+						enabled = true,
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = -10,
 						},
 						size = 10,
 						outline = "OUTLINE",
@@ -709,6 +732,22 @@ local DEFAULTS = {
 						position = {
 							x = 0,
 							y = 0,
+						},
+						size = 10,
+						outline = "OUTLINE",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
+					},
+					away = {
+						enabled = true,
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = -10,
 						},
 						size = 10,
 						outline = "OUTLINE",
