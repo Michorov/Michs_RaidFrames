@@ -330,7 +330,7 @@ local function NormalizeProfileTextSettings(profileSection)
 	if type(texts.away) == "table" then
 		local outline = texts.away.outline
 		if outline ~= nil then
-			texts.away.outline = addon.Utilities:NormalizeFontOutline(outline, "OUTLINE")
+			texts.away.outline = addon.Utilities:NormalizeFontOutline(outline)
 		end
 	end
 end
@@ -437,7 +437,7 @@ local DEFAULTS = {
 							y = -18,
 						},
 						size = 10,
-						outline = "OUTLINE",
+						outline = "",
 						color = {
 							r = 1,
 							g = 1,
@@ -750,7 +750,7 @@ local DEFAULTS = {
 							y = -18,
 						},
 						size = 10,
-						outline = "OUTLINE",
+						outline = "",
 						color = {
 							r = 1,
 							g = 1,

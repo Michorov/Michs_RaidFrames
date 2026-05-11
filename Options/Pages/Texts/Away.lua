@@ -80,7 +80,7 @@ local function GetModeDefaults()
 		offsetX = 0,
 		offsetY = -10,
 		size = 10,
-		outline = "OUTLINE",
+		outline = "",
 		color = { r = 1, g = 1, b = 1, a = 1 },
 	}
 end
