@@ -44,6 +44,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Bars.HealAbsorbs,
 		addon.Frames.Widgets.Texts.Name,
 		addon.Frames.Widgets.Texts.StatusText,
+		addon.Frames.Widgets.Texts.Away,
 		addon.Frames.Widgets.Texts.HealAbsorbs,
 		addon.Frames.Widgets.Icons.Buffs,
 		addon.Frames.Widgets.Icons.CustomBuffs,

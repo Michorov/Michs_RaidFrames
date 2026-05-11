@@ -60,6 +60,11 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.awayTextSettingsChanged then
+			addon.Frames.Widgets.Texts.Away:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
+		end
+
 		if updateReasons.absorbsSettingsChanged then
 			addon.Frames.Widgets.Bars.Absorbs:UpdateSettings(frame, settings)
 		end
@@ -192,6 +197,10 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.rosterChanged or updateReasons.statusStateChanged then
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
+		end
+
+		if updateReasons.rosterChanged or updateReasons.awayStateChanged then
+			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
 		end
 
 		if updateReasons.rosterChanged then
