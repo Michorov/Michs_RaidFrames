@@ -199,7 +199,12 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.awayStateChanged then
+		if
+			updateReasons.rosterChanged
+			or updateReasons.awayStateChanged
+			or updateReasons.combatStarted
+			or updateReasons.combatEnded
+		then
 			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
 		end
 

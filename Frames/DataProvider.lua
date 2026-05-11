@@ -10,6 +10,33 @@ local DataProvider = Frames.DataProvider
 DataProvider.Live = {}
 DataProvider.Test = {}
 
+local awayStatusByUnit = {}
+
+local function CanAccessValue(value)
+	if type(canaccessvalue) == "function" then
+		return canaccessvalue(value) == true
+	end
+
+	return true
+end
+
+local function GetAccessibleAFKStatus(unit)
+	if InChatMessagingLockdown and InChatMessagingLockdown() then
+		return nil
+	end
+
+	local isAFK
+	local ok = pcall(function()
+		isAFK = UnitIsAFK(unit)
+	end)
+
+	if not ok or not CanAccessValue(isAFK) then
+		return nil
+	end
+
+	return isAFK == true
+end
+
 local CLASS_SAMPLES = {
 	"WARRIOR",
 	"PALADIN",
@@ -274,11 +301,16 @@ end
 
 function DataProvider.Live:GetAwayStatus(frame)
 	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+	if type(unit) ~= "string" or unit == "" then
 		return nil
 	end
 
-	if not UnitIsAFK(unit) then
+	local isAFK = GetAccessibleAFKStatus(unit)
+	if isAFK ~= nil then
+		awayStatusByUnit[unit] = isAFK
+	end
+
+	if awayStatusByUnit[unit] ~= true then
 		return nil
 	end
 
