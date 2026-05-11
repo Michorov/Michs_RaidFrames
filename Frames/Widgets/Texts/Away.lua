@@ -85,7 +85,7 @@ local function UpdateSettingsCache(settings)
 		positionX = addon.Utilities:ToPixels(position.x or 0),
 		positionY = addon.Utilities:ToPixels(position.y or -10),
 		size = away.size or 10,
-		outline = addon.Utilities:NormalizeFontOutline(away.outline, "OUTLINE"),
+		outline = addon.Utilities:NormalizeFontOutline(away.outline),
 		color = {
 			r = color.r or 1,
 			g = color.g or 1,
