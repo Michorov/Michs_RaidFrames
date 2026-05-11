@@ -78,7 +78,7 @@ local function GetModeDefaults()
 		enabled = true,
 		anchor = "CENTER",
 		offsetX = 0,
-		offsetY = -10,
+		offsetY = -18,
 		size = 10,
 		outline = "",
 		color = { r = 1, g = 1, b = 1, a = 1 },

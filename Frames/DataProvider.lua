@@ -10,6 +10,12 @@ local DataProvider = Frames.DataProvider
 DataProvider.Live = {}
 DataProvider.Test = {}
 
+local L = addon.L
+
+local function GetAwayLabel()
+	return (L and L["Away"]) or "Away"
+end
+
 local CLASS_SAMPLES = {
 	"WARRIOR",
 	"PALADIN",
@@ -282,11 +288,11 @@ function DataProvider.Live:GetAwayStatus(frame)
 		return nil
 	end
 
-	return "Away"
+	return GetAwayLabel()
 end
 
 function DataProvider.Test:GetAwayStatus(frame)
-	return "Away", 61
+	return GetAwayLabel(), 61
 end
 
 function DataProvider.Live:IsHealer(frame)
