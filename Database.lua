@@ -434,7 +434,7 @@ local DEFAULTS = {
 						anchor = "CENTER",
 						position = {
 							x = 0,
-							y = -10,
+							y = -18,
 						},
 						size = 10,
 						outline = "OUTLINE",
@@ -747,7 +747,7 @@ local DEFAULTS = {
 						anchor = "CENTER",
 						position = {
 							x = 0,
-							y = -10,
+							y = -18,
 						},
 						size = 10,
 						outline = "OUTLINE",
