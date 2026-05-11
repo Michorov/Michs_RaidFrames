@@ -8,6 +8,62 @@ addon.Frames.Widgets.Texts.Away = addon.Frames.Widgets.Texts.Away or {}
 local Away = addon.Frames.Widgets.Texts.Away
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local afkStartedAtByUnit = {}
+local awayTicker
+
+local function GetCurrentTime()
+	if GetServerTime then
+		return GetServerTime()
+	end
+
+	return math.floor(GetTime())
+end
+
+local function FormatDuration(startedAt)
+	local elapsed = math.max(0, GetCurrentTime() - startedAt)
+	local minutes = math.floor(elapsed / 60)
+	local seconds = elapsed % 60
+
+	return ("Away - %d:%02d"):format(minutes, seconds)
+end
+
+local function StopTickerIfIdle()
+	if awayTicker and next(afkStartedAtByUnit) == nil then
+		awayTicker:Cancel()
+		awayTicker = nil
+	end
+end
+
+local function EnsureTicker()
+	if awayTicker then
+		return
+	end
+
+	awayTicker = C_Timer.NewTicker(1, function()
+		for unit in pairs(afkStartedAtByUnit) do
+			addon.UpdateScheduler:Notify("awayStateChanged", unit)
+		end
+	end)
+end
+
+local function TrackAfkStart(unit)
+	if not afkStartedAtByUnit[unit] then
+		afkStartedAtByUnit[unit] = GetCurrentTime()
+	end
+
+	EnsureTicker()
+
+	return afkStartedAtByUnit[unit]
+end
+
+local function ClearAfkStart(unit)
+	if type(unit) ~= "string" or unit == "" then
+		return
+	end
+
+	afkStartedAtByUnit[unit] = nil
+	StopTickerIfIdle()
+end
 
 local function GetGameFontNormalPath()
 	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
@@ -83,6 +139,12 @@ function Away:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 	local text = frame.awayText.text
+	local unit = frame.unit
+
+	if frame.awayTrackedUnit and frame.awayTrackedUnit ~= unit then
+		ClearAfkStart(frame.awayTrackedUnit)
+		frame.awayTrackedUnit = nil
+	end
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.away ~= true then
 		text:Hide()
@@ -90,17 +152,27 @@ function Away:UpdateState(frame, settings)
 	end
 
 	if not cachedSettings.enabled then
+		ClearAfkStart(unit)
+		frame.awayTrackedUnit = nil
 		text:Hide()
 		return
 	end
 
-	local unit = frame.unit
-	if type(unit) ~= "string" or unit == "" or not UnitIsAFK(unit) then
+	if type(unit) ~= "string" or unit == "" then
 		text:Hide()
 		return
 	end
 
-	text:SetText("AFK")
+	if not UnitIsAFK(unit) then
+		ClearAfkStart(unit)
+		frame.awayTrackedUnit = nil
+		text:Hide()
+		return
+	end
+
+	frame.awayTrackedUnit = unit
+	local startedAt = TrackAfkStart(unit)
+	text:SetText(FormatDuration(startedAt))
 	text:Show()
 end
 
