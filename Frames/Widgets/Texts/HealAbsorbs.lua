@@ -9,6 +9,12 @@ local HealAbsorbs = addon.Frames.Widgets.Texts.HealAbsorbs
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
+local function GetGameFontNormalPath()
+	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
+		or STANDARD_TEXT_FONT
+		or "Fonts\\FRIZQT__.TTF"
+end
+
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -23,7 +29,6 @@ local function UpdateSettingsCache(settings)
 		anchor = healAbsorbs.anchor or "CENTER",
 		positionX = addon.Utilities:ToPixels(position.x or 0),
 		positionY = addon.Utilities:ToPixels(position.y or 0),
-		font = healAbsorbs.font or "Fonts\\FRIZQT__.TTF",
 		size = healAbsorbs.size or 10,
 		outline = addon.Utilities:NormalizeFontOutline(healAbsorbs.outline, "OUTLINE"),
 		color = {
@@ -67,7 +72,7 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
+	text:SetFont(GetGameFontNormalPath(), scaledFontSize, cachedSettings.outline)
 
 	local c = cachedSettings.color
 	text:SetTextColor(c.r, c.g, c.b, c.a)
