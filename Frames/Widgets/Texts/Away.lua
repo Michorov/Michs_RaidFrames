@@ -7,14 +7,9 @@ addon.Frames.Widgets.Texts.Away = addon.Frames.Widgets.Texts.Away or {}
 
 local Away = addon.Frames.Widgets.Texts.Away
 
-local L = addon.L
 local settingsCache = setmetatable({}, { __mode = "k" })
 local afkStartedAtByUnit = {}
 local awayTicker
-
-local function GetAwayLabel()
-	return (L and L["Away"]) or "Away"
-end
 
 local function GetCurrentTime()
 	if GetServerTime then
@@ -29,7 +24,7 @@ local function FormatDuration(label, elapsed)
 	local minutes = math.floor(elapsed / 60)
 	local seconds = elapsed % 60
 
-	return ("%s - %d:%02d"):format(label or GetAwayLabel(), minutes, seconds)
+	return ("%s - %d:%02d"):format(label or "Away", minutes, seconds)
 end
 
 local function FormatStartedAt(label, startedAt)
