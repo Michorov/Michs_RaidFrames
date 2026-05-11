@@ -145,6 +145,7 @@ function Frames:CreatePreviewFrame(parent)
 		groupStatus = false,
 		threat = false,
 		name = false,
+		away = false,
 		statusText = false,
 		absorbs = false,
 		healAbsorbs = false,

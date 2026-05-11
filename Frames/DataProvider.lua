@@ -272,6 +272,23 @@ function DataProvider.Test:GetName(frame)
 	return names[index]
 end
 
+function DataProvider.Live:GetAwayStatus(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	if not UnitIsAFK(unit) then
+		return nil
+	end
+
+	return "Away"
+end
+
+function DataProvider.Test:GetAwayStatus(frame)
+	return "Away", 61
+end
+
 function DataProvider.Live:IsHealer(frame)
 	local unit = frame and frame.unit
 	if type(unit) ~= "string" or unit == "" then

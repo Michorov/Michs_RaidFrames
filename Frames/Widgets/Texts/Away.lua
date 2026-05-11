@@ -19,12 +19,16 @@ local function GetCurrentTime()
 	return math.floor(GetTime())
 end
 
-local function FormatDuration(startedAt)
-	local elapsed = math.max(0, GetCurrentTime() - startedAt)
+local function FormatDuration(label, elapsed)
+	elapsed = math.max(0, elapsed or 0)
 	local minutes = math.floor(elapsed / 60)
 	local seconds = elapsed % 60
 
-	return ("Away - %d:%02d"):format(minutes, seconds)
+	return ("%s - %d:%02d"):format(label or "Away", minutes, seconds)
+end
+
+local function FormatStartedAt(label, startedAt)
+	return FormatDuration(label, GetCurrentTime() - startedAt)
 end
 
 local function StopTickerIfIdle()
@@ -158,21 +162,31 @@ function Away:UpdateState(frame, settings)
 		return
 	end
 
-	if type(unit) ~= "string" or unit == "" then
-		text:Hide()
-		return
-	end
+	local label, elapsed = frame.dataProvider:GetAwayStatus(frame)
 
-	if not UnitIsAFK(unit) then
+	if not label then
 		ClearAfkStart(unit)
 		frame.awayTrackedUnit = nil
 		text:Hide()
 		return
 	end
 
+	if type(elapsed) == "number" then
+		ClearAfkStart(unit)
+		frame.awayTrackedUnit = nil
+		text:SetText(FormatDuration(label, elapsed))
+		text:Show()
+		return
+	end
+
+	if type(unit) ~= "string" or unit == "" then
+		text:Hide()
+		return
+	end
+
 	frame.awayTrackedUnit = unit
 	local startedAt = TrackAfkStart(unit)
-	text:SetText(FormatDuration(startedAt))
+	text:SetText(FormatStartedAt(label, startedAt))
 	text:Show()
 end
 
