@@ -159,10 +159,6 @@ local function ShowPreview(frame, cachedSettings)
 	local firstAura = auras[1]
 	local color = GetPreviewColor(frame, firstAura)
 
-	container:SetParent(frame)
-	container:ClearAllPoints()
-	container:SetAllPoints(frame)
-	container:SetFrameStrata(frame:GetFrameStrata())
 	container:Show()
 
 	ApplyPreviewGradient(container.previewGradient, firstAura, color)
@@ -207,6 +203,8 @@ function Dispels:Ensure(frame)
 	if not frame.dispelsContainer then
 		local container = CreateFrame("Frame", nil, frame)
 		container:EnableMouse(false)
+		container:ClearAllPoints()
+		container:SetAllPoints(frame)
 		container:SetFrameLevel(17)
 		frame.dispelsContainer = container
 	end
@@ -245,11 +243,6 @@ function Dispels:UpdateSettings(frame, settings)
 	end
 
 	local dispelIndicatorOption = cachedSettings.showOnlyPlayerDispellable and 1 or 2
-
-	container:SetParent(frame)
-	container:ClearAllPoints()
-	container:SetAllPoints(frame)
-	container:SetFrameStrata(frame:GetFrameStrata())
 
 	container:SetAttribute("max-buffs", 0)
 	container:SetAttribute("max-debuffs", 0)
