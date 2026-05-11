@@ -100,6 +100,7 @@ Options/Pages/Bars/HealAbsorbs.lua
 Options/Pages/Bars/Absorbs.lua
 Options/Pages/Bars.lua
 Options/Pages/Texts/Name.lua
+Options/Pages/Texts/Away.lua
 Options/Pages/Texts/HealAbsorbs.lua
 Options/Pages/Texts.lua
 Options/Pages/Auras/Buffs.lua
