@@ -10,6 +10,16 @@ local Dispels = addon.Options.Pages.Auras.Dispels
 local subpage
 local L = addon.L
 
+local gradientDirectionOptions = {
+	{ value = 0, text = L["Top"] },
+	{ value = 1, text = L["Bottom"] },
+}
+
+local function UpdateGradientDirectionOptions()
+	gradientDirectionOptions[1].text = L["Top"]
+	gradientDirectionOptions[2].text = L["Bottom"]
+end
+
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
 	if content and content.GetControllerState then
@@ -43,10 +53,19 @@ local function ResolveBoolean(value, defaultValue)
 	return value == true
 end
 
+local function ResolveGradientDirection(value, defaultValue)
+	if value == 0 or value == 1 then
+		return value
+	end
+
+	return defaultValue or 0
+end
+
 local function GetModeDefaults()
 	return {
 		enabled = true,
 		showOnlyPlayerDispellable = true,
+		gradientDirection = 0,
 	}
 end
 
@@ -105,19 +124,38 @@ function Dispels:Ensure(parent)
 		end, "dispelsSettingsChanged")
 	end)
 
+	subpage.gradientDirectionDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Start Gradient From"])
+	subpage.gradientDirectionDropdown:SetLayoutWidth(174)
+	subpage.gradientDirectionDropdown:SetOptions(gradientDirectionOptions)
+	subpage.gradientDirectionDropdown:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.dispels = section.widgets.icons.dispels or {}
+			section.widgets.icons.dispels.gradientDirection = value
+		end, "dispelsSettingsChanged")
+	end)
+
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
 		showOnlyPlayerDispellableCheckbox = subpage.showOnlyPlayerDispellableCheckbox,
+		gradientDirectionDropdown = subpage.gradientDirectionDropdown,
 	}
 
 	function subpage:UpdateLocale()
+		UpdateGradientDirectionOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
 		self.showOnlyPlayerDispellableCheckbox:SetText(L["Only Dispellable By Me"])
+		self.gradientDirectionDropdown:SetLabel(L["Start Gradient From"])
+		self.gradientDirectionDropdown:SetOptions(gradientDirectionOptions)
 	end
 
 	function subpage:UpdateLayout()
 		local controls = self.controls
+		local rowStepPx = addon.Utilities:ToPixels(50)
+		local topRowAdjustmentPx = addon.Utilities:ToPixels(8)
 		local firstRowOffsetPx = 0
+		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
 		local secondColumnOffsetPx = addon.Utilities:ToPixels(204)
 
 		for _, control in pairs(controls) do
@@ -137,6 +175,15 @@ function Dispels:Ensure(parent)
 			addon.Utilities:ToUI(secondColumnOffsetPx),
 			-addon.Utilities:ToUI(firstRowOffsetPx)
 		)
+
+		controls.gradientDirectionDropdown:ClearAllPoints()
+		controls.gradientDirectionDropdown:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(secondRowOffsetPx)
+		)
 	end
 
 	function subpage:UpdateState(profile)
@@ -155,6 +202,9 @@ function Dispels:Ensure(parent)
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(dispels.enabled, defaults.enabled))
 		controls.showOnlyPlayerDispellableCheckbox:SetChecked(
 			ResolveBoolean(dispels.showOnlyPlayerDispellable, defaults.showOnlyPlayerDispellable)
+		)
+		controls.gradientDirectionDropdown:SetValue(
+			ResolveGradientDirection(dispels.gradientDirection, defaults.gradientDirection)
 		)
 	end
 
