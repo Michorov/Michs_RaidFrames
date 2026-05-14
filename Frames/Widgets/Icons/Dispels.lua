@@ -14,10 +14,12 @@ local function UpdateSettingsCache(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local dispels = icons.dispels or {}
+	local gradientDirection = dispels.gradientDirection == 1 and 1 or 0
 
 	local result = {
 		enabled = dispels.enabled ~= false,
 		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
+		gradientDirection = gradientDirection,
 	}
 
 	settingsCache[settings] = result
@@ -103,7 +105,30 @@ local function GetPreviewColor(frame, aura)
 	return color or DEBUFF_TYPE_MAGIC_COLOR or { r = 0.2, g = 0.6, b = 1, a = 1 }
 end
 
-local function ApplyPreviewGradient(texture, aura, color)
+local function ApplyPreviewGradientDirection(texture, gradientDirection)
+	if gradientDirection ~= 1 then
+		return
+	end
+
+	local upperLeftX, upperLeftY, lowerLeftX, lowerLeftY, upperRightX, upperRightY, lowerRightX, lowerRightY =
+		texture:GetTexCoord()
+	if upperRightX then
+		texture:SetTexCoord(
+			lowerLeftX,
+			lowerLeftY,
+			upperLeftX,
+			upperLeftY,
+			lowerRightX,
+			lowerRightY,
+			upperRightX,
+			upperRightY
+		)
+	else
+		texture:SetTexCoord(upperLeftX, upperLeftY, lowerLeftY, lowerLeftX)
+	end
+end
+
+local function ApplyPreviewGradient(texture, aura, color, gradientDirection)
 	texture:ClearAllPoints()
 	texture:SetAllPoints(texture:GetParent())
 	texture:SetTexCoord(0, 1, 0, 1)
@@ -116,11 +141,17 @@ local function ApplyPreviewGradient(texture, aura, color)
 			TextureKitConstants.AddressModeWrap,
 			TextureKitConstants.AddressModeClamp
 		)
+		ApplyPreviewGradientDirection(texture, gradientDirection)
 	elseif texture.SetAtlas then
 		texture:SetAtlas("_RaidFrame-Dispel-Highlight-Horizontal", false)
+		ApplyPreviewGradientDirection(texture, gradientDirection)
 	elseif texture.SetGradientAlpha then
 		texture:SetTexture("Interface\\Buttons\\WHITE8x8")
-		texture:SetGradientAlpha("VERTICAL", color.r, color.g, color.b, 0, color.r, color.g, color.b, 0.65)
+		if gradientDirection == 1 then
+			texture:SetGradientAlpha("VERTICAL", color.r, color.g, color.b, 0.65, color.r, color.g, color.b, 0)
+		else
+			texture:SetGradientAlpha("VERTICAL", color.r, color.g, color.b, 0, color.r, color.g, color.b, 0.65)
+		end
 	else
 		texture:SetColorTexture(color.r, color.g, color.b, 0.35)
 	end
@@ -161,7 +192,7 @@ local function ShowPreview(frame, cachedSettings)
 
 	container:Show()
 
-	ApplyPreviewGradient(container.previewGradient, firstAura, color)
+	ApplyPreviewGradient(container.previewGradient, firstAura, color, cachedSettings.gradientDirection)
 	local borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
 	container.previewBorder:ClearAllPoints()
 	container.previewBorder:SetPoint("TOPLEFT", container, "TOPLEFT", borderInset, -borderInset)
@@ -253,7 +284,7 @@ function Dispels:UpdateSettings(frame, settings)
 	container:SetAttribute("show-dispel-indicator-overlay", true)
 	container:SetAttribute("suppress-dispel-border-icons", true)
 	container:SetAttribute("dispel-indicator-option", dispelIndicatorOption)
-	container:SetAttribute("aura-organization-type", 0)
+	container:SetAttribute("aura-organization-type", cachedSettings.gradientDirection)
 	container:SetAttribute("group-type", groupType)
 	container:SetAttribute("power-bar-used-height", 0)
 	container:SetAttribute("icon-size", 12)
