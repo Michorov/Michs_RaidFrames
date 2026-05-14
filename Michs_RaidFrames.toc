@@ -2,7 +2,7 @@
 ## Title: Mich's RaidFrames
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
-## Version: 2.2.5 
+## Version: 2.2.6
 ## SavedVariables: Michs_RaidFramesDB
 
 # Ace3
