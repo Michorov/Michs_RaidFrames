@@ -246,28 +246,10 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 		end
 	end
 
-	local function UpdateTestGroup(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, frame in ipairs(group.frames) do
-			UpdateFrame(frame, settings)
-		end
-	end
-
 	UpdateHeaderChildren(partyHeader.container, partySettings)
 
 	for _, header in ipairs(raidHeaders.containers) do
 		UpdateHeaderChildren(header, raidSettings)
-	end
-
-	if testPartyGroup.isActive then
-		UpdateTestGroup(testPartyGroup, partySettings)
-	end
-
-	if testRaidGroup.isActive then
-		UpdateTestGroup(testRaidGroup, profile.raid or {})
 	end
 
 	if previewFrames.party then
