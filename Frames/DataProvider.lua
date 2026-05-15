@@ -158,19 +158,12 @@ end
 function DataProvider.Test:GetHealth(frame)
 	local healthSamples = {
 		{ current = 100000, max = 100000 },
-		{ current = 87300, max = 100000 },
-		{ current = 74200, max = 100000 },
-		{ current = 61500, max = 100000 },
-		{ current = 48800, max = 100000 },
-		{ current = 35100, max = 100000 },
-		{ current = 52645, max = 100000 },
-		{ current = 6300, max = 100000 },
+		{ current = 70000, max = 100000 },
 	}
 
 	local healthIndex = frame and frame.testHealthIndex or 1
-	healthIndex = ((healthIndex - 1) % #healthSamples) + 1
+	local sample = healthSamples[healthIndex] or healthSamples[1]
 
-	local sample = healthSamples[healthIndex]
 	return sample.current, sample.max
 end
 

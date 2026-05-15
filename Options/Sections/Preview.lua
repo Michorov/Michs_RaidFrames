@@ -60,9 +60,21 @@ local previewWidgetFlags = {
 }
 
 local previewPageWidgets = {
-	general = { enabled = { "background", "health", "border", "power", "name", "roleIcon" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
-	layout = { enabled = { "background", "health", "border", "power", "name", "roleIcon" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
-	frames = { enabled = { "background", "health", "border", "power", "name", "roleIcon" }, controls = {}, testData = { testHealthIndex = 3, testPowerIndex = 1 } },
+	general = {
+		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
+		controls = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+	},
+	layout = {
+		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
+		controls = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+	},
+	frames = {
+		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
+		controls = {},
+		testData = { testHealthIndex = 2, testPowerIndex = 1 },
+	},
 	bars = {
 		enabled = { "background", "health", "border", "name", "roleIcon" },
 		controls = { "power", "absorbs", "healAbsorbs" },
@@ -90,7 +102,11 @@ local previewPageWidgets = {
 		controls = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
-	profiles = { enabled = { "background", "health", "border", "power", "name", "roleIcon" }, controls = {}, testData = { testHealthIndex = 1, testPowerIndex = 1 } },
+	profiles = {
+		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
+		controls = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+	},
 }
 
 Preview.WidgetFlags = previewWidgetFlags
