@@ -12,7 +12,7 @@ local BACKGROUND_CLASS_COLORS = {
 	ROGUE = { r = 0.902, g = 0.867, b = 0.373 }, -- #E6DD5F
 	PRIEST = { r = 0.749, g = 0.749, b = 0.749 }, -- #BFBFBF
 	DEATHKNIGHT = { r = 0.690, g = 0.110, b = 0.208 }, -- #B01C35
-	SHAMAN = { r = 0.000, g = 0.396, b = 0.784 }, -- #0065C8
+	SHAMAN = { r = 0.000, g = 0.353, b = 0.698 }, -- #005AB2
 	MAGE = { r = 0.224, g = 0.702, b = 0.831 }, -- #39B3D4
 	WARLOCK = { r = 0.478, g = 0.478, b = 0.839 }, -- #7A7AD6
 	MONK = { r = 0.000, g = 0.902, b = 0.537 }, -- #00E689
