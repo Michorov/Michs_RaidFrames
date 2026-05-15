@@ -6,19 +6,19 @@ addon.Style.Colors = addon.Style.Colors or {}
 local Colors = addon.Style.Colors
 
 local BACKGROUND_CLASS_COLORS = {
-	WARRIOR = { r = 0.702, g = 0.549, b = 0.388 }, -- #B38C63
-	PALADIN = { r = 0.867, g = 0.494, b = 0.655 }, -- #DD7EA7
-	HUNTER = { r = 0.604, g = 0.749, b = 0.408 }, -- #9ABF68
-	ROGUE = { r = 0.902, g = 0.867, b = 0.373 }, -- #E6DD5F
-	PRIEST = { r = 0.749, g = 0.749, b = 0.749 }, -- #BFBFBF
-	DEATHKNIGHT = { r = 0.690, g = 0.110, b = 0.208 }, -- #B01C35
+	WARRIOR = { r = 0.624, g = 0.490, b = 0.345 }, -- #9F7D58
+	PALADIN = { r = 0.769, g = 0.439, b = 0.584 }, -- #C47095
+	HUNTER = { r = 0.537, g = 0.667, b = 0.361 }, -- #89AA5C
+	ROGUE = { r = 0.800, g = 0.769, b = 0.329 }, -- #CCC454
+	PRIEST = { r = 0.800, g = 0.800, b = 0.800 }, -- #CCCCCC
+	DEATHKNIGHT = { r = 0.616, g = 0.098, b = 0.184 }, -- #9D192F
 	SHAMAN = { r = 0.000, g = 0.353, b = 0.698 }, -- #005AB2
-	MAGE = { r = 0.224, g = 0.702, b = 0.831 }, -- #39B3D4
-	WARLOCK = { r = 0.478, g = 0.478, b = 0.839 }, -- #7A7AD6
-	MONK = { r = 0.000, g = 0.902, b = 0.537 }, -- #00E689
-	DRUID = { r = 0.902, g = 0.439, b = 0.035 }, -- #E67009
-	DEMONHUNTER = { r = 0.576, g = 0.169, b = 0.710 }, -- #932BB5
-	EVOKER = { r = 0.180, g = 0.518, b = 0.447 }, -- #2E8472
+	MAGE = { r = 0.200, g = 0.624, b = 0.737 }, -- #339FBC
+	WARLOCK = { r = 0.424, g = 0.427, b = 0.745 }, -- #6C6DBE
+	MONK = { r = 0.000, g = 0.800, b = 0.478 }, -- #00CC7A
+	DRUID = { r = 0.800, g = 0.388, b = 0.031 }, -- #CC6308
+	DEMONHUNTER = { r = 0.510, g = 0.149, b = 0.631 }, -- #8226A1
+	EVOKER = { r = 0.161, g = 0.463, b = 0.400 }, -- #297666
 }
 
 local TEXT_CLASS_COLORS = {
