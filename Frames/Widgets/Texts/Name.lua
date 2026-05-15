@@ -23,12 +23,12 @@ local function UpdateSettingsCache(settings)
 		positionY = addon.Utilities:ToPixels(position.y or -2),
 		classColor = name.classColor == true,
 		color = {
-			r = color.r or 0,
-			g = color.g or 0,
-			b = color.b or 0,
+			r = color.r or 1,
+			g = color.g or 1,
+			b = color.b or 1,
 			a = color.a or 1,
 		},
-		font = name.font or "Interface\\AddOns\\Michs_RaidFrames\\Media\\Fonts\\Roboto-Bold.ttf",
+		font = name.font or "Fonts\\ARIALN.TTF",
 		size = name.size or 12,
 		outline = addon.Utilities:NormalizeFontOutline(name.outline),
 		truncate = name.truncate == true,
@@ -82,6 +82,8 @@ function Name:UpdateSettings(frame, settings)
 	)
 
 	nameText:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
+	nameText:SetShadowColor(0, 0, 0, 0.9)
+	nameText:SetShadowOffset(1, -1)
 	nameText:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 
