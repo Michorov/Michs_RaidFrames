@@ -107,7 +107,7 @@ function Frames:CreateTestFrame(group, frameIndex)
 
 	frame.testIndex = frameIndex
 	frame.testClassIndex = math.random(1, 13)
-	frame.testHealthIndex = math.random(1, 8)
+	frame.testHealthIndex = 1
 	frame.testPowerIndex = math.random(1, 8)
 	frame.testAbsorbIndex = math.random(1, 8)
 	frame.testHealAbsorbIndex = math.random(1, 8)
