@@ -240,7 +240,7 @@ function Dispels:Ensure(frame)
 		frame.dispelsContainer = container
 	end
 
-	if frame.previewWidgetVisibility or frame.dataProvider == addon.Frames.DataProvider.Test then
+	if frame.previewWidgetVisibility then
 		EnsurePreview(frame.dispelsContainer)
 	end
 end
@@ -251,7 +251,7 @@ function Dispels:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	if frame.previewWidgetVisibility or frame.dataProvider == addon.Frames.DataProvider.Test then
+	if frame.previewWidgetVisibility then
 		RemoveAnchor(frame)
 		ShowPreview(frame, cachedSettings)
 		return
