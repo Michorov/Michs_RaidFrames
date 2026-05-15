@@ -420,7 +420,6 @@ function FrameRegistry:CreateTestGroup(groupType)
 		addon.Modules:EnsureFrame(frame, settings)
 		addon.Modules:UpdateSettingsFrame(frame, settings)
 		addon.Frames.Base.Health:UpdateState(frame, settings)
-		addon.Frames.Base.Power:UpdateState(frame, settings)
 		addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 	end
 
@@ -458,7 +457,6 @@ function FrameRegistry:EnableTestMode(groupType)
 		for _, frame in ipairs(group.frames) do
 			addon.Modules:UpdateSettingsFrame(frame, settings)
 			addon.Frames.Base.Health:UpdateState(frame, settings)
-			addon.Frames.Base.Power:UpdateState(frame, settings)
 			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 		end
 
