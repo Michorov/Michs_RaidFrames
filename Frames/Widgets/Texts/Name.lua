@@ -41,10 +41,10 @@ end
 local function GetNameColor(frame, cachedSettings)
 	if cachedSettings.classColor then
 		if frame.previewWidgetVisibility then
-			return addon.Utilities:GetUnitClassColor("player", cachedSettings.color)
+			return addon.Style.Colors:GetUnitClassTextColor("player", cachedSettings.color)
 		end
 
-		return frame.dataProvider:GetClassColor(frame, cachedSettings.color)
+		return addon.Style.Colors:GetClassTextColor(frame.dataProvider:GetClassToken(frame), cachedSettings.color)
 	end
 
 	local c = cachedSettings.color

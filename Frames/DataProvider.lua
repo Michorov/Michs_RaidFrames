@@ -53,8 +53,6 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
-local TEST_SHAMAN_CLASS_COLOR = { r = 0.00, g = 0.28, b = 0.65 }
-
 local RAID_BUFF_REMINDER_CLASS_BUFFS = {
 	DRUID = { 1126 }, -- Mark of the Wild
 	MAGE = { 1459 }, -- Arcane Intellect
@@ -176,28 +174,20 @@ function DataProvider.Test:GetHealth(frame)
 	return sample.current, sample.max
 end
 
-function DataProvider.Live:GetClassColor(frame, fallbackColor)
-	return addon.Utilities:GetUnitClassColor(frame and frame.unit, fallbackColor)
+function DataProvider.Live:GetClassToken(frame)
+	local unit = frame and frame.unit
+	if not unit or not UnitExists(unit) then
+		return nil
+	end
+
+	return select(2, UnitClass(unit))
 end
 
-function DataProvider.Test:GetClassColor(frame, fallbackColor)
+function DataProvider.Test:GetClassToken(frame)
 	local index = frame and frame.testClassIndex or 1
 	index = ((index - 1) % #CLASS_SAMPLES) + 1
 
-	local fallback = fallbackColor or {}
-	local fa = fallback.a or 1
-	local classToken = CLASS_SAMPLES[index]
-
-	if classToken == "SHAMAN" then
-		return TEST_SHAMAN_CLASS_COLOR.r, TEST_SHAMAN_CLASS_COLOR.g, TEST_SHAMAN_CLASS_COLOR.b, fa
-	end
-
-	local color = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
-	if color then
-		return color.r, color.g, color.b, fa
-	end
-
-	return fallback.r or 1, fallback.g or 1, fallback.b or 1, fa
+	return CLASS_SAMPLES[index]
 end
 
 function DataProvider.Live:GetName(frame)
