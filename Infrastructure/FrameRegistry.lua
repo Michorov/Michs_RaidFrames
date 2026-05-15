@@ -440,11 +440,6 @@ function FrameRegistry:CreateTestGroup(groupType)
 		addon.Frames.Base.Health:UpdateState(frame, settings)
 		addon.Frames.Base.Power:UpdateState(frame, settings)
 		addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
-		addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 	end
 
 	addon.Frames:UpdateLayout(group, settings)
@@ -483,11 +478,6 @@ function FrameRegistry:EnableTestMode(groupType)
 			addon.Frames.Base.Health:UpdateState(frame, settings)
 			addon.Frames.Base.Power:UpdateState(frame, settings)
 			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
-			addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end
 
 		addon.Frames:UpdateLayout(group, settings)
