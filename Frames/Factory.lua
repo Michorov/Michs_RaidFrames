@@ -3,6 +3,31 @@ local _, addon = ...
 addon.Frames = addon.Frames or {}
 local Frames = addon.Frames
 
+local function SaveTestGroupPosition(group)
+	local groupType = group and group.testGroupType
+	if groupType ~= "party" and groupType ~= "raid" then
+		return
+	end
+
+	local centerX, centerY = group:GetCenter()
+	local parentCenterX, parentCenterY = UIParent:GetCenter()
+	if not centerX or not centerY or not parentCenterX or not parentCenterY then
+		return
+	end
+
+	local positionXPx = addon.Utilities:Unscale(addon.Utilities:ToPixels(centerX - parentCenterX))
+	local positionYPx = addon.Utilities:Unscale(addon.Utilities:ToPixels(centerY - parentCenterY))
+
+	local profile = addon.Database:GetProfile()
+	profile[groupType] = profile[groupType] or {}
+	profile[groupType].position = profile[groupType].position or {}
+	profile[groupType].position.x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
+	profile[groupType].position.y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
+
+	addon.Options.Data:RefreshProfile()
+	addon.UpdateScheduler:Notify("layoutChanged")
+end
+
 function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local size = raidSettings.size or {}
 	local spacing = raidSettings.spacing or {}
@@ -86,10 +111,28 @@ function Frames:CreateTestGroup(groupType)
 	local groupName = "MRF_Test" .. groupType .. "Group"
 	local group = CreateFrame("Frame", groupName, UIParent)
 	group.name = groupName
+	group.testGroupType = string.lower(groupType)
 
 	group:SetSize(1, 1)
 	group:ClearAllPoints()
 	group:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+	group:SetMovable(true)
+	group:SetClampedToScreen(true)
+	group:EnableMouse(true)
+	group:RegisterForDrag("LeftButton")
+
+	group:SetScript("OnDragStart", function(self)
+		if InCombatLockdown() then
+			return
+		end
+
+		self:StartMoving()
+	end)
+
+	group:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		SaveTestGroupPosition(self)
+	end)
 
 	return group
 end
@@ -114,7 +157,7 @@ function Frames:CreateTestFrame(group, frameIndex)
 
 	frame.dataProvider = addon.Frames.DataProvider.Test
 
-	frame:RegisterForClicks("AnyUp")
+	frame:EnableMouse(false)
 	frame:SetSize(1, 1)
 
 	return frame

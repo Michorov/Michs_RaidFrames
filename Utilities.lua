@@ -59,6 +59,11 @@ function Utilities:Scale(pixelCount)
 	return self:RoundToNearestInt(scaledPx)
 end
 
+function Utilities:Unscale(pixelCount)
+	local unscaledPx = (pixelCount or 0) / GetGlobalScale()
+	return self:RoundToNearestInt(unscaledPx)
+end
+
 function Utilities:ScaleEven(pixelCount)
 	local px = self:Scale(pixelCount)
 	if (px % 2) ~= 0 then
