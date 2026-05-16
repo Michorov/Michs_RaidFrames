@@ -25,6 +25,9 @@ Locales/ruRU.lua
 Locales/zhCN.lua
 Locales/zhTW.lua
 
+# Style
+Style/Colors.lua
+
 # Helpers
 Utilities.lua
 Database.lua

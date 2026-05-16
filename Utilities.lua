@@ -15,8 +15,6 @@ local ALLOWED_FONT_OUTLINE_VALUES = {
 	["THICKOUTLINE,MONOCHROME"] = true,
 }
 
-local SHAMAN_CLASS_COLOR = { r = 0.00, g = 0.28, b = 0.65 }
-
 function Utilities:RoundToNearestInt(value)
 	value = value or 0
 
@@ -61,6 +59,11 @@ function Utilities:Scale(pixelCount)
 	return self:RoundToNearestInt(scaledPx)
 end
 
+function Utilities:Unscale(pixelCount)
+	local unscaledPx = (pixelCount or 0) / GetGlobalScale()
+	return self:RoundToNearestInt(unscaledPx)
+end
+
 function Utilities:ScaleEven(pixelCount)
 	local px = self:Scale(pixelCount)
 	if (px % 2) ~= 0 then
@@ -92,34 +95,6 @@ function Utilities:NormalizeFontOutline(outline, fallback)
 	end
 
 	return normalizedFallback
-end
-
-function Utilities:GetUnitClassColor(unit, fallbackColor)
-	local fallback = fallbackColor or {}
-	local fr = fallback.r or 1
-	local fg = fallback.g or 1
-	local fb = fallback.b or 1
-	local fa = fallback.a or 1
-
-	if not unit or not UnitExists(unit) then
-		return fr, fg, fb, fa
-	end
-
-	local classFilename = select(2, UnitClass(unit))
-	if not classFilename then
-		return fr, fg, fb, fa
-	end
-
-	if classFilename == "SHAMAN" then
-		return SHAMAN_CLASS_COLOR.r, SHAMAN_CLASS_COLOR.g, SHAMAN_CLASS_COLOR.b, fa
-	end
-
-	local classColor = RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFilename]
-	if not classColor then
-		return fr, fg, fb, fa
-	end
-
-	return classColor.r or fr, classColor.g or fg, classColor.b or fb, fa
 end
 
 function Utilities:GetPlayerClassFileName()

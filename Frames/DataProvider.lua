@@ -53,8 +53,6 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
-local TEST_SHAMAN_CLASS_COLOR = { r = 0.00, g = 0.28, b = 0.65 }
-
 local RAID_BUFF_REMINDER_CLASS_BUFFS = {
 	DRUID = { 1126 }, -- Mark of the Wild
 	MAGE = { 1459 }, -- Arcane Intellect
@@ -160,44 +158,29 @@ end
 function DataProvider.Test:GetHealth(frame)
 	local healthSamples = {
 		{ current = 100000, max = 100000 },
-		{ current = 87300, max = 100000 },
-		{ current = 74200, max = 100000 },
-		{ current = 61500, max = 100000 },
-		{ current = 48800, max = 100000 },
-		{ current = 35100, max = 100000 },
-		{ current = 52645, max = 100000 },
-		{ current = 6300, max = 100000 },
+		{ current = 70000, max = 100000 },
 	}
 
 	local healthIndex = frame and frame.testHealthIndex or 1
-	healthIndex = ((healthIndex - 1) % #healthSamples) + 1
+	local sample = healthSamples[healthIndex] or healthSamples[1]
 
-	local sample = healthSamples[healthIndex]
 	return sample.current, sample.max
 end
 
-function DataProvider.Live:GetClassColor(frame, fallbackColor)
-	return addon.Utilities:GetUnitClassColor(frame and frame.unit, fallbackColor)
+function DataProvider.Live:GetClassToken(frame)
+	local unit = frame and frame.unit
+	if not unit or not UnitExists(unit) then
+		return nil
+	end
+
+	return select(2, UnitClass(unit))
 end
 
-function DataProvider.Test:GetClassColor(frame, fallbackColor)
+function DataProvider.Test:GetClassToken(frame)
 	local index = frame and frame.testClassIndex or 1
 	index = ((index - 1) % #CLASS_SAMPLES) + 1
 
-	local fallback = fallbackColor or {}
-	local fa = fallback.a or 1
-	local classToken = CLASS_SAMPLES[index]
-
-	if classToken == "SHAMAN" then
-		return TEST_SHAMAN_CLASS_COLOR.r, TEST_SHAMAN_CLASS_COLOR.g, TEST_SHAMAN_CLASS_COLOR.b, fa
-	end
-
-	local color = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
-	if color then
-		return color.r, color.g, color.b, fa
-	end
-
-	return fallback.r or 1, fallback.g or 1, fallback.b or 1, fa
+	return CLASS_SAMPLES[index]
 end
 
 function DataProvider.Live:GetName(frame)
@@ -209,94 +192,7 @@ function DataProvider.Live:GetName(frame)
 end
 
 function DataProvider.Test:GetName(frame)
-	if frame and frame.testName then
-		return frame.testName
-	end
-
-	local names = {
-		"Aelrin",
-		"Brakka",
-		"Caelynn",
-		"Dorun",
-		"Elyra",
-		"Faelor",
-		"Garrik",
-		"Halyra",
-		"Irven",
-		"Jorik",
-		"Kaelis",
-		"Lunara",
-		"Morven",
-		"Nyra",
-		"Orin",
-		"Pyrel",
-		"Quorin",
-		"Rhyssa",
-		"Selric",
-		"Thalen",
-		"Vaelor",
-		"Wrenna",
-		"Xalor",
-		"Yselle",
-		"Zorik",
-		"Ashara",
-		"Belric",
-		"Corven",
-		"Daelis",
-		"Elthor",
-		"Fenra",
-		"Galric",
-		"Helra",
-		"Ilyndra",
-		"Jareth",
-		"Kelza",
-		"Lorven",
-		"Myrra",
-		"Nareth",
-		"Olyra",
-		"Perin",
-		"Quella",
-		"Raelor",
-		"Syra",
-		"Torven",
-		"Ulric",
-		"Velyra",
-		"Wystan",
-		"Xyra",
-		"Yorik",
-		"Zelra",
-		"Althor",
-		"Brynna",
-		"Cerik",
-		"Draven",
-		"Esmira",
-		"Falkor",
-		"Glynn",
-		"Heron",
-		"Isolde",
-		"Jandor",
-		"Kyrra",
-		"Lethan",
-		"Maelis",
-		"Nymor",
-		"Orla",
-		"Praxis",
-		"Quenra",
-		"Rovan",
-		"Seris",
-		"Tyral",
-		"Ulnar",
-		"Vaelis",
-		"Wyra",
-		"Xandor",
-		"Ysara",
-		"Zarek",
-	}
-
-	local index = frame and frame.testIndex or 1
-	index = ((index - 1) % #names) + 1
-
-	return names[index]
+	return frame and frame.testName or ""
 end
 
 function DataProvider.Live:GetAwayStatus(frame)

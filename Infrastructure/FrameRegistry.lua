@@ -246,28 +246,10 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 		end
 	end
 
-	local function UpdateTestGroup(group, settings)
-		if not group or not group.frames then
-			return
-		end
-
-		for _, frame in ipairs(group.frames) do
-			UpdateFrame(frame, settings)
-		end
-	end
-
 	UpdateHeaderChildren(partyHeader.container, partySettings)
 
 	for _, header in ipairs(raidHeaders.containers) do
 		UpdateHeaderChildren(header, raidSettings)
-	end
-
-	if testPartyGroup.isActive then
-		UpdateTestGroup(testPartyGroup, partySettings)
-	end
-
-	if testRaidGroup.isActive then
-		UpdateTestGroup(testRaidGroup, profile.raid or {})
 	end
 
 	if previewFrames.party then
@@ -438,13 +420,7 @@ function FrameRegistry:CreateTestGroup(groupType)
 		addon.Modules:EnsureFrame(frame, settings)
 		addon.Modules:UpdateSettingsFrame(frame, settings)
 		addon.Frames.Base.Health:UpdateState(frame, settings)
-		addon.Frames.Base.Power:UpdateState(frame, settings)
 		addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
-		addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
-		addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 	end
 
 	addon.Frames:UpdateLayout(group, settings)
@@ -481,13 +457,7 @@ function FrameRegistry:EnableTestMode(groupType)
 		for _, frame in ipairs(group.frames) do
 			addon.Modules:UpdateSettingsFrame(frame, settings)
 			addon.Frames.Base.Health:UpdateState(frame, settings)
-			addon.Frames.Base.Power:UpdateState(frame, settings)
 			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
-			addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
-			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end
 
 		addon.Frames:UpdateLayout(group, settings)
