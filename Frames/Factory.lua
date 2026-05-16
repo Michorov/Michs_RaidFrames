@@ -146,7 +146,7 @@ function Frames:CreateTestFrame(group, frameIndex)
 	local frame = CreateFrame("Button", frameName, group)
 
 	frame.unit = nil
-	frame.testName = "Test Name"
+	frame.testName = "Test Frame"
 
 	frame.testIndex = frameIndex
 	frame.testClassIndex = math.random(1, 13)
