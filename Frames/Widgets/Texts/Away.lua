@@ -132,6 +132,8 @@ function Away:UpdateSettings(frame, settings)
 	)
 
 	text:SetFont(GetGameFontNormalPath(), scaledFontSize, cachedSettings.outline)
+	text:SetShadowColor(0, 0, 0, 0.9)
+	text:SetShadowOffset(1, -1)
 
 	local c = cachedSettings.color
 	text:SetTextColor(c.r, c.g, c.b, c.a)
