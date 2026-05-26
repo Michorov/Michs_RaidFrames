@@ -416,11 +416,6 @@ function FrameRegistry:CreateTestGroup(groupType)
 	for frameIndex = 1, frameCount do
 		local frame = addon.Frames:CreateTestFrame(group.container, frameIndex)
 		group.frames[frameIndex] = frame
-
-		addon.Modules:EnsureFrame(frame, settings)
-		addon.Modules:UpdateSettingsFrame(frame, settings)
-		addon.Frames.Base.Health:UpdateState(frame, settings)
-		addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 	end
 
 	addon.Frames:UpdateLayout(group, settings)
@@ -452,12 +447,6 @@ function FrameRegistry:EnableTestMode(groupType)
 			settings = addon.Database:GetProfile().party or {}
 		else
 			settings = addon.Database:GetProfile().raid or {}
-		end
-
-		for _, frame in ipairs(group.frames) do
-			addon.Modules:UpdateSettingsFrame(frame, settings)
-			addon.Frames.Base.Health:UpdateState(frame, settings)
-			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 		end
 
 		addon.Frames:UpdateLayout(group, settings)
