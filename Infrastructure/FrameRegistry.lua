@@ -43,8 +43,61 @@ local previewFrames = {
 
 local unitFrameMap = {}
 
+local miniCCProviderRegistered = false
+local miniCCRefreshFrames = nil
+local miniCCRefreshQueued = false
+
 local function IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
+end
+
+local function GetFrames()
+	local frames = {}
+
+	for _, frame in pairs(unitFrameMap) do
+		frames[#frames + 1] = frame
+	end
+
+	return frames
+end
+
+local function NotifyMiniCCFramesChanged()
+	if not miniCCRefreshFrames or miniCCRefreshQueued then
+		return
+	end
+
+	miniCCRefreshQueued = true
+	C_Timer.After(0, function()
+		miniCCRefreshQueued = false
+
+		if miniCCRefreshFrames then
+			miniCCRefreshFrames()
+		end
+	end)
+end
+
+local function RegisterMiniCCProvider()
+	if miniCCProviderRegistered then
+		return
+	end
+
+	local api = _G.MiniCCApi and _G.MiniCCApi.v1
+	if not api or type(api.RegisterFrameProvider) ~= "function" then
+		return
+	end
+
+	api:RegisterFrameProvider({
+		Name = "Michs_RaidFrames",
+		GetFrames = GetFrames,
+		RegisterRefreshFrames = function(callback)
+			if type(callback) == "function" then
+				miniCCRefreshFrames = callback
+				NotifyMiniCCFramesChanged()
+			end
+		end,
+	})
+
+	miniCCProviderRegistered = true
 end
 
 function MRF_OnUnitFrameLoad(frame)
@@ -79,6 +132,8 @@ function MRF_OnUnitChanged(frame, unit)
 	if unit then
 		unitFrameMap[unit] = frame
 	end
+
+	NotifyMiniCCFramesChanged()
 
 	if not IsSupportedUnit(unit) then
 		return
@@ -154,6 +209,7 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 		end
 
 		self.restoreLiveDriversAfterCombat = false
+		NotifyMiniCCFramesChanged()
 		return
 	end
 
@@ -172,6 +228,7 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	end
 
 	self.restoreLiveDriversAfterCombat = false
+	NotifyMiniCCFramesChanged()
 end
 
 function FrameRegistry:ResolveRaidSettings(profile)
@@ -357,6 +414,7 @@ function FrameRegistry:Initialize()
 
 	addon.Frames:UpdateLayout(partyHeader, partySettings)
 	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
+	RegisterMiniCCProvider()
 end
 
 function FrameRegistry:IsInitialized()
