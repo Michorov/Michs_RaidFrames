@@ -28,6 +28,68 @@ local function SaveTestGroupPosition(group)
 	addon.UpdateScheduler:Notify("layoutChanged")
 end
 
+local function CreateTestGroupDragOverlay(group)
+	local overlay = CreateFrame("Frame", nil, group)
+	overlay:SetAllPoints(group)
+	overlay:SetFrameLevel(40)
+	overlay:EnableMouse(false)
+
+	local background = overlay:CreateTexture(nil, "BACKGROUND")
+	background:SetAllPoints(overlay)
+	background:SetColorTexture(0.005, 0.015, 0.035, 0.78)
+	overlay.background = background
+
+	local handle = overlay:CreateTexture(nil, "ARTWORK")
+	handle:SetPoint("TOPLEFT", overlay, "TOPLEFT", 0, 0)
+	handle:SetPoint("TOPRIGHT", overlay, "TOPRIGHT", 0, 0)
+	handle:SetHeight(addon.Utilities:ToUI(addon.Utilities:Scale(4)))
+	handle:SetColorTexture(0.00, 0.42, 1.00, 0.85)
+	overlay.handle = handle
+
+	local textPadding = addon.Utilities:ToUI(addon.Utilities:Scale(8))
+	local text = overlay:CreateFontString(nil, "OVERLAY")
+	text:SetPoint("LEFT", overlay, "LEFT", textPadding, 0)
+	text:SetPoint("RIGHT", overlay, "RIGHT", -textPadding, 0)
+	text:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(18), "OUTLINE")
+	text:SetJustifyH("CENTER")
+	text:SetJustifyV("MIDDLE")
+	text:SetWordWrap(true)
+	text:SetTextColor(1, 1, 1, 1)
+	text:SetText("Drag to Move")
+	overlay.text = text
+
+	local border = {}
+	local thickness = addon.Utilities:ToUI(addon.Utilities:Scale(4))
+
+	border.top = overlay:CreateTexture(nil, "BORDER")
+	border.top:SetPoint("TOPLEFT", overlay, "TOPLEFT", 0, 0)
+	border.top:SetPoint("TOPRIGHT", overlay, "TOPRIGHT", 0, 0)
+	border.top:SetHeight(thickness)
+
+	border.bottom = overlay:CreateTexture(nil, "BORDER")
+	border.bottom:SetPoint("BOTTOMLEFT", overlay, "BOTTOMLEFT", 0, 0)
+	border.bottom:SetPoint("BOTTOMRIGHT", overlay, "BOTTOMRIGHT", 0, 0)
+	border.bottom:SetHeight(thickness)
+
+	border.left = overlay:CreateTexture(nil, "BORDER")
+	border.left:SetPoint("TOPLEFT", overlay, "TOPLEFT", 0, 0)
+	border.left:SetPoint("BOTTOMLEFT", overlay, "BOTTOMLEFT", 0, 0)
+	border.left:SetWidth(thickness)
+
+	border.right = overlay:CreateTexture(nil, "BORDER")
+	border.right:SetPoint("TOPRIGHT", overlay, "TOPRIGHT", 0, 0)
+	border.right:SetPoint("BOTTOMRIGHT", overlay, "BOTTOMRIGHT", 0, 0)
+	border.right:SetWidth(thickness)
+
+	for _, texture in pairs(border) do
+		texture:SetColorTexture(0.00, 0.42, 1.00, 0.90)
+	end
+
+	overlay.border = border
+
+	return overlay
+end
+
 function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local size = raidSettings.size or {}
 	local spacing = raidSettings.spacing or {}
@@ -120,6 +182,7 @@ function Frames:CreateTestGroup(groupType)
 	group:SetClampedToScreen(true)
 	group:EnableMouse(true)
 	group:RegisterForDrag("LeftButton")
+	group.dragOverlay = CreateTestGroupDragOverlay(group)
 
 	group:SetScript("OnDragStart", function(self)
 		if InCombatLockdown() then
@@ -156,6 +219,48 @@ function Frames:CreateTestFrame(group, frameIndex)
 	frame.testHealAbsorbIndex = math.random(1, 8)
 
 	frame.dataProvider = addon.Frames.DataProvider.Test
+
+	frame.testBackground = frame:CreateTexture(nil, "BACKGROUND")
+	frame.testBackground:SetAllPoints(frame)
+	frame.testBackground:SetColorTexture(0.10, 0.10, 0.10, 1)
+
+	local borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(1))
+	frame.testBorder = {}
+
+	frame.testBorder.top = frame:CreateTexture(nil, "BORDER")
+	frame.testBorder.top:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+	frame.testBorder.top:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+	frame.testBorder.top:SetHeight(borderThickness)
+
+	frame.testBorder.bottom = frame:CreateTexture(nil, "BORDER")
+	frame.testBorder.bottom:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+	frame.testBorder.bottom:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+	frame.testBorder.bottom:SetHeight(borderThickness)
+
+	frame.testBorder.left = frame:CreateTexture(nil, "BORDER")
+	frame.testBorder.left:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+	frame.testBorder.left:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+	frame.testBorder.left:SetWidth(borderThickness)
+
+	frame.testBorder.right = frame:CreateTexture(nil, "BORDER")
+	frame.testBorder.right:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+	frame.testBorder.right:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+	frame.testBorder.right:SetWidth(borderThickness)
+
+	for _, texture in pairs(frame.testBorder) do
+		texture:SetColorTexture(0.00, 0.42, 1.00, 0.85)
+	end
+
+	local textPadding = addon.Utilities:ToUI(addon.Utilities:Scale(4))
+	frame.testText = frame:CreateFontString(nil, "OVERLAY")
+	frame.testText:SetPoint("LEFT", frame, "LEFT", textPadding, 0)
+	frame.testText:SetPoint("RIGHT", frame, "RIGHT", -textPadding, 0)
+	frame.testText:SetFont("Fonts\\FRIZQT__.TTF", addon.Utilities:ScaleFont(10), "OUTLINE")
+	frame.testText:SetJustifyH("CENTER")
+	frame.testText:SetJustifyV("MIDDLE")
+	frame.testText:SetWordWrap(true)
+	frame.testText:SetTextColor(1, 1, 1, 1)
+	frame.testText:SetText("Test Frame")
 
 	frame:EnableMouse(false)
 	frame:SetSize(1, 1)
