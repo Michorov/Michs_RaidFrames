@@ -492,6 +492,18 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 	end
 end
 
+function FrameRegistry:GetActiveTestMode()
+	if testPartyGroup.isActive then
+		return "party"
+	end
+
+	if testRaidGroup.isActive then
+		return "raid"
+	end
+
+	return nil
+end
+
 function FrameRegistry:ToggleTestMode(groupType)
 	if InCombatLockdown() then
 		return
