@@ -9,6 +9,8 @@ local FramesPage = addon.Options.Pages.Frames
 local page
 local L = addon.L
 local theme = addon.Options.Theme
+local testModeButtonWidth = 116
+local testModeButtonHeight = 22
 
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
@@ -33,6 +35,14 @@ end
 local function GetModeKey()
 	local state = GetControllerState()
 	return state.mode == "raid" and "raid" or "party"
+end
+
+local function GetTestModeButtonText()
+	if addon.FrameRegistry and addon.FrameRegistry.GetActiveTestMode and addon.FrameRegistry:GetActiveTestMode() then
+		return L["Lock"]
+	end
+
+	return L["Unlock"]
 end
 
 local function GetModeDefaults(mode)
@@ -125,6 +135,15 @@ function FramesPage:Ensure(parent)
 		end
 	end)
 
+	page.testModeButton = addon.Options.Controls.Button:Create(page.header, GetTestModeButtonText())
+	page.testModeButton:SetLayoutSize(testModeButtonWidth, testModeButtonHeight)
+	page.testModeButton:SetOnClick(function()
+		addon.FrameRegistry:ToggleTestMode(GetModeKey())
+		if page and page.UpdateState then
+			page:UpdateState(addon.Database:GetProfile())
+		end
+	end)
+
 	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Width"])
 	page.frameWidthSlider:SetLayoutWidth(174)
 	ConfigureIntegerSlider(page.frameWidthSlider, 25, 200, 1)
@@ -177,6 +196,7 @@ function FramesPage:Ensure(parent)
 
 	page.controls = {
 		modeToggle = page.modeToggle,
+		testModeButton = page.testModeButton,
 		frameWidthSlider = page.frameWidthSlider,
 		frameHeightSlider = page.frameHeightSlider,
 		frameBorderThicknessSlider = page.frameBorderThicknessSlider,
@@ -187,6 +207,7 @@ function FramesPage:Ensure(parent)
 	function page:UpdateLocale()
 		self.header.title:SetText(L["Frames"])
 		self.modeToggle:SetOptions({ value = "party", text = L["Party"] }, { value = "raid", text = L["Raid"] })
+		self.testModeButton:SetText(GetTestModeButtonText())
 		self.frameWidthSlider:SetLabel(L["Frame Width"])
 		self.frameHeightSlider:SetLabel(L["Frame Height"])
 		self.frameBorderThicknessSlider:SetLabel(L["Border Size"])
@@ -198,6 +219,7 @@ function FramesPage:Ensure(parent)
 		local controls = self.controls
 		local headerHeightPx = addon.Utilities:ToPixels(32)
 		local firstControlOffsetPx = addon.Utilities:ToPixels(16)
+		local headerControlGapPx = addon.Utilities:ToPixels(8)
 		local rowStepPx = addon.Utilities:ToPixels(50)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
@@ -218,6 +240,15 @@ function FramesPage:Ensure(parent)
 				control:UpdateLayout()
 			end
 		end
+
+		controls.testModeButton:ClearAllPoints()
+		controls.testModeButton:SetPoint(
+			"RIGHT",
+			controls.modeToggle,
+			"LEFT",
+			-addon.Utilities:ToUI(headerControlGapPx),
+			0
+		)
 
 		controls.frameWidthSlider:ClearAllPoints()
 		controls.frameWidthSlider:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
@@ -275,6 +306,7 @@ function FramesPage:Ensure(parent)
 		local borderColor = border.color or defaults.borderColor
 
 		controls.modeToggle:SetValue(mode)
+		controls.testModeButton:SetText(GetTestModeButtonText())
 		controls.frameWidthSlider:SetValueSilently(size.width or defaults.frameWidth)
 		controls.frameHeightSlider:SetValueSilently(size.height or defaults.frameHeight)
 		controls.frameBorderThicknessSlider:SetValueSilently(border.thicknessPx or defaults.borderThickness)

@@ -123,7 +123,7 @@ L["Overlay"] = "Superposition"
 L["Overlay Style"] = "Style de superposition"
 L["Override Active per Specialization"] = "Remplacer le profil actif par specialisation"
 L["Party"] = "Groupe"
-L["Party Test"] = "Test groupe"
+L["Unlock"] = "Déverrouiller"
 L["Power"] = "Puissance"
 L["Power settings are disabled during combat."] = "Les parametres de puissance sont desactives en combat."
 L["Preview"] = "Apercu"
@@ -150,7 +150,7 @@ L["Raid Buff Reminder settings are disabled during combat."] =
 L["Raid Marker"] = "Marqueur de raid"
 L["Raid Marker settings are disabled during combat."] =
 	"Les parametres des marqueurs de raid sont desactives en combat."
-L["Raid Test"] = "Test raid"
+L["Lock"] = "Verrouiller"
 L["Ready Check"] = "Verification"
 L["Ready Check indicator settings are disabled during combat."] =
 	"Les parametres de l'indicateur de verification sont desactives en combat."

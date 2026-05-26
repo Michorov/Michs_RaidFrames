@@ -152,6 +152,14 @@ function Content:SetMode(mode)
 	if addon.Options.Sections.Preview and addon.Options.Sections.Preview.SetMode then
 		addon.Options.Sections.Preview:SetMode(controllerState.mode)
 	end
+
+	if addon.FrameRegistry and addon.FrameRegistry.GetActiveTestMode then
+		local activeTestMode = addon.FrameRegistry:GetActiveTestMode()
+		if activeTestMode and activeTestMode ~= controllerState.mode then
+			addon.FrameRegistry:ToggleTestMode(controllerState.mode)
+		end
+	end
+
 end
 
 function Content:GetControllerState()
