@@ -160,9 +160,6 @@ function Content:SetMode(mode)
 		end
 	end
 
-	if addon.Options.Sections.StatusBar and addon.Options.Sections.StatusBar.UpdateState then
-		addon.Options.Sections.StatusBar:UpdateState()
-	end
 end
 
 function Content:GetControllerState()
