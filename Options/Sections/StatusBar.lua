@@ -14,7 +14,7 @@ local layoutValues = {
 	textLeftInset = 10,
 	textRightGap = 10,
 	horizontalInset = 8,
-	buttonWidth = 116,
+	buttonWidth = 150,
 	buttonHeight = 22,
 	buttonSpacing = 2,
 }
@@ -43,13 +43,13 @@ function StatusBar:Ensure(parent)
 	statusBar.topBorder = statusBar:CreateTexture(nil, "OVERLAY")
 	statusBar.topBorder:SetColorTexture(theme:GetColor("border"))
 
-	statusBar.partyTestButton = addon.Options.Controls.Button:Create(statusBar, L["Party Test"])
+	statusBar.partyTestButton = addon.Options.Controls.Button:Create(statusBar, L["Unlock Party"])
 	statusBar.partyTestButton:SetLayoutSize(layoutValues.buttonWidth, layoutValues.buttonHeight)
 	statusBar.partyTestButton:SetOnClick(function()
 		addon.FrameRegistry:ToggleTestMode("party")
 	end)
 
-	statusBar.raidTestButton = addon.Options.Controls.Button:Create(statusBar, L["Raid Test"])
+	statusBar.raidTestButton = addon.Options.Controls.Button:Create(statusBar, L["Unlock Raid"])
 	statusBar.raidTestButton:SetLayoutSize(layoutValues.buttonWidth, layoutValues.buttonHeight)
 	statusBar.raidTestButton:SetOnClick(function()
 		addon.FrameRegistry:ToggleTestMode("raid")
@@ -74,8 +74,8 @@ function StatusBar:UpdateLocale()
 		return
 	end
 
-	statusBar.partyTestButton:SetText(L["Party Test"])
-	statusBar.raidTestButton:SetText(L["Raid Test"])
+	statusBar.partyTestButton:SetText(L["Unlock Party"])
+	statusBar.raidTestButton:SetText(L["Unlock Raid"])
 	self:UpdateState()
 end
 
