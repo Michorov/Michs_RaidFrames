@@ -450,7 +450,6 @@ local DEFAULTS = {
 					buffs = {
 						enabled = true,
 						anchor = "BOTTOMRIGHT",
-						relativeAnchor = "BOTTOMRIGHT",
 						offsetX = -2,
 						offsetY = 2,
 
@@ -764,7 +763,6 @@ local DEFAULTS = {
 					buffs = {
 						enabled = true,
 						anchor = "BOTTOMRIGHT",
-						relativeAnchor = "BOTTOMRIGHT",
 						offsetX = -2,
 						offsetY = 2,
 
