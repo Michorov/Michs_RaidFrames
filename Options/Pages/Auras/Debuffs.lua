@@ -10,6 +10,20 @@ local Debuffs = addon.Options.Pages.Auras.Debuffs
 local subpage
 local L = addon.L
 
+local anchorOptions = {
+	{ value = "TOPLEFT", text = L["Top Left"] },
+	{ value = "TOPRIGHT", text = L["Top Right"] },
+	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
+	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
+}
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Top Left"]
+	anchorOptions[2].text = L["Top Right"]
+	anchorOptions[3].text = L["Bottom Left"]
+	anchorOptions[4].text = L["Bottom Right"]
+end
+
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
 	if content and content.GetControllerState then
@@ -46,6 +60,7 @@ end
 local function GetModeDefaults()
 	return {
 		enabled = true,
+		anchor = "BOTTOMLEFT",
 		offsetX = 2,
 		offsetY = 2,
 		iconSize = 16,
@@ -124,6 +139,18 @@ function Debuffs:Ensure(parent)
 			section.widgets.icons.debuffs = section.widgets.icons.debuffs or {}
 			section.widgets.icons.debuffs.borderColorByDebuffType = checked == true
 		end, true)
+	end)
+
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
+	subpage.anchorDropdown:SetLayoutWidth(174)
+	subpage.anchorDropdown:SetOptions(anchorOptions)
+	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.debuffs = section.widgets.icons.debuffs or {}
+			section.widgets.icons.debuffs.anchor = value
+		end)
 	end)
 
 	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
@@ -259,6 +286,7 @@ function Debuffs:Ensure(parent)
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
 		borderColorByDebuffTypeCheckbox = subpage.borderColorByDebuffTypeCheckbox,
+		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
 		iconSizeSlider = subpage.iconSizeSlider,
@@ -273,8 +301,11 @@ function Debuffs:Ensure(parent)
 	}
 
 	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
 		self.borderColorByDebuffTypeCheckbox:SetText(L["Color By Debuff Type"])
+		self.anchorDropdown:SetLabel(L["Position"])
+		self.anchorDropdown:SetOptions(anchorOptions)
 		self.offsetXSlider:SetLabel(L["Offset X"])
 		self.offsetYSlider:SetLabel(L["Offset Y"])
 		self.iconSizeSlider:SetLabel(L["Icon Size"])
@@ -298,11 +329,19 @@ function Debuffs:Ensure(parent)
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
+		local checkboxStackGapPx = addon.Utilities:ToPixels(12)
+		local topControlsGapPx = addon.Utilities:ToPixels(28)
+		local anchorDropdownHeightPx = addon.Utilities:ToPixels(
+			controls.anchorDropdown.layoutValues.labelHeight
+				+ controls.anchorDropdown.layoutValues.labelSpacing
+				+ controls.anchorDropdown.layoutValues.fieldHeight
+		)
+		local stackedCheckboxHeightPx = (checkboxHeightPx * 2) + checkboxStackGapPx
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local firstRowOffsetPx = 0
-		local secondRowOffsetPx = rowStepPx
-		local thirdRowOffsetPx = rowStepPx * 2
+		local secondRowOffsetPx = math.max(stackedCheckboxHeightPx, anchorDropdownHeightPx) + topControlsGapPx
+		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx
 		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
 		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx + sectionGapPx
 		local sixthRowOffsetPx = fifthRowOffsetPx + rowStepPx
@@ -318,6 +357,15 @@ function Debuffs:Ensure(parent)
 
 		controls.borderColorByDebuffTypeCheckbox:ClearAllPoints()
 		controls.borderColorByDebuffTypeCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
+		)
+
+		controls.anchorDropdown:ClearAllPoints()
+		controls.anchorDropdown:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
@@ -424,6 +472,8 @@ function Debuffs:Ensure(parent)
 		controls.borderColorByDebuffTypeCheckbox:SetChecked(
 			ResolveBoolean(debuffs.borderColorByDebuffType, defaults.borderColorByDebuffType)
 		)
+		controls.anchorDropdown:SetOptions(anchorOptions)
+		controls.anchorDropdown:SetValue(debuffs.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(debuffs.offsetX or defaults.offsetX)
 		controls.offsetYSlider:SetValueSilently(debuffs.offsetY or defaults.offsetY)
 		controls.iconSizeSlider:SetValueSilently(debuffs.iconSize or defaults.iconSize)

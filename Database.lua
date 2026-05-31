@@ -474,7 +474,6 @@ local DEFAULTS = {
 					debuffs = {
 						enabled = true,
 						anchor = "BOTTOMLEFT",
-						relativeAnchor = "BOTTOMLEFT",
 						offsetX = 2,
 						offsetY = 2,
 
@@ -787,7 +786,6 @@ local DEFAULTS = {
 					debuffs = {
 						enabled = true,
 						anchor = "BOTTOMLEFT",
-						relativeAnchor = "BOTTOMLEFT",
 						offsetX = 2,
 						offsetY = 2,
 
