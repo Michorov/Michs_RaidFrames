@@ -73,7 +73,6 @@ local function UpdateSettingsCache(settings)
 		enabled = debuffs.enabled ~= false,
 		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		anchor = debuffs.anchor or "BOTTOMLEFT",
-		relativeAnchor = debuffs.relativeAnchor or "BOTTOMLEFT",
 		offsetXPx = addon.Utilities:ToPixels(debuffs.offsetX or 2),
 		offsetYPx = addon.Utilities:ToPixels(debuffs.offsetY or 2),
 		maxIcons = math.max(1, debuffs.maxIcons or 6),
@@ -112,16 +111,18 @@ function Debuffs:UpdateSettings(frame, settings)
 
 	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
-	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local containerOffsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
+	local containerOffsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local stepPx = iconSizePx + spacingPx
+	local anchor = cachedSettings.anchor
 
 	container:ClearAllPoints()
 	container:SetPoint(
-		cachedSettings.anchor,
+		anchor,
 		frame,
-		cachedSettings.relativeAnchor,
-		addon.Utilities:ToUI(offsetXPx),
-		addon.Utilities:ToUI(offsetYPx)
+		anchor,
+		addon.Utilities:ToUI(containerOffsetXPx),
+		addon.Utilities:ToUI(containerOffsetYPx)
 	)
 
 	local visibleCols = math.min(cachedSettings.maxIcons, cachedSettings.iconsPerRow)
@@ -131,6 +132,9 @@ function Debuffs:UpdateSettings(frame, settings)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+
+	local xDirection = anchor:find("LEFT", 1, true) and 1 or -1
+	local yDirection = anchor:find("TOP", 1, true) and -1 or 1
 
 	for i = 1, cachedSettings.maxIcons do
 		local icon = container.icons[i]
@@ -144,16 +148,21 @@ function Debuffs:UpdateSettings(frame, settings)
 		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
 		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
 
-		local idx = i - 1
-		local col = idx % cachedSettings.iconsPerRow
-		local row = math.floor(idx / cachedSettings.iconsPerRow)
+		local gridIndex = i - 1
+		local column = gridIndex % cachedSettings.iconsPerRow
+		local row = math.floor(gridIndex / cachedSettings.iconsPerRow)
 
-		local stepPx = iconSizePx + spacingPx
-		local xPx = (col * stepPx)
-		local yPx = (row * stepPx)
+		local offsetXPx = column * stepPx * xDirection
+		local offsetYPx = row * stepPx * yDirection
 
 		icon:ClearAllPoints()
-		icon:SetPoint("BOTTOMLEFT", container, "BOTTOMLEFT", addon.Utilities:ToUI(xPx), addon.Utilities:ToUI(yPx))
+		icon:SetPoint(
+			anchor,
+			container,
+			anchor,
+			addon.Utilities:ToUI(offsetXPx),
+			addon.Utilities:ToUI(offsetYPx)
+		)
 	end
 
 	for i = cachedSettings.maxIcons + 1, #container.icons do
