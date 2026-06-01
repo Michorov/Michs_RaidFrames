@@ -134,9 +134,22 @@ local CUSTOM_AURA_DEFAULTS = {
 	},
 }
 
-local function SyncCustomAuraValues(currentValues, defaultValues)
+local CUSTOM_BUFF_SETTING_DEFAULTS = {
+	enabled = false,
+	anchor = "CENTER",
+	offsetX = 0,
+	offsetY = 0,
+	iconSize = 16,
+	showStacks = false,
+	stacksFontSize = 10,
+	showCooldown = false,
+	cooldownFontSize = 10,
+}
+
+local function SyncCustomAuraDefaults(currentValues, defaultValues, entrySettingDefaults)
 	currentValues = currentValues or {}
 	defaultValues = defaultValues or {}
+	local useEntrySettingDefaults = type(entrySettingDefaults) == "table"
 
 	for className in pairs(currentValues) do
 		if defaultValues[className] == nil then
@@ -165,104 +178,36 @@ local function SyncCustomAuraValues(currentValues, defaultValues)
 			end
 
 			for spellId in pairs(specValues) do
-				if specDefaults[spellId] == nil then
+				local defaultEntry = specDefaults[spellId]
+				if defaultEntry == nil or (useEntrySettingDefaults and defaultEntry.enabled == false) then
 					specValues[spellId] = nil
 				end
 			end
 
 			for spellId, defaultEntry in pairs(specDefaults) do
-				local currentEntry = specValues[spellId]
-				if type(currentEntry) ~= "table" then
-					currentEntry = {}
-					specValues[spellId] = currentEntry
-				end
-
-				for key, value in pairs(defaultEntry) do
-					if key == "name" then
-						currentEntry[key] = value
-					elseif currentEntry[key] == nil then
-						currentEntry[key] = value
-					end
-				end
-			end
-		end
-	end
-
-	return currentValues
-end
-
-local function SyncCustomBuffs(currentValues, defaultValues)
-	currentValues = currentValues or {}
-	defaultValues = defaultValues or {}
-
-	for className in pairs(currentValues) do
-		if defaultValues[className] == nil then
-			currentValues[className] = nil
-		end
-	end
-
-	for className, classDefaults in pairs(defaultValues) do
-		local classValues = currentValues[className]
-		if type(classValues) ~= "table" then
-			classValues = {}
-			currentValues[className] = classValues
-		end
-
-		for specID in pairs(classValues) do
-			if classDefaults[specID] == nil then
-				classValues[specID] = nil
-			end
-		end
-
-		for specID, specDefaults in pairs(classDefaults) do
-			local specValues = classValues[specID]
-			if type(specValues) ~= "table" then
-				specValues = {}
-				classValues[specID] = specValues
-			end
-
-			for spellId in pairs(specValues) do
-				if specDefaults[spellId] == nil or specDefaults[spellId].enabled == false then
-					specValues[spellId] = nil
-				end
-			end
-
-			for spellId, defaultEntry in pairs(specDefaults) do
-				if defaultEntry.enabled ~= false then
+				if not useEntrySettingDefaults or defaultEntry.enabled ~= false then
 					local currentEntry = specValues[spellId]
 					if type(currentEntry) ~= "table" then
 						currentEntry = {}
 						specValues[spellId] = currentEntry
 					end
 
-					currentEntry.name = defaultEntry.name
+					if useEntrySettingDefaults then
+						currentEntry.name = defaultEntry.name
 
-					if currentEntry.enabled == nil then
-						currentEntry.enabled = false
-					end
-					if currentEntry.anchor == nil then
-						currentEntry.anchor = "CENTER"
-					end
-					if currentEntry.offsetX == nil then
-						currentEntry.offsetX = 0
-					end
-					if currentEntry.offsetY == nil then
-						currentEntry.offsetY = 0
-					end
-					if currentEntry.iconSize == nil then
-						currentEntry.iconSize = 16
-					end
-					if currentEntry.showStacks == nil then
-						currentEntry.showStacks = false
-					end
-					if currentEntry.stacksFontSize == nil then
-						currentEntry.stacksFontSize = 10
-					end
-					if currentEntry.showCooldown == nil then
-						currentEntry.showCooldown = false
-					end
-					if currentEntry.cooldownFontSize == nil then
-						currentEntry.cooldownFontSize = 10
+						for key, value in pairs(entrySettingDefaults) do
+							if currentEntry[key] == nil then
+								currentEntry[key] = value
+							end
+						end
+					else
+						for key, value in pairs(defaultEntry) do
+							if key == "name" then
+								currentEntry[key] = value
+							elseif currentEntry[key] == nil then
+								currentEntry[key] = value
+							end
+						end
 					end
 				end
 			end
@@ -283,10 +228,14 @@ local function SyncProfileCustomAuraDefaults(profileSection)
 	profileSection.widgets.icons.customBuffs = profileSection.widgets.icons.customBuffs or {}
 
 	local buffSettings = profileSection.widgets.icons.buffs
-	buffSettings.customAuraValues = SyncCustomAuraValues(buffSettings.customAuraValues, CUSTOM_AURA_DEFAULTS)
+	buffSettings.customAuraValues = SyncCustomAuraDefaults(buffSettings.customAuraValues, CUSTOM_AURA_DEFAULTS)
 
 	profileSection.widgets.icons.customBuffs =
-		SyncCustomBuffs(profileSection.widgets.icons.customBuffs, CUSTOM_AURA_DEFAULTS)
+		SyncCustomAuraDefaults(
+			profileSection.widgets.icons.customBuffs,
+			CUSTOM_AURA_DEFAULTS,
+			CUSTOM_BUFF_SETTING_DEFAULTS
+		)
 end
 
 local function SyncAllProfilesCustomAuraDefaults(profile)
