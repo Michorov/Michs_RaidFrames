@@ -103,17 +103,14 @@ function Debuffs:Ensure(frame)
 	end
 end
 
-function Debuffs:UpdateSettings(frame, settings)
+local function UpdateContainerSettings(frame, settings)
 	local container = frame.debuffsContainer
-
-	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
 	local containerOffsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local containerOffsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
-	local stepPx = iconSizePx + spacingPx
 	local anchor = cachedSettings.anchor
 
 	container:ClearAllPoints()
@@ -132,6 +129,16 @@ function Debuffs:UpdateSettings(frame, settings)
 	local heightPx = (rowCount * iconSizePx) + ((rowCount - 1) * spacingPx)
 
 	container:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+end
+
+local function UpdateIconSettings(frame, settings)
+	local container = frame.debuffsContainer
+	local cachedSettings = settingsCache[settings]
+
+	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
+	local stepPx = iconSizePx + spacingPx
+	local anchor = cachedSettings.anchor
 
 	local xDirection = anchor:find("LEFT", 1, true) and 1 or -1
 	local yDirection = anchor:find("TOP", 1, true) and -1 or 1
@@ -171,6 +178,13 @@ function Debuffs:UpdateSettings(frame, settings)
 			icon:Hide()
 		end
 	end
+end
+
+function Debuffs:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+
+	UpdateContainerSettings(frame, settings)
+	UpdateIconSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
