@@ -493,7 +493,6 @@ local DEFAULTS = {
 					},
 					privateAuras = {
 						anchor = "LEFT",
-						relativeAnchor = "LEFT",
 						offsetX = 2,
 						offsetY = 2,
 
@@ -805,7 +804,6 @@ local DEFAULTS = {
 					},
 					privateAuras = {
 						anchor = "LEFT",
-						relativeAnchor = "LEFT",
 						offsetX = 2,
 						offsetY = 2,
 
