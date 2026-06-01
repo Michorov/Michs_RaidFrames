@@ -10,6 +10,16 @@ local PrivateAuras = addon.Options.Pages.Auras.PrivateAuras
 local subpage
 local L = addon.L
 
+local anchorOptions = {
+	{ value = "LEFT", text = L["Left"] },
+	{ value = "RIGHT", text = L["Right"] },
+}
+
+local function UpdateAnchorOptions()
+	anchorOptions[1].text = L["Left"]
+	anchorOptions[2].text = L["Right"]
+end
+
 local function GetControllerState()
 	local content = addon.Options.Sections.Content
 	if content and content.GetControllerState then
@@ -38,6 +48,7 @@ end
 local function GetModeDefaults(mode)
 	if mode == "raid" then
 		return {
+			anchor = "LEFT",
 			offsetX = 2,
 			offsetY = 2,
 			iconSize = 16,
@@ -47,6 +58,7 @@ local function GetModeDefaults(mode)
 	end
 
 	return {
+		anchor = "LEFT",
 		offsetX = 2,
 		offsetY = 2,
 		iconSize = 20,
@@ -93,6 +105,18 @@ function PrivateAuras:Ensure(parent)
 	end
 
 	subpage = CreateFrame("Frame", nil, parent)
+
+	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
+	subpage.anchorDropdown:SetLayoutWidth(174)
+	subpage.anchorDropdown:SetOptions(anchorOptions)
+	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
+			section.widgets.icons.privateAuras.anchor = value
+		end)
+	end)
 
 	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
 	subpage.offsetXSlider:SetLayoutWidth(174)
@@ -155,6 +179,7 @@ function PrivateAuras:Ensure(parent)
 	end)
 
 	subpage.controls = {
+		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
 		iconSizeSlider = subpage.iconSizeSlider,
@@ -163,6 +188,9 @@ function PrivateAuras:Ensure(parent)
 	}
 
 	function subpage:UpdateLocale()
+		UpdateAnchorOptions()
+		self.anchorDropdown:SetLabel(L["Position"])
+		self.anchorDropdown:SetOptions(anchorOptions)
 		self.offsetXSlider:SetLabel(L["Offset X"])
 		self.offsetYSlider:SetLabel(L["Offset Y"])
 		self.iconSizeSlider:SetLabel(L["Icon Size"])
@@ -177,14 +205,24 @@ function PrivateAuras:Ensure(parent)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
-		local firstRowOffsetPx = 0
-		local secondRowOffsetPx = rowStepPx
+		local anchorRowOffsetPx = 0
+		local firstRowOffsetPx = rowStepPx
+		local secondRowOffsetPx = firstRowOffsetPx + rowStepPx
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
 				control:UpdateLayout()
 			end
 		end
+
+		controls.anchorDropdown:ClearAllPoints()
+		controls.anchorDropdown:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(anchorRowOffsetPx)
+		)
 
 		controls.offsetXSlider:ClearAllPoints()
 		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
@@ -233,6 +271,8 @@ function PrivateAuras:Ensure(parent)
 		local icons = widgets.icons or {}
 		local privateAuras = icons.privateAuras or {}
 
+		controls.anchorDropdown:SetOptions(anchorOptions)
+		controls.anchorDropdown:SetValue(privateAuras.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(privateAuras.offsetX or defaults.offsetX)
 		controls.offsetYSlider:SetValueSilently(privateAuras.offsetY or defaults.offsetY)
 		controls.iconSizeSlider:SetValueSilently(privateAuras.iconSize or defaults.iconSize)

@@ -25,7 +25,6 @@ local function GetPrivateAurasSettings(settings)
 
 	return {
 		anchor = privateAuras.anchor or "LEFT",
-		relativeAnchor = privateAuras.relativeAnchor or "LEFT",
 		offsetXPx = addon.Utilities:ToPixels(privateAuras.offsetX or 2),
 		offsetYPx = addon.Utilities:ToPixels(privateAuras.offsetY or 2),
 		maxIcons = math.max(1, privateAuras.maxIcons or 3),
@@ -113,6 +112,8 @@ local function EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
 	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
+	local anchor = privateAuraSettings.anchor
+	local xDirection = anchor == "RIGHT" and -1 or 1
 
 	for auraIndex = 1, privateAuraSettings.maxIcons do
 		local icon = previewIcons[auraIndex]
@@ -122,12 +123,18 @@ local function EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
 		end
 
 		local sample = TEST_PRIVATE_AURA_SAMPLES[((auraIndex - 1) % #TEST_PRIVATE_AURA_SAMPLES) + 1]
-		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
+		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx) * xDirection
 
 		icon.dispelType = sample.dispelType
 
 		icon:ClearAllPoints()
-		icon:SetPoint("LEFT", container, "LEFT", addon.Utilities:ToUI(xOffsetPx), 0)
+		icon:SetPoint(
+			anchor,
+			container,
+			anchor,
+			addon.Utilities:ToUI(xOffsetPx),
+			0
+		)
 		icon:SetSize(iconSize, iconSize)
 
 		icon.texture:SetTexture(GetTestPrivateAuraTexture(sample))
@@ -156,7 +163,22 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 
 	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
 
-	if frame.privateAurasAnchoredUnit == unit and #frame.privateAurasAnchorIDs > 0 then
+	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
+	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	local anchor = privateAuraSettings.anchor
+	local xDirection = anchor == "RIGHT" and -1 or 1
+	local anchorLayoutKey = table.concat({
+		anchor,
+		tostring(privateAuraSettings.maxIcons),
+		tostring(iconSizePx),
+		tostring(spacingPx),
+	}, ":")
+
+	if
+		frame.privateAurasAnchoredUnit == unit
+		and frame.privateAurasAnchorLayoutKey == anchorLayoutKey
+		and #frame.privateAurasAnchorIDs > 0
+	then
 		return
 	end
 
@@ -167,9 +189,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	end
 	wipe(frame.privateAurasAnchorIDs)
 	frame.privateAurasAnchoredUnit = nil
-
-	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	frame.privateAurasAnchorLayoutKey = nil
 
 	if not unit or not C_UnitAuras or not C_UnitAuras.AddPrivateAuraAnchor then
 		container:Hide()
@@ -179,7 +199,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
 
 	for auraIndex = 1, privateAuraSettings.maxIcons do
-		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx)
+		local xOffsetPx = (auraIndex - 1) * (iconSizePx + spacingPx) * xDirection
 
 		local anchorID = C_UnitAuras.AddPrivateAuraAnchor({
 			unitToken = unit,
@@ -194,9 +214,9 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 				iconHeight = iconSize,
 				borderScale = 1.0,
 				iconAnchor = {
-					point = "LEFT",
+					point = anchor,
 					relativeTo = container,
-					relativePoint = "LEFT",
+					relativePoint = anchor,
 					offsetX = addon.Utilities:ToUI(xOffsetPx),
 					offsetY = 0,
 				},
@@ -212,6 +232,7 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 	container:SetShown(anchored)
 	if anchored then
 		frame.privateAurasAnchoredUnit = unit
+		frame.privateAurasAnchorLayoutKey = anchorLayoutKey
 	end
 end
 
@@ -248,7 +269,7 @@ local function ApplyContainerLayout(frame, privateAuraSettings)
 	container:SetPoint(
 		privateAuraSettings.anchor,
 		frame,
-		privateAuraSettings.relativeAnchor,
+		privateAuraSettings.anchor,
 		addon.Utilities:ToUI(offsetXPx),
 		addon.Utilities:ToUI(offsetYPx)
 	)
