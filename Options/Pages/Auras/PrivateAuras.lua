@@ -205,8 +205,14 @@ function PrivateAuras:Ensure(parent)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
+		local positionToSlidersGapPx = addon.Utilities:ToPixels(28)
+		local anchorDropdownHeightPx = addon.Utilities:ToPixels(
+			controls.anchorDropdown.layoutValues.labelHeight
+				+ controls.anchorDropdown.layoutValues.labelSpacing
+				+ controls.anchorDropdown.layoutValues.fieldHeight
+		)
 		local anchorRowOffsetPx = 0
-		local firstRowOffsetPx = rowStepPx
+		local firstRowOffsetPx = anchorDropdownHeightPx + positionToSlidersGapPx
 		local secondRowOffsetPx = firstRowOffsetPx + rowStepPx
 
 		for _, control in pairs(controls) do
