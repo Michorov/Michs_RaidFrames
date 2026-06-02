@@ -35,31 +35,6 @@ local function UpdateAnchorOptions()
 	anchorOptions[9].text = L["Bottom Right"]
 end
 
-local function GetControllerState()
-	local content = addon.Options.Sections.Content
-	if content and content.GetControllerState then
-		return content:GetControllerState()
-	end
-
-	addon.Options.ControllerState = addon.Options.ControllerState
-		or {
-			mode = "party",
-			subpages = {
-				auras = "buffs",
-				texts = "name",
-				indicators = "readyCheck",
-				bars = "health",
-			},
-		}
-
-	return addon.Options.ControllerState
-end
-
-local function GetModeKey()
-	local state = GetControllerState()
-	return state.mode == "raid" and "raid" or "party"
-end
-
 local function ShowCombatLockMessage()
 	print("|cffff9900Mich's RaidFrames:|r " .. L["Custom buff settings are disabled during combat."])
 end
@@ -99,7 +74,7 @@ end
 local function GetCurrentSpecBuffEntries(profile)
 	profile = profile or addon.Database:GetProfile()
 
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 	local section = profile[mode] or {}
 	local widgets = section.widgets or {}
 	local icons = widgets.icons or {}
@@ -149,7 +124,7 @@ end
 
 local function GetSelectedSpellId(specID, entries)
 	subpage.selectedSpellIds = subpage.selectedSpellIds or {}
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 	subpage.selectedSpellIds[mode] = subpage.selectedSpellIds[mode] or {}
 
 	local selectedSpellId = subpage.selectedSpellIds[mode][specID]
@@ -173,7 +148,7 @@ end
 
 local function SetSelectedSpellId(specID, spellId)
 	subpage.selectedSpellIds = subpage.selectedSpellIds or {}
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 	subpage.selectedSpellIds[mode] = subpage.selectedSpellIds[mode] or {}
 	subpage.selectedSpellIds[mode][specID] = spellId
 end
@@ -192,7 +167,7 @@ local function ApplySelectedBuffSetting(updateFn)
 	end
 
 	local profile = addon.Database:GetProfile()
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 	local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
 
 	profile[mode] = profile[mode] or {}
@@ -495,7 +470,7 @@ function BuffCustomIcons:Ensure(parent)
 			return
 		end
 
-		local mode = GetModeKey()
+		local mode = addon.Options.State:GetMode()
 		local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
 		local settings = (((((profile[mode] or {}).widgets or {}).icons or {}).customBuffs or {})[classFileName] or {})[self.activeSpecID]
 			or {}

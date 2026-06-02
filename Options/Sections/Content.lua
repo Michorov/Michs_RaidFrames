@@ -9,19 +9,6 @@ local Content = addon.Options.Sections.Content
 local content
 local activePage = "general"
 
-local controllerState = addon.Options.ControllerState
-	or {
-		mode = "party",
-		subpages = {
-			auras = "buffs",
-			texts = "name",
-			indicators = "readyCheck",
-			bars = "health",
-		},
-	}
-
-addon.Options.ControllerState = controllerState
-
 function Content:Ensure(parent)
 	if content then
 		return content
@@ -147,21 +134,17 @@ function Content:GetActivePage()
 end
 
 function Content:SetMode(mode)
-	controllerState.mode = mode == "raid" and "raid" or "party"
+	local activeMode = addon.Options.State:SetMode(mode)
 
 	if addon.Options.Sections.Preview and addon.Options.Sections.Preview.SetMode then
-		addon.Options.Sections.Preview:SetMode(controllerState.mode)
+		addon.Options.Sections.Preview:SetMode(activeMode)
 	end
 
 	if addon.FrameRegistry and addon.FrameRegistry.GetActiveTestMode then
 		local activeTestMode = addon.FrameRegistry:GetActiveTestMode()
-		if activeTestMode and activeTestMode ~= controllerState.mode then
-			addon.FrameRegistry:ToggleTestMode(controllerState.mode)
+		if activeTestMode and activeTestMode ~= activeMode then
+			addon.FrameRegistry:ToggleTestMode(activeMode)
 		end
 	end
 
-end
-
-function Content:GetControllerState()
-	return controllerState
 end

@@ -10,31 +10,6 @@ local Power = addon.Options.Pages.Bars.Power
 local subpage
 local L = addon.L
 
-local function GetControllerState()
-	local content = addon.Options.Sections.Content
-	if content and content.GetControllerState then
-		return content:GetControllerState()
-	end
-
-	addon.Options.ControllerState = addon.Options.ControllerState
-		or {
-			mode = "party",
-			subpages = {
-				auras = "buffs",
-				texts = "name",
-				indicators = "readyCheck",
-				bars = "health",
-			},
-		}
-
-	return addon.Options.ControllerState
-end
-
-local function GetModeKey()
-	local state = GetControllerState()
-	return state.mode == "raid" and "raid" or "party"
-end
-
 local function GetModeDefaults(mode)
 	if mode == "raid" then
 		return {
@@ -67,7 +42,7 @@ local function ApplyModeSetting(updateFn, notifyEvent)
 	end
 
 	local profile = addon.Database:GetProfile()
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 
 	profile[mode] = profile[mode] or {}
 	updateFn(profile[mode], mode)
@@ -191,7 +166,7 @@ function Power:Ensure(parent)
 		end
 
 		local controls = self.controls
-		local mode = GetModeKey()
+		local mode = addon.Options.State:GetMode()
 		local section = profile[mode] or {}
 		local defaults = GetModeDefaults(mode)
 		local power = section.power or {}
