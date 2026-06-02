@@ -8,6 +8,7 @@ local Bars = addon.Options.Pages.Bars
 
 local page
 local L = addon.L
+local State = addon.Options.State
 local theme = addon.Options.Theme
 
 local subpageOptions = {
@@ -17,29 +18,8 @@ local subpageOptions = {
 	{ value = "absorbs", text = L["Absorbs"] },
 }
 
-local function GetControllerState()
-	local content = addon.Options.Sections.Content
-	if content and content.GetControllerState then
-		return content:GetControllerState()
-	end
-
-	addon.Options.ControllerState = addon.Options.ControllerState
-		or {
-			mode = "party",
-			subpages = {
-				auras = "buffs",
-				texts = "name",
-				indicators = "readyCheck",
-				bars = "health",
-			},
-		}
-
-	return addon.Options.ControllerState
-end
-
 local function GetActiveSubpageKey()
-	local state = GetControllerState()
-	local subpageKey = (state.subpages or {}).bars or subpageOptions[1].value
+	local subpageKey = State:GetSubpage("bars") or subpageOptions[1].value
 
 	for _, option in ipairs(subpageOptions) do
 		if option.value == subpageKey then
@@ -93,8 +73,7 @@ function Bars:Ensure(parent)
 	page.subpageDropdown:SetLabelVisible(false)
 	page.subpageDropdown:SetOptions(subpageOptions)
 	page.subpageDropdown:SetOnValueChanged(function(_, value)
-		local state = GetControllerState()
-		state.subpages.bars = value
+		State:SetSubpage("bars", value)
 		if page and page.SetActiveSubpage then
 			page:SetActiveSubpage(value, addon.Database:GetProfile())
 		end
@@ -142,9 +121,6 @@ function Bars:Ensure(parent)
 	end
 
 	function page:SetActiveSubpage(subpageKey, profile)
-		local state = GetControllerState()
-		state.subpages = state.subpages or {}
-
 		local activeSubpageKey = subpageOptions[1].value
 		for _, option in ipairs(subpageOptions) do
 			if option.value == subpageKey then
@@ -153,7 +129,7 @@ function Bars:Ensure(parent)
 			end
 		end
 
-		state.subpages.bars = activeSubpageKey
+		State:SetSubpage("bars", activeSubpageKey)
 
 		for key, subpage in pairs(self.subpages) do
 			subpage:SetShown(key == activeSubpageKey)
@@ -203,10 +179,9 @@ function Bars:Ensure(parent)
 	end
 
 	function page:UpdateState(profile)
-		local state = GetControllerState()
 		local activeSubpageKey = GetActiveSubpageKey()
 
-		self.modeToggle:SetValue(state.mode or "party")
+		self.modeToggle:SetValue(State:GetMode())
 		self.subpageDropdown:SetOptions(subpageOptions)
 		self.subpageDropdown:SetValue(activeSubpageKey)
 		self:SetActiveSubpage(activeSubpageKey, profile)
