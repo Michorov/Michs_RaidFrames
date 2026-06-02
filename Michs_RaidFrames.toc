@@ -88,6 +88,7 @@ Infrastructure/FrameRegistry.lua
 # Options
 Options/Theme.lua
 Options/Data.lua
+Options/State.lua
 Options/Controls/Button.lua
 Options/Controls/Checkbox.lua
 Options/Controls/Dropdown.lua

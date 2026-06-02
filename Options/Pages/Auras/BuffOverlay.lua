@@ -11,31 +11,6 @@ local subpage
 local L = addon.L
 local theme = addon.Options.Theme
 
-local function GetControllerState()
-	local content = addon.Options.Sections.Content
-	if content and content.GetControllerState then
-		return content:GetControllerState()
-	end
-
-	addon.Options.ControllerState = addon.Options.ControllerState
-		or {
-			mode = "party",
-			subpages = {
-				auras = "buffs",
-				texts = "name",
-				indicators = "readyCheck",
-				bars = "health",
-			},
-		}
-
-	return addon.Options.ControllerState
-end
-
-local function GetModeKey()
-	local state = GetControllerState()
-	return state.mode == "raid" and "raid" or "party"
-end
-
 local function ShowCombatLockMessage()
 	print("|cffff9900Mich's RaidFrames:|r " .. L["Buff overlay settings are disabled during combat."])
 end
@@ -51,7 +26,7 @@ end
 local function GetCurrentSpecOverlayData(profile)
 	profile = profile or addon.Database:GetProfile()
 
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 	local section = profile[mode] or {}
 	local widgets = section.widgets or {}
 	local bars = widgets.bars or {}
@@ -159,7 +134,7 @@ local function EnsureRowPool(targetCount)
 			end
 
 			local profile = addon.Database:GetProfile()
-			local mode = GetModeKey()
+			local mode = addon.Options.State:GetMode()
 
 			profile[mode] = profile[mode] or {}
 			profile[mode].widgets = profile[mode].widgets or {}
@@ -199,7 +174,7 @@ local function EnsureRowPool(targetCount)
 			end
 
 			local profile = addon.Database:GetProfile()
-			local mode = GetModeKey()
+			local mode = addon.Options.State:GetMode()
 
 			profile[mode] = profile[mode] or {}
 			profile[mode].widgets = profile[mode].widgets or {}
@@ -238,7 +213,7 @@ local function EnsureRowPool(targetCount)
 			end
 
 			local profile = addon.Database:GetProfile()
-			local mode = GetModeKey()
+			local mode = addon.Options.State:GetMode()
 
 			profile[mode] = profile[mode] or {}
 			profile[mode].widgets = profile[mode].widgets or {}

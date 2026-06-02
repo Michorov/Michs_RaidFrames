@@ -24,31 +24,6 @@ local function UpdateAnchorOptions()
 	anchorOptions[4].text = L["Bottom Right"]
 end
 
-local function GetControllerState()
-	local content = addon.Options.Sections.Content
-	if content and content.GetControllerState then
-		return content:GetControllerState()
-	end
-
-	addon.Options.ControllerState = addon.Options.ControllerState
-		or {
-			mode = "party",
-			subpages = {
-				auras = "buffs",
-				texts = "name",
-				indicators = "readyCheck",
-				bars = "health",
-			},
-		}
-
-	return addon.Options.ControllerState
-end
-
-local function GetModeKey()
-	local state = GetControllerState()
-	return state.mode == "raid" and "raid" or "party"
-end
-
 local function ResolveBoolean(value, defaultValue)
 	if value == nil then
 		return defaultValue
@@ -90,7 +65,7 @@ local function ApplyModeSetting(updateFn, notifyState)
 	end
 
 	local profile = addon.Database:GetProfile()
-	local mode = GetModeKey()
+	local mode = addon.Options.State:GetMode()
 
 	profile[mode] = profile[mode] or {}
 	updateFn(profile[mode], mode)
@@ -461,7 +436,7 @@ function Debuffs:Ensure(parent)
 		end
 
 		local controls = self.controls
-		local mode = GetModeKey()
+		local mode = addon.Options.State:GetMode()
 		local section = profile[mode] or {}
 		local defaults = GetModeDefaults()
 		local widgets = section.widgets or {}

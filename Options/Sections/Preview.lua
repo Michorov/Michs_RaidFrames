@@ -7,7 +7,7 @@ addon.Options.Sections.Preview = addon.Options.Sections.Preview or {}
 local Preview = addon.Options.Sections.Preview
 
 local preview
-local activeMode = (addon.Options.ControllerState and addon.Options.ControllerState.mode) or "party"
+local activeMode = addon.Options.State:GetMode()
 local activePage = "general"
 local L = addon.L
 local theme = addon.Options.Theme
