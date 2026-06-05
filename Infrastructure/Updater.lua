@@ -124,7 +124,7 @@ local function BuildStateUpdater(updateReasons)
 	end
 
 	return function(frame, settings)
-		if updateReasons.rosterChanged or updateReasons.healthStateChanged then
+		if updateReasons.rosterChanged or updateReasons.healthStateChanged or updateReasons.healthSettingsChanged then
 			addon.Frames.Base.Health:UpdateState(frame, settings)
 		end
 
