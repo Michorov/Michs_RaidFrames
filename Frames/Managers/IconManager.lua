@@ -5,6 +5,7 @@ addon.Frames.Managers = addon.Frames.Managers or {}
 addon.Frames.Managers.IconManager = addon.Frames.Managers.IconManager or {}
 
 local IconManager = addon.Frames.Managers.IconManager
+local issecretvalue = issecretvalue
 
 local function ToSuffixFromKey(key)
 	return (key:gsub("^%l", string.upper))
@@ -163,6 +164,7 @@ function IconManager:ApplyCooldownSettings(icon, settings)
 	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
 		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown)
 	end
+
 	if settings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
 		local scaledSize = addon.Utilities:ScaleFont(settings.cooldownFontSize)
 		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
@@ -181,7 +183,13 @@ function IconManager:ApplyIconState(icon, state)
 	end
 
 	if icon.texture then
-		icon.texture:SetTexture(state.texture)
+		local currentTexture = icon.texture:GetTexture()
+		local currentTextureIsSecret = issecretvalue and issecretvalue(currentTexture)
+		local newTextureIsSecret = issecretvalue and issecretvalue(state.texture)
+
+		if currentTextureIsSecret or newTextureIsSecret or currentTexture ~= state.texture then
+			icon.texture:SetTexture(state.texture)
+		end
 	end
 
 	if icon.countText then
