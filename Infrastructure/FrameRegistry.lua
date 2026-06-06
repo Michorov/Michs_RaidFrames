@@ -149,6 +149,12 @@ function MRF_OnUnitChanged(frame, unit)
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
+
+	C_Timer.After(1, function()
+		if frame.unit == unit then
+			addon.UpdateScheduler:Notify("rosterChanged", unit)
+		end
+	end)
 end
 
 local function ApplyBlizzardFramesVisibility()
