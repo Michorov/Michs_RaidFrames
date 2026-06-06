@@ -71,18 +71,29 @@ function Health:UpdateState(frame, settings)
 	healthBar:SetMinMaxValues(0, max)
 	healthBar:SetValue(current)
 
+	local color = cachedSettings.color
+
 	if not cachedSettings.classColor then
 		if healthBar.classToken == false then
 			return
 		end
 
 		healthBar.classToken = false
-		local color = cachedSettings.color
 		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
 		return
 	end
 
 	local classToken = frame.dataProvider:GetClassToken(frame)
+	if not classToken then
+		if healthBar.classToken == false then
+			return
+		end
+
+		healthBar.classToken = false
+		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+		return
+	end
+
 	if classToken == healthBar.classToken then
 		return
 	end
