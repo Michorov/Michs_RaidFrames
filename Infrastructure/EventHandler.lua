@@ -62,6 +62,17 @@ function EventHandler:Initialize()
 	initialized = true
 end
 
+local function QueueLateRosterRefresh()
+	local delays = { 0.2, 0.8, 1.5 }
+	for _, delay in ipairs(delays) do
+		C_Timer.After(delay, function()
+			addon.UpdateScheduler:Notify("rosterChanged")
+			addon.UpdateScheduler:Notify("layoutChanged")
+			addon.UpdateScheduler:Notify("nameStateChanged")
+		end)
+	end
+end
+
 function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.FrameRegistry:Initialize()
 	addon.Database:ApplyProfileForCurrentSpec()
@@ -73,17 +84,23 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 	C_Timer.After(0.1, function()
 		addon.UpdateScheduler:Notify("rosterChanged")
 	end)
+
+	QueueLateRosterRefresh()
 end
 
 function EventHandler:ZONE_CHANGED_NEW_AREA()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+	QueueLateRosterRefresh()
 end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+	QueueLateRosterRefresh()
 end
 
 function EventHandler:PARTY_LEADER_CHANGED()
