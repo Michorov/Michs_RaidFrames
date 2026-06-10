@@ -144,6 +144,13 @@ local CUSTOM_BUFF_SETTING_DEFAULTS = {
 	stacksFontSize = 10,
 	showCooldown = false,
 	cooldownFontSize = 10,
+	colorTexture = false,
+	colorTextureColor = {
+		r = 1,
+		g = 1,
+		b = 1,
+		a = 1,
+	},
 }
 
 local function SyncCustomAuraDefaults(currentValues, defaultValues, entrySettingDefaults)

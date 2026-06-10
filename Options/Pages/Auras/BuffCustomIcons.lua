@@ -68,6 +68,13 @@ local function GetBuffDefaults()
 		stacksFontSize = 10,
 		showCooldown = false,
 		cooldownFontSize = 10,
+		colorTexture = false,
+		colorTextureColor = {
+			r = 1,
+			g = 1,
+			b = 1,
+			a = 1,
+		},
 	}
 end
 
@@ -323,6 +330,28 @@ function BuffCustomIcons:Ensure(parent)
 		end)
 	end)
 
+	subpage.colorTextureCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Color Texture"])
+	subpage.colorTextureCheckbox:SetLayoutWidth(174)
+	subpage.colorTextureCheckbox:SetOnValueChanged(function(_, checked)
+		ApplySelectedBuffSetting(function(settings)
+			settings.colorTexture = checked == true
+		end)
+	end)
+
+	subpage.colorTextureColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
+	subpage.colorTextureColorPicker:SetLayoutWidth(174)
+	subpage.colorTextureColorPicker:SetHasOpacity(true)
+	subpage.colorTextureColorPicker:SetOnValueChanged(function(_, r, g, b, a)
+		ApplySelectedBuffSetting(function(settings)
+			settings.colorTextureColor = {
+				r = r,
+				g = g,
+				b = b,
+				a = a,
+			}
+		end)
+	end)
+
 	subpage.controls = {
 		buffDropdown = subpage.buffDropdown,
 		enabledCheckbox = subpage.enabledCheckbox,
@@ -334,6 +363,8 @@ function BuffCustomIcons:Ensure(parent)
 		stacksFontSizeSlider = subpage.stacksFontSizeSlider,
 		showCooldownCheckbox = subpage.showCooldownCheckbox,
 		cooldownFontSizeSlider = subpage.cooldownFontSizeSlider,
+		colorTextureCheckbox = subpage.colorTextureCheckbox,
+		colorTextureColorPicker = subpage.colorTextureColorPicker,
 	}
 
 	function subpage:UpdateLocale()
@@ -350,6 +381,8 @@ function BuffCustomIcons:Ensure(parent)
 		self.stacksFontSizeSlider:SetLabel(L["Stacks Size"])
 		self.showCooldownCheckbox:SetText(L["Show Duration"])
 		self.cooldownFontSizeSlider:SetLabel(L["Duration Size"])
+		self.colorTextureCheckbox:SetText(L["Color Texture"])
+		self.colorTextureColorPicker:SetLabel(L["Color"])
 		RefreshSelectionState(addon.Database:GetProfile())
 	end
 
@@ -368,6 +401,7 @@ function BuffCustomIcons:Ensure(parent)
 		local iconSizeRowOffsetPx = offsetsRowOffsetPx + rowStepPx
 		local stacksRowOffsetPx = iconSizeRowOffsetPx + rowStepPx + sectionGapPx
 		local durationRowOffsetPx = stacksRowOffsetPx + rowStepPx
+		local colorTextureRowOffsetPx = durationRowOffsetPx + rowStepPx + sectionGapPx
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -384,9 +418,12 @@ function BuffCustomIcons:Ensure(parent)
 
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorTextureColorPicker.layoutValues.pickerSize)
 		local headerCheckboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (headerHeightPx - checkboxHeightPx) / 2))
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
+		local colorTextureCheckboxOffsetPx =
+			addon.Utilities:RoundToNearestInt(math.max(0, (colorPickerSizePx - checkboxHeightPx) / 2))
 
 		controls.buffDropdown:ClearAllPoints()
 		controls.buffDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
@@ -453,6 +490,24 @@ function BuffCustomIcons:Ensure(parent)
 			addon.Utilities:ToUI(secondColumnOffsetPx),
 			-addon.Utilities:ToUI(durationRowOffsetPx)
 		)
+
+		controls.colorTextureCheckbox:ClearAllPoints()
+		controls.colorTextureCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(colorTextureRowOffsetPx + colorTextureCheckboxOffsetPx)
+		)
+
+		controls.colorTextureColorPicker:ClearAllPoints()
+		controls.colorTextureColorPicker:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			addon.Utilities:ToUI(secondColumnOffsetPx),
+			-addon.Utilities:ToUI(colorTextureRowOffsetPx)
+		)
 	end
 
 	function subpage:UpdateState(profile)
@@ -487,6 +542,10 @@ function BuffCustomIcons:Ensure(parent)
 		controls.stacksFontSizeSlider:SetValueSilently(settings.stacksFontSize or defaults.stacksFontSize)
 		controls.showCooldownCheckbox:SetChecked(settings.showCooldown == true)
 		controls.cooldownFontSizeSlider:SetValueSilently(settings.cooldownFontSize or defaults.cooldownFontSize)
+		controls.colorTextureCheckbox:SetChecked(settings.colorTexture == true)
+
+		local color = settings.colorTextureColor or defaults.colorTextureColor
+		controls.colorTextureColorPicker:SetColor(color.r, color.g, color.b, color.a)
 
 		for _, control in pairs(controls) do
 			control:Show()
