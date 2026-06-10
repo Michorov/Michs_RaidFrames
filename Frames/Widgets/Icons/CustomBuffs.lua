@@ -23,6 +23,7 @@ local function UpdateSettingsCache(settings)
 	for spellId, iconData in pairs(specAuras) do
 		if iconData.enabled then
 			local icon = iconData or {}
+			local color = icon.colorTextureColor or {}
 			iconSettings[spellId] = {
 				anchor = icon.anchor or "CENTER",
 				offsetXPx = addon.Utilities:ToPixels(icon.offsetX or 0),
@@ -33,6 +34,13 @@ local function UpdateSettingsCache(settings)
 				stacksFontSize = icon.stacksFontSize or 10,
 				showCooldown = icon.showCooldown == true,
 				cooldownFontSize = icon.cooldownFontSize or 10,
+				colorTexture = icon.colorTexture == true,
+				colorTextureColor = {
+					r = color.r or 1,
+					g = color.g or 1,
+					b = color.b or 1,
+					a = color.a or 1,
+				},
 			}
 		end
 	end
@@ -138,16 +146,22 @@ function CustomBuffs:UpdateState(frame, settings)
 
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 	for _, aura in pairs(auras) do
-		local spellOk, isEnabled = pcall(function()
-			return aura.spellId and cachedSettings.iconSettings[aura.spellId] ~= nil
+		local spellOk, iconSettings = pcall(function()
+			return aura.spellId and cachedSettings.iconSettings[aura.spellId]
 		end)
-		if spellOk and isEnabled then
+		if spellOk and iconSettings then
 			local icon = customBuffs[aura.spellId]
-			if icon and aura.icon then
+			if icon and (aura.icon or iconSettings.colorTexture) then
 				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 				local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)
+
+				if iconSettings.colorTexture then
+					addon.Frames.Managers.IconManager:ApplyColorTexture(icon, iconSettings.colorTextureColor)
+				else
+					addon.Frames.Managers.IconManager:ApplyTexture(icon, aura.icon)
+				end
+
 				addon.Frames.Managers.IconManager:ApplyIconState(icon, {
-					texture = aura.icon,
 					countText = stackText,
 					durationObject = provider:GetAuraDuration(frame, aura),
 					hasExpiration = hasExpiration,

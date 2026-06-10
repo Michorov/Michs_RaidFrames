@@ -177,19 +177,56 @@ function IconManager:ApplyCooldownSettings(icon, settings)
 	end
 end
 
+function IconManager:ApplyTexture(icon, texture)
+	if not icon or not icon.texture then
+		return
+	end
+
+	icon.texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+	local currentTexture = icon.texture:GetTexture()
+	local currentTextureIsSecret = issecretvalue and issecretvalue(currentTexture)
+	local newTextureIsSecret = issecretvalue and issecretvalue(texture)
+
+	if currentTextureIsSecret or newTextureIsSecret or icon.texture.appliedColor or currentTexture ~= texture then
+		icon.texture:SetTexture(texture)
+		icon.texture.appliedColor = nil
+	end
+end
+
+function IconManager:ApplyColorTexture(icon, color)
+	if not icon or not icon.texture or not color then
+		return
+	end
+
+	icon.texture:SetTexCoord(0, 1, 0, 1)
+
+	local appliedColor = icon.texture.appliedColor
+
+	if
+		not appliedColor
+		or appliedColor.r ~= color.r
+		or appliedColor.g ~= color.g
+		or appliedColor.b ~= color.b
+		or appliedColor.a ~= color.a
+	then
+		icon.texture:SetColorTexture(color.r, color.g, color.b, color.a)
+		icon.texture.appliedColor = {
+			r = color.r,
+			g = color.g,
+			b = color.b,
+			a = color.a,
+		}
+	end
+end
+
 function IconManager:ApplyIconState(icon, state)
 	if not icon then
 		return
 	end
 
-	if icon.texture then
-		local currentTexture = icon.texture:GetTexture()
-		local currentTextureIsSecret = issecretvalue and issecretvalue(currentTexture)
-		local newTextureIsSecret = issecretvalue and issecretvalue(state.texture)
-
-		if currentTextureIsSecret or newTextureIsSecret or currentTexture ~= state.texture then
-			icon.texture:SetTexture(state.texture)
-		end
+	if state.texture ~= nil then
+		self:ApplyTexture(icon, state.texture)
 	end
 
 	if icon.countText then
