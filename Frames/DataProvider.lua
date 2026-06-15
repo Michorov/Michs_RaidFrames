@@ -339,7 +339,7 @@ function DataProvider.Live:GetAbsorbs(frame)
 	end
 
 	local maxHealth = UnitHealthMax(unit)
-	if not maxHealth or maxHealth <= 0 then
+	if not maxHealth then
 		return nil, nil
 	end
 
