@@ -1,8 +1,8 @@
-## Interface: 120000, 120001, 120005
+## Interface: 120000, 120001, 120005, 120007
 ## Title: Mich's RaidFrames
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
-## Version: 2.2.14
+## Version: 2.2.15
 ## SavedVariables: Michs_RaidFramesDB
 ## OptionalDeps: MiniCC
 
