@@ -11,6 +11,9 @@ local updateReasons = {
 local flushCallback
 local initialized = false
 local flushScheduled = false
+local flushScheduledAt = nil
+
+local STALE_FLUSH_SECONDS = 1
 
 local function ScheduleFlush()
 	if flushCallback == nil then
@@ -18,13 +21,20 @@ local function ScheduleFlush()
 	end
 
 	if flushScheduled then
-		return
+		if flushScheduledAt and (GetTime() - flushScheduledAt) > STALE_FLUSH_SECONDS then
+			flushScheduled = false
+			flushScheduledAt = nil
+		else
+			return
+		end
 	end
 
 	flushScheduled = true
+	flushScheduledAt = GetTime()
 
 	C_Timer.After(0, function()
 		flushScheduled = false
+		flushScheduledAt = nil
 
 		local reasons = updateReasons
 		updateReasons = {
