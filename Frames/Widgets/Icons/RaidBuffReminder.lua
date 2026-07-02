@@ -34,6 +34,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function RaidBuffReminder:Ensure(frame)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if not frame.raidBuffReminderContainer then
 		frame.raidBuffReminderContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "raidBuffReminderContainer", 39)
 		frame.raidBuffReminderIcon = addon.Frames.Managers.IconManager:CreateIcon(frame.raidBuffReminderContainer, 1)
@@ -43,6 +47,11 @@ end
 
 function RaidBuffReminder:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
+
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	local icon = frame.raidBuffReminderIcon
@@ -74,6 +83,10 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.raidBuffReminder ~= true then
 		frame.raidBuffReminderIcon:Hide()
