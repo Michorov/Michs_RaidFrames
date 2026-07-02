@@ -43,6 +43,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function Buffs:Ensure(frame)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if not frame.buffsContainer then
 		frame.buffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "buffsContainer", 42)
 	end
@@ -128,17 +132,25 @@ end
 function Buffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	UpdateContainerSettings(frame, settings)
 	UpdateIconSettings(frame, settings)
 end
 
 function Buffs:UpdateState(frame, settings)
-	local container = frame.buffsContainer
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
+	local container = frame.buffsContainer
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.buffs ~= true then
 		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)

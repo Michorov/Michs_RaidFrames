@@ -90,6 +90,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function Debuffs:Ensure(frame)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if not frame.debuffsContainer then
 		frame.debuffsContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "debuffsContainer", 41)
 	end
@@ -183,17 +187,25 @@ end
 function Debuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	UpdateContainerSettings(frame, settings)
 	UpdateIconSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	local container = frame.debuffsContainer
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
+	local container = frame.debuffsContainer
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.debuffs ~= true then
 		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
