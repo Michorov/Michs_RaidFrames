@@ -207,7 +207,7 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged then
+		if updateReasons.rosterChanged and not addon.IsRestrictedAuraAPI then
 			addon.AuraHandler:UpdateAurasForUnit(frame.unit)
 		end
 

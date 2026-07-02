@@ -236,6 +236,10 @@ function EventHandler:UNIT_AURA(event, unit, updateInfo)
 		return
 	end
 
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
 	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 end
