@@ -21,7 +21,6 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = debuffs.enabled ~= false,
-		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		anchor = debuffs.anchor or "BOTTOMLEFT",
 		offsetXPx = addon.Utilities:ToPixels(debuffs.offsetX or 2),
 		offsetYPx = addon.Utilities:ToPixels(debuffs.offsetY or 2),
