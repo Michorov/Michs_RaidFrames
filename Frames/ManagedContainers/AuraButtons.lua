@@ -95,16 +95,6 @@ function AuraButtons:ApplyIconSettings(button, cachedSettings)
 	button:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 end
 
-function AuraButtons:ApplyBorderColor(button, color)
-	if not button or not button.border or not color then
-		return
-	end
-
-	for _, texture in pairs(button.border.edges) do
-		texture:SetColorTexture(color.r, color.g, color.b, color.a or 1)
-	end
-end
-
 function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
 	local borderSize = addon.Utilities:ToUI(scaledBorderSizePx)
@@ -117,8 +107,6 @@ function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 	edges.bottom:SetHeight(borderSize)
 	edges.left:SetWidth(borderSize)
 	edges.right:SetWidth(borderSize)
-
-	self:ApplyBorderColor(button, { r = 0, g = 0, b = 0, a = 1 })
 end
 
 function AuraButtons:ApplyCooldownSettings(button, cachedSettings)
