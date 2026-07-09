@@ -39,6 +39,7 @@ Modules.lua
 Frames/Managers/IconManager.lua
 
 # Managed Containers
+Frames/ManagedContainers/AuraButtons.lua
 Frames/ManagedContainers/Debuffs.lua
 
 # Widgets Text
