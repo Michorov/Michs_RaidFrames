@@ -297,7 +297,7 @@ function Dispels:UpdateSettings(frame, settings)
 	container:SetAttribute("always-hide-duration", true)
 	if dispelIndicatorOverlayType then
 		container:SetAttribute("dispel-indicator-overlay-type", dispelIndicatorOverlayType)
-		container:SetAttribute("dispel-indicator-overlay-animation", true)
+		container:SetAttribute("dispel-indicator-overlay-animation", false)
 	end
 	container:SetAttribute("update-settings", true)
 	container:Show()
