@@ -6,9 +6,12 @@ addon.Frames.ManagedContainers.AuraButtons = addon.Frames.ManagedContainers.Aura
 
 local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
-local function CreateBorderTexture(parent)
+local function CreateBorderTexture(parent, fromPoint, toPoint)
 	local texture = parent:CreateTexture(nil, "ARTWORK")
 	texture:SetColorTexture(0, 0, 0, 1)
+	texture:SetPoint(fromPoint, parent, fromPoint)
+	texture:SetPoint(toPoint, parent, toPoint)
+
 	return texture
 end
 
@@ -30,10 +33,10 @@ function AuraButtons:Initialize(button, container)
 	border:SetAllPoints(button)
 	border:SetFrameLevel(buttonFrameLevel + 2)
 	border.edges = {
-		top = CreateBorderTexture(border),
-		bottom = CreateBorderTexture(border),
-		left = CreateBorderTexture(border),
-		right = CreateBorderTexture(border),
+		top = CreateBorderTexture(border, "TOPLEFT", "TOPRIGHT"),
+		bottom = CreateBorderTexture(border, "BOTTOMLEFT", "BOTTOMRIGHT"),
+		left = CreateBorderTexture(border, "TOPLEFT", "BOTTOMLEFT"),
+		right = CreateBorderTexture(border, "TOPRIGHT", "BOTTOMRIGHT"),
 	}
 	button.border = border
 
@@ -46,7 +49,7 @@ function AuraButtons:Initialize(button, container)
 
 	local textLayer = CreateFrame("Frame", nil, button)
 	textLayer:SetAllPoints(button)
-	textLayer:SetFrameLevel(buttonFrameLevel + 20)
+	textLayer:SetFrameLevel(buttonFrameLevel + 3)
 	button.textLayer = textLayer
 
 	for _, region in ipairs({ cooldown:GetRegions() }) do
@@ -110,24 +113,9 @@ function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 
 	ApplyIconInsets(button, cachedSettings)
 
-	edges.top:ClearAllPoints()
-	edges.top:SetPoint("TOPLEFT", border, "TOPLEFT")
-	edges.top:SetPoint("TOPRIGHT", border, "TOPRIGHT")
 	edges.top:SetHeight(borderSize)
-
-	edges.bottom:ClearAllPoints()
-	edges.bottom:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT")
-	edges.bottom:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT")
 	edges.bottom:SetHeight(borderSize)
-
-	edges.left:ClearAllPoints()
-	edges.left:SetPoint("TOPLEFT", border, "TOPLEFT")
-	edges.left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT")
 	edges.left:SetWidth(borderSize)
-
-	edges.right:ClearAllPoints()
-	edges.right:SetPoint("TOPRIGHT", border, "TOPRIGHT")
-	edges.right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT")
 	edges.right:SetWidth(borderSize)
 
 	self:ApplyBorderColor(button, { r = 0, g = 0, b = 0, a = 1 })
