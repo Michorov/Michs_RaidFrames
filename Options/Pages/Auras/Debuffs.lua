@@ -107,6 +107,7 @@ function Debuffs:Ensure(parent)
 	subpage.borderColorByDebuffTypeCheckbox =
 		addon.Options.Controls.Checkbox:Create(subpage, L["Color By Debuff Type"])
 	subpage.borderColorByDebuffTypeCheckbox:SetLayoutWidth(174)
+	subpage.borderColorByDebuffTypeCheckbox:SetShown(not addon.IsRestrictedAuraAPI)
 	subpage.borderColorByDebuffTypeCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
@@ -311,7 +312,9 @@ function Debuffs:Ensure(parent)
 				+ controls.anchorDropdown.layoutValues.labelSpacing
 				+ controls.anchorDropdown.layoutValues.fieldHeight
 		)
-		local stackedCheckboxHeightPx = (checkboxHeightPx * 2) + checkboxStackGapPx
+		local showBorderColorByDebuffType = not addon.IsRestrictedAuraAPI
+		local stackedCheckboxHeightPx = showBorderColorByDebuffType and ((checkboxHeightPx * 2) + checkboxStackGapPx)
+			or checkboxHeightPx
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local firstRowOffsetPx = 0
@@ -331,13 +334,16 @@ function Debuffs:Ensure(parent)
 		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
 
 		controls.borderColorByDebuffTypeCheckbox:ClearAllPoints()
-		controls.borderColorByDebuffTypeCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
-		)
+		controls.borderColorByDebuffTypeCheckbox:SetShown(showBorderColorByDebuffType)
+		if showBorderColorByDebuffType then
+			controls.borderColorByDebuffTypeCheckbox:SetPoint(
+				"TOPLEFT",
+				self,
+				"TOPLEFT",
+				0,
+				-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
+			)
+		end
 
 		controls.anchorDropdown:ClearAllPoints()
 		controls.anchorDropdown:SetPoint(
@@ -444,6 +450,7 @@ function Debuffs:Ensure(parent)
 		local debuffs = icons.debuffs or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(debuffs.enabled, defaults.enabled))
+		controls.borderColorByDebuffTypeCheckbox:SetShown(not addon.IsRestrictedAuraAPI)
 		controls.borderColorByDebuffTypeCheckbox:SetChecked(
 			ResolveBoolean(debuffs.borderColorByDebuffType, defaults.borderColorByDebuffType)
 		)
