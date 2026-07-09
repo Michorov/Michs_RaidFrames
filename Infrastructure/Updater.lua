@@ -94,6 +94,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.debuffAurasSettingsChanged then
+			addon.Frames.ManagedContainers.Debuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 		end

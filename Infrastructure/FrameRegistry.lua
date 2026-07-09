@@ -135,6 +135,10 @@ function MRF_OnUnitChanged(frame, unit)
 
 	NotifyMiniCCFramesChanged()
 
+	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.debuffs then
+		frame.managedContainers.debuffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
+	end
+
 	if not IsSupportedUnit(unit) then
 		return
 	end
