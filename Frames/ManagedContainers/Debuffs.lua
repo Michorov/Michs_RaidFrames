@@ -5,6 +5,7 @@ addon.Frames.ManagedContainers = addon.Frames.ManagedContainers or {}
 addon.Frames.ManagedContainers.Debuffs = addon.Frames.ManagedContainers.Debuffs or {}
 
 local Debuffs = addon.Frames.ManagedContainers.Debuffs
+local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
@@ -92,69 +93,16 @@ local function UpdateAuraGroupSettings(frame, settings)
 	})
 end
 
-local function UpdateButtonSettings(button, settings)
-	local cachedSettings = settingsCache[settings]
-	local scaledIconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
-	local scaledStacksFontSize = addon.Utilities:ScaleFont(cachedSettings.stacksFontSize)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
-
-	button:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
-
-	button.cooldown:SetHideCountdownNumbers(not cachedSettings.showCooldown)
-
-	button.count:SetFont("Fonts\\FRIZQT__.TTF", scaledStacksFontSize, "OUTLINE")
-	button.count:ClearAllPoints()
-	button.count:SetAlpha(cachedSettings.showStacks and 1 or 0)
-	button.count:SetPoint(
-		"BOTTOMRIGHT",
-		button,
-		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderSizePx - 2),
-		addon.Utilities:ToUI(scaledBorderSizePx - 2)
-	)
-
-	if cachedSettings.showCooldown and button.cooldown.SetCountdownFont then
-		local scaledSize = addon.Utilities:ScaleFont(cachedSettings.cooldownFontSize)
-		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
-		local cooldownFont = _G[fontName]
-		if not cooldownFont then
-			cooldownFont = CreateFont(fontName)
-		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
-		button.cooldown:SetCountdownFont(fontName)
-	end
-end
-
 local function UpdateButtonsSettings(frame, settings)
 	local container = frame.managedContainers.debuffs
+	local cachedSettings = settingsCache[settings]
 
 	for button in pairs(container.auraButtons or {}) do
-		UpdateButtonSettings(button, settings)
+		AuraButtons:ApplyIconSettings(button, cachedSettings)
+		AuraButtons:ApplyBorderSettings(button, cachedSettings)
+		AuraButtons:ApplyCooldownSettings(button, cachedSettings)
+		AuraButtons:ApplyCountSettings(button, cachedSettings)
 	end
-end
-
-local function InitializeButton(button, container)
-	container.auraButtons = container.auraButtons or {}
-	container.auraButtons[button] = true
-
-	button:EnableMouse(false)
-
-	local icon = button:CreateTexture(nil, "ARTWORK")
-	icon:SetAllPoints(button)
-	icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-	button.icon = icon
-	button:SetIcon(icon)
-
-	local cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
-	cooldown:SetAllPoints(button)
-	cooldown:SetReverse(true)
-	button.cooldown = cooldown
-	button:SetDurationCooldown(cooldown)
-
-	local count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
-	count:SetTextColor(1, 1, 1, 1)
-	button.count = count
-	button:SetApplicationCount(count, {})
 end
 
 function Debuffs:Ensure(frame, settings)
@@ -183,7 +131,7 @@ function Debuffs:Ensure(frame, settings)
 		sortMethod = AuraContainerSortMethod.UnitFrameDebuff,
 		sortDirection = AuraContainerSortDirection.Normal,
 		initializeFrame = function(button)
-			InitializeButton(button, container)
+			AuraButtons:Initialize(button, container)
 		end,
 	})
 
