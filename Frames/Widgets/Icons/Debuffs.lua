@@ -90,7 +90,7 @@ local function UpdateSettingsCache(settings)
 end
 
 function Debuffs:Ensure(frame)
-	if addon.IsRestrictedAuraAPI then
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
 		return
 	end
 
@@ -187,7 +187,7 @@ end
 function Debuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if addon.IsRestrictedAuraAPI then
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
 		return
 	end
 
@@ -201,7 +201,7 @@ function Debuffs:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if addon.IsRestrictedAuraAPI then
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
 		return
 	end
 
@@ -279,6 +279,8 @@ function Debuffs:UpdateState(frame, settings)
 end
 
 function Debuffs:Init()
+	addon.Frames.ManagedContainers.Debuffs:Init()
+
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "debuffAurasSettingsChanged",

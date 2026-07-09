@@ -38,6 +38,9 @@ Modules.lua
 # Frame Managers
 Frames/Managers/IconManager.lua
 
+# Managed Containers
+Frames/ManagedContainers/Debuffs.lua
+
 # Widgets Text
 Frames/Widgets/Texts/Name.lua
 Frames/Widgets/Texts/StatusText.lua
