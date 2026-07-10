@@ -119,7 +119,7 @@ function AuraButtons:ApplyCooldownSettings(button, cachedSettings)
 		if not cooldownFont then
 			cooldownFont = CreateFont(fontName)
 		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		cooldownFont:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledSize, "OUTLINE")
 		button.cooldown:SetCountdownFont(fontName)
 	end
 end
@@ -128,7 +128,7 @@ function AuraButtons:ApplyCountSettings(button, cachedSettings)
 	local scaledStacksFontSize = addon.Utilities:ScaleFont(cachedSettings.stacksFontSize)
 	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
 
-	button.count:SetFont("Fonts\\FRIZQT__.TTF", scaledStacksFontSize, "OUTLINE")
+	button.count:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledStacksFontSize, "OUTLINE")
 	button.count:ClearAllPoints()
 	button.count:SetAlpha(cachedSettings.showStacks and 1 or 0)
 	button.count:SetPoint(

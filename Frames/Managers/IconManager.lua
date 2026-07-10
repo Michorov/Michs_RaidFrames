@@ -147,7 +147,7 @@ function IconManager:ApplyCountSettings(icon, settings)
 	local scaledFontSize = addon.Utilities:ScaleFont(settings.stacksFontSize)
 	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
 
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", scaledFontSize, "OUTLINE")
+	icon.countText:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledFontSize, "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
 	icon.countText:SetShown(settings.showStacks)
@@ -172,7 +172,7 @@ function IconManager:ApplyCooldownSettings(icon, settings)
 		if not cooldownFont then
 			cooldownFont = CreateFont(fontName)
 		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		cooldownFont:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledSize, "OUTLINE")
 		icon.cooldown:SetCountdownFont(fontName)
 	end
 end
