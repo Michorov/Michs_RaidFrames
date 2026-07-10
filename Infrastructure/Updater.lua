@@ -84,6 +84,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 		end
 
+		if updateReasons.buffAuraFiltersChanged then
+			addon.Frames.ManagedContainers.Buffs:UpdateFilters(frame, settings)
+		end
+
 		if updateReasons.customBuffSettingsChanged then
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateState(frame, settings)

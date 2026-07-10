@@ -9,48 +9,24 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local CUSTOM_BUFF_SPELL_IDS = {
-	[17] = true,
-	[139] = true,
-	[774] = true,
-	[974] = true,
-	[8936] = true,
-	[33763] = true,
-	[41635] = true,
-	[48438] = true,
-	[53563] = true,
-	[61295] = true,
-	[77489] = true,
-	[115175] = true,
-	[119611] = true,
-	[124682] = true,
-	[155777] = true,
-	[156322] = true,
-	[156910] = true,
-	[194384] = true,
-	[207400] = true,
-	[355941] = true,
-	[360827] = true,
-	[363502] = true,
-	[364343] = true,
-	[366155] = true,
-	[367364] = true,
-	[373267] = true,
-	[376788] = true,
-	[382024] = true,
-	[383648] = true,
-	[395152] = true,
-	[410089] = true,
-	[410263] = true,
-	[410686] = true,
-	[413984] = true,
-	[450769] = true,
-	[1244893] = true,
-	[1253593] = true,
-}
-
 local function ShouldUseManagedContainer(frame)
 	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
+end
+
+local function GetEnabledBuffSpellIDs(buffs)
+	local customAuraValues = buffs.customAuraValues or {}
+	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
+	local specID = addon.Utilities:GetPlayerSpecID()
+	local specAuras = classAuras[specID] or classAuras[-1] or {}
+	local spellIDs = {}
+
+	for spellID, auraSettings in pairs(specAuras) do
+		if auraSettings.enabled == true then
+			spellIDs[tonumber(spellID) or spellID] = true
+		end
+	end
+
+	return spellIDs
 end
 
 local function UpdateSettingsCache(settings)
@@ -73,6 +49,7 @@ local function UpdateSettingsCache(settings)
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
+		includeSpellIDs = GetEnabledBuffSpellIDs(buffs),
 	}
 
 	settingsCache[settings] = result
@@ -153,6 +130,7 @@ function Buffs:Ensure(frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
+	local cachedSettings = settingsCache[settings]
 
 	frame.managedContainers = frame.managedContainers or {}
 
@@ -169,7 +147,7 @@ function Buffs:Ensure(frame, settings)
 	container:AddAuraGroup("buffs", "HELPFUL|PLAYER", {
 		maxFrameCount = 0,
 		candidateFilters = {
-			includeSpellIDs = CUSTOM_BUFF_SPELL_IDS,
+			includeSpellIDs = cachedSettings.includeSpellIDs,
 		},
 		sortMethod = AuraContainerSortMethod.Default,
 		sortDirection = AuraContainerSortDirection.Normal,
@@ -197,6 +175,25 @@ function Buffs:UpdateSettings(frame, settings)
 	UpdateButtonsSettings(frame, settings)
 	UpdateContainerSettings(frame, settings)
 	UpdateAuraGroupSettings(frame, settings)
+end
+
+function Buffs:UpdateFilters(frame, settings)
+	UpdateSettingsCache(settings)
+
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	if not frame.managedContainers or not frame.managedContainers.buffs then
+		self:Ensure(frame, settings)
+	end
+
+	local container = frame.managedContainers.buffs
+	local cachedSettings = settingsCache[settings]
+
+	container:SetAuraGroupCandidateFilters("buffs", {
+		includeSpellIDs = cachedSettings.includeSpellIDs,
+	})
 end
 
 function Buffs:Init()
