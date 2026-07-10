@@ -279,8 +279,6 @@ function Debuffs:UpdateState(frame, settings)
 end
 
 function Debuffs:Init()
-	addon.Frames.ManagedContainers.Debuffs:Init()
-
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "debuffAurasSettingsChanged",

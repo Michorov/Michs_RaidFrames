@@ -139,6 +139,10 @@ function MRF_OnUnitChanged(frame, unit)
 		frame.managedContainers.debuffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
 	end
 
+	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.buffs then
+		frame.managedContainers.buffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
+	end
+
 	if not IsSupportedUnit(unit) then
 		return
 	end
