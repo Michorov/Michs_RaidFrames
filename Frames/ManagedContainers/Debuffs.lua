@@ -46,7 +46,8 @@ local function UpdateContainerSettings(frame, settings)
 	local containerOffsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
 	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
 	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
-	local rowWidthPx = (iconSizePx * cachedSettings.iconsPerRow) + (spacingPx * (cachedSettings.iconsPerRow - 1))
+	local visibleCols = math.min(cachedSettings.maxIcons, cachedSettings.iconsPerRow)
+	local rowWidthPx = (iconSizePx * visibleCols) + (spacingPx * (visibleCols - 1)) + 1
 	local anchor = cachedSettings.anchor
 
 	container:ClearAllPoints()
@@ -134,8 +135,9 @@ function Debuffs:Ensure(frame, settings)
 		end,
 	})
 
-	UpdateAuraGroupSettings(frame, settings)
 	UpdateButtonsSettings(frame, settings)
+	UpdateContainerSettings(frame, settings)
+	UpdateAuraGroupSettings(frame, settings)
 end
 
 function Debuffs:UpdateSettings(frame, settings)
@@ -149,9 +151,9 @@ function Debuffs:UpdateSettings(frame, settings)
 		self:Ensure(frame, settings)
 	end
 
+	UpdateButtonsSettings(frame, settings)
 	UpdateContainerSettings(frame, settings)
 	UpdateAuraGroupSettings(frame, settings)
-	UpdateButtonsSettings(frame, settings)
 end
 
 function Debuffs:Init()
