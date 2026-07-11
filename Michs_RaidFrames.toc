@@ -42,6 +42,7 @@ Frames/Managers/IconManager.lua
 Frames/ManagedContainers/AuraButtons.lua
 Frames/ManagedContainers/Buffs.lua
 Frames/ManagedContainers/Debuffs.lua
+Frames/ManagedContainers/BuffOverlay.lua
 
 # Widgets Text
 Frames/Widgets/Texts/Name.lua

@@ -48,6 +48,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Texts.HealAbsorbs,
 		addon.Frames.ManagedContainers.Buffs,
 		addon.Frames.ManagedContainers.Debuffs,
+		addon.Frames.ManagedContainers.BuffOverlay,
 		addon.Frames.Widgets.Icons.Buffs,
 		addon.Frames.Widgets.Icons.CustomBuffs,
 		addon.Frames.Widgets.Icons.Debuffs,

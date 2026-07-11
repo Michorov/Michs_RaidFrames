@@ -94,6 +94,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.buffOverlaySettingsChanged then
+			addon.Frames.ManagedContainers.BuffOverlay:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 		end
