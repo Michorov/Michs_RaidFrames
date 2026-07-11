@@ -10,18 +10,40 @@ local page
 local L = addon.L
 local State = addon.Options.State
 local theme = addon.Options.Theme
+local _, _, _, interfaceVersion = GetBuildInfo()
+local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
+
+local subpageLabelKeys = {
+	buffs = "Buffs",
+	buffFilters = "Buffs - Filters",
+	buffOverlay = "Buffs - Overlay",
+	buffCustomIcons = "Buffs - Custom Icons",
+	debuffs = "Debuffs",
+	dispels = "Dispels",
+	bigDefensive = "Big Defensive",
+	privateAuras = "Private Auras",
+	raidBuffReminder = "Raid Buff Reminder",
+}
+
+local function GetSubpageLabel(subpageKey)
+	return L[subpageLabelKeys[subpageKey]]
+end
 
 local subpageOptions = {
-	{ value = "buffs", text = L["Buffs"] },
-	{ value = "buffFilters", text = L["Buffs - Filters"] },
-	{ value = "buffOverlay", text = L["Buffs - Overlay"] },
-	{ value = "buffCustomIcons", text = L["Buffs - Custom Icons"] },
-	{ value = "debuffs", text = L["Debuffs"] },
-	{ value = "dispels", text = L["Dispels"] },
-	{ value = "bigDefensive", text = L["Big Defensive"] },
-	{ value = "privateAuras", text = L["Private Auras"] },
-	{ value = "raidBuffReminder", text = L["Raid Buff Reminder"] },
+	{ value = "buffs", text = GetSubpageLabel("buffs") },
+	{ value = "buffFilters", text = GetSubpageLabel("buffFilters") },
+	{ value = "buffOverlay", text = GetSubpageLabel("buffOverlay") },
+	{ value = "buffCustomIcons", text = GetSubpageLabel("buffCustomIcons") },
+	{ value = "debuffs", text = GetSubpageLabel("debuffs") },
+	{ value = "dispels", text = GetSubpageLabel("dispels") },
+	{ value = "bigDefensive", text = GetSubpageLabel("bigDefensive") },
 }
+
+if not isRestrictedAuraAPI then
+	table.insert(subpageOptions, { value = "privateAuras", text = GetSubpageLabel("privateAuras") })
+end
+
+table.insert(subpageOptions, { value = "raidBuffReminder", text = GetSubpageLabel("raidBuffReminder") })
 
 local specHeaderSubpages = {
 	buffFilters = true,
@@ -97,7 +119,6 @@ function Auras:Ensure(parent)
 	local debuffsSubpage = addon.Options.Pages.Auras.Debuffs:Ensure(page.body)
 	local dispelsSubpage = addon.Options.Pages.Auras.Dispels:Ensure(page.body)
 	local bigDefensiveSubpage = addon.Options.Pages.Auras.BigDefensive:Ensure(page.body)
-	local privateAurasSubpage = addon.Options.Pages.Auras.PrivateAuras:Ensure(page.body)
 	local raidBuffReminderSubpage = addon.Options.Pages.Auras.RaidBuffReminder:Ensure(page.body)
 
 	page.subpages = {
@@ -108,9 +129,12 @@ function Auras:Ensure(parent)
 		debuffs = debuffsSubpage,
 		dispels = dispelsSubpage,
 		bigDefensive = bigDefensiveSubpage,
-		privateAuras = privateAurasSubpage,
 		raidBuffReminder = raidBuffReminderSubpage,
 	}
+
+	if not isRestrictedAuraAPI then
+		page.subpages.privateAuras = addon.Options.Pages.Auras.PrivateAuras:Ensure(page.body)
+	end
 
 	for subpageKey, subpage in pairs(page.subpages) do
 		subpage:SetPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
@@ -126,15 +150,9 @@ function Auras:Ensure(parent)
 	}
 
 	function page:UpdateLocale()
-		subpageOptions[1].text = L["Buffs"]
-		subpageOptions[2].text = L["Buffs - Filters"]
-		subpageOptions[3].text = L["Buffs - Overlay"]
-		subpageOptions[4].text = L["Buffs - Custom Icons"]
-		subpageOptions[5].text = L["Debuffs"]
-		subpageOptions[6].text = L["Dispels"]
-		subpageOptions[7].text = L["Big Defensive"]
-		subpageOptions[8].text = L["Private Auras"]
-		subpageOptions[9].text = L["Raid Buff Reminder"]
+		for _, option in ipairs(subpageOptions) do
+			option.text = GetSubpageLabel(option.value)
+		end
 
 		self.modeToggle:SetOptions(
 			{ value = "party", text = L["Party"] },
