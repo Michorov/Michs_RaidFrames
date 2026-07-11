@@ -68,10 +68,6 @@ local function UpdateOverlayButtonSettings(frame, settings)
 	slotButton:SetPoint("BOTTOMRIGHT", healthTexture, "BOTTOMRIGHT", 0, 0)
 
 	slotButton.overlayTexture:SetColorTexture(cachedSettings.color.r, cachedSettings.color.g, cachedSettings.color.b, 1)
-
-	if not cachedSettings.enabled then
-		slotButton:Hide()
-	end
 end
 
 local function UpdateFilters(frame, settings)
