@@ -44,6 +44,7 @@ local function GetModeDefaults()
 		iconsPerRow = 3,
 		borderSizePx = 1,
 		borderColorByDebuffType = false,
+		showTooltips = false,
 		showStacks = true,
 		stacksFontSize = 10,
 		showCooldown = false,
@@ -104,17 +105,15 @@ function Debuffs:Ensure(parent)
 		end, true)
 	end)
 
-	subpage.borderColorByDebuffTypeCheckbox =
-		addon.Options.Controls.Checkbox:Create(subpage, L["Color By Debuff Type"])
-	subpage.borderColorByDebuffTypeCheckbox:SetLayoutWidth(174)
-	subpage.borderColorByDebuffTypeCheckbox:SetShown(not addon.IsRestrictedAuraAPI)
-	subpage.borderColorByDebuffTypeCheckbox:SetOnValueChanged(function(_, checked)
+	subpage.showTooltipsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Tooltips"])
+	subpage.showTooltipsCheckbox:SetLayoutWidth(174)
+	subpage.showTooltipsCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.debuffs = section.widgets.icons.debuffs or {}
-			section.widgets.icons.debuffs.borderColorByDebuffType = checked == true
-		end, true)
+			section.widgets.icons.debuffs.showTooltips = checked == true
+		end)
 	end)
 
 	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
@@ -261,7 +260,7 @@ function Debuffs:Ensure(parent)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
-		borderColorByDebuffTypeCheckbox = subpage.borderColorByDebuffTypeCheckbox,
+		showTooltipsCheckbox = subpage.showTooltipsCheckbox,
 		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
@@ -279,7 +278,7 @@ function Debuffs:Ensure(parent)
 	function subpage:UpdateLocale()
 		UpdateAnchorOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
-		self.borderColorByDebuffTypeCheckbox:SetText(L["Color By Debuff Type"])
+		self.showTooltipsCheckbox:SetText(L["Show Tooltips"])
 		self.anchorDropdown:SetLabel(L["Position"])
 		self.anchorDropdown:SetOptions(anchorOptions)
 		self.offsetXSlider:SetLabel(L["Offset X"])
@@ -312,9 +311,7 @@ function Debuffs:Ensure(parent)
 				+ controls.anchorDropdown.layoutValues.labelSpacing
 				+ controls.anchorDropdown.layoutValues.fieldHeight
 		)
-		local showBorderColorByDebuffType = not addon.IsRestrictedAuraAPI
-		local stackedCheckboxHeightPx = showBorderColorByDebuffType and ((checkboxHeightPx * 2) + checkboxStackGapPx)
-			or checkboxHeightPx
+		local stackedCheckboxHeightPx = (checkboxHeightPx * 2) + checkboxStackGapPx
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local firstRowOffsetPx = 0
@@ -333,17 +330,14 @@ function Debuffs:Ensure(parent)
 		controls.enabledCheckbox:ClearAllPoints()
 		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
 
-		controls.borderColorByDebuffTypeCheckbox:ClearAllPoints()
-		controls.borderColorByDebuffTypeCheckbox:SetShown(showBorderColorByDebuffType)
-		if showBorderColorByDebuffType then
-			controls.borderColorByDebuffTypeCheckbox:SetPoint(
-				"TOPLEFT",
-				self,
-				"TOPLEFT",
-				0,
-				-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
-			)
-		end
+		controls.showTooltipsCheckbox:ClearAllPoints()
+		controls.showTooltipsCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
+		)
 
 		controls.anchorDropdown:ClearAllPoints()
 		controls.anchorDropdown:SetPoint(
@@ -450,10 +444,7 @@ function Debuffs:Ensure(parent)
 		local debuffs = icons.debuffs or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(debuffs.enabled, defaults.enabled))
-		controls.borderColorByDebuffTypeCheckbox:SetShown(not addon.IsRestrictedAuraAPI)
-		controls.borderColorByDebuffTypeCheckbox:SetChecked(
-			ResolveBoolean(debuffs.borderColorByDebuffType, defaults.borderColorByDebuffType)
-		)
+		controls.showTooltipsCheckbox:SetChecked(ResolveBoolean(debuffs.showTooltips, defaults.showTooltips))
 		controls.anchorDropdown:SetOptions(anchorOptions)
 		controls.anchorDropdown:SetValue(debuffs.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(debuffs.offsetX or defaults.offsetX)

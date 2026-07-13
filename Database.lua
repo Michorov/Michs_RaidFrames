@@ -419,6 +419,7 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+						showTooltips = false,
 
 						useCustomBuffFilter = false,
 						showExternals = false,
@@ -443,6 +444,7 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+						showTooltips = false,
 
 						borderSizePx = 1,
 						borderColorByDebuffType = false,
@@ -730,6 +732,7 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+						showTooltips = false,
 
 						useCustomBuffFilter = false,
 						showExternals = false,
@@ -754,6 +757,7 @@ local DEFAULTS = {
 
 						showCooldown = false,
 						cooldownFontSize = 10,
+						showTooltips = false,
 
 						borderSizePx = 1,
 						borderColorByDebuffType = false,

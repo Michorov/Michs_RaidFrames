@@ -47,7 +47,7 @@ local function GetModeDefaults()
 		stacksFontSize = 10,
 		showCooldown = false,
 		cooldownFontSize = 10,
-		showExternals = false,
+		showTooltips = false,
 	}
 end
 
@@ -104,15 +104,15 @@ function Buffs:Ensure(parent)
 		end, true)
 	end)
 
-	subpage.showExternalsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show External Buffs"])
-	subpage.showExternalsCheckbox:SetLayoutWidth(174)
-	subpage.showExternalsCheckbox:SetOnValueChanged(function(_, checked)
+	subpage.showTooltipsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Tooltips"])
+	subpage.showTooltipsCheckbox:SetLayoutWidth(174)
+	subpage.showTooltipsCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
-			section.widgets.icons.buffs.showExternals = checked == true
-		end, true)
+			section.widgets.icons.buffs.showTooltips = checked == true
+		end)
 	end)
 
 	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
@@ -259,7 +259,7 @@ function Buffs:Ensure(parent)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
-		showExternalsCheckbox = subpage.showExternalsCheckbox,
+		showTooltipsCheckbox = subpage.showTooltipsCheckbox,
 		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
@@ -277,7 +277,7 @@ function Buffs:Ensure(parent)
 	function subpage:UpdateLocale()
 		UpdateAnchorOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
-		self.showExternalsCheckbox:SetText(L["Show External Buffs"])
+		self.showTooltipsCheckbox:SetText(L["Show Tooltips"])
 		self.anchorDropdown:SetLabel(L["Position"])
 		self.anchorDropdown:SetOptions(anchorOptions)
 		self.offsetXSlider:SetLabel(L["Offset X"])
@@ -329,8 +329,8 @@ function Buffs:Ensure(parent)
 		controls.enabledCheckbox:ClearAllPoints()
 		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
 
-		controls.showExternalsCheckbox:ClearAllPoints()
-		controls.showExternalsCheckbox:SetPoint(
+		controls.showTooltipsCheckbox:ClearAllPoints()
+		controls.showTooltipsCheckbox:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
@@ -443,7 +443,7 @@ function Buffs:Ensure(parent)
 		local buffs = icons.buffs or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(buffs.enabled, defaults.enabled))
-		controls.showExternalsCheckbox:SetChecked(ResolveBoolean(buffs.showExternals, defaults.showExternals))
+		controls.showTooltipsCheckbox:SetChecked(ResolveBoolean(buffs.showTooltips, defaults.showTooltips))
 		controls.anchorDropdown:SetOptions(anchorOptions)
 		controls.anchorDropdown:SetValue(buffs.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(buffs.offsetX or defaults.offsetX)

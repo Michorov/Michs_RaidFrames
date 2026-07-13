@@ -15,11 +15,25 @@ local function CreateBorderTexture(parent, fromPoint, toPoint)
 	return texture
 end
 
+function AuraButtons:ApplyTooltipSettings(button, cachedSettings)
+	local enabled = cachedSettings.showTooltips == true
+
+	if button.SetMouseClickEnabled then
+		button:SetMouseClickEnabled(false)
+	end
+
+	if button.SetMouseMotionEnabled then
+		button:SetMouseMotionEnabled(enabled == true)
+	elseif button.EnableMouse then
+		button:EnableMouse(enabled == true)
+	end
+end
+
 function AuraButtons:Initialize(button, container)
 	container.auraButtons = container.auraButtons or {}
 	container.auraButtons[button] = true
 
-	button:EnableMouse(false)
+	AuraButtons:ApplyTooltipSettings(button, { showTooltips = false })
 
 	local icon = button:CreateTexture(nil, "ARTWORK")
 	icon:SetAllPoints(button)
@@ -107,6 +121,10 @@ function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 	edges.bottom:SetHeight(borderSize)
 	edges.left:SetWidth(borderSize)
 	edges.right:SetWidth(borderSize)
+
+	if button.SetHitRectInsets then
+		button:SetHitRectInsets(borderSize, borderSize, borderSize, borderSize)
+	end
 end
 
 function AuraButtons:ApplyCooldownSettings(button, cachedSettings)
