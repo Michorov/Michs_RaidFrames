@@ -135,23 +135,29 @@ function MRF_OnUnitChanged(frame, unit)
 
 	NotifyMiniCCFramesChanged()
 
-	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.debuffs then
-		frame.managedContainers.debuffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
+	local isSupportedUnit = IsSupportedUnit(unit)
+
+	if addon.IsRestrictedAuraAPI and frame.managedContainers then
+		local managedUnit = isSupportedUnit and unit or "none"
+
+		if frame.managedContainers.debuffs then
+			frame.managedContainers.debuffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.buffs then
+			frame.managedContainers.buffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.customBuffs then
+			frame.managedContainers.customBuffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.buffOverlay then
+			frame.managedContainers.buffOverlay:SetUnit(managedUnit)
+		end
 	end
 
-	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.buffs then
-		frame.managedContainers.buffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
-	end
-
-	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.customBuffs then
-		frame.managedContainers.customBuffs:SetUnit(IsSupportedUnit(unit) and unit or "none")
-	end
-
-	if addon.IsRestrictedAuraAPI and frame.managedContainers and frame.managedContainers.buffOverlay then
-		frame.managedContainers.buffOverlay:SetUnit(IsSupportedUnit(unit) and unit or "none")
-	end
-
-	if not IsSupportedUnit(unit) then
+	if not isSupportedUnit then
 		return
 	end
 
