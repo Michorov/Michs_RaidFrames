@@ -141,7 +141,7 @@ function Buffs:Ensure(frame, settings)
 	end
 
 	local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
-	container:SetFrameLevel(42)
+	container:SetFrameLevel(55)
 	frame.managedContainers.buffs = container
 
 	UpdateContainerSettings(frame, settings)

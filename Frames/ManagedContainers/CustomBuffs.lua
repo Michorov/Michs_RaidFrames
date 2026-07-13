@@ -184,7 +184,7 @@ function CustomBuffs:Ensure(frame, settings)
 	end
 
 	local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
-	container:SetFrameLevel(43)
+	container:SetFrameLevel(60)
 	container.auraSlots = {}
 
 	frame.managedContainers.customBuffs = container

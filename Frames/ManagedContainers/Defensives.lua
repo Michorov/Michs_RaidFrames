@@ -97,7 +97,7 @@ function Defensives:Ensure(frame, settings)
 	end
 
 	local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
-	container:SetFrameLevel(44)
+	container:SetFrameLevel(50)
 
 	frame.managedContainers.defensives = container
 	UpdateContainerSettings(frame, settings)

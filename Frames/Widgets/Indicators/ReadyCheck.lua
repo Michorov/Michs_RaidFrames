@@ -37,7 +37,7 @@ end
 function ReadyCheck:Ensure(frame)
 	if not frame.readyCheck then
 		local container = CreateFrame("Frame", nil, frame)
-		container:SetFrameLevel(55)
+		container:SetFrameLevel(75)
 		container.texture = container:CreateTexture(nil, "ARTWORK")
 		container.texture:SetAllPoints(container)
 		container.texture:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
