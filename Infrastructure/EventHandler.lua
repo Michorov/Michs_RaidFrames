@@ -232,12 +232,11 @@ function EventHandler:UNIT_DISPLAYPOWER(event, unit)
 end
 
 function EventHandler:UNIT_AURA(event, unit, updateInfo)
-	if not IsSupportedUnit(unit) then
+	if addon.IsRestrictedAuraAPI then
 		return
 	end
 
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("raidBuffReminderStateChanged", unit)
+	if not IsSupportedUnit(unit) then
 		return
 	end
 

@@ -113,6 +113,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.raidBuffReminderSettingsChanged then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
@@ -229,15 +230,21 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
-		if updateReasons.raidBuffReminderStateChanged then
-			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
+		if
+			updateReasons.rosterChanged
+			or updateReasons.statusStateChanged
+			or updateReasons.outOfRangeAlphaStateChanged
+		then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
 		if updateReasons.combatStarted then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
 		if updateReasons.combatEnded then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 

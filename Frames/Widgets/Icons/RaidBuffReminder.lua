@@ -9,43 +9,6 @@ local RaidBuffReminder = addon.Frames.Widgets.Icons.RaidBuffReminder
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function HasAuraFromSpellIDs(unit, spellIds)
-	if type(unit) ~= "string" or unit == "" or type(spellIds) ~= "table" then
-		return false
-	end
-
-	if not C_UnitAuras or not C_UnitAuras.GetUnitAuraBySpellID then
-		return false
-	end
-
-	for _, spellId in ipairs(spellIds) do
-		if C_UnitAuras.GetUnitAuraBySpellID(unit, spellId) then
-			return true
-		end
-	end
-
-	return false
-end
-
-local function HasAuraFromAuraList(auras, spellIds)
-	if type(auras) ~= "table" or type(spellIds) ~= "table" then
-		return false
-	end
-
-	for _, aura in pairs(auras) do
-		local auraSpellId = aura.spellId
-		if auraSpellId and not issecretvalue(auraSpellId) then
-			for _, spellId in ipairs(spellIds) do
-				if auraSpellId == spellId then
-					return true
-				end
-			end
-		end
-	end
-
-	return false
-end
-
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -71,6 +34,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function RaidBuffReminder:Ensure(frame)
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	if not frame.raidBuffReminderContainer then
 		frame.raidBuffReminderContainer = addon.Frames.Managers.IconManager:CreateContainer(frame, "raidBuffReminderContainer", 39)
 		frame.raidBuffReminderIcon = addon.Frames.Managers.IconManager:CreateIcon(frame.raidBuffReminderContainer, 1)
@@ -80,6 +47,10 @@ end
 
 function RaidBuffReminder:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
 
 	local cachedSettings = settingsCache[settings]
 
@@ -112,6 +83,10 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.raidBuffReminder ~= true then
 		frame.raidBuffReminderIcon:Hide()
@@ -154,15 +129,23 @@ function RaidBuffReminder:UpdateState(frame, settings)
 	end
 
 	local icon = frame.raidBuffReminderIcon
-	local useSpellIDLookup = addon.IsRestrictedAuraAPI and not isTestProvider
-	local auras = useSpellIDLookup and nil or provider:GetUnitAuras(frame, "helpful")
+	local auras = provider:GetUnitAuras(frame, "helpful")
 
 	if blessingOfTheBronzeSpellIds then
-		local hasBlessingOfTheBronze
-		if useSpellIDLookup then
-			hasBlessingOfTheBronze = HasAuraFromSpellIDs(unit, blessingOfTheBronzeSpellIds)
-		else
-			hasBlessingOfTheBronze = HasAuraFromAuraList(auras, blessingOfTheBronzeSpellIds)
+		local hasBlessingOfTheBronze = false
+		for _, aura in pairs(auras) do
+			local auraSpellId = aura.spellId
+			if auraSpellId and not issecretvalue(auraSpellId) then
+				for _, bronzeSpellId in ipairs(blessingOfTheBronzeSpellIds) do
+					if auraSpellId == bronzeSpellId then
+						hasBlessingOfTheBronze = true
+						break
+					end
+				end
+			end
+			if hasBlessingOfTheBronze then
+				break
+			end
 		end
 
 		if not hasBlessingOfTheBronze then
@@ -173,11 +156,20 @@ function RaidBuffReminder:UpdateState(frame, settings)
 			icon:Hide()
 		end
 	else
-		local hasBuff
-		if useSpellIDLookup then
-			hasBuff = HasAuraFromSpellIDs(unit, classBuffSpellIds)
-		else
-			hasBuff = HasAuraFromAuraList(auras, classBuffSpellIds)
+		local hasBuff = false
+		for _, aura in pairs(auras) do
+			local auraSpellId = aura.spellId
+			if auraSpellId and not issecretvalue(auraSpellId) then
+				for _, spellId in ipairs(classBuffSpellIds) do
+					if auraSpellId == spellId then
+						hasBuff = true
+						break
+					end
+				end
+			end
+			if hasBuff then
+				break
+			end
 		end
 
 		if not hasBuff then
@@ -194,6 +186,6 @@ function RaidBuffReminder:Init()
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "raidBuffReminderSettingsChanged",
-		stateReason = "raidBuffReminderStateChanged",
+		stateReason = "aurasStateChanged",
 	})
 end

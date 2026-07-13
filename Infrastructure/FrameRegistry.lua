@@ -155,6 +155,10 @@ function MRF_OnUnitChanged(frame, unit)
 		if frame.managedContainers.buffOverlay then
 			frame.managedContainers.buffOverlay:SetUnit(managedUnit)
 		end
+
+		if frame.managedContainers.raidBuffReminder then
+			frame.managedContainers.raidBuffReminder:SetUnit(managedUnit)
+		end
 	end
 
 	if not isSupportedUnit then
