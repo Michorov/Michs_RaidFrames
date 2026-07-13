@@ -50,6 +50,7 @@ function Modules:Initialize()
 		addon.Frames.ManagedContainers.CustomBuffs,
 		addon.Frames.ManagedContainers.Debuffs,
 		addon.Frames.ManagedContainers.BuffOverlay,
+		addon.Frames.ManagedContainers.RaidBuffReminder,
 		addon.Frames.Widgets.Icons.Buffs,
 		addon.Frames.Widgets.Icons.CustomBuffs,
 		addon.Frames.Widgets.Icons.Debuffs,
