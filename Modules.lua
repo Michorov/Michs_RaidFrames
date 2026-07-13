@@ -49,6 +49,7 @@ function Modules:Initialize()
 		addon.Frames.ManagedContainers.Buffs,
 		addon.Frames.ManagedContainers.CustomBuffs,
 		addon.Frames.ManagedContainers.Debuffs,
+		addon.Frames.ManagedContainers.Defensives,
 		addon.Frames.ManagedContainers.BuffOverlay,
 		addon.Frames.ManagedContainers.RaidBuffReminder,
 		addon.Frames.Widgets.Icons.Buffs,

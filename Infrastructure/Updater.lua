@@ -108,6 +108,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.bigDefensiveAurasSettingsChanged then
+			addon.Frames.ManagedContainers.Defensives:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end

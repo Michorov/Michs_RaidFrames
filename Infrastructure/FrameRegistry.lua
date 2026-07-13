@@ -152,6 +152,10 @@ function MRF_OnUnitChanged(frame, unit)
 			frame.managedContainers.customBuffs:SetUnit(managedUnit)
 		end
 
+		if frame.managedContainers.defensives then
+			frame.managedContainers.defensives:SetUnit(managedUnit)
+		end
+
 		if frame.managedContainers.buffOverlay then
 			frame.managedContainers.buffOverlay:SetUnit(managedUnit)
 		end
