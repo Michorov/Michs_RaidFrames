@@ -51,15 +51,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
-	if not self.rangeTicker then
-		addon.Frames.RangeChecker:UpdateSettings()
-
-		self.rangeTicker = C_Timer.NewTicker(0.5, function()
-			if IsInGroup() or IsInRaid() then
-				addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-			end
-		end)
-	end
+	addon.Frames.RangeChecker:UpdateSettings()
 
 	initialized = true
 end
@@ -259,6 +251,7 @@ function EventHandler:UNIT_IN_RANGE_UPDATE(event, unit)
 		return
 	end
 
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
 	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
 end
 
@@ -267,6 +260,7 @@ function EventHandler:UNIT_PHASE(event, unit)
 		return
 	end
 
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
 	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
 end
 
