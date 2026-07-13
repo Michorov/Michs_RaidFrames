@@ -100,7 +100,7 @@ function Away:Ensure(frame)
 		local awayFrame = CreateFrame("Frame", nil, frame)
 		awayFrame:SetAllPoints(frame)
 		awayFrame:SetFrameLevel(32)
-		awayFrame.text = awayFrame:CreateFontString(nil, "OVERLAY")
+		awayFrame.text = awayFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 		awayFrame.text:Hide()
 
 		frame.awayText = awayFrame

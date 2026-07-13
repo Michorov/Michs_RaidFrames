@@ -41,7 +41,7 @@ function HealAbsorbs:Ensure(frame)
 		local healAbsorbTextFrame = CreateFrame("Frame", nil, frame)
 		healAbsorbTextFrame:SetAllPoints(frame)
 		healAbsorbTextFrame:SetFrameLevel(100)
-		healAbsorbTextFrame.text = healAbsorbTextFrame:CreateFontString(nil, "OVERLAY")
+		healAbsorbTextFrame.text = healAbsorbTextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 		healAbsorbTextFrame.text:Hide()
 
 		frame.healAbsorbText = healAbsorbTextFrame

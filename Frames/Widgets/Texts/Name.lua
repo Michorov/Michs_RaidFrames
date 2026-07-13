@@ -56,7 +56,7 @@ function Name:Ensure(frame)
 		local nameFrame = CreateFrame("Frame", nil, frame)
 		nameFrame:SetAllPoints(frame)
 		nameFrame:SetFrameLevel(30)
-		nameFrame.text = nameFrame:CreateFontString(nil, "OVERLAY")
+		nameFrame.text = nameFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 
 		frame.nameText = nameFrame
 	end
