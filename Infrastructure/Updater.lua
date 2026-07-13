@@ -231,6 +231,10 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
+		if updateReasons.rosterChanged or updateReasons.unitVisibilityChanged then
+			addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
+		end
+
 		if
 			updateReasons.rosterChanged
 			or updateReasons.statusStateChanged

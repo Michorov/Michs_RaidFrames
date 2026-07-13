@@ -45,6 +45,8 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_CONNECTION")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED")
+	self:RegisterEvent("UNIT_IN_RANGE_UPDATE")
+	self:RegisterEvent("UNIT_PHASE")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
@@ -250,6 +252,22 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+end
+
+function EventHandler:UNIT_IN_RANGE_UPDATE(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
+end
+
+function EventHandler:UNIT_PHASE(event, unit)
+	if not IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
 end
 
 function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
