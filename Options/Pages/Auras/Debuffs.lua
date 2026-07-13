@@ -202,7 +202,7 @@ function Debuffs:Ensure(parent)
 
 	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 4, 1)
+	ConfigureIntegerSlider(subpage.borderSizeSlider, 0, 4, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
