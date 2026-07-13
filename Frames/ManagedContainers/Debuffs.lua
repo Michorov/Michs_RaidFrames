@@ -123,7 +123,7 @@ function Debuffs:Ensure(frame, settings)
 	end
 
 	local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
-	container:SetFrameLevel(41)
+	container:SetFrameLevel(45)
 
 	frame.managedContainers.debuffs = container
 	UpdateContainerSettings(frame, settings)

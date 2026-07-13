@@ -33,6 +33,7 @@ function AuraButtons:Initialize(button, container)
 	container.auraButtons = container.auraButtons or {}
 	container.auraButtons[button] = true
 
+	button:SetFrameLevel(container:GetFrameLevel())
 	AuraButtons:ApplyTooltipSettings(button, { showTooltips = false })
 
 	local icon = button:CreateTexture(nil, "ARTWORK")

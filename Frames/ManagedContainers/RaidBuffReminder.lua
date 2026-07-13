@@ -198,7 +198,7 @@ function RaidBuffReminder:Ensure(frame, settings)
 	end
 
 	local wrapper = CreateFrame("Frame", nil, frame)
-	wrapper:SetFrameLevel(39)
+	wrapper:SetFrameLevel(40)
 	wrapper:SetClipsChildren(true)
 
 	local container = CreateFrame("AuraContainer", nil, wrapper, "CustomAuraContainerTemplate")
