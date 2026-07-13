@@ -84,7 +84,7 @@ function AuraButtons:Initialize(button, container)
 end
 
 local function ApplyIconInsets(button, cachedSettings)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(cachedSettings.borderSizePx))
 
 	button.icon:ClearAllPoints()
 	button.icon:SetPoint(
@@ -110,13 +110,14 @@ function AuraButtons:ApplyIconSettings(button, cachedSettings)
 end
 
 function AuraButtons:ApplyBorderSettings(button, cachedSettings)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(cachedSettings.borderSizePx))
 	local borderSize = addon.Utilities:ToUI(scaledBorderSizePx)
 	local border = button.border
 	local edges = border.edges
 
 	ApplyIconInsets(button, cachedSettings)
 
+	border:SetShown(scaledBorderSizePx > 0)
 	edges.top:SetHeight(borderSize)
 	edges.bottom:SetHeight(borderSize)
 	edges.left:SetWidth(borderSize)
@@ -144,7 +145,8 @@ end
 
 function AuraButtons:ApplyCountSettings(button, cachedSettings)
 	local scaledStacksFontSize = addon.Utilities:ScaleFont(cachedSettings.stacksFontSize)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(cachedSettings.borderSizePx))
+	local countOffsetPx = scaledBorderSizePx > 0 and scaledBorderSizePx - 2 or 0
 
 	button.count:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledStacksFontSize, "OUTLINE")
 	button.count:ClearAllPoints()
@@ -153,7 +155,7 @@ function AuraButtons:ApplyCountSettings(button, cachedSettings)
 		"BOTTOMRIGHT",
 		button,
 		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderSizePx - 2),
-		addon.Utilities:ToUI(scaledBorderSizePx - 2)
+		-addon.Utilities:ToUI(countOffsetPx),
+		addon.Utilities:ToUI(countOffsetPx)
 	)
 end
