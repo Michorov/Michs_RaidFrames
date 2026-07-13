@@ -104,7 +104,9 @@ local function ApplyIconInsets(button, cachedSettings)
 end
 
 function AuraButtons:ApplyIconSettings(button, cachedSettings)
-	local scaledIconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
+	local scaledIconSizePx = cachedSettings.useEvenIconSize
+		and addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
+		or addon.Utilities:Scale(cachedSettings.iconSizePx)
 
 	button:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 end

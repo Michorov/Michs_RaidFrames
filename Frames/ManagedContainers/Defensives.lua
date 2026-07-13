@@ -26,6 +26,7 @@ local function UpdateSettingsCache(settings)
 		offsetYPx = addon.Utilities:ToPixels(bigDefensive.offsetY or 0),
 		maxIcons = math.max(1, bigDefensive.maxIcons or 1),
 		iconSizePx = addon.Utilities:ToPixels(bigDefensive.iconSize or 32),
+		useEvenIconSize = true,
 		borderSizePx = addon.Utilities:ToPixels(bigDefensive.borderSizePx or 1),
 		showStacks = bigDefensive.showStacks ~= false,
 		stacksFontSize = bigDefensive.stacksFontSize or 16,
@@ -43,7 +44,7 @@ local function UpdateContainerSettings(frame, settings)
 
 	local containerOffsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
 	local containerOffsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
-	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
+	local iconSizePx = addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
 	local rowWidthPx = (iconSizePx * cachedSettings.maxIcons) + 1
 
 	container:ClearAllPoints()
