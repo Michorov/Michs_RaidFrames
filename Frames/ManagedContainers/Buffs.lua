@@ -48,6 +48,7 @@ local function UpdateSettingsCache(settings)
 		stacksFontSize = buffs.stacksFontSize or 10,
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
+		showTooltips = buffs.showTooltips == true,
 		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
 		includeSpellIDs = GetEnabledBuffSpellIDs(buffs),
 	}
@@ -119,6 +120,7 @@ local function UpdateButtonsSettings(frame, settings)
 		AuraButtons:ApplyBorderSettings(button, cachedSettings)
 		AuraButtons:ApplyCooldownSettings(button, cachedSettings)
 		AuraButtons:ApplyCountSettings(button, cachedSettings)
+		AuraButtons:ApplyTooltipSettings(button, cachedSettings)
 	end
 end
 

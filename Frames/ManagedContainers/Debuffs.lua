@@ -32,6 +32,7 @@ local function UpdateSettingsCache(settings)
 		stacksFontSize = debuffs.stacksFontSize or 10,
 		showCooldown = debuffs.showCooldown == true,
 		cooldownFontSize = debuffs.cooldownFontSize or 10,
+		showTooltips = debuffs.showTooltips == true,
 		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
 	}
 
@@ -102,6 +103,7 @@ local function UpdateButtonsSettings(frame, settings)
 		AuraButtons:ApplyBorderSettings(button, cachedSettings)
 		AuraButtons:ApplyCooldownSettings(button, cachedSettings)
 		AuraButtons:ApplyCountSettings(button, cachedSettings)
+		AuraButtons:ApplyTooltipSettings(button, cachedSettings)
 	end
 end
 
