@@ -126,11 +126,27 @@ function Defensives:UpdateSettings(frame, settings)
 	UpdateButtonsSettings(frame, settings)
 	UpdateContainerSettings(frame, settings)
 	UpdateAuraGroupSettings(frame, settings)
+	self:UpdateState(frame, settings)
+end
+
+function Defensives:UpdateState(frame, settings)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	if not frame.managedContainers or not frame.managedContainers.defensives then
+		return
+	end
+
+	local unit = frame.unit
+	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
+	frame.managedContainers.defensives:SetShown(shouldShow)
 end
 
 function Defensives:Init()
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "bigDefensiveAurasSettingsChanged",
+		stateReason = "unitVisibilityChanged",
 	})
 end
