@@ -136,10 +136,6 @@ function Debuffs:Ensure(frame, settings)
 			AuraButtons:Initialize(button, container)
 		end,
 	})
-
-	UpdateButtonsSettings(frame, settings)
-	UpdateContainerSettings(frame, settings)
-	UpdateAuraGroupSettings(frame, settings)
 end
 
 function Debuffs:UpdateSettings(frame, settings)
