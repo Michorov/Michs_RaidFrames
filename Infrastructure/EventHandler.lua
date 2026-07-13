@@ -237,6 +237,7 @@ function EventHandler:UNIT_AURA(event, unit, updateInfo)
 	end
 
 	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("raidBuffReminderStateChanged", unit)
 		return
 	end
 

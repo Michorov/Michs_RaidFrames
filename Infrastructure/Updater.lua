@@ -229,6 +229,10 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
+		if updateReasons.raidBuffReminderStateChanged then
+			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
+		end
+
 		if updateReasons.combatStarted then
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
