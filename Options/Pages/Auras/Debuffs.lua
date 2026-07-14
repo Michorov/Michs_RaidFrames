@@ -9,6 +9,8 @@ local Debuffs = addon.Options.Pages.Auras.Debuffs
 
 local subpage
 local L = addon.L
+local _, _, _, interfaceVersion = GetBuildInfo()
+local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local anchorOptions = {
 	{ value = "TOPLEFT", text = L["Top Left"] },
@@ -107,12 +109,25 @@ function Debuffs:Ensure(parent)
 
 	subpage.showTooltipsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Tooltips"])
 	subpage.showTooltipsCheckbox:SetLayoutWidth(174)
+	subpage.showTooltipsCheckbox:SetShown(isRestrictedAuraAPI)
 	subpage.showTooltipsCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.debuffs = section.widgets.icons.debuffs or {}
 			section.widgets.icons.debuffs.showTooltips = checked == true
+		end)
+	end)
+
+	subpage.borderColorByDebuffTypeCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Color By Debuff Type"])
+	subpage.borderColorByDebuffTypeCheckbox:SetLayoutWidth(174)
+	subpage.borderColorByDebuffTypeCheckbox:SetShown(not isRestrictedAuraAPI)
+	subpage.borderColorByDebuffTypeCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.debuffs = section.widgets.icons.debuffs or {}
+			section.widgets.icons.debuffs.borderColorByDebuffType = checked == true
 		end)
 	end)
 
@@ -261,6 +276,7 @@ function Debuffs:Ensure(parent)
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
 		showTooltipsCheckbox = subpage.showTooltipsCheckbox,
+		borderColorByDebuffTypeCheckbox = subpage.borderColorByDebuffTypeCheckbox,
 		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
 		offsetYSlider = subpage.offsetYSlider,
@@ -279,6 +295,7 @@ function Debuffs:Ensure(parent)
 		UpdateAnchorOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
 		self.showTooltipsCheckbox:SetText(L["Show Tooltips"])
+		self.borderColorByDebuffTypeCheckbox:SetText(L["Color By Debuff Type"])
 		self.anchorDropdown:SetLabel(L["Position"])
 		self.anchorDropdown:SetOptions(anchorOptions)
 		self.offsetXSlider:SetLabel(L["Offset X"])
@@ -332,6 +349,15 @@ function Debuffs:Ensure(parent)
 
 		controls.showTooltipsCheckbox:ClearAllPoints()
 		controls.showTooltipsCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
+		)
+
+		controls.borderColorByDebuffTypeCheckbox:ClearAllPoints()
+		controls.borderColorByDebuffTypeCheckbox:SetPoint(
 			"TOPLEFT",
 			self,
 			"TOPLEFT",
@@ -444,7 +470,10 @@ function Debuffs:Ensure(parent)
 		local debuffs = icons.debuffs or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(debuffs.enabled, defaults.enabled))
+		controls.showTooltipsCheckbox:SetShown(isRestrictedAuraAPI)
+		controls.borderColorByDebuffTypeCheckbox:SetShown(not isRestrictedAuraAPI)
 		controls.showTooltipsCheckbox:SetChecked(ResolveBoolean(debuffs.showTooltips, defaults.showTooltips))
+		controls.borderColorByDebuffTypeCheckbox:SetChecked(ResolveBoolean(debuffs.borderColorByDebuffType, defaults.borderColorByDebuffType))
 		controls.anchorDropdown:SetOptions(anchorOptions)
 		controls.anchorDropdown:SetValue(debuffs.anchor or defaults.anchor)
 		controls.offsetXSlider:SetValueSilently(debuffs.offsetX or defaults.offsetX)
