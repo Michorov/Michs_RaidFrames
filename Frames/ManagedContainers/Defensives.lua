@@ -140,7 +140,12 @@ function Defensives:UpdateState(frame, settings)
 
 	local unit = frame.unit
 	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
-	frame.managedContainers.defensives:SetShown(shouldShow)
+	local container = frame.managedContainers.defensives
+
+	if container.isShown ~= shouldShow then
+		container.isShown = shouldShow
+		container:SetShown(shouldShow)
+	end
 end
 
 function Defensives:Init()
