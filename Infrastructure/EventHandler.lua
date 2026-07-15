@@ -57,6 +57,10 @@ function EventHandler:Initialize()
 		self.rangeTicker = C_Timer.NewTicker(0.25, function()
 			if IsInGroup() or IsInRaid() then
 				addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+				if addon.IsRestrictedAuraAPI then
+					addon.UpdateScheduler:Notify("unitVisibilityChanged")
+				end
 			end
 		end)
 	end
