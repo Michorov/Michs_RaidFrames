@@ -101,16 +101,12 @@ local function QueueLateRosterRefresh()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
-	addon.FrameRegistry:Initialize()
 	addon.Database:ApplyProfileForCurrentSpec()
-	addon.UpdateScheduler:Notify("layoutChanged")
+	addon.FrameRegistry:Initialize()
+
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-	C_Timer.After(0.1, function()
-		addon.UpdateScheduler:Notify("rosterChanged")
-	end)
 
 	QueueLateRosterRefresh()
 end
