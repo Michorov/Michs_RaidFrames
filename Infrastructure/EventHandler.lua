@@ -11,6 +11,37 @@ local function IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
+local function CreateRangeTrackers()
+	local function CreateRangeTracker(unit)
+		local frame = CreateFrame("Frame")
+		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
+		frame:SetScript("OnEvent", function(_, event, eventUnit)
+			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
+
+			if addon.IsRestrictedAuraAPI then
+				addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
+			end
+		end)
+		return frame
+	end
+
+	local trackers = {}
+
+	trackers.player = CreateRangeTracker("player")
+
+	for i = 1, 4 do
+		local unit = "party" .. i
+		trackers[unit] = CreateRangeTracker(unit)
+	end
+
+	for i = 1, 40 do
+		local unit = "raid" .. i
+		trackers[unit] = CreateRangeTracker(unit)
+	end
+
+	return trackers
+end
+
 function EventHandler:Initialize()
 	if initialized then
 		error("EventHandler already initialized", 2)
@@ -47,25 +78,13 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_CONNECTION")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED")
-	self:RegisterEvent("UNIT_IN_RANGE_UPDATE")
 	self:RegisterEvent("UNIT_PHASE")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
 	addon.Frames.RangeChecker:UpdateSettings()
-
-	if not self.rangeTicker then
-		self.rangeTicker = C_Timer.NewTicker(0.25, function()
-			if IsInGroup() or IsInRaid() then
-				addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-				if addon.IsRestrictedAuraAPI then
-					addon.UpdateScheduler:Notify("unitVisibilityChanged")
-				end
-			end
-		end)
-	end
+	self.rangeTrackers = CreateRangeTrackers()
 
 	initialized = true
 end
@@ -266,15 +285,6 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-end
-
-function EventHandler:UNIT_IN_RANGE_UPDATE(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
-	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
 end
 
 function EventHandler:UNIT_PHASE(event, unit)
