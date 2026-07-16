@@ -35,7 +35,7 @@ end
 function PendingSummon:Ensure(frame)
 	if not frame.pendingSummon then
 		local container = CreateFrame("Frame", nil, frame)
-		container:SetFrameLevel(50)
+		container:SetFrameLevel(70)
 
 		container.icon = container:CreateTexture(nil, "ARTWORK")
 		container.icon:SetAllPoints(container)

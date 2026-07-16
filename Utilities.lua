@@ -97,6 +97,12 @@ function Utilities:NormalizeFontOutline(outline, fallback)
 	return normalizedFallback
 end
 
+function Utilities:GetGameFontNormalPath()
+	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
+		or STANDARD_TEXT_FONT
+		or "Fonts\\FRIZQT__.TTF"
+end
+
 function Utilities:GetPlayerClassFileName()
 	local _, classFileName = UnitClass("player")
 	return classFileName

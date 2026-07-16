@@ -29,6 +29,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function BuffOverlay:Ensure(frame)
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	frame.buffOverlays = frame.buffOverlays or {}
 
 	local overlay = frame.buffOverlays.overlay1
@@ -47,9 +51,14 @@ function BuffOverlay:Ensure(frame)
 end
 
 function BuffOverlay:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	local healthTexture = frame.healthBar:GetStatusBarTexture()
 
-	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	for index = 1, #cachedSettings.overlayKeys do
@@ -65,6 +74,15 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.buffOverlay ~= true then
 		for _, overlay in pairs(frame.buffOverlays) do
 			overlay:Hide()
@@ -88,11 +106,6 @@ function BuffOverlay:UpdateState(frame, settings)
 		end
 		return
 	end
-
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
 
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}

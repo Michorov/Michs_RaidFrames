@@ -9,6 +9,8 @@ local Buffs = addon.Options.Pages.Auras.Buffs
 
 local subpage
 local L = addon.L
+local _, _, _, interfaceVersion = GetBuildInfo()
+local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local anchorOptions = {
 	{ value = "TOPLEFT", text = L["Top Left"] },
@@ -48,6 +50,7 @@ local function GetModeDefaults()
 		showCooldown = false,
 		cooldownFontSize = 10,
 		showExternals = false,
+		showTooltips = false,
 	}
 end
 
@@ -104,15 +107,28 @@ function Buffs:Ensure(parent)
 		end, true)
 	end)
 
+	subpage.showTooltipsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show Tooltips"])
+	subpage.showTooltipsCheckbox:SetLayoutWidth(174)
+	subpage.showTooltipsCheckbox:SetShown(isRestrictedAuraAPI)
+	subpage.showTooltipsCheckbox:SetOnValueChanged(function(_, checked)
+		ApplyModeSetting(function(section)
+			section.widgets = section.widgets or {}
+			section.widgets.icons = section.widgets.icons or {}
+			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
+			section.widgets.icons.buffs.showTooltips = checked == true
+		end)
+	end)
+
 	subpage.showExternalsCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show External Buffs"])
 	subpage.showExternalsCheckbox:SetLayoutWidth(174)
+	subpage.showExternalsCheckbox:SetShown(not isRestrictedAuraAPI)
 	subpage.showExternalsCheckbox:SetOnValueChanged(function(_, checked)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
 			section.widgets.icons = section.widgets.icons or {}
 			section.widgets.icons.buffs = section.widgets.icons.buffs or {}
 			section.widgets.icons.buffs.showExternals = checked == true
-		end, true)
+		end)
 	end)
 
 	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
@@ -201,7 +217,7 @@ function Buffs:Ensure(parent)
 
 	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
 	subpage.borderSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.borderSizeSlider, 1, 4, 1)
+	ConfigureIntegerSlider(subpage.borderSizeSlider, 0, 4, 1)
 	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
 		ApplyModeSetting(function(section)
 			section.widgets = section.widgets or {}
@@ -259,6 +275,7 @@ function Buffs:Ensure(parent)
 
 	subpage.controls = {
 		enabledCheckbox = subpage.enabledCheckbox,
+		showTooltipsCheckbox = subpage.showTooltipsCheckbox,
 		showExternalsCheckbox = subpage.showExternalsCheckbox,
 		anchorDropdown = subpage.anchorDropdown,
 		offsetXSlider = subpage.offsetXSlider,
@@ -277,6 +294,7 @@ function Buffs:Ensure(parent)
 	function subpage:UpdateLocale()
 		UpdateAnchorOptions()
 		self.enabledCheckbox:SetText(L["Enabled"])
+		self.showTooltipsCheckbox:SetText(L["Show Tooltips"])
 		self.showExternalsCheckbox:SetText(L["Show External Buffs"])
 		self.anchorDropdown:SetLabel(L["Position"])
 		self.anchorDropdown:SetOptions(anchorOptions)
@@ -328,6 +346,15 @@ function Buffs:Ensure(parent)
 
 		controls.enabledCheckbox:ClearAllPoints()
 		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
+
+		controls.showTooltipsCheckbox:ClearAllPoints()
+		controls.showTooltipsCheckbox:SetPoint(
+			"TOPLEFT",
+			self,
+			"TOPLEFT",
+			0,
+			-addon.Utilities:ToUI(firstRowOffsetPx + checkboxHeightPx + checkboxStackGapPx)
+		)
 
 		controls.showExternalsCheckbox:ClearAllPoints()
 		controls.showExternalsCheckbox:SetPoint(
@@ -443,6 +470,9 @@ function Buffs:Ensure(parent)
 		local buffs = icons.buffs or {}
 
 		controls.enabledCheckbox:SetChecked(ResolveBoolean(buffs.enabled, defaults.enabled))
+		controls.showTooltipsCheckbox:SetShown(isRestrictedAuraAPI)
+		controls.showExternalsCheckbox:SetShown(not isRestrictedAuraAPI)
+		controls.showTooltipsCheckbox:SetChecked(ResolveBoolean(buffs.showTooltips, defaults.showTooltips))
 		controls.showExternalsCheckbox:SetChecked(ResolveBoolean(buffs.showExternals, defaults.showExternals))
 		controls.anchorDropdown:SetOptions(anchorOptions)
 		controls.anchorDropdown:SetValue(buffs.anchor or defaults.anchor)

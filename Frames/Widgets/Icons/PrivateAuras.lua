@@ -237,6 +237,10 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 end
 
 function PrivateAuras:Ensure(frame)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if not frame.privateAurasContainer then
 		frame.privateAurasContainer =
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
@@ -277,6 +281,13 @@ local function ApplyContainerLayout(frame, privateAuraSettings)
 end
 
 function PrivateAuras:UpdateSettings(frame, settings)
+	if addon.IsRestrictedAuraAPI then
+		if frame.privateAurasContainer then
+			frame.privateAurasContainer:Hide()
+		end
+		return
+	end
+
 	local privateAuraSettings = GetPrivateAurasSettings(settings)
 
 	ApplyContainerLayout(frame, privateAuraSettings)

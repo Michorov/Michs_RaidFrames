@@ -7,12 +7,6 @@ addon.Frames.Widgets.Texts.StatusText = addon.Frames.Widgets.Texts.StatusText or
 
 local StatusText = addon.Frames.Widgets.Texts.StatusText
 
-local function GetGameFontNormalPath()
-	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
-		or STANDARD_TEXT_FONT
-		or "Fonts\\FRIZQT__.TTF"
-end
-
 function StatusText:Ensure(frame)
 	if not frame.statusText then
 		local statusFrame = CreateFrame("Frame", nil, frame)
@@ -21,7 +15,7 @@ function StatusText:Ensure(frame)
 
 		local text = statusFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 		text:SetPoint("CENTER", statusFrame, "CENTER", 0, 0)
-		text:SetFont(GetGameFontNormalPath(), addon.Utilities:ScaleFont(16), "")
+		text:SetFont(addon.Utilities:GetGameFontNormalPath(), addon.Utilities:ScaleFont(16), "")
 		text:SetTextColor(0.55, 0.55, 0.55, 1)
 		text:SetShadowColor(0, 0, 0, 0.9)
 		text:SetShadowOffset(1, -1)

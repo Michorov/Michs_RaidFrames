@@ -135,7 +135,37 @@ function MRF_OnUnitChanged(frame, unit)
 
 	NotifyMiniCCFramesChanged()
 
-	if not IsSupportedUnit(unit) then
+	local isSupportedUnit = IsSupportedUnit(unit)
+
+	if addon.IsRestrictedAuraAPI and frame.managedContainers then
+		local managedUnit = isSupportedUnit and unit or "none"
+
+		if frame.managedContainers.debuffs then
+			frame.managedContainers.debuffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.buffs then
+			frame.managedContainers.buffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.customBuffs then
+			frame.managedContainers.customBuffs:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.defensives then
+			frame.managedContainers.defensives:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.buffOverlay then
+			frame.managedContainers.buffOverlay:SetUnit(managedUnit)
+		end
+
+		if frame.managedContainers.raidBuffReminder then
+			frame.managedContainers.raidBuffReminder:SetUnit(managedUnit)
+		end
+	end
+
+	if not isSupportedUnit then
 		return
 	end
 

@@ -1,4 +1,4 @@
-## Interface: 120000, 120001, 120005, 120007
+## Interface: 120007, 120100
 ## Title: Mich's RaidFrames
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
@@ -37,6 +37,15 @@ Modules.lua
 
 # Frame Managers
 Frames/Managers/IconManager.lua
+
+# Managed Containers
+Frames/ManagedContainers/AuraButtons.lua
+Frames/ManagedContainers/Buffs.lua
+Frames/ManagedContainers/CustomBuffs.lua
+Frames/ManagedContainers/Debuffs.lua
+Frames/ManagedContainers/Defensives.lua
+Frames/ManagedContainers/BuffOverlay.lua
+Frames/ManagedContainers/RaidBuffReminder.lua
 
 # Widgets Text
 Frames/Widgets/Texts/Name.lua

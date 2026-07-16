@@ -274,6 +274,7 @@ function Dispels:UpdateSettings(frame, settings)
 	end
 
 	local dispelIndicatorOption = cachedSettings.showOnlyPlayerDispellable and 1 or 2
+	local dispelIndicatorOverlayType = Enum.RaidDispelOverlayType and Enum.RaidDispelOverlayType.UseDebuffColor
 
 	container:SetAttribute("max-buffs", 0)
 	container:SetAttribute("max-debuffs", 0)
@@ -288,8 +289,16 @@ function Dispels:UpdateSettings(frame, settings)
 	container:SetAttribute("group-type", groupType)
 	container:SetAttribute("power-bar-used-height", 0)
 	container:SetAttribute("icon-size", 12)
+	container:SetAttribute("debuff-size", 12)
+	container:SetAttribute("buff-size", 12)
+	container:SetAttribute("debuff-border-scale", 1)
+	container:SetAttribute("buff-border-scale", 1)
 	container:SetAttribute("set-aura-size-to-icon-size", true)
 	container:SetAttribute("always-hide-duration", true)
+	if dispelIndicatorOverlayType then
+		container:SetAttribute("dispel-indicator-overlay-type", dispelIndicatorOverlayType)
+		container:SetAttribute("dispel-indicator-overlay-animation", false)
+	end
 	container:SetAttribute("update-settings", true)
 	container:Show()
 

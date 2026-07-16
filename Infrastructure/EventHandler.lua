@@ -11,6 +11,34 @@ local function IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
+local function CreateRangeTrackers()
+	local function CreateRangeTracker(unit)
+		local frame = CreateFrame("Frame")
+		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
+		frame:RegisterUnitEvent("UNIT_PHASE", unit)
+		frame:SetScript("OnEvent", function(_, event, eventUnit)
+			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
+		end)
+		return frame
+	end
+
+	local trackers = {}
+
+	trackers.player = CreateRangeTracker("player")
+
+	for i = 1, 4 do
+		local unit = "party" .. i
+		trackers[unit] = CreateRangeTracker(unit)
+	end
+
+	for i = 1, 40 do
+		local unit = "raid" .. i
+		trackers[unit] = CreateRangeTracker(unit)
+	end
+
+	return trackers
+end
+
 function EventHandler:Initialize()
 	if initialized then
 		error("EventHandler already initialized", 2)
@@ -23,6 +51,8 @@ function EventHandler:Initialize()
 
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("PLAYER_ALIVE")
+	self:RegisterEvent("PLAYER_UNGHOST")
 
 	self:RegisterEvent("READY_CHECK")
 	self:RegisterEvent("READY_CHECK_CONFIRM")
@@ -49,12 +79,13 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
-	if not self.rangeTicker then
-		addon.Frames.RangeChecker:UpdateSettings()
+	addon.Frames.RangeChecker:UpdateSettings()
+	self.rangeTrackers = CreateRangeTrackers()
 
-		self.rangeTicker = C_Timer.NewTicker(0.5, function()
+	if addon.IsRestrictedAuraAPI and not self.unitVisibilityTicker then
+		self.unitVisibilityTicker = C_Timer.NewTicker(0.25, function()
 			if IsInGroup() or IsInRaid() then
-				addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+				addon.UpdateScheduler:Notify("unitVisibilityChanged")
 			end
 		end)
 	end
@@ -74,16 +105,12 @@ local function QueueLateRosterRefresh()
 end
 
 function EventHandler:PLAYER_ENTERING_WORLD()
-	addon.FrameRegistry:Initialize()
 	addon.Database:ApplyProfileForCurrentSpec()
-	addon.UpdateScheduler:Notify("layoutChanged")
+	addon.FrameRegistry:Initialize()
+
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-	C_Timer.After(0.1, function()
-		addon.UpdateScheduler:Notify("rosterChanged")
-	end)
 
 	QueueLateRosterRefresh()
 end
@@ -129,6 +156,14 @@ function EventHandler:PLAYER_REGEN_DISABLED()
 	end
 
 	addon.UpdateScheduler:Notify("combatStarted")
+end
+
+function EventHandler:PLAYER_ALIVE()
+	addon.UpdateScheduler:Notify("statusStateChanged", "player")
+end
+
+function EventHandler:PLAYER_UNGHOST()
+	addon.UpdateScheduler:Notify("statusStateChanged", "player")
 end
 
 function EventHandler:READY_CHECK()
@@ -232,6 +267,10 @@ function EventHandler:UNIT_DISPLAYPOWER(event, unit)
 end
 
 function EventHandler:UNIT_AURA(event, unit, updateInfo)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if not IsSupportedUnit(unit) then
 		return
 	end

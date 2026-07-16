@@ -34,6 +34,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function BigDefensive:Ensure(frame)
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	if not frame.bigDefensiveContainer then
 		frame.bigDefensiveContainer =
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "bigDefensiveContainer", 44)
@@ -49,9 +53,14 @@ function BigDefensive:Ensure(frame)
 end
 
 function BigDefensive:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	local container = frame.bigDefensiveContainer
 
-	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
 	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
@@ -94,12 +103,16 @@ function BigDefensive:UpdateSettings(frame, settings)
 end
 
 function BigDefensive:UpdateState(frame, settings)
-	local container = frame.bigDefensiveContainer
-
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
+	local container = frame.bigDefensiveContainer
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.bigDefensive ~= true then
 		addon.Frames.Managers.IconManager:HideIcons(container, cachedSettings.maxIcons)
