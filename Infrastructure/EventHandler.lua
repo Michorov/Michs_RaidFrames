@@ -23,6 +23,8 @@ function EventHandler:Initialize()
 
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("PLAYER_ALIVE")
+	self:RegisterEvent("PLAYER_UNGHOST")
 
 	self:RegisterEvent("READY_CHECK")
 	self:RegisterEvent("READY_CHECK_CONFIRM")
@@ -135,6 +137,14 @@ function EventHandler:PLAYER_REGEN_DISABLED()
 	end
 
 	addon.UpdateScheduler:Notify("combatStarted")
+end
+
+function EventHandler:PLAYER_ALIVE()
+	addon.UpdateScheduler:Notify("statusStateChanged", "player")
+end
+
+function EventHandler:PLAYER_UNGHOST()
+	addon.UpdateScheduler:Notify("statusStateChanged", "player")
 end
 
 function EventHandler:READY_CHECK()
