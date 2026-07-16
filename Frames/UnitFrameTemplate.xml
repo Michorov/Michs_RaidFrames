@@ -36,6 +36,11 @@
             </OnLoad>
             <OnAttributeChanged>
                 if name == "unit" then
+                    local oldUnit = self.unit
+                    if oldUnit == value then
+                        return
+                    end
+
                     self.unit = value
                     if MRF_OnUnitChanged then
                         MRF_OnUnitChanged(self, value)
