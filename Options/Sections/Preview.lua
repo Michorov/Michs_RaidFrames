@@ -11,6 +11,8 @@ local activeMode = addon.Options.State:GetMode()
 local activePage = "general"
 local L = addon.L
 local theme = addon.Options.Theme
+local _, _, _, interfaceVersion = GetBuildInfo()
+local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local layoutValues = {
 	outerInset = 8,
@@ -21,6 +23,14 @@ local layoutValues = {
 	bodyWidth = 200,
 	checkboxTopOffset = 220,
 	checkboxGap = 8,
+}
+
+local auraPreviewControls = {
+	"buffs",
+	"debuffs",
+	"bigDefensive",
+	"dispels",
+	"raidBuffReminder",
 }
 
 local previewWidgetFlags = {
@@ -51,13 +61,18 @@ local previewWidgetFlags = {
 	raidBuffReminder = { label = "Buff Reminder", enabled = false, updateStateReason = "aurasStateChanged" },
 	debuffs = { label = "Debuffs", enabled = false, updateStateReason = "aurasStateChanged" },
 	bigDefensive = { label = "Big Defensive", enabled = false, updateStateReason = "aurasStateChanged" },
-	privateAuras = { label = "Private Auras", enabled = false, updateStateReason = "privateAurasSettingsChanged" },
 	dispels = {
 		label = "Dispels",
 		enabled = false,
 		updateStateReason = "dispelsSettingsChanged",
 	},
 }
+
+if not isRestrictedAuraAPI then
+	table.insert(auraPreviewControls, 4, "privateAuras")
+	previewWidgetFlags.privateAuras =
+		{ label = "Private Auras", enabled = false, updateStateReason = "privateAurasSettingsChanged" }
+end
 
 local previewPageWidgets = {
 	general = {
@@ -87,14 +102,7 @@ local previewPageWidgets = {
 	},
 	auras = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
-		controls = {
-			"buffs",
-			"debuffs",
-			"bigDefensive",
-			"privateAuras",
-			"dispels",
-			"raidBuffReminder",
-		},
+		controls = auraPreviewControls,
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	indicators = {

@@ -38,6 +38,15 @@ Modules.lua
 # Frame Managers
 Frames/Managers/IconManager.lua
 
+# Managed Containers
+Frames/ManagedContainers/AuraButtons.lua
+Frames/ManagedContainers/Buffs.lua
+Frames/ManagedContainers/CustomBuffs.lua
+Frames/ManagedContainers/Debuffs.lua
+Frames/ManagedContainers/Defensives.lua
+Frames/ManagedContainers/BuffOverlay.lua
+Frames/ManagedContainers/RaidBuffReminder.lua
+
 # Widgets Text
 Frames/Widgets/Texts/Name.lua
 Frames/Widgets/Texts/StatusText.lua

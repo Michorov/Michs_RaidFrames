@@ -115,6 +115,7 @@ local function EnsureCheckboxPool(targetCount)
 				buffs.customAuraValues[classFileName][self.specID][self.spellId] or {}
 			buffs.customAuraValues[classFileName][self.specID][self.spellId].enabled = checked == true
 
+			addon.UpdateScheduler:Notify("buffAuraFiltersChanged")
 			addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
 			addon.UpdateScheduler:Notify("aurasStateChanged")
 		end)

@@ -93,7 +93,7 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 end
 
 local function ApplyTextureInsets(icon, settings)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
 
 	icon.texture:ClearAllPoints()
 	icon.texture:SetPoint(
@@ -127,14 +127,25 @@ function IconManager:ApplyBorderColor(icon, color)
 		return
 	end
 
+	if not icon.border:IsShown() then
+		return
+	end
+
 	icon.border:SetBackdropBorderColor(color.r, color.g, color.b, color.a or 1)
 end
 
 function IconManager:ApplyBorderSettings(icon, settings)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
 
 	ApplyTextureInsets(icon, settings)
 
+	if scaledBorderSizePx <= 0 then
+		icon.border:SetBackdrop(nil)
+		icon.border:Hide()
+		return
+	end
+
+	icon.border:Show()
 	icon.border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
 		edgeSize = addon.Utilities:ToUI(scaledBorderSizePx),
@@ -145,9 +156,10 @@ end
 
 function IconManager:ApplyCountSettings(icon, settings)
 	local scaledFontSize = addon.Utilities:ScaleFont(settings.stacksFontSize)
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(settings.borderSizePx))
+	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
+	local countOffsetPx = scaledBorderSizePx > 0 and scaledBorderSizePx - 2 or 0
 
-	icon.countText:SetFont("Fonts\\FRIZQT__.TTF", scaledFontSize, "OUTLINE")
+	icon.countText:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledFontSize, "OUTLINE")
 	icon.countText:ClearAllPoints()
 	icon.countText:SetTextColor(1, 1, 1, 1)
 	icon.countText:SetShown(settings.showStacks)
@@ -155,8 +167,8 @@ function IconManager:ApplyCountSettings(icon, settings)
 		"BOTTOMRIGHT",
 		icon,
 		"BOTTOMRIGHT",
-		-addon.Utilities:ToUI(scaledBorderSizePx - 2),
-		addon.Utilities:ToUI(scaledBorderSizePx - 2)
+		-addon.Utilities:ToUI(countOffsetPx),
+		addon.Utilities:ToUI(countOffsetPx)
 	)
 end
 
@@ -172,7 +184,7 @@ function IconManager:ApplyCooldownSettings(icon, settings)
 		if not cooldownFont then
 			cooldownFont = CreateFont(fontName)
 		end
-		cooldownFont:SetFont("Fonts\\FRIZQT__.TTF", scaledSize, "OUTLINE")
+		cooldownFont:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledSize, "OUTLINE")
 		icon.cooldown:SetCountdownFont(fontName)
 	end
 end

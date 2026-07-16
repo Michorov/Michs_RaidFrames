@@ -52,6 +52,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function CustomBuffs:Ensure(frame)
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	if not frame.customBuffsFrame then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetAllPoints(frame)
@@ -78,6 +82,11 @@ end
 
 function CustomBuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	local cachedSettings = settingsCache[settings]
 	local customBuffs = frame.customBuffs
 
@@ -115,6 +124,15 @@ function CustomBuffs:UpdateSettings(frame, settings)
 end
 
 function CustomBuffs:UpdateState(frame, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+		return
+	end
+
 	local customBuffs = frame.customBuffs
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.customBuffs ~= true then
@@ -134,11 +152,6 @@ function CustomBuffs:UpdateState(frame, settings)
 		end
 		return
 	end
-
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
 
 	for _, icon in pairs(customBuffs) do
 		icon:Hide()

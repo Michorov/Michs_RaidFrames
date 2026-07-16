@@ -79,31 +79,42 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.buffAurasSettingsChanged then
+			addon.Frames.ManagedContainers.Buffs:UpdateSettings(frame, settings)
+			addon.Frames.ManagedContainers.CustomBuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Buffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 		end
 
+		if updateReasons.buffAuraFiltersChanged then
+			addon.Frames.ManagedContainers.Buffs:UpdateFilters(frame, settings)
+		end
+
 		if updateReasons.customBuffSettingsChanged then
+			addon.Frames.ManagedContainers.CustomBuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateState(frame, settings)
 		end
 
 		if updateReasons.buffOverlaySettingsChanged then
+			addon.Frames.ManagedContainers.BuffOverlay:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Bars.BuffOverlay:UpdateState(frame, settings)
 		end
 
 		if updateReasons.debuffAurasSettingsChanged then
+			addon.Frames.ManagedContainers.Debuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
 		end
 
 		if updateReasons.bigDefensiveAurasSettingsChanged then
+			addon.Frames.ManagedContainers.Defensives:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.BigDefensive:UpdateState(frame, settings)
 		end
 
 		if updateReasons.raidBuffReminderSettingsChanged then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
@@ -207,7 +218,7 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged then
+		if updateReasons.rosterChanged and not addon.IsRestrictedAuraAPI then
 			addon.AuraHandler:UpdateAurasForUnit(frame.unit)
 		end
 
@@ -220,11 +231,25 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
+		if updateReasons.rosterChanged or updateReasons.unitVisibilityChanged then
+			addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
+		end
+
+		if
+			updateReasons.rosterChanged
+			or updateReasons.statusStateChanged
+			or updateReasons.outOfRangeAlphaStateChanged
+		then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
+		end
+
 		if updateReasons.combatStarted then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
 		if updateReasons.combatEnded then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
