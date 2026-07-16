@@ -18,10 +18,6 @@ local function CreateRangeTrackers()
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
 		frame:SetScript("OnEvent", function(_, event, eventUnit)
 			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
-
-			if addon.IsRestrictedAuraAPI then
-				addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
-			end
 		end)
 		return frame
 	end
@@ -85,6 +81,14 @@ function EventHandler:Initialize()
 
 	addon.Frames.RangeChecker:UpdateSettings()
 	self.rangeTrackers = CreateRangeTrackers()
+
+	if addon.IsRestrictedAuraAPI and not self.unitVisibilityTicker then
+		self.unitVisibilityTicker = C_Timer.NewTicker(0.25, function()
+			if IsInGroup() or IsInRaid() then
+				addon.UpdateScheduler:Notify("unitVisibilityChanged")
+			end
+		end)
+	end
 
 	initialized = true
 end
