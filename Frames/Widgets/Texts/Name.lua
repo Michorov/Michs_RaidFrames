@@ -87,7 +87,7 @@ function Name:UpdateSettings(frame, settings)
 	nameText:SetTextColor(GetNameColor(frame, cachedSettings))
 end
 
-function Name:UpdateState(frame, settings)
+local function ApplyNameState(frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -111,6 +111,14 @@ function Name:UpdateState(frame, settings)
 	frame.nameText.text:SetText(name)
 	frame.nameText.text:SetTextColor(GetNameColor(frame, cachedSettings))
 	frame.nameText:Show()
+end
+
+function Name:UpdateState(frame, settings)
+	ApplyNameState(frame, settings)
+
+	C_Timer.After(0.25, function()
+		ApplyNameState(frame, settings)
+	end)
 end
 
 function Name:Init()
