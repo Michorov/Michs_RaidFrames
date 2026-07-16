@@ -15,6 +15,7 @@ local function CreateRangeTrackers()
 	local function CreateRangeTracker(unit)
 		local frame = CreateFrame("Frame")
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
+		frame:RegisterUnitEvent("UNIT_PHASE", unit)
 		frame:SetScript("OnEvent", function(_, event, eventUnit)
 			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
 
@@ -78,7 +79,6 @@ function EventHandler:Initialize()
 	self:RegisterEvent("UNIT_NAME_UPDATE")
 	self:RegisterEvent("UNIT_CONNECTION")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED")
-	self:RegisterEvent("UNIT_PHASE")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
@@ -281,15 +281,6 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-end
-
-function EventHandler:UNIT_PHASE(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
-	addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
 end
 
 function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
