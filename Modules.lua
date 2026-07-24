@@ -109,14 +109,14 @@ function Modules:RequestUpdateSettings()
 	end
 end
 
-function Modules:RequestUpdateState()
+function Modules:RequestUpdateState(unit)
 	local notifiedReasons = {}
 
 	for _, definition in ipairs(registeredModules) do
 		local reason = definition.stateReason
 		if reason and not notifiedReasons[reason] then
 			notifiedReasons[reason] = true
-			addon.UpdateScheduler:Notify(reason)
+			addon.UpdateScheduler:Notify(reason, unit)
 		end
 	end
 end
