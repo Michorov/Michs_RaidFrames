@@ -38,17 +38,35 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function GetNameColor(frame, cachedSettings)
-	if cachedSettings.classColor then
-		if frame.previewWidgetVisibility then
-			return addon.Style.Colors:GetUnitClassTextColor("player", cachedSettings.color)
-		end
+local function ApplyNameColor(fontString, frame, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+	local c = cachedSettings.color
 
-		return addon.Style.Colors:GetClassTextColor(frame.dataProvider:GetClassToken(frame), cachedSettings.color)
+	if not cachedSettings.classColor then
+		fontString:SetTextColor(c.r, c.g, c.b, c.a)
+		return
 	end
 
-	local c = cachedSettings.color
-	return c.r, c.g, c.b, c.a
+	local classToken
+
+	if frame.previewWidgetVisibility then
+		classToken = select(2, UnitClass("player"))
+	else
+		local unit = frame and frame.unit
+		if unit and UnitExists(unit) then
+			classToken = select(2, UnitClass(unit))
+		end
+	end
+
+	local classColor = classToken and C_ClassColor.GetClassColor(classToken)
+	if classColor then
+		fontString:SetTextColor(classColor:GetRGBA())
+	else
+		fontString:SetTextColor(c.r, c.g, c.b, c.a)
+	end
 end
 
 function Name:Ensure(frame)
@@ -84,7 +102,7 @@ function Name:UpdateSettings(frame, settings)
 	nameText:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
 	nameText:SetShadowColor(0, 0, 0, 0.9)
 	nameText:SetShadowOffset(1, -1)
-	nameText:SetTextColor(GetNameColor(frame, cachedSettings))
+	ApplyNameColor(nameText, frame, settings)
 end
 
 local function ApplyNameState(frame, settings)
@@ -109,7 +127,7 @@ local function ApplyNameState(frame, settings)
 	end
 
 	frame.nameText.text:SetText(name)
-	frame.nameText.text:SetTextColor(GetNameColor(frame, cachedSettings))
+	ApplyNameColor(frame.nameText.text, frame, settings)
 	frame.nameText:Show()
 end
 

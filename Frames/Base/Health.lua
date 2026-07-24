@@ -28,12 +28,35 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function GetClassHealthColor(frame, classToken)
-	if frame.previewWidgetVisibility then
-		return addon.Style.Colors:GetUnitClassBackgroundColor("player")
+local function ApplyHealthColor(healthBar, frame, settings)
+	if not settingsCache[settings] then
+		UpdateSettingsCache(settings)
+	end
+	local cachedSettings = settingsCache[settings]
+
+	local color = cachedSettings.color
+	if not cachedSettings.classColor then
+		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+		return
 	end
 
-	return addon.Style.Colors:GetClassBackgroundColor(classToken)
+	local classToken
+
+	if frame.previewWidgetVisibility then
+		classToken = select(2, UnitClass("player"))
+	else
+		local unit = frame and frame.unit
+		if unit and UnitExists(unit) then
+			classToken = select(2, UnitClass(unit))
+		end
+	end
+
+	local classColor = classToken and C_ClassColor.GetClassColor(classToken)
+	if classColor then
+		healthBar:SetStatusBarColor(classColor:GetRGBA())
+	else
+		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
+	end
 end
 
 function Health:Ensure(frame)
@@ -51,17 +74,11 @@ function Health:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local healthBar = frame.healthBar
-	healthBar.classToken = nil
 	healthBar:SetStatusBarTexture(cachedSettings.texture)
 end
 
 function Health:UpdateState(frame, settings)
 	local healthBar = frame.healthBar
-
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-	local cachedSettings = settingsCache[settings]
 
 	local current, max = frame.dataProvider:GetHealth(frame)
 	if current == nil or max == nil then
@@ -71,35 +88,7 @@ function Health:UpdateState(frame, settings)
 	healthBar:SetMinMaxValues(0, max)
 	healthBar:SetValue(current)
 
-	local color = cachedSettings.color
-
-	if not cachedSettings.classColor then
-		if healthBar.classToken == false then
-			return
-		end
-
-		healthBar.classToken = false
-		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-		return
-	end
-
-	local classToken = frame.dataProvider:GetClassToken(frame)
-	if not classToken then
-		if healthBar.classToken == false then
-			return
-		end
-
-		healthBar.classToken = false
-		healthBar:SetStatusBarColor(color.r, color.g, color.b, color.a)
-		return
-	end
-
-	if classToken == healthBar.classToken then
-		return
-	end
-
-	healthBar.classToken = classToken
-	healthBar:SetStatusBarColor(GetClassHealthColor(frame, classToken))
+	ApplyHealthColor(healthBar, frame, settings)
 end
 
 function Health:Init()
