@@ -97,6 +97,10 @@ function Utilities:NormalizeFontOutline(outline, fallback)
 	return normalizedFallback
 end
 
+function Utilities.IsSupportedUnit(unit)
+	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
+end
+
 function Utilities:GetGameFontNormalPath()
 	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
 		or STANDARD_TEXT_FONT
