@@ -99,7 +99,7 @@ function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
-	header.mrfHeaderKind = "raid"
+	header.HeaderKind = "raid"
 
 	header:SetAttribute("point", "TOP")
 	header:SetAttribute("xOffset", 0)
@@ -136,7 +136,7 @@ function Frames:CreatePartyHeader(partySettings)
 	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_PartyHeader", UIParent, "SecureGroupHeaderTemplate")
-	header.mrfHeaderKind = "party"
+	header.HeaderKind = "party"
 
 	local totalHeight = (5 * frameHeight) + (4 * spacingY)
 	header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)
