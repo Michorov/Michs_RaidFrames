@@ -119,11 +119,11 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.privateAurasSettingsChanged then
+		if updateReasons.privateAurasSettingsChanged then
 			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.dispelsSettingsChanged then
+		if updateReasons.dispelsSettingsChanged then
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
@@ -135,94 +135,64 @@ local function BuildStateUpdater(updateReasons)
 	end
 
 	return function(frame, settings)
-		if updateReasons.rosterChanged or updateReasons.healthStateChanged or updateReasons.healthSettingsChanged then
+		if updateReasons.healthStateChanged or updateReasons.healthSettingsChanged then
 			addon.Frames.Base.Health:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.powerStateChanged or updateReasons.powerSettingsChanged then
+		if updateReasons.powerStateChanged or updateReasons.powerSettingsChanged then
 			addon.Frames.Base.Power:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.nameStateChanged
-			or updateReasons.nameSettingsChanged
-		then
+		if updateReasons.nameStateChanged or updateReasons.nameSettingsChanged then
 			addon.Frames.Widgets.Texts.Name:UpdateState(frame, settings)
 		end
 
 		if
-			updateReasons.rosterChanged
-			or updateReasons.readyCheckStateChanged
+			updateReasons.readyCheckStateChanged
 			or updateReasons.readyCheckStateFinished
 			or updateReasons.readyCheckSettingsChanged
 		then
 			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.pendingSummonStateChanged
-			or updateReasons.pendingSummonSettingsChanged
-		then
+		if updateReasons.pendingSummonStateChanged or updateReasons.pendingSummonSettingsChanged then
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.raidMarkerStateChanged
-			or updateReasons.raidMarkerSettingsChanged
-		then
+		if updateReasons.raidMarkerStateChanged or updateReasons.raidMarkerSettingsChanged then
 			addon.Frames.Widgets.Indicators.RaidMarker:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.roleIconStateChanged
-			or updateReasons.roleIconSettingsChanged
-		then
+		if updateReasons.roleIconStateChanged or updateReasons.roleIconSettingsChanged then
 			addon.Frames.Widgets.Indicators.RoleIcon:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.groupStatusStateChanged
-			or updateReasons.groupStatusSettingsChanged
-		then
+		if updateReasons.groupStatusStateChanged or updateReasons.groupStatusSettingsChanged then
 			addon.Frames.Widgets.Indicators.GroupStatus:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.threatStateChanged then
+		if updateReasons.threatStateChanged then
 			addon.Frames.Widgets.Indicators.Threat:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.absorbsStateChanged then
+		if updateReasons.absorbsStateChanged then
 			addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.healAbsorbsStateChanged then
+		if updateReasons.healAbsorbsStateChanged then
 			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.statusStateChanged then
+		if updateReasons.statusStateChanged then
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.awayStateChanged
-			or updateReasons.combatStarted
-			or updateReasons.combatEnded
-		then
+		if updateReasons.awayStateChanged or updateReasons.combatStarted or updateReasons.combatEnded then
 			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged and not addon.IsRestrictedAuraAPI then
-			addon.AuraHandler:UpdateAurasForUnit(frame.unit)
-		end
-
-		if updateReasons.rosterChanged or updateReasons.aurasStateChanged then
+		if updateReasons.aurasStateChanged then
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)
@@ -231,15 +201,11 @@ local function BuildStateUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
-		if updateReasons.rosterChanged or updateReasons.unitVisibilityChanged then
+		if updateReasons.unitVisibilityChanged then
 			addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
 		end
 
-		if
-			updateReasons.rosterChanged
-			or updateReasons.statusStateChanged
-			or updateReasons.outOfRangeAlphaStateChanged
-		then
+		if updateReasons.statusStateChanged or updateReasons.outOfRangeAlphaStateChanged then
 			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
@@ -265,6 +231,11 @@ local function Flush(updateReasons)
 	end
 
 	local globalReasons = updateReasons.global or {}
+	if globalReasons.rosterChanged then
+		addon.FrameRegistry:UpdateRoster()
+		globalReasons.rosterChanged = nil
+	end
+
 	local hasUnits = next(updateReasons.units or {}) ~= nil
 	local hasGlobal = next(globalReasons) ~= nil
 	if not hasUnits and not hasGlobal then
