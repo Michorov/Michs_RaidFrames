@@ -51,23 +51,6 @@ local function IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
-local function GetRosterKey(unit)
-	if not UnitExists(unit) then
-		return unit .. ":none", false
-	end
-
-	if C_Secrets and C_Secrets.ShouldUnitIdentityBeSecret and C_Secrets.ShouldUnitIdentityBeSecret(unit) then
-		return nil, true
-	end
-
-	local guid = UnitGUID(unit)
-	if type(canaccessvalue) == "function" and not canaccessvalue(guid) then
-		return nil, true
-	end
-
-	return unit .. ":" .. (guid or "none"), false
-end
-
 local function GetFrames()
 	local frames = {}
 
@@ -396,15 +379,13 @@ function FrameRegistry:UpdateRoster()
 		if not IsSupportedUnit(unit) then
 			frame.RosterKey = nil
 		else
-			local rosterKey, isSecret = GetRosterKey(unit)
-			local shouldUpdate = isSecret or frame.RosterKey ~= rosterKey
-
-			if shouldUpdate then
+			local guid = UnitExists(unit) and UnitGUID(unit) or nil
+			local rosterKey = unit .. ":" .. (guid or "none")
+			if frame.RosterKey ~= rosterKey then
 				addon.AuraHandler:UpdateAurasForUnit(unit)
 				addon.Modules:RequestUpdateState(unit)
+				frame.RosterKey = rosterKey
 			end
-
-			frame.RosterKey = isSecret and nil or rosterKey
 		end
 	end
 end
