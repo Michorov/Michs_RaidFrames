@@ -55,17 +55,15 @@ function AuraButtons:Initialize(button, container)
 	}
 	button.border = border
 
-	local cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
-	cooldown:SetAllPoints(button)
-	cooldown:SetReverse(true)
-	cooldown:SetFrameLevel(buttonFrameLevel + 1)
-	button.cooldown = cooldown
-	button:SetDurationCooldown(cooldown)
-
 	local textLayer = CreateFrame("Frame", nil, button)
 	textLayer:SetAllPoints(button)
 	textLayer:SetFrameLevel(buttonFrameLevel + 3)
 	button.textLayer = textLayer
+
+	local cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+	cooldown:SetAllPoints(button)
+	cooldown:SetReverse(true)
+	cooldown:SetFrameLevel(buttonFrameLevel + 1)
 
 	for _, region in ipairs({ cooldown:GetRegions() }) do
 		if region and region.GetObjectType and region:GetObjectType() == "FontString" then
@@ -75,6 +73,9 @@ function AuraButtons:Initialize(button, container)
 			break
 		end
 	end
+
+	button.cooldown = cooldown
+	button:SetDurationCooldown(cooldown)
 
 	local count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
 	count:SetTextColor(1, 1, 1, 1)
