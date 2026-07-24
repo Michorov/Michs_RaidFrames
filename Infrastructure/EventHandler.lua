@@ -7,9 +7,7 @@ LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
 
-local function IsSupportedUnit(unit)
-	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
-end
+local IsSupportedUnit = addon.Utilities.IsSupportedUnit
 
 local function CreateRangeTrackers()
 	local function CreateRangeTracker(unit)
