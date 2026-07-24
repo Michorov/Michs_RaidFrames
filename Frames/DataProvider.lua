@@ -167,22 +167,6 @@ function DataProvider.Test:GetHealth(frame)
 	return sample.current, sample.max
 end
 
-function DataProvider.Live:GetClassToken(frame)
-	local unit = frame and frame.unit
-	if not unit or not UnitExists(unit) then
-		return nil
-	end
-
-	return select(2, UnitClass(unit))
-end
-
-function DataProvider.Test:GetClassToken(frame)
-	local index = frame and frame.testClassIndex or 1
-	index = ((index - 1) % #CLASS_SAMPLES) + 1
-
-	return CLASS_SAMPLES[index]
-end
-
 function DataProvider.Live:GetName(frame)
 	if not frame or not frame.unit or not UnitExists(frame.unit) then
 		return ""
