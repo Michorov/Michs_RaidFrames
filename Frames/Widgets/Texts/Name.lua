@@ -38,7 +38,7 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function ApplyNameColor(fontString, frame, settings)
+local function ApplyNameColor(text, frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
@@ -46,7 +46,7 @@ local function ApplyNameColor(fontString, frame, settings)
 	local c = cachedSettings.color
 
 	if not cachedSettings.classColor then
-		fontString:SetTextColor(c.r, c.g, c.b, c.a)
+		text:SetTextColor(c.r, c.g, c.b, c.a)
 		return
 	end
 
@@ -63,20 +63,46 @@ local function ApplyNameColor(fontString, frame, settings)
 
 	local classColor = classToken and C_ClassColor.GetClassColor(classToken)
 	if classColor then
-		fontString:SetTextColor(classColor:GetRGBA())
+		text:SetTextColor(classColor:GetRGBA())
 	else
-		fontString:SetTextColor(c.r, c.g, c.b, c.a)
+		text:SetTextColor(c.r, c.g, c.b, c.a)
 	end
 end
 
-function Name:Ensure(frame)
-	if not frame.nameText then
-		local nameFrame = CreateFrame("Frame", nil, frame)
-		nameFrame:SetAllPoints(frame)
-		nameFrame:SetFrameLevel(30)
-		nameFrame.text = nameFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+local function StopRetry(name)
+	if name.retryTicker then
+		name.retryTicker:Cancel()
+	end
 
-		frame.nameText = nameFrame
+	name.retryTicker = nil
+end
+
+local function StartRetry(frame)
+	local name = frame.name
+
+	if name.retryTicker then
+		return
+	end
+
+	name.retryTicker = C_Timer.NewTicker(0.25, function()
+		local unit = frame.unit
+		if frame.name ~= name or not unit then
+			StopRetry(name)
+			return
+		end
+
+		addon.UpdateScheduler:Notify("nameStateChanged", unit)
+	end)
+end
+
+function Name:Ensure(frame)
+	if not frame.name then
+		local name = CreateFrame("Frame", nil, frame)
+		name:SetAllPoints(frame)
+		name:SetFrameLevel(30)
+		name.text = name:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+
+		frame.name = name
 	end
 end
 
@@ -84,59 +110,79 @@ function Name:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	local nameText = frame.nameText.text
+	local text = frame.name.text
 
 	local scaledPositionX = addon.Utilities:Scale(cachedSettings.positionX)
 	local scaledPositionY = addon.Utilities:Scale(cachedSettings.positionY)
 	local scaledFontSize = addon.Utilities:ScaleFont(cachedSettings.size)
 
-	nameText:ClearAllPoints()
-	nameText:SetPoint(
+	text:ClearAllPoints()
+	text:SetPoint(
 		cachedSettings.anchor,
-		frame.nameText,
+		frame.name,
 		cachedSettings.anchor,
 		addon.Utilities:ToUI(scaledPositionX),
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	nameText:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
-	nameText:SetShadowColor(0, 0, 0, 0.9)
-	nameText:SetShadowOffset(1, -1)
-	ApplyNameColor(nameText, frame, settings)
+	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
+	text:SetShadowColor(0, 0, 0, 0.9)
+	text:SetShadowOffset(1, -1)
+	ApplyNameColor(text, frame, settings)
 end
 
-local function ApplyNameState(frame, settings)
+function Name:UpdateState(frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
+	local name = frame.name
+
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.name ~= true then
-		frame.nameText.text:SetText("")
-		frame.nameText:Hide()
+		name.text:SetText("")
+		StopRetry(name)
+		name:Hide()
 		return
 	end
 
-	local name = frame.dataProvider:GetName(frame) or ""
+	local rosterKey = frame.RosterKey
+	local rawName = frame.dataProvider:GetName(frame)
+	local isValidName = type(rawName) == "string" and rawName ~= "" and rawName ~= UNKNOWNOBJECT
 
-	if cachedSettings.truncate then
-		local maxLength = cachedSettings.maxLength
-		if maxLength > 0 and #name > maxLength then
-			name = name:sub(1, maxLength):gsub("%s+$", "") .. ".."
+	local displayName
+
+	if isValidName then
+		displayName = rawName
+
+		if cachedSettings.truncate then
+			local maxLength = cachedSettings.maxLength
+			if maxLength > 0 and #displayName > maxLength then
+				displayName = displayName:sub(1, maxLength):gsub("%s+$", "") .. ".."
+			end
+		end
+
+		name.cachedRosterKey = rosterKey
+		name.cachedName = displayName
+
+		StopRetry(name)
+	elseif rosterKey and name.cachedRosterKey == rosterKey and name.cachedName then
+		displayName = name.cachedName
+
+		StartRetry(frame)
+	else
+		displayName = ""
+
+		if frame.unit then
+			StartRetry(frame)
+		else
+			StopRetry(name)
 		end
 	end
 
-	frame.nameText.text:SetText(name)
-	ApplyNameColor(frame.nameText.text, frame, settings)
-	frame.nameText:Show()
-end
-
-function Name:UpdateState(frame, settings)
-	ApplyNameState(frame, settings)
-
-	C_Timer.After(0.25, function()
-		ApplyNameState(frame, settings)
-	end)
+	name.text:SetText(displayName)
+	ApplyNameColor(name.text, frame, settings)
+	name:Show()
 end
 
 function Name:Init()
