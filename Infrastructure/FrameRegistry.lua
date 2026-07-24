@@ -282,7 +282,7 @@ function FrameRegistry:GetSettingsForFrame(frame)
 		return nil
 	end
 
-	local headerKind = parent.mrfHeaderKind
+	local headerKind = parent.HeaderKind
 	if not headerKind then
 		local parentName = parent.GetName and parent:GetName() or nil
 		if parentName == "MRF_PartyHeader" then
