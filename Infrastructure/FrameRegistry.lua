@@ -51,6 +51,23 @@ local function IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
+local function GetRosterKey(unit)
+	if not UnitExists(unit) then
+		return unit .. ":none", false
+	end
+
+	if C_Secrets and C_Secrets.ShouldUnitIdentityBeSecret and C_Secrets.ShouldUnitIdentityBeSecret(unit) then
+		return nil, true
+	end
+
+	local guid = UnitGUID(unit)
+	if type(canaccessvalue) == "function" and not canaccessvalue(guid) then
+		return nil, true
+	end
+
+	return unit .. ":" .. (guid or "none"), false
+end
+
 local function GetFrames()
 	local frames = {}
 
@@ -123,6 +140,8 @@ function MRF_OnUnitFrameLoad(frame)
 end
 
 function MRF_OnUnitChanged(frame, unit)
+	frame.RosterKey = nil
+
 	for k, v in pairs(unitFrameMap) do
 		if v == frame then
 			unitFrameMap[k] = nil
@@ -303,48 +322,13 @@ function FrameRegistry:GetSettingsForFrame(frame)
 	return nil
 end
 
-function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
-	if not initialized then
-		error("FrameRegistry is not initialized", 2)
+local function UpdateFrame(frame, settings, stateCallback, settingsCallback)
+	if (not InCombatLockdown()) and type(settingsCallback) == "function" then
+		settingsCallback(frame, settings)
 	end
 
-	local inCombat = InCombatLockdown()
-
-	local profile = addon.Database:GetProfile()
-	local partySettings = profile.party or {}
-	local raidSettings = self:ResolveRaidSettings(profile)
-
-	local function UpdateFrame(frame, settings)
-		if (not inCombat) and type(settingsCallback) == "function" then
-			settingsCallback(frame, settings)
-		end
-
-		if type(stateCallback) == "function" then
-			stateCallback(frame, settings)
-		end
-	end
-
-	local function UpdateHeaderChildren(header, settings)
-		for i = 1, 5 do
-			local frame = header:GetAttribute("child" .. i)
-			if frame then
-				UpdateFrame(frame, settings)
-			end
-		end
-	end
-
-	UpdateHeaderChildren(partyHeader.container, partySettings)
-
-	for _, header in ipairs(raidHeaders.containers) do
-		UpdateHeaderChildren(header, raidSettings)
-	end
-
-	if previewFrames.party then
-		UpdateFrame(previewFrames.party, partySettings)
-	end
-
-	if previewFrames.raid then
-		UpdateFrame(previewFrames.raid, profile.raid or {})
+	if type(stateCallback) == "function" then
+		stateCallback(frame, settings)
 	end
 end
 
@@ -353,20 +337,9 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 		error("FrameRegistry is not initialized", 2)
 	end
 
-	local inCombat = InCombatLockdown()
-
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
 	local raidSettings = self:ResolveRaidSettings(profile)
-
-	local function UpdateFrame(frame, settings)
-		if (not inCombat) and type(settingsCallback) == "function" then
-			settingsCallback(frame, settings)
-		end
-		if type(stateCallback) == "function" then
-			stateCallback(frame, settings)
-		end
-	end
 
 	local frame = unitFrameMap[unit]
 	if frame then
@@ -376,7 +349,63 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 		else
 			settings = raidSettings
 		end
-		UpdateFrame(frame, settings)
+		UpdateFrame(frame, settings, stateCallback, settingsCallback)
+	end
+end
+
+function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
+	if not initialized then
+		error("FrameRegistry is not initialized", 2)
+	end
+
+	local profile = addon.Database:GetProfile()
+	local partySettings = profile.party or {}
+	local raidSettings = self:ResolveRaidSettings(profile)
+
+	for i = 1, 5 do
+		local frame = partyHeader.container:GetAttribute("child" .. i)
+		if frame then
+			UpdateFrame(frame, partySettings, stateCallback, settingsCallback)
+		end
+	end
+
+	for _, header in ipairs(raidHeaders.containers) do
+		for i = 1, 5 do
+			local frame = header:GetAttribute("child" .. i)
+			if frame then
+				UpdateFrame(frame, raidSettings, stateCallback, settingsCallback)
+			end
+		end
+	end
+
+	if previewFrames.party then
+		UpdateFrame(previewFrames.party, partySettings, stateCallback, settingsCallback)
+	end
+
+	if previewFrames.raid then
+		UpdateFrame(previewFrames.raid, profile.raid or {}, stateCallback, settingsCallback)
+	end
+end
+
+function FrameRegistry:UpdateRoster()
+	if not initialized then
+		error("FrameRegistry is not initialized", 2)
+	end
+
+	for unit, frame in pairs(unitFrameMap) do
+		if not IsSupportedUnit(unit) then
+			frame.RosterKey = nil
+		else
+			local rosterKey, isSecret = GetRosterKey(unit)
+			local shouldUpdate = isSecret or frame.RosterKey ~= rosterKey
+
+			if shouldUpdate then
+				addon.AuraHandler:UpdateAurasForUnit(unit)
+				addon.Modules:RequestUpdateState(unit)
+			end
+
+			frame.RosterKey = isSecret and nil or rosterKey
+		end
 	end
 end
 

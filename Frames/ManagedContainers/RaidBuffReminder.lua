@@ -262,5 +262,6 @@ function RaidBuffReminder:Init()
 	addon.Modules:Register({
 		module = self,
 		settingsReason = "raidBuffReminderSettingsChanged",
+		stateReason = "statusStateChanged",
 	})
 end

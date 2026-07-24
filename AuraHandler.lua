@@ -38,6 +38,10 @@ local function FullRefresh(unit)
 end
 
 function AuraHandler:UpdateAurasForUnit(unit, updateInfo)
+	if addon.IsRestrictedAuraAPI then
+		return
+	end
+
 	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
 		return
 	end
@@ -89,11 +93,19 @@ function AuraHandler:UpdateAurasForUnit(unit, updateInfo)
 end
 
 function AuraHandler:GetUnitAuras(unit, collectionKey)
+	if addon.IsRestrictedAuraAPI then
+		return {}
+	end
+
 	local collection = self.unitAuras[collectionKey]
 	return collection and collection[unit] or {}
 end
 
 function AuraHandler:GetUnitAuraInstanceIDs(unit, collectionKey)
+	if addon.IsRestrictedAuraAPI then
+		return {}
+	end
+
 	local collection = self.unitAuras[collectionKey]
 	return collection and collection[unit] or {}
 end
