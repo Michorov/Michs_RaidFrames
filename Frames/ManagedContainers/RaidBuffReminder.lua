@@ -13,7 +13,7 @@ local function ShouldUseManagedContainer(frame)
 end
 
 local function CreateIcon(parent)
-	local icon = CreateFrame("Frame", nil, parent)
+	local icon = CreateFrame("Frame", nil, parent, "DisableUntrustedLayoutScriptsTemplate")
 	icon:EnableMouse(false)
 
 	icon.border = icon:CreateTexture(nil, "BORDER")
@@ -147,9 +147,9 @@ local function UpdateManagedSettings(frame, settings)
 
 	container:ClearAllPoints()
 	container:SetPoint("TOPLEFT", wrapper, "TOPLEFT", 0, 0)
-	container:SetAuraLayoutAnchorPoint("TOPLEFT")
-	container:SetAuraLayoutRowWidth(wrapperSize)
-	container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
+	container:SetFlowLayoutAnchorPoint("TOPLEFT")
+	container:SetFlowLayoutMaximumLineSize(wrapperSize)
+	container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
 
 	icon:ClearAllPoints()
 	icon:SetPoint("TOPLEFT", container, "TOPRIGHT", 0, 0)
@@ -176,8 +176,8 @@ local function UpdateManagedSettings(frame, settings)
 	container:SetAuraGroupLayout("raidBuffReminder", {
 		elementWidth = wrapperSize,
 		elementHeight = wrapperSize,
-		elementSpacingX = 0,
-		elementSpacingY = 0,
+		elementSpacing = 0,
+		lineSpacing = 0,
 	})
 end
 

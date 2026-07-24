@@ -77,23 +77,23 @@ local function UpdateContainerSettings(frame, settings)
 		addon.Utilities:ToUI(containerOffsetYPx)
 	)
 
-	container:SetAuraLayoutAnchorPoint(anchor)
-	container:SetAuraLayoutRowWidth(addon.Utilities:ToUI(rowWidthPx))
+	container:SetFlowLayoutAnchorPoint(anchor)
+	container:SetFlowLayoutMaximumLineSize(addon.Utilities:ToUI(rowWidthPx))
 
 	if anchor == "TOPLEFT" then
-		container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
 	end
 
 	if anchor == "TOPRIGHT" then
-		container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
 	end
 
 	if anchor == "BOTTOMRIGHT" then
-		container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Up)
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Up)
 	end
 
 	if anchor == "BOTTOMLEFT" then
-		container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Up)
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Up)
 	end
 end
 
@@ -106,8 +106,8 @@ local function UpdateAuraGroupSettings(frame, settings)
 
 	container:SetAuraGroupMaxFrameCount("buffs", maxFrameCount)
 	container:SetAuraGroupLayout("buffs", {
-		elementSpacingX = spacing,
-		elementSpacingY = spacing,
+		elementSpacing = spacing,
+		lineSpacing = spacing,
 	})
 end
 

@@ -56,9 +56,9 @@ local function UpdateContainerSettings(frame, settings)
 		addon.Utilities:ToUI(containerOffsetYPx)
 	)
 
-	container:SetAuraLayoutAnchorPoint(cachedSettings.anchor)
-	container:SetAuraLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
-	container:SetAuraLayoutRowWidth(addon.Utilities:ToUI(rowWidthPx))
+	container:SetFlowLayoutAnchorPoint(cachedSettings.anchor)
+	container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
+	container:SetFlowLayoutMaximumLineSize(addon.Utilities:ToUI(rowWidthPx))
 end
 
 local function UpdateAuraGroupSettings(frame, settings)
