@@ -229,18 +229,10 @@ function Away:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local checkboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorPicker.layoutValues.pickerSize)
-		local dropdownFieldTopOffsetPx =
-			addon.Utilities:ToPixels(
-				controls.outlineDropdown.layoutValues.labelHeight + controls.outlineDropdown.layoutValues.labelSpacing
-			)
-		local dropdownFieldHeightPx = addon.Utilities:ToPixels(controls.outlineDropdown.layoutValues.fieldHeight)
-		local colorPickerOffsetPx = dropdownFieldTopOffsetPx
-			+ addon.Utilities:RoundToNearestInt(math.max(0, (dropdownFieldHeightPx - colorPickerSizePx) / 2))
 
 		ForEachControl(controls, "UpdateLayout")
 
@@ -304,7 +296,7 @@ function Away:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(fourthRowOffsetPx + colorPickerOffsetPx)
+			-addon.Utilities:ToUI(fourthRowOffsetPx)
 		)
 	end
 

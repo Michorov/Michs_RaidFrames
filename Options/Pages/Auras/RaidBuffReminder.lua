@@ -233,10 +233,6 @@ function RaidBuffReminder:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.borderColorPicker.layoutValues.pickerSize)
-		local colorPickerOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - colorPickerSizePx) / 2))
 		local firstRowOffsetPx = 0
 		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
 		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx + sectionGapPx
@@ -288,7 +284,7 @@ function RaidBuffReminder:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(fifthRowOffsetPx + colorPickerOffsetPx)
+			-addon.Utilities:ToUI(fifthRowOffsetPx)
 		)
 	end
 

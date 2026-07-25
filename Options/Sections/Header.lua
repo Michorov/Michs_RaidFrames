@@ -26,7 +26,7 @@ function Header:Ensure(parent)
 	local closeButton = addon.Options.Controls.Button:Create(header, "X")
 	closeButton:SetLayoutSize(24, 24)
 	closeButton:SetLayoutBorderSize(0)
-	theme:ApplyFont(closeButton.text, "arialNarrow", 16, "")
+	closeButton:SetFontSize(16)
 	closeButton.text:SetTextColor(theme:GetTextColor("secondary"))
 	closeButton:SetBackdropColor(0, 0, 0, 0)
 

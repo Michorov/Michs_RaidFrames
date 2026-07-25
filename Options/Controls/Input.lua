@@ -33,6 +33,7 @@ function Input:Create(parent, labelText)
 		labelSpacing = 4,
 		borderThickness = 1,
 		textInset = 10,
+		fontSize = 12,
 	}
 
 	control.placeholder = ""
@@ -40,14 +41,14 @@ function Input:Create(parent, labelText)
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	control.label:SetPoint("TOPLEFT", control, "TOPLEFT", 0, 0)
-	theme:ApplyFont(control.label, "arialNarrow", 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", control.layoutValues.fontSize, "")
 	control.label:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.label:SetJustifyH("LEFT")
 	control.label:SetText(labelText or "Input")
 
 	control.field = CreateFrame("EditBox", nil, control, "BackdropTemplate")
 	control.field:SetAutoFocus(false)
-	theme:ApplyFont(control.field, "arialNarrow", 12, "")
+	theme:ApplyFont(control.field, "arialNarrow", control.layoutValues.fontSize, "")
 	control.field:SetTextColor(0.85, 0.85, 0.88, 1)
 	control.field:SetJustifyH("LEFT")
 
@@ -83,7 +84,7 @@ function Input:Create(parent, labelText)
 	control.field.hoverTexture:Hide()
 
 	control.placeholderText = control.field:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	theme:ApplyFont(control.placeholderText, "arialNarrow", 12, "")
+	theme:ApplyFont(control.placeholderText, "arialNarrow", control.layoutValues.fontSize, "")
 	control.placeholderText:SetTextColor(0.50, 0.52, 0.56, 1)
 	control.placeholderText:SetJustifyH("LEFT")
 	control.placeholderText:Hide()
@@ -109,6 +110,16 @@ function Input:Create(parent, labelText)
 	function control:SetLayoutSize(width, height)
 		self.layoutValues.width = width
 		self.layoutValues.fieldHeight = height
+		self:UpdateLayout()
+	end
+
+	function control:SetBorderSize(borderThickness)
+		self.layoutValues.borderThickness = borderThickness
+		self:UpdateLayout()
+	end
+
+	function control:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
 		self:UpdateLayout()
 	end
 
@@ -162,6 +173,9 @@ function Input:Create(parent, labelText)
 
 		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
 		self:SetWidth(addon.Utilities:ToUI(widthPx))
+		theme:ApplyFont(self.label, "arialNarrow", self.layoutValues.fontSize, "")
+		theme:ApplyFont(self.field, "arialNarrow", self.layoutValues.fontSize, "")
+		theme:ApplyFont(self.placeholderText, "arialNarrow", self.layoutValues.fontSize, "")
 
 		self.label:ClearAllPoints()
 		self.field:ClearAllPoints()

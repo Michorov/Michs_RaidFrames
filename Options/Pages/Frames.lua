@@ -200,11 +200,6 @@ function FramesPage:Ensure(parent)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
 		local threeColumnThirdOffsetPx = (threeColumnSlotWidthPx * 2) + (columnGapPx * 2)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.backgroundColorPicker.layoutValues.pickerSize)
-		local colorPickerOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - colorPickerSizePx) / 2))
-
 		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
 
 		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
@@ -243,7 +238,7 @@ function FramesPage:Ensure(parent)
 			self.body,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnThirdOffsetPx),
-			-addon.Utilities:ToUI(colorPickerOffsetPx)
+			0
 		)
 
 		controls.frameBorderThicknessSlider:ClearAllPoints()
@@ -261,7 +256,7 @@ function FramesPage:Ensure(parent)
 			self.body,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(rowStepPx + colorPickerOffsetPx)
+			-addon.Utilities:ToUI(rowStepPx)
 		)
 	end
 

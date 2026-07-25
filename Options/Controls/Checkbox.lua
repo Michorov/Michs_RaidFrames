@@ -8,6 +8,8 @@ local Checkbox = addon.Options.Controls.Checkbox
 local theme = addon.Options.Theme
 local hoverAccentColor = { 1.0, 0.74, 0.42, 1 }
 
+Checkbox.defaultHeight = 16
+
 local function UpdateVisual(checkbox)
 	if checkbox.checked then
 		if checkbox.isHovered then
@@ -32,9 +34,10 @@ function Checkbox:Create(parent, text)
 
 	checkbox.layoutValues = {
 		width = 220,
-		height = 16,
+		height = Checkbox.defaultHeight,
 		boxSize = 16,
 		borderThickness = 1,
+		fontSize = 12,
 		textInset = 8,
 		checkInset = 3,
 	}
@@ -80,7 +83,7 @@ function Checkbox:Create(parent, text)
 
 	checkbox.text = checkbox:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	checkbox.text:SetJustifyH("LEFT")
-	theme:ApplyFont(checkbox.text, "arialNarrow", 12, "")
+	theme:ApplyFont(checkbox.text, "arialNarrow", checkbox.layoutValues.fontSize, "")
 	checkbox.text:SetTextColor(theme:GetTextColor("primary"))
 	checkbox.text:SetText(text or "Checkbox")
 
@@ -117,6 +120,16 @@ function Checkbox:Create(parent, text)
 		self:UpdateLayout()
 	end
 
+	function checkbox:SetBorderSize(borderThickness)
+		self.layoutValues.borderThickness = borderThickness
+		self:UpdateLayout()
+	end
+
+	function checkbox:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
+		self:UpdateLayout()
+	end
+
 	function checkbox:UpdateLayout()
 		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
 		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
@@ -135,6 +148,7 @@ function Checkbox:Create(parent, text)
 		local textLeftOffset = addon.Utilities:ToUI(boxSizePx + textInsetPx)
 
 		self:SetSize(width, height)
+		theme:ApplyFont(self.text, "arialNarrow", self.layoutValues.fontSize, "")
 
 		self.box:ClearAllPoints()
 		self.box:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -boxTopInset)

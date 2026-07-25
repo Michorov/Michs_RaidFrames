@@ -199,6 +199,7 @@ local function EnsureRowPool(targetCount)
 
 		row.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
 		row.colorPicker:SetLayoutWidth(96)
+		row.colorPicker:SetCompact(true)
 		row.colorPicker:SetOnValueChanged(function(self, r, g, b)
 			if InCombatLockdown() then
 				ShowCombatLockMessage()

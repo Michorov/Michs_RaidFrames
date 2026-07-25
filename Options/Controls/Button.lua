@@ -7,13 +7,18 @@ addon.Options.Controls.Button = addon.Options.Controls.Button or {}
 local Button = addon.Options.Controls.Button
 local theme = addon.Options.Theme
 
+Button.defaultHeight = 24
+
 function Button:Create(parent, text)
 	local button = CreateFrame("Button", nil, parent, "BackdropTemplate")
 
 	button.layoutValues = {
 		width = 48,
-		height = 24,
+		height = Button.defaultHeight,
 		borderThickness = 1,
+		fontSize = 14,
+		textAlignment = "CENTER",
+		textInset = 0,
 	}
 
 	button:SetBackdrop({
@@ -48,7 +53,7 @@ function Button:Create(parent, text)
 
 	button.text = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	button.text:SetPoint("CENTER", button, "CENTER", 0, 0)
-	theme:ApplyFont(button.text, "arialNarrow", 14, "")
+	theme:ApplyFont(button.text, "arialNarrow", button.layoutValues.fontSize, "")
 	button.text:SetText(text or "Button")
 	button.text:SetTextColor(theme:GetTextColor("primary"))
 
@@ -103,11 +108,41 @@ function Button:Create(parent, text)
 		self:UpdateLayout()
 	end
 
+	function button:SetBorderSize(borderThickness)
+		self:SetLayoutBorderSize(borderThickness)
+	end
+
+	function button:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
+
+		self:UpdateLayout()
+	end
+
+	function button:SetTextAlignment(alignment, inset)
+		self.layoutValues.textAlignment = alignment or "CENTER"
+		self.layoutValues.textInset = inset or 0
+
+		self:UpdateLayout()
+	end
+
 	function button:UpdateLayout()
+		local textInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.textInset))
+
 		self:SetSize(
 			addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.width)),
 			addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.height))
 		)
+		theme:ApplyFont(self.text, "arialNarrow", self.layoutValues.fontSize, "")
+		self.text:SetJustifyH(self.layoutValues.textAlignment)
+		self.text:ClearAllPoints()
+
+		if self.layoutValues.textAlignment == "LEFT" then
+			self.text:SetPoint("LEFT", self, "LEFT", textInset, 0)
+		elseif self.layoutValues.textAlignment == "RIGHT" then
+			self.text:SetPoint("RIGHT", self, "RIGHT", -textInset, 0)
+		else
+			self.text:SetPoint("CENTER", self, "CENTER", 0, 0)
+		end
 
 		if self.layoutValues.borderThickness == 0 then
 			self.borderTop:Hide()

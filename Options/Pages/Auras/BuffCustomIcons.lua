@@ -417,13 +417,15 @@ function BuffCustomIcons:Ensure(parent)
 		end
 
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorTextureColorPicker.layoutValues.pickerSize)
+		local colorPickerFieldTopOffsetPx = math.max(0, sliderHeightPx - colorPickerSizePx)
 		local headerCheckboxOffsetPx =
 			addon.Utilities:RoundToNearestInt(math.max(0, (headerHeightPx - checkboxHeightPx) / 2))
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local colorTextureCheckboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (colorPickerSizePx - checkboxHeightPx) / 2))
+			colorPickerFieldTopOffsetPx
+			+ addon.Utilities:RoundToNearestInt(math.max(0, (colorPickerSizePx - checkboxHeightPx) / 2))
 
 		controls.buffDropdown:ClearAllPoints()
 		controls.buffDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)

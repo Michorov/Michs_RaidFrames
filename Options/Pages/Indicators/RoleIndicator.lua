@@ -214,7 +214,7 @@ function RoleIndicator:Ensure(parent)
 		local roleCheckboxGapPx = addon.Utilities:ToPixels(14)
 		local showTankWidthPx = addon.Utilities:ToPixels(controls.showTankCheckbox.layoutValues.width)
 		local showHealerWidthPx = addon.Utilities:ToPixels(controls.showHealerCheckbox.layoutValues.width)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local enabledControlsOffsetPx = 0

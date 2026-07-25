@@ -260,14 +260,11 @@ function Name:Ensure(parent)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
 		local dropdownSliderOffsetPx = addon.Utilities:ToPixels(5)
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorPicker.layoutValues.pickerSize)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.classColorCheckbox.layoutValues.height)
 		local dropdownFieldTopOffsetPx = addon.Utilities:ToPixels(
 			controls.outlineDropdown.layoutValues.labelHeight + controls.outlineDropdown.layoutValues.labelSpacing
 		)
 		local dropdownFieldHeightPx = addon.Utilities:ToPixels(controls.outlineDropdown.layoutValues.fieldHeight)
-		local colorPickerOffsetPx = dropdownFieldTopOffsetPx
-			+ addon.Utilities:RoundToNearestInt(math.max(0, (dropdownFieldHeightPx - colorPickerSizePx) / 2))
 		local checkboxOffsetPx = dropdownFieldTopOffsetPx
 			+ addon.Utilities:RoundToNearestInt(math.max(0, (dropdownFieldHeightPx - checkboxHeightPx) / 2))
 		local checkboxCenterOffsetPx = checkboxOffsetPx + addon.Utilities:RoundToNearestInt(checkboxHeightPx / 2)
@@ -275,7 +272,7 @@ function Name:Ensure(parent)
 			(
 				addon.Utilities:ToPixels(controls.maxLengthSlider.layoutValues.topRowHeight)
 				+ addon.Utilities:ToPixels(controls.maxLengthSlider.layoutValues.labelSpacing)
-				+ addon.Utilities:ToPixels(controls.maxLengthSlider.layoutValues.thumbSize)
+				+ addon.Utilities:ToPixels(controls.maxLengthSlider.layoutValues.fieldHeight)
 			) / 2
 		)
 		local maxLengthSliderOffsetPx =
@@ -323,7 +320,7 @@ function Name:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(styleControlsOffsetPx + colorPickerOffsetPx)
+			-addon.Utilities:ToUI(styleControlsOffsetPx)
 		)
 
 		controls.classColorCheckbox:ClearAllPoints()

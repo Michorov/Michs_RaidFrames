@@ -137,6 +137,7 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 		width = SegmentedToggle.defaultWidth,
 		height = SegmentedToggle.defaultHeight,
 		borderThickness = 1,
+		fontSize = 12,
 	}
 
 	control.leftOption = leftOption or { value = "left", text = L["Left"] }
@@ -234,12 +235,19 @@ function SegmentedToggle:Create(parent, leftOption, rightOption)
 		self:UpdateLayout()
 	end
 
+	function control:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
+		self:UpdateLayout()
+	end
+
 	function control:UpdateLayout()
 		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
 		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
 		local borderThickness = addon.Utilities:ToUI(addon.Utilities:ToPixels(self.layoutValues.borderThickness))
 
 		self:SetSize(addon.Utilities:ToUI(widthPx), addon.Utilities:ToUI(heightPx))
+		theme:ApplyFont(self.leftSegment.text, "arialNarrow", self.layoutValues.fontSize, "")
+		theme:ApplyFont(self.rightSegment.text, "arialNarrow", self.layoutValues.fontSize, "")
 
 		self.activePlate.topHighlight:SetHeight(borderThickness)
 		self.topBorder:SetHeight(borderThickness)

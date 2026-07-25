@@ -319,7 +319,7 @@ function Buffs:Ensure(parent)
 		local columnWidthPx = addon.Utilities:ToPixels(174)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local checkboxStackGapPx = addon.Utilities:ToPixels(12)
 		local topControlsGapPx = addon.Utilities:ToPixels(28)

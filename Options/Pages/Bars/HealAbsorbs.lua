@@ -97,13 +97,6 @@ function HealAbsorbs:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local fieldTopInsetPx = addon.Utilities:ToPixels(
-			controls.textureDropdown.layoutValues.labelHeight + controls.textureDropdown.layoutValues.labelSpacing
-		)
-		local fieldHeightPx = addon.Utilities:ToPixels(controls.textureDropdown.layoutValues.fieldHeight)
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.colorPicker.layoutValues.pickerSize)
-		local colorPickerOffsetPx = fieldTopInsetPx
-			+ addon.Utilities:RoundToNearestInt(math.max(0, (fieldHeightPx - colorPickerSizePx) / 2))
 
 		for _, control in pairs(controls) do
 			if control.UpdateLayout then
@@ -120,7 +113,7 @@ function HealAbsorbs:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(colorPickerOffsetPx)
+			0
 		)
 	end
 
