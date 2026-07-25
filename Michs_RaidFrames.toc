@@ -2,7 +2,7 @@
 ## Title: Mich's RaidFrames
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
-## Version: 3.0.0
+## Version: 3.0.1
 ## SavedVariables: Michs_RaidFramesDB
 ## OptionalDeps: MiniCC
 
