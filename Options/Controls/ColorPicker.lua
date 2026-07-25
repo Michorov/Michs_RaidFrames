@@ -7,6 +7,9 @@ addon.Options.Controls.ColorPicker = addon.Options.Controls.ColorPicker or {}
 local ColorPicker = addon.Options.Controls.ColorPicker
 local theme = addon.Options.Theme
 
+ColorPicker.defaultHeight = 44
+ColorPicker.compactHeight = 24
+
 local function ClampChannel(value, fallback)
 	value = tonumber(value)
 	if value == nil then
@@ -95,13 +98,16 @@ function ColorPicker:Create(parent, labelText)
 	local control = CreateFrame("Frame", nil, parent)
 	control.layoutValues = {
 		width = 220,
+		height = ColorPicker.defaultHeight,
 		pickerSize = 24,
 		labelInset = 8,
 		borderThickness = 1,
 		swatchInnerInset = 2,
+		fontSize = 12,
 	}
 	control.labelVisible = true
 	control.hasOpacity = false
+	control.isCompact = false
 	control.isHovered = false
 	control.r = 1
 	control.g = 1
@@ -109,7 +115,7 @@ function ColorPicker:Create(parent, labelText)
 	control.a = 1
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	theme:ApplyFont(control.label, "arialNarrow", 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", control.layoutValues.fontSize, "")
 	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
@@ -140,8 +146,36 @@ function ColorPicker:Create(parent, labelText)
 		self:UpdateLayout()
 	end
 
+	function control:SetLayoutHeight(height)
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutSize(width, height)
+		self.layoutValues.width = width
+		self.layoutValues.height = height
+		self:UpdateLayout()
+	end
+
+	function control:SetCompact(isCompact)
+		self.isCompact = isCompact == true
+		self.layoutValues.height = self.isCompact and ColorPicker.compactHeight or ColorPicker.defaultHeight
+		self:UpdateLayout()
+	end
+
 	function control:SetPickerSize(size)
 		self.layoutValues.pickerSize = size
+		self.layoutValues.height = math.max(self.layoutValues.height, size or 0)
+		self:UpdateLayout()
+	end
+
+	function control:SetBorderSize(borderThickness)
+		self.layoutValues.borderThickness = borderThickness
+		self:UpdateLayout()
+	end
+
+	function control:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
 		self:UpdateLayout()
 	end
 
@@ -153,6 +187,7 @@ function ColorPicker:Create(parent, labelText)
 	function control:SetHasOpacity(hasOpacity)
 		self.hasOpacity = hasOpacity == true
 		self.a = self.hasOpacity and self.a or 1
+		UpdateVisual(self)
 	end
 
 	function control:SetColor(r, g, b, a)
@@ -181,21 +216,26 @@ function ColorPicker:Create(parent, labelText)
 
 	function control:UpdateLayout()
 		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
 		local pickerSizePx = addon.Utilities:ToPixels(self.layoutValues.pickerSize)
 		local labelInsetPx = addon.Utilities:ToPixels(self.layoutValues.labelInset)
 		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
 		local swatchInnerInsetPx = addon.Utilities:ToPixels(self.layoutValues.swatchInnerInset)
+		local pickerTopInsetPx = math.max(0, heightPx - pickerSizePx)
 
 		local width = addon.Utilities:ToUI(widthPx)
+		local height = addon.Utilities:ToUI(heightPx)
 		local pickerSize = addon.Utilities:ToUI(pickerSizePx)
 		local labelInset = addon.Utilities:ToUI(labelInsetPx)
 		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		local swatchInnerInset = addon.Utilities:ToUI(swatchInnerInsetPx)
+		local pickerTopInset = addon.Utilities:ToUI(pickerTopInsetPx)
 
-		self:SetSize(width, pickerSize)
+		self:SetSize(width, height)
+		theme:ApplyFont(self.label, "arialNarrow", self.layoutValues.fontSize, "")
 
 		self.field:ClearAllPoints()
-		self.field:SetPoint("LEFT", self, "LEFT", 0, 0)
+		self.field:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -pickerTopInset)
 		self.field:SetSize(pickerSize, pickerSize)
 
 		self.field.topBorder:SetHeight(borderThickness)

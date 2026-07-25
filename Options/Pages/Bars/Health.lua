@@ -87,10 +87,7 @@ function Health:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
-		local colorPickerSizePx = addon.Utilities:ToPixels(controls.healthColorPicker.layoutValues.pickerSize)
-		local colorPickerOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - colorPickerSizePx) / 2))
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.useClassColorCheckbox.layoutValues.height)
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 
@@ -109,7 +106,7 @@ function Health:Ensure(parent)
 			self,
 			"TOPLEFT",
 			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(colorPickerOffsetPx)
+			0
 		)
 	end
 

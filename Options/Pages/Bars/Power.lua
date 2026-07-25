@@ -125,7 +125,7 @@ function Power:Ensure(parent)
 		local columnGapPx = addon.Utilities:ToPixels(30)
 		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
 		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 

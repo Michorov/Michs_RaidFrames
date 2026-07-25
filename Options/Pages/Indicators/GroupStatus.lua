@@ -199,7 +199,7 @@ function GroupStatus:Ensure(parent)
 		local secondColumnOffsetPx = columnWidthPx + columnGapPx
 		local statusCheckboxGapPx = addon.Utilities:ToPixels(14)
 		local showLeaderWidthPx = addon.Utilities:ToPixels(controls.showLeaderCheckbox.layoutValues.width)
-		local sliderHeightPx = addon.Utilities:ToPixels(34)
+		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
 		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
 		local checkboxOffsetPx = addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
 		local enabledControlsOffsetPx = 0

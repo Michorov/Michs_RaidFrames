@@ -9,6 +9,8 @@ local Slider = addon.Options.Controls.Slider
 local theme = addon.Options.Theme
 local hoverAccentColor = { 1.0, 0.74, 0.42, 1 }
 
+Slider.defaultHeight = 44
+
 local function UpdateVisuals(control)
 	local minValue, maxValue = control.slider:GetMinMaxValues()
 	local value = control.slider:GetValue()
@@ -90,19 +92,20 @@ end
 function Slider:Create(parent, text)
 	local control = CreateFrame("Frame", nil, parent)
 	control.layoutValues = {
-		width = 200,
+		width = 220,
+		fieldHeight = 24,
 		trackHeight = 4,
 		thumbSize = 12,
-		trackVerticalOffset = 4,
 		topRowHeight = 16,
-		labelSpacing = 6,
+		labelSpacing = 4,
 		borderThickness = 1,
+		fontSize = 12,
 		valueInputWidth = 40,
 		valueInputGap = 6,
 	}
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	theme:ApplyFont(control.label, "arialNarrow", 12, "")
+	theme:ApplyFont(control.label, "arialNarrow", control.layoutValues.fontSize, "")
 	control.label:SetTextColor(theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
@@ -111,7 +114,7 @@ function Slider:Create(parent, text)
 	control.valueInput = CreateFrame("EditBox", nil, control)
 	control.valueInput:SetAutoFocus(false)
 	control.valueInput:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	theme:ApplyFont(control.valueInput, "arialNarrow", 12, "")
+	theme:ApplyFont(control.valueInput, "arialNarrow", control.layoutValues.fontSize, "")
 	control.valueInput:SetTextColor(0.65, 0.65, 0.68, 1)
 	control.valueInput:SetJustifyH("RIGHT")
 	control.valueInput:SetTextInsets(0, 0, 0, 0)
@@ -198,6 +201,16 @@ function Slider:Create(parent, text)
 		self:UpdateLayout()
 	end
 
+	function control:SetBorderSize(borderThickness)
+		self.layoutValues.borderThickness = borderThickness
+		self:UpdateLayout()
+	end
+
+	function control:SetFontSize(fontSize)
+		self.layoutValues.fontSize = fontSize
+		self:UpdateLayout()
+	end
+
 	function control:SetValueSilently(value)
 		self.suppressValueChanged = true
 		self.slider:SetValue(value)
@@ -210,21 +223,23 @@ function Slider:Create(parent, text)
 
 	function control:UpdateLayout()
 		local controlWidthPx = addon.Utilities:ToPixels(self.layoutValues.width)
+		local fieldHeightPx = addon.Utilities:ToPixels(self.layoutValues.fieldHeight)
 		local trackHeightPx = addon.Utilities:ToPixels(self.layoutValues.trackHeight)
 		local thumbSizePx = addon.Utilities:ToPixels(self.layoutValues.thumbSize)
-		local trackVerticalOffsetPx = addon.Utilities:ToPixels(self.layoutValues.trackVerticalOffset)
 		local topRowHeightPx = addon.Utilities:ToPixels(self.layoutValues.topRowHeight)
 		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
 		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
 		local valueInputWidthPx = addon.Utilities:ToPixels(self.layoutValues.valueInputWidth)
 		local valueInputGapPx = addon.Utilities:ToPixels(self.layoutValues.valueInputGap)
 		local sliderTopOffsetPx = topRowHeightPx + labelSpacingPx
-		local controlHeightPx = topRowHeightPx + labelSpacingPx + thumbSizePx
+		local controlHeightPx = topRowHeightPx + labelSpacingPx + fieldHeightPx
 
 		self.trackWidth = addon.Utilities:ToUI(controlWidthPx)
 
 		self:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(controlHeightPx))
 		self.valueInput:SetSize(addon.Utilities:ToUI(valueInputWidthPx), addon.Utilities:ToUI(topRowHeightPx))
+		theme:ApplyFont(self.label, "arialNarrow", self.layoutValues.fontSize, "")
+		theme:ApplyFont(self.valueInput, "arialNarrow", self.layoutValues.fontSize, "")
 
 		self.label:ClearAllPoints()
 		self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
@@ -234,11 +249,11 @@ function Slider:Create(parent, text)
 		self.slider:ClearAllPoints()
 		self.slider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
 		self.slider:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
-		self.slider:SetHeight(addon.Utilities:ToUI(thumbSizePx))
+		self.slider:SetHeight(addon.Utilities:ToUI(fieldHeightPx))
 
 		self.track:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(trackHeightPx))
 		self.track:ClearAllPoints()
-		self.track:SetPoint("TOPLEFT", self.slider, "TOPLEFT", 0, -addon.Utilities:ToUI(trackVerticalOffsetPx))
+		self.track:SetPoint("CENTER", self.slider, "CENTER", 0, 0)
 
 		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		self.trackTopBorder:SetHeight(borderThickness)
