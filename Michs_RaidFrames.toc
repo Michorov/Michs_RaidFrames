@@ -4,6 +4,7 @@
 ## Author: Mich
 ## Version: 3.0.1
 ## SavedVariables: Michs_RaidFramesDB
+## Dependencies: Michs_PixelPerfectLib, Michs_OptionsUILib
 ## OptionalDeps: MiniCC
 
 # Ace3
@@ -27,6 +28,7 @@ Locales/zhCN.lua
 Locales/zhTW.lua
 
 # Helpers
+Libraries.lua
 Utilities.lua
 Database.lua
 AuraHandler.lua
