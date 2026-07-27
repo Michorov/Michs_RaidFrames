@@ -207,7 +207,7 @@ local function DeleteSelectedProfile(controls)
 	PrintProfileMsg((L["Deleted profile '%s'."]):format(target))
 end
 
-local function UpdateState(page, controls)
+local function UpdateState(subpage, controls)
 	local options = BuildProfileOptions(true)
 	local specOptions = BuildSpecProfileOptions()
 	local deleteOptions = BuildProfileOptions(false)
@@ -231,14 +231,14 @@ local function UpdateState(page, controls)
 		controls.deleteProfileDropdown:SetValue(nil)
 	end
 
-	for _, specEntry in ipairs(page.specEntries or {}) do
+	for _, specEntry in ipairs(subpage.specEntries or {}) do
 		specEntry.dropdown:SetOptions(specOptions)
 		specEntry.dropdown:SetValue(addon.Database:GetSpecProfileName(specEntry.specID))
 	end
 end
 
-local function CreateSectionTitle(page, text)
-	local title = page:CreateControl("Label", text)
+local function CreateSectionTitle(subpage, text)
+	local title = subpage:CreateControl("Label", text)
 	title:SetTextColor(OptionsUILib.Theme:GetColor("brand"))
 	title:SetLayoutSize(240, 16)
 
@@ -250,15 +250,16 @@ function Profiles:Create(panel)
 		title = L["Profiles"],
 		sidebarPlacement = "bottom",
 	})
+	local subpage = page:RegisterSubPage("profiles", { title = L["Profiles"] })
 
-	page.activeSectionTitle = CreateSectionTitle(page, L["Active Profile"])
-	page.specOverridesSectionTitle = CreateSectionTitle(page, L["Override Active per Specialization"])
-	page.createSectionTitle = CreateSectionTitle(page, L["Create New Profile"])
-	page.copySectionTitle = CreateSectionTitle(page, L["Copy Profile"])
-	page.deleteSectionTitle = CreateSectionTitle(page, L["Delete Profile"])
+	subpage.activeSectionTitle = CreateSectionTitle(subpage, L["Active Profile"])
+	subpage.specOverridesSectionTitle = CreateSectionTitle(subpage, L["Override Active per Specialization"])
+	subpage.createSectionTitle = CreateSectionTitle(subpage, L["Create New Profile"])
+	subpage.copySectionTitle = CreateSectionTitle(subpage, L["Copy Profile"])
+	subpage.deleteSectionTitle = CreateSectionTitle(subpage, L["Delete Profile"])
 
 	local controls = {}
-	local activeProfileDropdown = page:CreateControl("Dropdown", "")
+	local activeProfileDropdown = subpage:CreateControl("Dropdown", "")
 	activeProfileDropdown:SetLayoutWidth(200)
 	activeProfileDropdown:SetLabelVisible(false)
 	activeProfileDropdown:SetOnValueChanged(function(_, value)
@@ -271,7 +272,7 @@ function Profiles:Create(panel)
 		end
 	end)
 
-	local newProfileInput = page:CreateControl("Input", "")
+	local newProfileInput = subpage:CreateControl("Input", "")
 	newProfileInput:SetLayoutWidth(200)
 	newProfileInput:SetLabelVisible(false)
 	newProfileInput:SetPlaceholder(L["New Profile Name"])
@@ -279,17 +280,17 @@ function Profiles:Create(panel)
 		CreateProfileFromInput(controls)
 	end)
 
-	local createProfileButton = page:CreateControl("Button", L["Create"])
+	local createProfileButton = subpage:CreateControl("Button", L["Create"])
 	createProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	createProfileButton:SetOnClick(function()
 		CreateProfileFromInput(controls)
 	end)
 
-	local copyFromDropdown = page:CreateControl("Dropdown", "")
+	local copyFromDropdown = subpage:CreateControl("Dropdown", "")
 	copyFromDropdown:SetLayoutWidth(200)
 	copyFromDropdown:SetLabelVisible(false)
 
-	local copyProfileInput = page:CreateControl("Input", "")
+	local copyProfileInput = subpage:CreateControl("Input", "")
 	copyProfileInput:SetLayoutWidth(200)
 	copyProfileInput:SetLabelVisible(false)
 	copyProfileInput:SetPlaceholder(L["New Profile Name"])
@@ -297,25 +298,25 @@ function Profiles:Create(panel)
 		CopyProfileFromInput(controls)
 	end)
 
-	local copyProfileButton = page:CreateControl("Button", L["Copy"])
+	local copyProfileButton = subpage:CreateControl("Button", L["Copy"])
 	copyProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	copyProfileButton:SetOnClick(function()
 		CopyProfileFromInput(controls)
 	end)
 
-	local deleteProfileDropdown = page:CreateControl("Dropdown", "")
+	local deleteProfileDropdown = subpage:CreateControl("Dropdown", "")
 	deleteProfileDropdown:SetLayoutWidth(200)
 	deleteProfileDropdown:SetLabelVisible(false)
 
-	local deleteProfileButton = page:CreateControl("Button", L["Delete"])
+	local deleteProfileButton = subpage:CreateControl("Button", L["Delete"])
 	deleteProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	deleteProfileButton:SetOnClick(function()
 		DeleteSelectedProfile(controls)
 	end)
 
-	page.specEntries = BuildPlayerSpecEntries()
-	for _, specEntry in ipairs(page.specEntries) do
-		local dropdown = page:CreateControl("Dropdown", GetSpecDisplayName(specEntry))
+	subpage.specEntries = BuildPlayerSpecEntries()
+	for _, specEntry in ipairs(subpage.specEntries) do
+		local dropdown = subpage:CreateControl("Dropdown", GetSpecDisplayName(specEntry))
 		dropdown:SetLayoutWidth(140)
 		dropdown:SetPlaceholder(L["Use Active"])
 		dropdown:SetOnValueChanged(function(_, value)
@@ -347,44 +348,44 @@ function Profiles:Create(panel)
 	controls.deleteProfileDropdown = deleteProfileDropdown
 	controls.deleteProfileButton = deleteProfileButton
 
-	page.activeSectionTitle:SetLayoutPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
-	activeProfileDropdown:SetLayoutPoint("TOPLEFT", page.activeSectionTitle, "BOTTOMLEFT", 0, -10)
+	subpage.activeSectionTitle:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	activeProfileDropdown:SetLayoutPoint("TOPLEFT", subpage.activeSectionTitle, "BOTTOMLEFT", 0, -10)
 
 	local contentTopAnchor = activeProfileDropdown
 
-	if #page.specEntries > 0 then
-		page.specOverridesSectionTitle:SetLayoutPoint("TOPLEFT", activeProfileDropdown, "BOTTOMLEFT", 0, -24)
+	if #subpage.specEntries > 0 then
+		subpage.specOverridesSectionTitle:SetLayoutPoint("TOPLEFT", activeProfileDropdown, "BOTTOMLEFT", 0, -24)
 
-		for index, specEntry in ipairs(page.specEntries) do
+		for index, specEntry in ipairs(subpage.specEntries) do
 			if index == 1 then
-				specEntry.dropdown:SetLayoutPoint("TOPLEFT", page.specOverridesSectionTitle, "BOTTOMLEFT", 0, -10)
+				specEntry.dropdown:SetLayoutPoint("TOPLEFT", subpage.specOverridesSectionTitle, "BOTTOMLEFT", 0, -10)
 			else
-				specEntry.dropdown:SetLayoutPoint("TOPLEFT", page.specEntries[index - 1].dropdown, "TOPRIGHT", 8, 0)
+				specEntry.dropdown:SetLayoutPoint("TOPLEFT", subpage.specEntries[index - 1].dropdown, "TOPRIGHT", 8, 0)
 			end
 		end
 
-		contentTopAnchor = page.specEntries[1].dropdown
+		contentTopAnchor = subpage.specEntries[1].dropdown
 	else
-		page.specOverridesSectionTitle:Hide()
+		subpage.specOverridesSectionTitle:Hide()
 	end
 
-	page.createSectionTitle:SetLayoutPoint("TOPLEFT", contentTopAnchor, "BOTTOMLEFT", 0, -24)
-	newProfileInput:SetLayoutPoint("TOPLEFT", page.createSectionTitle, "BOTTOMLEFT", 0, -10)
+	subpage.createSectionTitle:SetLayoutPoint("TOPLEFT", contentTopAnchor, "BOTTOMLEFT", 0, -24)
+	newProfileInput:SetLayoutPoint("TOPLEFT", subpage.createSectionTitle, "BOTTOMLEFT", 0, -10)
 	createProfileButton:SetLayoutPoint("TOPLEFT", newProfileInput.field, "TOPRIGHT", 1, 0)
 
-	page.copySectionTitle:SetLayoutPoint("TOPLEFT", newProfileInput, "BOTTOMLEFT", 0, -24)
-	copyFromDropdown:SetLayoutPoint("TOPLEFT", page.copySectionTitle, "BOTTOMLEFT", 0, -10)
+	subpage.copySectionTitle:SetLayoutPoint("TOPLEFT", newProfileInput, "BOTTOMLEFT", 0, -24)
+	copyFromDropdown:SetLayoutPoint("TOPLEFT", subpage.copySectionTitle, "BOTTOMLEFT", 0, -10)
 	copyProfileInput:SetLayoutPoint("TOPLEFT", copyFromDropdown, "TOPRIGHT", 1, 0)
 	copyProfileButton:SetLayoutPoint("TOPLEFT", copyProfileInput, "TOPRIGHT", 1, 0)
 
-	page.deleteSectionTitle:SetLayoutPoint("TOPLEFT", copyFromDropdown, "BOTTOMLEFT", 0, -24)
-	deleteProfileDropdown:SetLayoutPoint("TOPLEFT", page.deleteSectionTitle, "BOTTOMLEFT", 0, -10)
+	subpage.deleteSectionTitle:SetLayoutPoint("TOPLEFT", copyFromDropdown, "BOTTOMLEFT", 0, -24)
+	deleteProfileDropdown:SetLayoutPoint("TOPLEFT", subpage.deleteSectionTitle, "BOTTOMLEFT", 0, -10)
 	deleteProfileButton:SetLayoutPoint("TOPLEFT", deleteProfileDropdown, "TOPRIGHT", 1, 0)
 
 	addon.OptionsNew:RegisterForProfileUpdates("profiles", function()
-		UpdateState(page, controls)
+		UpdateState(subpage, controls)
 	end)
-	UpdateState(page, controls)
+	UpdateState(subpage, controls)
 
 	return page
 end

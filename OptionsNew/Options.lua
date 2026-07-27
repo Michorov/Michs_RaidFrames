@@ -84,6 +84,7 @@ function OptionsNew:Initialize()
 		headerButtonText = GetTestModeButtonText(),
 		headerButtonCallback = ToggleTestMode,
 	})
+	layoutPage:RegisterSubPage("layout", { title = L["Layout"] })
 
 	local framesPage = panel:RegisterPage("frames", {
 		title = L["Frames"],
@@ -94,6 +95,7 @@ function OptionsNew:Initialize()
 		headerButtonText = GetTestModeButtonText(),
 		headerButtonCallback = ToggleTestMode,
 	})
+	framesPage:RegisterSubPage("frames", { title = L["Frames"] })
 
 	local barsPage = panel:RegisterPage("bars", {
 		title = L["Bars"],
