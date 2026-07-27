@@ -143,6 +143,7 @@ Options/Sections/StatusBar.lua
 Options/Options.lua
 
 # Options New
+OptionsNew/Pages/General.lua
 OptionsNew/Options.lua
 
 # Entry Point
