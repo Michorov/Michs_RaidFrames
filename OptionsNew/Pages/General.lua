@@ -24,15 +24,16 @@ function General:Create(panel)
 		title = L["General"],
 		showHeader = true,
 	})
+	local subpage = page:RegisterSubPage("general", { title = L["General"] })
 
-	local showSoloPartyFrameCheckbox = page:CreateControl("Checkbox", L["Show Solo Party Frame"])
+	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", L["Show Solo Party Frame"])
 	showSoloPartyFrameCheckbox:SetOnValueChanged(function(_, checked)
 		local profile = addon.Database:GetProfile()
 		profile.core.showSoloPartyFrame = checked
 		addon.UpdateScheduler:Notify("soloFrameChanged")
 	end)
 
-	local hideBlizzardPartyRaidFramesCheckbox = page:CreateControl(
+	local hideBlizzardPartyRaidFramesCheckbox = subpage:CreateControl(
 		"Checkbox",
 		L["Hide Blizzard Party/Raid Frames"]
 	)
@@ -42,7 +43,7 @@ function General:Create(panel)
 		addon.UpdateScheduler:Notify("layoutChanged")
 	end)
 
-	local hideBlizzardRaidFrameManagerCheckbox = page:CreateControl(
+	local hideBlizzardRaidFrameManagerCheckbox = subpage:CreateControl(
 		"Checkbox",
 		L["Hide Blizzard Raid Frame Manager"]
 	)
@@ -52,7 +53,7 @@ function General:Create(panel)
 		addon.UpdateScheduler:Notify("layoutChanged")
 	end)
 
-	local globalScaleSlider = page:CreateControl("Slider", L["Global Scale"])
+	local globalScaleSlider = subpage:CreateControl("Slider", L["Global Scale"])
 	globalScaleSlider:SetMinMaxValues(0.5, 2.0)
 	globalScaleSlider:SetStep(0.01)
 	globalScaleSlider:SetValueFormatter(function(value)
@@ -66,7 +67,7 @@ function General:Create(panel)
 		addon.Modules:RequestUpdateSettings()
 	end)
 
-	local outOfRangeAlphaSlider = page:CreateControl("Slider", L["Out of Range Alpha"])
+	local outOfRangeAlphaSlider = subpage:CreateControl("Slider", L["Out of Range Alpha"])
 	outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
 	outOfRangeAlphaSlider:SetStep(0.05)
 	outOfRangeAlphaSlider:SetValueFormatter(function(value)
@@ -79,7 +80,7 @@ function General:Create(panel)
 		addon.UpdateScheduler:Notify("outOfRangeAlphaSettingChanged")
 	end)
 
-	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", page.body, "TOPLEFT", 0, 0)
+	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
 	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint("TOPLEFT", hideBlizzardPartyRaidFramesCheckbox, "BOTTOMLEFT", 0, -12)
 	globalScaleSlider:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "TOPLEFT", 291, 0)
