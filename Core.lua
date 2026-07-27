@@ -13,6 +13,7 @@ local function InitializeAddon()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
 	addon.Options:Initialize()
+	addon.OptionsNew:Initialize()
 
 	addon.Modules:Initialize()
 	addon.EventHandler:Initialize()
