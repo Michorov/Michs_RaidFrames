@@ -144,6 +144,7 @@ Options/Options.lua
 
 # Options New
 OptionsNew/Pages/General.lua
+OptionsNew/Pages/Layout.lua
 OptionsNew/Pages/Profiles.lua
 OptionsNew/Options.lua
 

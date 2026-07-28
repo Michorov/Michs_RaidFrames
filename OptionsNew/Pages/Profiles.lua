@@ -106,11 +106,7 @@ local function BuildPlayerSpecEntries()
 	return entries
 end
 
-local function RefreshProfilesPage()
-	addon.OptionsNew:RefreshProfile()
-end
-
-local function CreateProfileFromInput(controls)
+local function CreateProfileFromInput(panel, controls)
 	local name = Trim(controls.newProfileInput:GetText())
 
 	if name == "" then
@@ -127,16 +123,11 @@ local function CreateProfileFromInput(controls)
 	addon.Database:SetBaseProfileName(name)
 	addon.Database:ApplyProfileForCurrentSpec()
 	controls.newProfileInput:SetText("")
-	RefreshProfilesPage()
+	panel:UpdateState()
 	PrintProfileMsg((L["Created '%s' and set it as the active profile."]):format(name))
 end
 
-local function CopyProfileFromInput(controls)
-	if InCombatLockdown() then
-		PrintProfileMsg(L["Layout changes are disabled during combat."])
-		return
-	end
-
+local function CopyProfileFromInput(panel, controls)
 	local source = controls.copyFromDropdown:GetValue()
 	local name = Trim(controls.copyProfileInput:GetText())
 
@@ -162,17 +153,12 @@ local function CopyProfileFromInput(controls)
 
 	controls.copyProfileInput:SetText("")
 	controls.copyFromDropdown:SetValue(nil)
-	RefreshProfilesPage()
+	panel:UpdateState()
 
 	PrintProfileMsg((L["Created '%s' by copying '%s' and set it as the active profile."]):format(name, source))
 end
 
-local function DeleteSelectedProfile(controls)
-	if InCombatLockdown() then
-		PrintProfileMsg(L["Layout changes are disabled during combat."])
-		return
-	end
-
+local function DeleteSelectedProfile(panel, controls)
 	local target = controls.deleteProfileDropdown:GetValue()
 
 	if not target or target == "" then
@@ -202,7 +188,7 @@ local function DeleteSelectedProfile(controls)
 	addon.Database:ApplyProfileForCurrentSpec()
 	addon.Database:DeleteProfile(target)
 	controls.deleteProfileDropdown:SetValue(nil)
-	RefreshProfilesPage()
+	panel:UpdateState()
 
 	PrintProfileMsg((L["Deleted profile '%s'."]):format(target))
 end
@@ -268,7 +254,7 @@ function Profiles:Create(panel)
 		if value and value ~= currentProfile then
 			addon.Database:SetBaseProfileName(value)
 			addon.Database:ApplyProfileForCurrentSpec()
-			RefreshProfilesPage()
+			panel:UpdateState()
 		end
 	end)
 
@@ -277,13 +263,13 @@ function Profiles:Create(panel)
 	newProfileInput:SetLabelVisible(false)
 	newProfileInput:SetPlaceholder(L["New Profile Name"])
 	newProfileInput:SetOnEnterPressed(function()
-		CreateProfileFromInput(controls)
+		CreateProfileFromInput(panel, controls)
 	end)
 
 	local createProfileButton = subpage:CreateControl("Button", L["Create"])
 	createProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	createProfileButton:SetOnClick(function()
-		CreateProfileFromInput(controls)
+		CreateProfileFromInput(panel, controls)
 	end)
 
 	local copyFromDropdown = subpage:CreateControl("Dropdown", "")
@@ -295,13 +281,13 @@ function Profiles:Create(panel)
 	copyProfileInput:SetLabelVisible(false)
 	copyProfileInput:SetPlaceholder(L["New Profile Name"])
 	copyProfileInput:SetOnEnterPressed(function()
-		CopyProfileFromInput(controls)
+		CopyProfileFromInput(panel, controls)
 	end)
 
 	local copyProfileButton = subpage:CreateControl("Button", L["Copy"])
 	copyProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	copyProfileButton:SetOnClick(function()
-		CopyProfileFromInput(controls)
+		CopyProfileFromInput(panel, controls)
 	end)
 
 	local deleteProfileDropdown = subpage:CreateControl("Dropdown", "")
@@ -311,7 +297,7 @@ function Profiles:Create(panel)
 	local deleteProfileButton = subpage:CreateControl("Button", L["Delete"])
 	deleteProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	deleteProfileButton:SetOnClick(function()
-		DeleteSelectedProfile(controls)
+		DeleteSelectedProfile(panel, controls)
 	end)
 
 	subpage.specEntries = BuildPlayerSpecEntries()
@@ -332,7 +318,7 @@ function Profiles:Create(panel)
 
 			if addon.Utilities:GetPlayerSpecID() == specEntry.specID then
 				addon.Database:ApplyProfileForCurrentSpec()
-				RefreshProfilesPage()
+				panel:UpdateState()
 			end
 		end)
 
@@ -382,10 +368,9 @@ function Profiles:Create(panel)
 	deleteProfileDropdown:SetLayoutPoint("TOPLEFT", subpage.deleteSectionTitle, "BOTTOMLEFT", 0, -10)
 	deleteProfileButton:SetLayoutPoint("TOPLEFT", deleteProfileDropdown, "TOPRIGHT", 1, 0)
 
-	addon.OptionsNew:RegisterForProfileUpdates("profiles", function()
+	subpage:SetStateUpdater(function()
 		UpdateState(subpage, controls)
 	end)
-	UpdateState(subpage, controls)
 
 	return page
 end
