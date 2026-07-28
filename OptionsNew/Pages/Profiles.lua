@@ -55,7 +55,7 @@ local function BuildSpecProfileOptions()
 	local options = {
 		{
 			value = nil,
-			text = L["Use Active"],
+			textKey = "Use Active",
 			textColor = { OptionsUILib.Theme:GetTextColor("placeholder") },
 		},
 	}
@@ -218,13 +218,14 @@ local function UpdateState(subpage, controls)
 	end
 
 	for _, specEntry in ipairs(subpage.specEntries or {}) do
+		specEntry.dropdown:SetLabel(GetSpecDisplayName(specEntry))
 		specEntry.dropdown:SetOptions(specOptions)
 		specEntry.dropdown:SetValue(addon.Database:GetSpecProfileName(specEntry.specID))
 	end
 end
 
-local function CreateSectionTitle(subpage, text)
-	local title = subpage:CreateControl("Label", text)
+local function CreateSectionTitle(subpage, textKey)
+	local title = subpage:CreateControl("Label", { textKey = textKey })
 	title:SetTextColor(OptionsUILib.Theme:GetColor("brand"))
 	title:SetLayoutSize(240, 16)
 
@@ -233,16 +234,16 @@ end
 
 function Profiles:Create(panel)
 	local page = panel:RegisterPage("profiles", {
-		title = L["Profiles"],
+		titleKey = "Profiles",
 		sidebarPlacement = "bottom",
 	})
-	local subpage = page:RegisterSubPage("profiles", { title = L["Profiles"] })
+	local subpage = page:RegisterSubPage("profiles", { titleKey = "Profiles" })
 
-	subpage.activeSectionTitle = CreateSectionTitle(subpage, L["Active Profile"])
-	subpage.specOverridesSectionTitle = CreateSectionTitle(subpage, L["Override Active per Specialization"])
-	subpage.createSectionTitle = CreateSectionTitle(subpage, L["Create New Profile"])
-	subpage.copySectionTitle = CreateSectionTitle(subpage, L["Copy Profile"])
-	subpage.deleteSectionTitle = CreateSectionTitle(subpage, L["Delete Profile"])
+	subpage.activeSectionTitle = CreateSectionTitle(subpage, "Active Profile")
+	subpage.specOverridesSectionTitle = CreateSectionTitle(subpage, "Override Active per Specialization")
+	subpage.createSectionTitle = CreateSectionTitle(subpage, "Create New Profile")
+	subpage.copySectionTitle = CreateSectionTitle(subpage, "Copy Profile")
+	subpage.deleteSectionTitle = CreateSectionTitle(subpage, "Delete Profile")
 
 	local controls = {}
 	local activeProfileDropdown = subpage:CreateControl("Dropdown", "")
@@ -261,12 +262,12 @@ function Profiles:Create(panel)
 	local newProfileInput = subpage:CreateControl("Input", "")
 	newProfileInput:SetLayoutWidth(200)
 	newProfileInput:SetLabelVisible(false)
-	newProfileInput:SetPlaceholder(L["New Profile Name"])
+	newProfileInput:SetPlaceholderKey("New Profile Name")
 	newProfileInput:SetOnEnterPressed(function()
 		CreateProfileFromInput(panel, controls)
 	end)
 
-	local createProfileButton = subpage:CreateControl("Button", L["Create"])
+	local createProfileButton = subpage:CreateControl("Button", { textKey = "Create" })
 	createProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	createProfileButton:SetOnClick(function()
 		CreateProfileFromInput(panel, controls)
@@ -279,12 +280,12 @@ function Profiles:Create(panel)
 	local copyProfileInput = subpage:CreateControl("Input", "")
 	copyProfileInput:SetLayoutWidth(200)
 	copyProfileInput:SetLabelVisible(false)
-	copyProfileInput:SetPlaceholder(L["New Profile Name"])
+	copyProfileInput:SetPlaceholderKey("New Profile Name")
 	copyProfileInput:SetOnEnterPressed(function()
 		CopyProfileFromInput(panel, controls)
 	end)
 
-	local copyProfileButton = subpage:CreateControl("Button", L["Copy"])
+	local copyProfileButton = subpage:CreateControl("Button", { textKey = "Copy" })
 	copyProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	copyProfileButton:SetOnClick(function()
 		CopyProfileFromInput(panel, controls)
@@ -294,7 +295,7 @@ function Profiles:Create(panel)
 	deleteProfileDropdown:SetLayoutWidth(200)
 	deleteProfileDropdown:SetLabelVisible(false)
 
-	local deleteProfileButton = subpage:CreateControl("Button", L["Delete"])
+	local deleteProfileButton = subpage:CreateControl("Button", { textKey = "Delete" })
 	deleteProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)
 	deleteProfileButton:SetOnClick(function()
 		DeleteSelectedProfile(panel, controls)
@@ -304,7 +305,7 @@ function Profiles:Create(panel)
 	for _, specEntry in ipairs(subpage.specEntries) do
 		local dropdown = subpage:CreateControl("Dropdown", GetSpecDisplayName(specEntry))
 		dropdown:SetLayoutWidth(140)
-		dropdown:SetPlaceholder(L["Use Active"])
+		dropdown:SetPlaceholderKey("Use Active")
 		dropdown:SetOnValueChanged(function(_, value)
 			local specName = GetSpecDisplayName(specEntry)
 

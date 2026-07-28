@@ -5,13 +5,12 @@ addon.OptionsNew.Pages = addon.OptionsNew.Pages or {}
 addon.OptionsNew.Pages.General = addon.OptionsNew.Pages.General or {}
 
 local General = addon.OptionsNew.Pages.General
-local L = addon.L
 
 local function GetLanguageOptions()
 	local options = {
 		{
 			value = nil,
-			text = L["Automatic"],
+			textKey = "Automatic",
 		},
 	}
 
@@ -27,19 +26,19 @@ end
 
 function General:Create(panel)
 	local page = panel:RegisterPage("general", {
-		title = L["General"],
+		titleKey = "General",
 		showHeader = true,
 	})
-	local subpage = page:RegisterSubPage("general", { title = L["General"] })
+	local subpage = page:RegisterSubPage("general", { titleKey = "General" })
 
-	local languageDropdown = subpage:CreateControl("Dropdown", L["Language"])
+	local languageDropdown = subpage:CreateControl("Dropdown", { labelKey = "Language" })
 	languageDropdown:SetLayoutWidth(174)
 	languageDropdown:SetOptions(GetLanguageOptions())
 	languageDropdown:SetOnValueChanged(function(_, value)
 		addon.Locale:SetLocaleOverride(value)
 	end)
 
-	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", L["Show Solo Party Frame"])
+	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", { labelKey = "Show Solo Party Frame" })
 	showSoloPartyFrameCheckbox:BindValue({
 		get = function(profile)
 			return profile.core.showSoloPartyFrame
@@ -54,7 +53,7 @@ function General:Create(panel)
 
 	local hideBlizzardPartyRaidFramesCheckbox = subpage:CreateControl(
 		"Checkbox",
-		L["Hide Blizzard Party/Raid Frames"]
+		{ labelKey = "Hide Blizzard Party/Raid Frames" }
 	)
 	hideBlizzardPartyRaidFramesCheckbox:BindValue({
 		get = function(profile)
@@ -70,7 +69,7 @@ function General:Create(panel)
 
 	local hideBlizzardRaidFrameManagerCheckbox = subpage:CreateControl(
 		"Checkbox",
-		L["Hide Blizzard Raid Frame Manager"]
+		{ labelKey = "Hide Blizzard Raid Frame Manager" }
 	)
 	hideBlizzardRaidFrameManagerCheckbox:BindValue({
 		get = function(profile)
@@ -84,7 +83,7 @@ function General:Create(panel)
 		end,
 	})
 
-	local globalScaleSlider = subpage:CreateControl("Slider", L["Global Scale"])
+	local globalScaleSlider = subpage:CreateControl("Slider", { labelKey = "Global Scale" })
 	globalScaleSlider:SetMinMaxValues(0.5, 2.0)
 	globalScaleSlider:SetStep(0.01)
 	globalScaleSlider:SetValueFormatter(function(value)
@@ -104,7 +103,7 @@ function General:Create(panel)
 		end,
 	})
 
-	local outOfRangeAlphaSlider = subpage:CreateControl("Slider", L["Out of Range Alpha"])
+	local outOfRangeAlphaSlider = subpage:CreateControl("Slider", { labelKey = "Out of Range Alpha" })
 	outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
 	outOfRangeAlphaSlider:SetStep(0.05)
 	outOfRangeAlphaSlider:SetValueFormatter(function(value)

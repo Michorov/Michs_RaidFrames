@@ -25,6 +25,13 @@ local function GetTestModeButtonText()
 	return L["Unlock"]
 end
 
+local function GetModeOptions()
+	return {
+		{ value = "party", textKey = "Party" },
+		{ value = "raid", textKey = "Raid" },
+	}
+end
+
 local function RefreshTestModeButtons()
 	if not panel then
 		return
@@ -61,9 +68,16 @@ function OptionsNew:Initialize()
 
 	panel = addon.OptionsUI:CreatePanel({
 		name = "MichsRaidFramesOptionsNew",
-		title = "Mich's Raid Frames",
+		titleKey = "Mich's Raid Frames",
+		localize = function(key)
+			return L[key]
+		end,
+		localeGetter = function()
+			return addon.Locale:GetCurrentLocale()
+		end,
 		previewEnabled = true,
 		modes = { "party", "raid" },
+		modeOptions = GetModeOptions(),
 		activeMode = "party",
 		profileGetter = function()
 			return addon.Database:GetProfile()
@@ -88,7 +102,7 @@ function OptionsNew:Initialize()
 	})
 
 	local framesPage = panel:RegisterPage("frames", {
-		title = L["Frames"],
+		titleKey = "Frames",
 		showHeader = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
@@ -96,69 +110,73 @@ function OptionsNew:Initialize()
 		headerButtonText = GetTestModeButtonText(),
 		headerButtonCallback = ToggleTestMode,
 	})
-	framesPage:RegisterSubPage("frames", { title = L["Frames"] })
+	framesPage:RegisterSubPage("frames", { titleKey = "Frames" })
 
 	local barsPage = panel:RegisterPage("bars", {
-		title = L["Bars"],
+		titleKey = "Bars",
 		showHeader = true,
 		showSubpageDropdown = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
 	})
-	barsPage:RegisterSubPage("health", { title = L["Health"] })
-	barsPage:RegisterSubPage("power", { title = L["Power"] })
-	barsPage:RegisterSubPage("healAbsorbs", { title = L["Heal Absorbs"] })
-	barsPage:RegisterSubPage("absorbs", { title = L["Absorbs"] })
+	barsPage:RegisterSubPage("health", { titleKey = "Health" })
+	barsPage:RegisterSubPage("power", { titleKey = "Power" })
+	barsPage:RegisterSubPage("healAbsorbs", { titleKey = "Heal Absorbs" })
+	barsPage:RegisterSubPage("absorbs", { titleKey = "Absorbs" })
 
 	local textsPage = panel:RegisterPage("texts", {
-		title = L["Texts"],
+		titleKey = "Texts",
 		showHeader = true,
 		showSubpageDropdown = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
 	})
-	textsPage:RegisterSubPage("name", { title = L["Name"] })
-	textsPage:RegisterSubPage("away", { title = L["Away"] })
-	textsPage:RegisterSubPage("healAbsorbs", { title = L["Heal Absorbs"] })
+	textsPage:RegisterSubPage("name", { titleKey = "Name" })
+	textsPage:RegisterSubPage("away", { titleKey = "Away" })
+	textsPage:RegisterSubPage("healAbsorbs", { titleKey = "Heal Absorbs" })
 
 	local aurasPage = panel:RegisterPage("auras", {
-		title = L["Auras"],
+		titleKey = "Auras",
 		showHeader = true,
 		showSubpageDropdown = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
 	})
-	aurasPage:RegisterSubPage("buffs", { title = L["Buffs"] })
-	aurasPage:RegisterSubPage("buffFilters", { title = L["Buffs - Filters"] })
-	aurasPage:RegisterSubPage("buffOverlay", { title = L["Buffs - Overlay"] })
-	aurasPage:RegisterSubPage("buffCustomIcons", { title = L["Buffs - Custom Icons"] })
-	aurasPage:RegisterSubPage("debuffs", { title = L["Debuffs"] })
-	aurasPage:RegisterSubPage("dispels", { title = L["Dispels"] })
-	aurasPage:RegisterSubPage("bigDefensive", { title = L["Big Defensive"] })
+	aurasPage:RegisterSubPage("buffs", { titleKey = "Buffs" })
+	aurasPage:RegisterSubPage("buffFilters", { titleKey = "Buffs - Filters" })
+	aurasPage:RegisterSubPage("buffOverlay", { titleKey = "Buffs - Overlay" })
+	aurasPage:RegisterSubPage("buffCustomIcons", { titleKey = "Buffs - Custom Icons" })
+	aurasPage:RegisterSubPage("debuffs", { titleKey = "Debuffs" })
+	aurasPage:RegisterSubPage("dispels", { titleKey = "Dispels" })
+	aurasPage:RegisterSubPage("bigDefensive", { titleKey = "Big Defensive" })
 	if not isRestrictedAuraAPI then
-		aurasPage:RegisterSubPage("privateAuras", { title = L["Private Auras"] })
+		aurasPage:RegisterSubPage("privateAuras", { titleKey = "Private Auras" })
 	end
-	aurasPage:RegisterSubPage("raidBuffReminder", { title = L["Raid Buff Reminder"] })
+	aurasPage:RegisterSubPage("raidBuffReminder", { titleKey = "Raid Buff Reminder" })
 
 	local indicatorsPage = panel:RegisterPage("indicators", {
-		title = L["Indicators"],
+		titleKey = "Indicators",
 		showHeader = true,
 		showSubpageDropdown = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
 	})
-	indicatorsPage:RegisterSubPage("readyCheck", { title = L["Ready Check"] })
-	indicatorsPage:RegisterSubPage("pendingSummon", { title = L["Summon"] })
-	indicatorsPage:RegisterSubPage("raidMarker", { title = L["Raid Marker"] })
-	indicatorsPage:RegisterSubPage("roleIcon", { title = L["Role Indicator"] })
-	indicatorsPage:RegisterSubPage("groupStatus", { title = L["Group Leader"] })
-	indicatorsPage:RegisterSubPage("threat", { title = L["Threat"] })
+	indicatorsPage:RegisterSubPage("readyCheck", { titleKey = "Ready Check" })
+	indicatorsPage:RegisterSubPage("pendingSummon", { titleKey = "Summon" })
+	indicatorsPage:RegisterSubPage("raidMarker", { titleKey = "Raid Marker" })
+	indicatorsPage:RegisterSubPage("roleIcon", { titleKey = "Role Indicator" })
+	indicatorsPage:RegisterSubPage("groupStatus", { titleKey = "Group Leader" })
+	indicatorsPage:RegisterSubPage("threat", { titleKey = "Threat" })
 
 	OptionsNew.Pages.Profiles:Create(panel)
 	panel:SetDefaultPage("general")
 
 	addon.Options.Data:RegisterForUpdates(OptionsNew, function()
 		panel:UpdateState()
+	end)
+
+	addon.Locale:RegisterForUpdates("optionsNew", function()
+		OptionsNew:UpdateLocale()
 	end)
 
 	SLASH_MICHRAIDFRAMESNEW1 = "/mrfnew"
@@ -188,4 +206,13 @@ end
 
 function OptionsNew:IsOpen()
 	return panel and panel:IsShown()
+end
+
+function OptionsNew:UpdateLocale()
+	if not panel then
+		return
+	end
+
+	panel:UpdateLocale()
+	RefreshTestModeButtons()
 end

@@ -5,7 +5,6 @@ addon.OptionsNew.Pages = addon.OptionsNew.Pages or {}
 addon.OptionsNew.Pages.Layout = addon.OptionsNew.Pages.Layout or {}
 
 local Layout = addon.OptionsNew.Pages.Layout
-local L = addon.L
 
 local function FormatInteger(value)
 	return string.format("%d", value)
@@ -15,7 +14,7 @@ function Layout:Create(panel, config)
 	config = config or {}
 
 	local page = panel:RegisterPage("layout", {
-		title = L["Layout"],
+		titleKey = "Layout",
 		showHeader = true,
 		showModeSwitch = true,
 		modeSwitchType = "toggle",
@@ -23,12 +22,12 @@ function Layout:Create(panel, config)
 		headerButtonText = config.headerButtonText,
 		headerButtonCallback = config.headerButtonCallback,
 	})
-	local subpage = page:RegisterSubPage("layout", { title = L["Layout"] })
+	local subpage = page:RegisterSubPage("layout", { titleKey = "Layout" })
 
 	local positionRow = subpage:CreateRow(3)
 	positionRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	local horizontalPositionSlider = positionRow:CreateControl("Slider", L["Horizontal Position"])
+	local horizontalPositionSlider = positionRow:CreateControl("Slider", { labelKey = "Horizontal Position" })
 	horizontalPositionSlider:SetMinMaxValues(-2000, 2000)
 	horizontalPositionSlider:SetStep(1)
 	horizontalPositionSlider:SetValueFormatter(FormatInteger)
@@ -44,7 +43,7 @@ function Layout:Create(panel, config)
 		end,
 	})
 
-	local verticalPositionSlider = positionRow:CreateControl("Slider", L["Vertical Position"])
+	local verticalPositionSlider = positionRow:CreateControl("Slider", { labelKey = "Vertical Position" })
 	verticalPositionSlider:SetMinMaxValues(-2000, 2000)
 	verticalPositionSlider:SetStep(1)
 	verticalPositionSlider:SetValueFormatter(FormatInteger)
@@ -63,7 +62,7 @@ function Layout:Create(panel, config)
 	local spacingRow = subpage:CreateRow(3)
 	spacingRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -8)
 
-	local horizontalSpacingSlider = spacingRow:CreateControl("Slider", L["Horizontal Spacing"])
+	local horizontalSpacingSlider = spacingRow:CreateControl("Slider", { labelKey = "Horizontal Spacing" })
 	horizontalSpacingSlider:SetMinMaxValues(-25, 25)
 	horizontalSpacingSlider:SetStep(1)
 	horizontalSpacingSlider:SetValueFormatter(FormatInteger)
@@ -79,7 +78,7 @@ function Layout:Create(panel, config)
 		end,
 	})
 
-	local verticalSpacingSlider = spacingRow:CreateControl("Slider", L["Vertical Spacing"])
+	local verticalSpacingSlider = spacingRow:CreateControl("Slider", { labelKey = "Vertical Spacing" })
 	verticalSpacingSlider:SetMinMaxValues(-25, 25)
 	verticalSpacingSlider:SetStep(1)
 	verticalSpacingSlider:SetValueFormatter(FormatInteger)
@@ -98,10 +97,10 @@ function Layout:Create(panel, config)
 	local orientationRow = subpage:CreateRow(3)
 	orientationRow:SetLayoutPoint("TOPLEFT", spacingRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local orientationDropdown = orientationRow:CreateControl("Dropdown", L["Orientation"])
+	local orientationDropdown = orientationRow:CreateControl("Dropdown", { labelKey = "Orientation" })
 	orientationDropdown:SetOptions({
-		{ value = "HORIZONTAL", text = L["Horizontal"] },
-		{ value = "VERTICAL", text = L["Vertical"] },
+		{ value = "HORIZONTAL", textKey = "Horizontal" },
+		{ value = "VERTICAL", textKey = "Vertical" },
 	})
 	orientationDropdown:BindValue({
 		get = function(profile, mode)
@@ -116,7 +115,7 @@ function Layout:Create(panel, config)
 	})
 
 	local reverseSlot = orientationRow:CreateCheckboxSlot()
-	local reverseGroupOrderCheckbox = reverseSlot:CreateControl("Checkbox", L["Reverse Group Order"])
+	local reverseGroupOrderCheckbox = reverseSlot:CreateControl("Checkbox", { labelKey = "Reverse Group Order" })
 	reverseGroupOrderCheckbox:BindValue({
 		get = function(profile)
 			return profile.raid.reverse
@@ -131,7 +130,10 @@ function Layout:Create(panel, config)
 
 	local raidGroupCheckboxes = {}
 	for groupIndex = 1, 8 do
-		local checkbox = subpage:CreateControl("Checkbox", (L["Group %d"]):format(groupIndex))
+		local checkbox = subpage:CreateControl("Checkbox", {
+			labelKey = "Group %d",
+			labelArgs = { groupIndex },
+		})
 		local rowIndex = math.floor((groupIndex - 1) / 4)
 		local rowColumnIndex = (groupIndex - 1) % 4
 		local columnIndex = math.floor(rowColumnIndex / 2)
