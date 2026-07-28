@@ -41,6 +41,13 @@ local function RefreshTestModeButtons()
 	end
 end
 
+local function SyncTestMode(mode)
+	local activeTestMode = addon.FrameRegistry:GetActiveTestMode()
+	if activeTestMode and activeTestMode ~= mode then
+		addon.FrameRegistry:ToggleTestMode(mode)
+	end
+end
+
 local function ToggleTestMode()
 	addon.FrameRegistry:ToggleTestMode(panel:GetActiveMode())
 	RefreshTestModeButtons()
@@ -66,6 +73,11 @@ function OptionsNew:Initialize()
 	panel:SetFooterUpdater(function()
 		local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
 		return (L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName)
+	end)
+
+	panel:RegisterStateUpdater(OptionsNew, function(_, mode)
+		SyncTestMode(mode)
+		RefreshTestModeButtons()
 	end)
 
 	OptionsNew.Pages.General:Create(panel)
