@@ -7,12 +7,37 @@ addon.OptionsNew.Pages.General = addon.OptionsNew.Pages.General or {}
 local General = addon.OptionsNew.Pages.General
 local L = addon.L
 
+local function GetLanguageOptions()
+	local options = {
+		{
+			value = nil,
+			text = L["Automatic"],
+		},
+	}
+
+	for _, locale in ipairs(addon.Locale:GetAvailableLocales()) do
+		options[#options + 1] = {
+			value = locale,
+			text = addon.Locale:GetLocaleDisplayName(locale),
+		}
+	end
+
+	return options
+end
+
 function General:Create(panel)
 	local page = panel:RegisterPage("general", {
 		title = L["General"],
 		showHeader = true,
 	})
 	local subpage = page:RegisterSubPage("general", { title = L["General"] })
+
+	local languageDropdown = subpage:CreateControl("Dropdown", L["Language"])
+	languageDropdown:SetLayoutWidth(174)
+	languageDropdown:SetOptions(GetLanguageOptions())
+	languageDropdown:SetOnValueChanged(function(_, value)
+		addon.Locale:SetLocaleOverride(value)
+	end)
 
 	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", L["Show Solo Party Frame"])
 	showSoloPartyFrameCheckbox:BindValue({
@@ -98,7 +123,13 @@ function General:Create(panel)
 		end,
 	})
 
-	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	subpage:SetStateUpdater(function()
+		languageDropdown:SetOptions(GetLanguageOptions())
+		languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
+	end)
+
+	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, -72)
 	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
 	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint("TOPLEFT", hideBlizzardPartyRaidFramesCheckbox, "BOTTOMLEFT", 0, -12)
 	globalScaleSlider:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "TOPLEFT", 291, 0)
