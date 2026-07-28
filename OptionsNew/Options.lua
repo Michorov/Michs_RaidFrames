@@ -6,7 +6,6 @@ local L = addon.L
 
 local panel
 local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
-local profileSubscribers = {}
 local _, _, _, interfaceVersion = GetBuildInfo()
 local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
@@ -45,16 +44,7 @@ end
 local function ToggleTestMode()
 	addon.FrameRegistry:ToggleTestMode(panel:GetActiveMode())
 	RefreshTestModeButtons()
-	OptionsNew:RefreshProfile()
-end
-
-function OptionsNew:UpdateFooter()
-	if not panel then
-		return
-	end
-
-	local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
-	panel:SetFooterText((L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName))
+	panel:UpdateState()
 end
 
 function OptionsNew:Initialize()
@@ -68,23 +58,22 @@ function OptionsNew:Initialize()
 		previewEnabled = true,
 		modes = { "party", "raid" },
 		activeMode = "party",
-		stateUpdater = function()
-			OptionsNew:RefreshProfile()
+		profileGetter = function()
+			return addon.Database:GetProfile()
 		end,
 	})
 
+	panel:SetFooterUpdater(function()
+		local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
+		return (L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName)
+	end)
+
 	OptionsNew.Pages.General:Create(panel)
 
-	local layoutPage = panel:RegisterPage("layout", {
-		title = L["Layout"],
-		showHeader = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-		showHeaderButton = true,
+	OptionsNew.Pages.Layout:Create(panel, {
 		headerButtonText = GetTestModeButtonText(),
 		headerButtonCallback = ToggleTestMode,
 	})
-	layoutPage:RegisterSubPage("layout", { title = L["Layout"] })
 
 	local framesPage = panel:RegisterPage("frames", {
 		title = L["Frames"],
@@ -156,13 +145,8 @@ function OptionsNew:Initialize()
 	OptionsNew.Pages.Profiles:Create(panel)
 	panel:SetDefaultPage("general")
 
-	self:RegisterForProfileUpdates("footer", function()
-		OptionsNew:UpdateFooter()
-	end)
-	self:RefreshProfile()
-
 	addon.Options.Data:RegisterForUpdates(OptionsNew, function()
-		OptionsNew:RefreshProfile()
+		panel:UpdateState()
 	end)
 
 	SLASH_MICHRAIDFRAMESNEW1 = "/mrfnew"
@@ -192,16 +176,4 @@ end
 
 function OptionsNew:IsOpen()
 	return panel and panel:IsShown()
-end
-
-function OptionsNew:RegisterForProfileUpdates(key, callback)
-	profileSubscribers[key] = callback
-end
-
-function OptionsNew:RefreshProfile()
-	local profile = addon.Database:GetProfile()
-
-	for _, callback in pairs(profileSubscribers) do
-		callback(profile)
-	end
 end
