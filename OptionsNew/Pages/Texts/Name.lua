@@ -43,27 +43,8 @@ end
 function Name:Create(page)
 	local subpage = page:RegisterSubPage("name", { titleKey = "Name" })
 
-	local fontRow = subpage:CreateRow(4)
-	fontRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
-
-	local sizeSlider = fontRow:CreateControl("Slider", { labelKey = "Font Size" })
-	sizeSlider:SetMinMaxValues(6, 32)
-	sizeSlider:SetStep(1)
-	sizeSlider:SetValueFormatter(FormatInteger)
-	sizeSlider:BindValue({
-		get = function(profile, mode)
-			return profile[mode].widgets.texts.name.size
-		end,
-		set = function(profile, mode, value)
-			profile[mode].widgets.texts.name.size = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("nameSettingsChanged")
-		end,
-	})
-
 	local positionRow = subpage:CreateRow(4)
-	positionRow:SetLayoutPoint("TOPLEFT", fontRow.frame, "BOTTOMLEFT", 0, -16)
+	positionRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local anchorDropdown = positionRow:CreateControl("Dropdown", { labelKey = "Position" })
 	anchorDropdown:SetOptions(anchorOptions)
@@ -111,8 +92,27 @@ function Name:Create(page)
 		end,
 	})
 
+	local fontRow = subpage:CreateRow(4)
+	fontRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local sizeSlider = fontRow:CreateControl("Slider", { labelKey = "Font Size" })
+	sizeSlider:SetMinMaxValues(6, 32)
+	sizeSlider:SetStep(1)
+	sizeSlider:SetValueFormatter(FormatInteger)
+	sizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.texts.name.size
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.texts.name.size = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("nameSettingsChanged")
+		end,
+	})
+
 	local styleRow = subpage:CreateRow(4)
-	styleRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -16)
+	styleRow:SetLayoutPoint("TOPLEFT", fontRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local outlineDropdown = styleRow:CreateControl("Dropdown", { labelKey = "Style" })
 	outlineDropdown:SetOptions(outlineOptions)

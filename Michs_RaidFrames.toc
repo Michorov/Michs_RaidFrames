@@ -155,6 +155,13 @@ OptionsNew/Pages/Texts.lua
 OptionsNew/Pages/Texts/Name.lua
 OptionsNew/Pages/Texts/Away.lua
 OptionsNew/Pages/Texts/HealAbsorbs.lua
+OptionsNew/Pages/Indicators.lua
+OptionsNew/Pages/Indicators/ReadyCheck.lua
+OptionsNew/Pages/Indicators/PendingSummon.lua
+OptionsNew/Pages/Indicators/RaidMarker.lua
+OptionsNew/Pages/Indicators/RoleIndicator.lua
+OptionsNew/Pages/Indicators/GroupStatus.lua
+OptionsNew/Pages/Indicators/Threat.lua
 OptionsNew/Pages/Profiles.lua
 OptionsNew/Options.lua
 
