@@ -12,10 +12,11 @@ local function InitializeAddon()
 	local flushCallback = addon.Updater:CreateFlushCallback()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
+	addon.Modules:Initialize()
+
 	addon.Options:Initialize()
 	addon.OptionsNew:Initialize()
 
-	addon.Modules:Initialize()
 	addon.EventHandler:Initialize()
 end
 

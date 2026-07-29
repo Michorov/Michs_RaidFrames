@@ -132,6 +132,7 @@ function OptionsNew:Initialize()
 	OptionsNew.Pages.Indicators:Create(panel)
 
 	OptionsNew.Pages.Profiles:Create(panel)
+	OptionsNew.Preview:Create(panel)
 	panel:SetDefaultPage("general")
 
 	addon.Options.Data:RegisterForUpdates(OptionsNew, function()
@@ -177,5 +178,6 @@ function OptionsNew:UpdateLocale()
 	end
 
 	panel:UpdateLocale()
+	OptionsNew.Preview:UpdateLocale()
 	RefreshTestModeButtons()
 end
