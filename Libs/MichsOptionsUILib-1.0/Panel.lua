@@ -8,7 +8,7 @@ Panel.__index = Panel
 
 local defaultLayout = {
 	height = 576,
-	headerHeight = 48,
+	headerHeight = 40,
 	footerHeight = 32,
 	sidebarWidth = 160,
 	mainWidth = 640,
