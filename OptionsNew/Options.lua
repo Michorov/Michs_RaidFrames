@@ -122,10 +122,6 @@ function OptionsNew:Initialize()
 	OptionsNew.Preview:Create(panel)
 	panel:SetDefaultPage("general")
 
-	addon.Options.Data:RegisterForUpdates(OptionsNew, function()
-		panel:UpdateState()
-	end)
-
 	addon.Locale:RegisterForUpdates("optionsNew", function()
 		OptionsNew:UpdateLocale()
 	end)
@@ -165,6 +161,12 @@ end
 
 function OptionsNew:IsOpen()
 	return panel and panel:IsShown()
+end
+
+function OptionsNew:RefreshState()
+	if panel then
+		panel:UpdateState()
+	end
 end
 
 function OptionsNew:ShouldOpenAfterCombat()

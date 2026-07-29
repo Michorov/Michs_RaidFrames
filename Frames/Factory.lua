@@ -24,7 +24,14 @@ local function SaveTestGroupPosition(group)
 	profile[groupType].position.x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
 	profile[groupType].position.y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
 
-	addon.Options.Data:RefreshProfile()
+	if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
+		addon.Options.Data:RefreshProfile()
+	end
+
+	if addon.OptionsNew and addon.OptionsNew.RefreshState then
+		addon.OptionsNew:RefreshState()
+	end
+
 	addon.UpdateScheduler:Notify("layoutChanged")
 end
 

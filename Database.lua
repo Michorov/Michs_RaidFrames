@@ -1231,6 +1231,10 @@ function Database:Initialize()
 			addon.Options.Data:RefreshProfile()
 		end
 
+		if addon.OptionsNew and addon.OptionsNew.RefreshState then
+			addon.OptionsNew:RefreshState()
+		end
+
 		addon.Frames.RangeChecker:UpdateSettings()
 		addon.Modules:RequestUpdateAll()
 	end

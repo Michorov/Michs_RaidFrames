@@ -305,6 +305,10 @@ function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 		addon.Options.Data:RefreshProfile()
 	end
 
+	if addon.OptionsNew and addon.OptionsNew.RefreshState then
+		addon.OptionsNew:RefreshState()
+	end
+
 	if addon.Options and addon.Options.UpdateLayout then
 		addon.Options:UpdateLayout()
 	end
