@@ -14,7 +14,7 @@ local function InitializeAddon()
 
 	addon.Modules:Initialize()
 
-	addon.OptionsNew:Initialize()
+	addon.Options:Initialize()
 
 	addon.EventHandler:Initialize()
 end
