@@ -7,6 +7,8 @@ addon.Frames.Base.Health = addon.Frames.Base.Health or {}
 local Health = addon.Frames.Base.Health
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local CLASS_COLOR_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\M-SolidDarker"
+local STATIC_COLOR_TEXTURE = "Interface\\Buttons\\WHITE8x8"
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -15,7 +17,6 @@ local function UpdateSettingsCache(settings)
 	local color = health.color or {}
 
 	local result = {
-		texture = health.texture or "Interface\\Buttons\\WHITE8x8",
 		classColor = health.classColor == true,
 		color = {
 			r = color.r or 0.10,
@@ -24,6 +25,8 @@ local function UpdateSettingsCache(settings)
 			a = color.a or 1.0,
 		},
 	}
+
+	result.texture = result.classColor and CLASS_COLOR_TEXTURE or STATIC_COLOR_TEXTURE
 
 	settingsCache[settings] = result
 end
