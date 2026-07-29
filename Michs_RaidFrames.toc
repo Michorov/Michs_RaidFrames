@@ -155,6 +155,16 @@ OptionsNew/Pages/Texts.lua
 OptionsNew/Pages/Texts/Name.lua
 OptionsNew/Pages/Texts/Away.lua
 OptionsNew/Pages/Texts/HealAbsorbs.lua
+OptionsNew/Pages/Auras.lua
+OptionsNew/Pages/Auras/Buffs.lua
+OptionsNew/Pages/Auras/BuffFilters.lua
+OptionsNew/Pages/Auras/BuffOverlay.lua
+OptionsNew/Pages/Auras/BuffCustomIcons.lua
+OptionsNew/Pages/Auras/Debuffs.lua
+OptionsNew/Pages/Auras/Dispels.lua
+OptionsNew/Pages/Auras/BigDefensive.lua
+OptionsNew/Pages/Auras/PrivateAuras.lua
+OptionsNew/Pages/Auras/RaidBuffReminder.lua
 OptionsNew/Pages/Indicators.lua
 OptionsNew/Pages/Indicators/ReadyCheck.lua
 OptionsNew/Pages/Indicators/PendingSummon.lua

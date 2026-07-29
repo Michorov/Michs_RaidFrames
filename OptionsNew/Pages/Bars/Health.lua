@@ -7,14 +7,20 @@ addon.OptionsNew.Pages.Bars.Health = addon.OptionsNew.Pages.Bars.Health or {}
 
 local Health = addon.OptionsNew.Pages.Bars.Health
 
+local colorModeOptions = {
+	{ value = true, textKey = "Class Color" },
+	{ value = false, textKey = "Static" },
+}
+
 function Health:Create(page)
 	local subpage = page:RegisterSubPage("health", { titleKey = "Health" })
 
 	local row = subpage:CreateRow(4)
 	row:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	local useClassColorCheckbox = row:CreateControl("Checkbox", { labelKey = "Use Class Color" })
-	useClassColorCheckbox:BindValue({
+	local colorModeDropdown = row:CreateControl("Dropdown", { labelKey = "Color" })
+	colorModeDropdown:SetOptions(colorModeOptions)
+	colorModeDropdown:BindValue({
 		get = function(profile, mode)
 			return profile[mode].health.classColor
 		end,
