@@ -116,7 +116,19 @@ function EventHandler:PARTY_LEADER_CHANGED()
 end
 
 function EventHandler:PLAYER_REGEN_ENABLED()
-	if addon.Options:ShouldOpenAfterCombat() then
+	local openedDeferredOptions = false
+
+	if addon.OptionsNew and addon.OptionsNew.ShouldOpenAfterCombat and addon.OptionsNew:ShouldOpenAfterCombat() then
+		addon.OptionsNew:Open()
+		openedDeferredOptions = true
+	end
+
+	if
+		not openedDeferredOptions
+		and addon.Options
+		and addon.Options.ShouldOpenAfterCombat
+		and addon.Options:ShouldOpenAfterCombat()
+	then
 		addon.Options:Open()
 	end
 
@@ -132,7 +144,11 @@ function EventHandler:PLAYER_REGEN_ENABLED()
 end
 
 function EventHandler:PLAYER_REGEN_DISABLED()
-	if addon.Options:IsOpen() then
+	if addon.OptionsNew and addon.OptionsNew.IsOpen and addon.OptionsNew:IsOpen() then
+		addon.OptionsNew:Close()
+	end
+
+	if addon.Options and addon.Options.IsOpen and addon.Options:IsOpen() then
 		addon.Options:Close()
 	end
 
