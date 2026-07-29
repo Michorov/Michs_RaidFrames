@@ -4,12 +4,12 @@
 ## Author: Mich
 ## Version: 3.0.1
 ## SavedVariables: Michs_RaidFramesDB
-## Dependencies: Michs_OptionsUILib
 ## OptionalDeps: MiniCC
 
-# Ace3
+# Libs
 Libs/LibStub/LibStub.lua
 Libs/MichsPixelPerfectLib-1.0/MichsPixelPerfectLib-1.0.lua
+Libs/MichsOptionsUILib-1.0/MichsOptionsUILib-1.0.xml
 Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
 Libs/AceEvent-3.0/AceEvent-3.0.xml
 Libs/AceDB-3.0/AceDB-3.0.xml

@@ -1,0 +1,24 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="Core.lua"/>
+	<Script file="Theme.lua"/>
+	<Script file="Instance.lua"/>
+	<Script file="Panel/Header.lua"/>
+	<Script file="Panel/Sidebar.lua"/>
+	<Script file="Panel/Content.lua"/>
+	<Script file="Panel/Preview.lua"/>
+	<Script file="Panel/Footer.lua"/>
+	<Script file="Controls/Checkbox.lua"/>
+	<Script file="Controls/Slider.lua"/>
+	<Script file="Controls/Dropdown.lua"/>
+	<Script file="Controls/Input.lua"/>
+	<Script file="Controls/Label.lua"/>
+	<Script file="Controls/Button.lua"/>
+	<Script file="Controls/ColorPicker.lua"/>
+	<Script file="Controls/SegmentedToggle.lua"/>
+	<Script file="Controls/Binding.lua"/>
+	<Script file="Layout/Row.lua"/>
+	<Script file="Panel/SubPage.lua"/>
+	<Script file="Panel/Page.lua"/>
+	<Script file="Panel/Updater.lua"/>
+	<Script file="Panel.lua"/>
+</Ui>
