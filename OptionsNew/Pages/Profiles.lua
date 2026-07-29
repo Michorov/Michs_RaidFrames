@@ -8,6 +8,7 @@ local OptionsUILib = LibStub("MichsOptionsUILib-1.0")
 local Profiles = addon.OptionsNew.Pages.Profiles
 local L = addon.L
 
+local bodyWidth = 576
 local actionButtonWidth = 88
 local actionButtonHeight = 24
 
@@ -227,7 +228,7 @@ end
 local function CreateSectionTitle(subpage, textKey)
 	local title = subpage:CreateControl("Label", { textKey = textKey })
 	title:SetTextColor(OptionsUILib.Theme:GetColor("brand"))
-	title:SetLayoutSize(240, 16)
+	title:SetLayoutSize(bodyWidth, 16)
 
 	return title
 end
@@ -249,6 +250,7 @@ function Profiles:Create(panel)
 	local activeProfileDropdown = subpage:CreateControl("Dropdown", "")
 	activeProfileDropdown:SetLayoutWidth(200)
 	activeProfileDropdown:SetLabelVisible(false)
+	activeProfileDropdown:SetPlaceholderKey("Select...")
 	activeProfileDropdown:SetOnValueChanged(function(_, value)
 		local currentProfile = addon.Database:GetBaseProfileName() or "Default"
 
@@ -276,6 +278,7 @@ function Profiles:Create(panel)
 	local copyFromDropdown = subpage:CreateControl("Dropdown", "")
 	copyFromDropdown:SetLayoutWidth(200)
 	copyFromDropdown:SetLabelVisible(false)
+	copyFromDropdown:SetPlaceholderKey("Select...")
 
 	local copyProfileInput = subpage:CreateControl("Input", "")
 	copyProfileInput:SetLayoutWidth(200)
@@ -294,6 +297,7 @@ function Profiles:Create(panel)
 	local deleteProfileDropdown = subpage:CreateControl("Dropdown", "")
 	deleteProfileDropdown:SetLayoutWidth(200)
 	deleteProfileDropdown:SetLabelVisible(false)
+	deleteProfileDropdown:SetPlaceholderKey("Select...")
 
 	local deleteProfileButton = subpage:CreateControl("Button", { textKey = "Delete" })
 	deleteProfileButton:SetLayoutSize(actionButtonWidth, actionButtonHeight)

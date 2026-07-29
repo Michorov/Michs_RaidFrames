@@ -14,7 +14,7 @@ end
 function Power:Create(page)
 	local subpage = page:RegisterSubPage("power", { titleKey = "Power" })
 
-	local checkboxRow = subpage:CreateRow(4)
+	local checkboxRow = subpage:CreateRow(2)
 	checkboxRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local checkboxSlot = checkboxRow:CreateCheckboxSlot()

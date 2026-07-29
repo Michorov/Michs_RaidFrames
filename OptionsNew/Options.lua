@@ -6,8 +6,6 @@ local L = addon.L
 
 local panel
 local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
-local _, _, _, interfaceVersion = GetBuildInfo()
-local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local function GetDisplayProfileName(name)
 	if name == "Default" then
@@ -110,24 +108,7 @@ function OptionsNew:Initialize()
 
 	OptionsNew.Pages.Texts:Create(panel)
 
-	local aurasPage = panel:RegisterPage("auras", {
-		titleKey = "Auras",
-		showHeader = true,
-		showSubpageDropdown = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-	})
-	aurasPage:RegisterSubPage("buffs", { titleKey = "Buffs" })
-	aurasPage:RegisterSubPage("buffFilters", { titleKey = "Buffs - Filters" })
-	aurasPage:RegisterSubPage("buffOverlay", { titleKey = "Buffs - Overlay" })
-	aurasPage:RegisterSubPage("buffCustomIcons", { titleKey = "Buffs - Custom Icons" })
-	aurasPage:RegisterSubPage("debuffs", { titleKey = "Debuffs" })
-	aurasPage:RegisterSubPage("dispels", { titleKey = "Dispels" })
-	aurasPage:RegisterSubPage("bigDefensive", { titleKey = "Big Defensive" })
-	if not isRestrictedAuraAPI then
-		aurasPage:RegisterSubPage("privateAuras", { titleKey = "Private Auras" })
-	end
-	aurasPage:RegisterSubPage("raidBuffReminder", { titleKey = "Raid Buff Reminder" })
+	OptionsNew.Pages.Auras:Create(panel)
 
 	OptionsNew.Pages.Indicators:Create(panel)
 

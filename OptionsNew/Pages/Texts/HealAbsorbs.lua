@@ -33,7 +33,7 @@ end
 function HealAbsorbs:Create(page)
 	local subpage = page:RegisterSubPage("healAbsorbs", { titleKey = "Heal Absorbs" })
 
-	local enabledRow = subpage:CreateRow(4)
+	local enabledRow = subpage:CreateRow(2)
 	enabledRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local checkboxSlot = enabledRow:CreateCheckboxSlot()
