@@ -180,8 +180,6 @@ function Preview:Ensure(parent)
 	preview.frameAreaBackground:SetVertTile(true)
 	preview.frameAreaBackground:SetVertexColor(theme:GetColor("buttonBackgroundHover", 0.45))
 
-	preview.partyFrame, preview.raidFrame = addon.FrameRegistry:CreatePreviewFrames(preview.body)
-
 	for widgetKey, flag in pairs(previewWidgetFlags) do
 		local checkbox = addon.Options.Controls.Checkbox:Create(preview.body, L[flag.label])
 		local key = widgetKey

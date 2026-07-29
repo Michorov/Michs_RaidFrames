@@ -163,6 +163,7 @@ OptionsNew/Pages/Indicators/RoleIndicator.lua
 OptionsNew/Pages/Indicators/GroupStatus.lua
 OptionsNew/Pages/Indicators/Threat.lua
 OptionsNew/Pages/Profiles.lua
+OptionsNew/Preview.lua
 OptionsNew/Options.lua
 
 # Entry Point
