@@ -145,6 +145,16 @@ Options/Options.lua
 # Options New
 OptionsNew/Pages/General.lua
 OptionsNew/Pages/Layout.lua
+OptionsNew/Pages/Frames.lua
+OptionsNew/Pages/Bars.lua
+OptionsNew/Pages/Bars/Health.lua
+OptionsNew/Pages/Bars/Power.lua
+OptionsNew/Pages/Bars/HealAbsorbs.lua
+OptionsNew/Pages/Bars/Absorbs.lua
+OptionsNew/Pages/Texts.lua
+OptionsNew/Pages/Texts/Name.lua
+OptionsNew/Pages/Texts/Away.lua
+OptionsNew/Pages/Texts/HealAbsorbs.lua
 OptionsNew/Pages/Profiles.lua
 OptionsNew/Options.lua
 

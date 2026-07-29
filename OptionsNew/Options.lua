@@ -101,39 +101,14 @@ function OptionsNew:Initialize()
 		headerButtonCallback = ToggleTestMode,
 	})
 
-	local framesPage = panel:RegisterPage("frames", {
-		titleKey = "Frames",
-		showHeader = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-		showHeaderButton = true,
+	OptionsNew.Pages.Frames:Create(panel, {
 		headerButtonText = GetTestModeButtonText(),
 		headerButtonCallback = ToggleTestMode,
 	})
-	framesPage:RegisterSubPage("frames", { titleKey = "Frames" })
 
-	local barsPage = panel:RegisterPage("bars", {
-		titleKey = "Bars",
-		showHeader = true,
-		showSubpageDropdown = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-	})
-	barsPage:RegisterSubPage("health", { titleKey = "Health" })
-	barsPage:RegisterSubPage("power", { titleKey = "Power" })
-	barsPage:RegisterSubPage("healAbsorbs", { titleKey = "Heal Absorbs" })
-	barsPage:RegisterSubPage("absorbs", { titleKey = "Absorbs" })
+	OptionsNew.Pages.Bars:Create(panel)
 
-	local textsPage = panel:RegisterPage("texts", {
-		titleKey = "Texts",
-		showHeader = true,
-		showSubpageDropdown = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-	})
-	textsPage:RegisterSubPage("name", { titleKey = "Name" })
-	textsPage:RegisterSubPage("away", { titleKey = "Away" })
-	textsPage:RegisterSubPage("healAbsorbs", { titleKey = "Heal Absorbs" })
+	OptionsNew.Pages.Texts:Create(panel)
 
 	local aurasPage = panel:RegisterPage("auras", {
 		titleKey = "Auras",
