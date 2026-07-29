@@ -6,252 +6,133 @@ addon.Options.Pages.General = addon.Options.Pages.General or {}
 
 local General = addon.Options.Pages.General
 
-local page
-local L = addon.L
-local theme = addon.Options.Theme
-
 local function GetLanguageOptions()
 	local options = {
 		{
 			value = nil,
-			text = L["Automatic"],
-			textColor = { theme:GetTextColor("placeholder") },
+			textKey = "Automatic",
 		},
 	}
 
 	for _, locale in ipairs(addon.Locale:GetAvailableLocales()) do
-		table.insert(options, {
+		options[#options + 1] = {
 			value = locale,
 			text = addon.Locale:GetLocaleDisplayName(locale),
-		})
+		}
 	end
 
 	return options
 end
 
-local function ParsePercentOrRaw(control, text)
-	local sanitizedText = (text or ""):gsub("%s+", ""):gsub(",", ".")
-	local hasPercent = sanitizedText:find("%%") ~= nil
-	local numericText = sanitizedText:gsub("%%", "")
-	local number = tonumber(numericText)
+function General:Create(panel)
+	local page = panel:RegisterPage("general", {
+		titleKey = "General",
+		showHeader = true,
+	})
+	local subpage = page:RegisterSubPage("general", { titleKey = "General" })
 
-	if not number then
-		return nil
-	end
-
-	local _, maxValue = control.slider:GetMinMaxValues()
-
-	if hasPercent or number > maxValue then
-		return number / 100
-	end
-
-	return number
-end
-
-function General:Ensure(parent)
-	if page then
-		return page
-	end
-
-	page = CreateFrame("Frame", nil, parent)
-	page.header = CreateFrame("Frame", nil, page)
-	page.header:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
-	page.header:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, 0)
-
-	page.body = CreateFrame("Frame", nil, page)
-	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 0, 0)
-	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", 0, 0)
-
-	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
-	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
-	page.header.title:SetJustifyH("LEFT")
-	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
-	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText(L["General"])
-
-	local showSoloPartyFrameCheckbox = addon.Options.Controls.Checkbox:Create(page.body, L["Show Solo Party Frame"])
-	showSoloPartyFrameCheckbox:SetChecked(false)
-	showSoloPartyFrameCheckbox:SetOnValueChanged(function(_, checked)
-		local profile = addon.Database:GetProfile()
-		profile.core.showSoloPartyFrame = checked
-		addon.UpdateScheduler:Notify("soloFrameChanged")
-	end)
-
-	local hideBlizzardPartyRaidFramesCheckbox =
-		addon.Options.Controls.Checkbox:Create(page.body, L["Hide Blizzard Party/Raid Frames"])
-	hideBlizzardPartyRaidFramesCheckbox:SetChecked(false)
-	hideBlizzardPartyRaidFramesCheckbox:SetOnValueChanged(function(_, checked)
-		local profile = addon.Database:GetProfile()
-		profile.core.hideBlizzardRaidFrames = checked
-		addon.UpdateScheduler:Notify("layoutChanged")
-	end)
-
-	local hideBlizzardRaidFrameManagerCheckbox =
-		addon.Options.Controls.Checkbox:Create(page.body, L["Hide Blizzard Raid Frame Manager"])
-	hideBlizzardRaidFrameManagerCheckbox:SetChecked(false)
-	hideBlizzardRaidFrameManagerCheckbox:SetOnValueChanged(function(_, checked)
-		local profile = addon.Database:GetProfile()
-		profile.core.hideBlizzardRaidFrameManager = checked
-		addon.UpdateScheduler:Notify("layoutChanged")
-	end)
-
-	local globalScaleSlider = addon.Options.Controls.Slider:Create(page.body, L["Global Scale"])
-	globalScaleSlider:SetMinMaxValues(0.5, 2.0)
-	globalScaleSlider:SetStep(0.01)
-	globalScaleSlider:SetValueFormatter(function(value)
-		return string.format("%.0f%%", value * 100)
-	end)
-	globalScaleSlider:SetValueParser(ParsePercentOrRaw)
-	globalScaleSlider:SetOnValueChanged(function(_, value)
-		local profile = addon.Database:GetProfile()
-		profile.core.uiScale = value
-		addon.UpdateScheduler:Notify("layoutChanged")
-		addon.Modules:RequestUpdateSettings()
-	end)
-
-	local outOfRangeAlphaSlider = addon.Options.Controls.Slider:Create(page.body, L["Out of Range Alpha"])
-	outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
-	outOfRangeAlphaSlider:SetStep(0.05)
-	outOfRangeAlphaSlider:SetValueFormatter(function(value)
-		return string.format("%.0f%%", value * 100)
-	end)
-	outOfRangeAlphaSlider:SetValueParser(ParsePercentOrRaw)
-	outOfRangeAlphaSlider:SetOnValueChanged(function(_, value)
-		local profile = addon.Database:GetProfile()
-		profile.core.outOfRangeAlpha = value
-		addon.UpdateScheduler:Notify("outOfRangeAlphaSettingChanged")
-	end)
-
-	local languageDropdown = addon.Options.Controls.Dropdown:Create(page.body, L["Language"])
+	local languageDropdown = subpage:CreateControl("Dropdown", { labelKey = "Language" })
 	languageDropdown:SetLayoutWidth(174)
 	languageDropdown:SetOptions(GetLanguageOptions())
 	languageDropdown:SetOnValueChanged(function(_, value)
 		addon.Locale:SetLocaleOverride(value)
 	end)
 
-	page.controls = {
-		showSoloPartyFrameCheckbox = showSoloPartyFrameCheckbox,
-		hideBlizzardPartyRaidFramesCheckbox = hideBlizzardPartyRaidFramesCheckbox,
-		hideBlizzardRaidFrameManagerCheckbox = hideBlizzardRaidFrameManagerCheckbox,
-		globalScaleSlider = globalScaleSlider,
-		outOfRangeAlphaSlider = outOfRangeAlphaSlider,
-		languageDropdown = languageDropdown,
-	}
+	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", { labelKey = "Show Solo Party Frame" })
+	showSoloPartyFrameCheckbox:BindValue({
+		get = function(profile)
+			return profile.core.showSoloPartyFrame
+		end,
+		set = function(profile, _, value)
+			profile.core.showSoloPartyFrame = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("soloFrameChanged")
+		end,
+	})
 
-	function page:UpdateLayout()
-		local controls = self.controls
+	local hideBlizzardPartyRaidFramesCheckbox = subpage:CreateControl(
+		"Checkbox",
+		{ labelKey = "Hide Blizzard Party/Raid Frames" }
+	)
+	hideBlizzardPartyRaidFramesCheckbox:BindValue({
+		get = function(profile)
+			return profile.core.hideBlizzardRaidFrames
+		end,
+		set = function(profile, _, value)
+			profile.core.hideBlizzardRaidFrames = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
 
-		self.header:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(32)))
+	local hideBlizzardRaidFrameManagerCheckbox = subpage:CreateControl(
+		"Checkbox",
+		{ labelKey = "Hide Blizzard Raid Frame Manager" }
+	)
+	hideBlizzardRaidFrameManagerCheckbox:BindValue({
+		get = function(profile)
+			return profile.core.hideBlizzardRaidFrameManager
+		end,
+		set = function(profile, _, value)
+			profile.core.hideBlizzardRaidFrameManager = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
 
-		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(addon.Utilities:ToPixels(16)))
-		self.body:SetPoint(
-			"TOPRIGHT",
-			self.header,
-			"BOTTOMRIGHT",
-			0,
-			-addon.Utilities:ToUI(addon.Utilities:ToPixels(16))
-		)
+	local globalScaleSlider = subpage:CreateControl("Slider", { labelKey = "Global Scale" })
+	globalScaleSlider:SetMinMaxValues(0.5, 2.0)
+	globalScaleSlider:SetStep(0.01)
+	globalScaleSlider:SetValueFormatter(function(value)
+		return string.format("%.0f%%", value * 100)
+	end)
+	globalScaleSlider:SetValueParser("percent")
+	globalScaleSlider:BindValue({
+		get = function(profile)
+			return profile.core.uiScale
+		end,
+		set = function(profile, _, value)
+			profile.core.uiScale = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+			addon.Modules:RequestUpdateSettings()
+		end,
+	})
 
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
-		end
+	local outOfRangeAlphaSlider = subpage:CreateControl("Slider", { labelKey = "Out of Range Alpha" })
+	outOfRangeAlphaSlider:SetMinMaxValues(0, 1)
+	outOfRangeAlphaSlider:SetStep(0.05)
+	outOfRangeAlphaSlider:SetValueFormatter(function(value)
+		return string.format("%.0f%%", value * 100)
+	end)
+	outOfRangeAlphaSlider:SetValueParser("percent")
+	outOfRangeAlphaSlider:BindValue({
+		get = function(profile)
+			return profile.core.outOfRangeAlpha
+		end,
+		set = function(profile, _, value)
+			profile.core.outOfRangeAlpha = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("outOfRangeAlphaSettingChanged")
+		end,
+	})
 
-		local languageSectionGapPx = addon.Utilities:ToPixels(28)
-		local languageControlHeightPx = addon.Utilities:ToPixels(
-			controls.languageDropdown.layoutValues.labelHeight
-				+ controls.languageDropdown.layoutValues.labelSpacing
-				+ controls.languageDropdown.layoutValues.fieldHeight
-		)
-		local mainControlsTopOffsetPx = languageControlHeightPx + languageSectionGapPx
-
-		controls.languageDropdown:ClearAllPoints()
-		controls.languageDropdown:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
-
-		controls.showSoloPartyFrameCheckbox:ClearAllPoints()
-		controls.showSoloPartyFrameCheckbox:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(mainControlsTopOffsetPx)
-		)
-
-		controls.hideBlizzardPartyRaidFramesCheckbox:ClearAllPoints()
-		controls.hideBlizzardPartyRaidFramesCheckbox:SetPoint(
-			"TOPLEFT",
-			controls.showSoloPartyFrameCheckbox,
-			"BOTTOMLEFT",
-			0,
-			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-		)
-
-		controls.hideBlizzardRaidFrameManagerCheckbox:ClearAllPoints()
-		controls.hideBlizzardRaidFrameManagerCheckbox:SetPoint(
-			"TOPLEFT",
-			controls.hideBlizzardPartyRaidFramesCheckbox,
-			"BOTTOMLEFT",
-			0,
-			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-		)
-
-		controls.globalScaleSlider:ClearAllPoints()
-		controls.globalScaleSlider:SetPoint(
-			"TOPLEFT",
-			controls.showSoloPartyFrameCheckbox,
-			"TOPLEFT",
-			addon.Utilities:ToUI(addon.Utilities:ToPixels(291)),
-			0
-		)
-
-		controls.outOfRangeAlphaSlider:ClearAllPoints()
-		controls.outOfRangeAlphaSlider:SetPoint(
-			"TOPLEFT",
-			controls.globalScaleSlider,
-			"BOTTOMLEFT",
-			0,
-			-addon.Utilities:ToUI(addon.Utilities:ToPixels(12))
-		)
-	end
-
-	function page:UpdateState(profile)
-		if not profile or not profile.core then
-			return
-		end
-
-		local controls = self.controls
-
-		controls.showSoloPartyFrameCheckbox:SetChecked(profile.core.showSoloPartyFrame == true)
-		controls.hideBlizzardPartyRaidFramesCheckbox:SetChecked(profile.core.hideBlizzardRaidFrames == true)
-		controls.hideBlizzardRaidFrameManagerCheckbox:SetChecked(profile.core.hideBlizzardRaidFrameManager == true)
-		controls.globalScaleSlider:SetValueSilently(profile.core.uiScale or 1)
-		controls.outOfRangeAlphaSlider:SetValueSilently(profile.core.outOfRangeAlpha or 1)
-		controls.languageDropdown:SetOptions(GetLanguageOptions())
-		controls.languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
-	end
-
-	function page:UpdateLocale()
-		local controls = self.controls
-
-		self.header.title:SetText(L["General"])
-		controls.showSoloPartyFrameCheckbox:SetText(L["Show Solo Party Frame"])
-		controls.hideBlizzardPartyRaidFramesCheckbox:SetText(L["Hide Blizzard Party/Raid Frames"])
-		controls.hideBlizzardRaidFrameManagerCheckbox:SetText(L["Hide Blizzard Raid Frame Manager"])
-		controls.globalScaleSlider:SetLabel(L["Global Scale"])
-		controls.outOfRangeAlphaSlider:SetLabel(L["Out of Range Alpha"])
-		controls.languageDropdown:SetLabel(L["Language"])
-		controls.languageDropdown:SetOptions(GetLanguageOptions())
-		controls.languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
-	end
-
-	addon.Options.Data:RegisterForUpdates(page, function(profile)
-		page:UpdateState(profile)
+	subpage:SetStateUpdater(function()
+		languageDropdown:SetOptions(GetLanguageOptions())
+		languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
 	end)
 
-	page:UpdateLocale()
-	page:UpdateLayout()
-	page:UpdateState(addon.Database:GetProfile())
+	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, -72)
+	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
+	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint("TOPLEFT", hideBlizzardPartyRaidFramesCheckbox, "BOTTOMLEFT", 0, -12)
+	globalScaleSlider:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "TOPLEFT", 291, 0)
+	outOfRangeAlphaSlider:SetLayoutPoint("TOPLEFT", globalScaleSlider, "BOTTOMLEFT", 0, -12)
 
 	return page
 end

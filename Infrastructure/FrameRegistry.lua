@@ -415,7 +415,7 @@ function FrameRegistry:UpdateLayout()
 		addon.Frames:UpdateLayout(testRaidGroup, profile.raid or {})
 	end
 
-	local previewSection = addon.Options and addon.Options.Sections and addon.Options.Sections.Preview
+	local previewSection = addon.Options and addon.Options.Preview
 	if previewSection and previewSection.UpdateFrameLayout then
 		if previewFrames.party then
 			previewSection:UpdateFrameLayout(previewFrames.party, partySettings)

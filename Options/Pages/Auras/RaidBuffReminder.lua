@@ -7,312 +7,156 @@ addon.Options.Pages.Auras.RaidBuffReminder = addon.Options.Pages.Auras.RaidBuffR
 
 local RaidBuffReminder = addon.Options.Pages.Auras.RaidBuffReminder
 
-local subpage
-local L = addon.L
-
 local anchorOptions = {
-	{ value = "TOPLEFT", text = L["Top Left"] },
-	{ value = "TOP", text = L["Top"] },
-	{ value = "TOPRIGHT", text = L["Top Right"] },
-	{ value = "LEFT", text = L["Left"] },
-	{ value = "CENTER", text = L["Center"] },
-	{ value = "RIGHT", text = L["Right"] },
-	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
-	{ value = "BOTTOM", text = L["Bottom"] },
-	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
+	{ value = "TOPLEFT", textKey = "Top Left" },
+	{ value = "TOP", textKey = "Top" },
+	{ value = "TOPRIGHT", textKey = "Top Right" },
+	{ value = "LEFT", textKey = "Left" },
+	{ value = "CENTER", textKey = "Center" },
+	{ value = "RIGHT", textKey = "Right" },
+	{ value = "BOTTOMLEFT", textKey = "Bottom Left" },
+	{ value = "BOTTOM", textKey = "Bottom" },
+	{ value = "BOTTOMRIGHT", textKey = "Bottom Right" },
 }
-
-local function UpdateAnchorOptions()
-	anchorOptions[1].text = L["Top Left"]
-	anchorOptions[2].text = L["Top"]
-	anchorOptions[3].text = L["Top Right"]
-	anchorOptions[4].text = L["Left"]
-	anchorOptions[5].text = L["Center"]
-	anchorOptions[6].text = L["Right"]
-	anchorOptions[7].text = L["Bottom Left"]
-	anchorOptions[8].text = L["Bottom"]
-	anchorOptions[9].text = L["Bottom Right"]
-end
-
-local function ResolveBoolean(value, defaultValue)
-	if value == nil then
-		return defaultValue
-	end
-
-	return value == true
-end
-
-local function GetModeDefaults(mode)
-	if mode == "raid" then
-		return {
-			enabled = true,
-			showInCombat = false,
-			anchor = "CENTER",
-			offsetX = 0,
-			offsetY = 0,
-			iconSize = 28,
-			borderSizePx = 1,
-			borderColor = { r = 1, g = 0, b = 0, a = 1 },
-		}
-	end
-
-	return {
-		enabled = true,
-		showInCombat = false,
-		anchor = "CENTER",
-		offsetX = 0,
-		offsetY = 0,
-		iconSize = 32,
-		borderSizePx = 1,
-		borderColor = { r = 1, g = 0, b = 0, a = 1 },
-	}
-end
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Raid Buff Reminder settings are disabled during combat."])
-end
-
-local function ApplyModeSetting(updateFn)
-	if InCombatLockdown() then
-		ShowCombatLockMessage()
-		if subpage and subpage.UpdateState then
-			subpage:UpdateState(addon.Database:GetProfile())
-		end
-		return
-	end
-
-	local profile = addon.Database:GetProfile()
-	local mode = addon.Options.State:GetMode()
-
-	profile[mode] = profile[mode] or {}
-	updateFn(profile[mode], mode)
-
-	addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
-end
 
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
 
-local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
-	slider:SetMinMaxValues(minValue, maxValue)
-	slider:SetStep(step or 1)
-	slider:SetValueFormatter(FormatInteger)
-end
+function RaidBuffReminder:Create(page)
+	local subpage = page:RegisterSubPage("raidBuffReminder", { titleKey = "Raid Buff Reminder" })
 
-function RaidBuffReminder:Ensure(parent)
-	if subpage then
-		return subpage
-	end
+	local settingsRow = subpage:CreateRow(2)
+	settingsRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	subpage = CreateFrame("Frame", nil, parent)
+	local checkboxSlot = settingsRow:CreateCheckboxSlot("top")
+	local enabledCheckbox = checkboxSlot:CreateControl("Checkbox", { labelKey = "Enabled" })
+	enabledCheckbox:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.enabled
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.enabled = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
-	subpage.enabledCheckbox:SetLayoutWidth(174)
-	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.enabled = checked == true
-		end)
-	end)
+	local showInCombatCheckbox = checkboxSlot:CreateControl("Checkbox", { labelKey = "Show in Combat" })
+	showInCombatCheckbox:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.showInCombat
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.showInCombat = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.showInCombatCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Show in Combat"])
-	subpage.showInCombatCheckbox:SetLayoutWidth(174)
-	subpage.showInCombatCheckbox:SetOnValueChanged(function(_, checked)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.showInCombat = checked == true
-		end)
-	end)
+	local anchorRow = subpage:CreateRow(4)
+	anchorRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
-	subpage.anchorDropdown:SetLayoutWidth(174)
-	subpage.anchorDropdown:SetOptions(anchorOptions)
-	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.anchor = value
-		end)
-	end)
+	local anchorDropdown = anchorRow:CreateControl("Dropdown", { labelKey = "Position" })
+	anchorDropdown:SetOptions(anchorOptions)
+	anchorDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.anchor
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.anchor = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
-	subpage.offsetXSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetXSlider, -300, 300, 1)
-	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.offsetX = value
-		end)
-	end)
+	local offsetXSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset X" })
+	offsetXSlider:SetMinMaxValues(-300, 300)
+	offsetXSlider:SetStep(1)
+	offsetXSlider:SetValueFormatter(FormatInteger)
+	offsetXSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.offsetX
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.offsetX = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
-	subpage.offsetYSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetYSlider, -300, 300, 1)
-	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.offsetY = value
-		end)
-	end)
+	local offsetYSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset Y" })
+	offsetYSlider:SetMinMaxValues(-300, 300)
+	offsetYSlider:SetStep(1)
+	offsetYSlider:SetValueFormatter(FormatInteger)
+	offsetYSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.offsetY
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.offsetY = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
-	subpage.iconSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 128, 1)
-	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.iconSize = value
-		end)
-	end)
+	local iconRow = subpage:CreateRow(4)
+	iconRow:SetLayoutPoint("TOPLEFT", anchorRow.frame, "BOTTOMLEFT", 0, -16)
 
-	subpage.borderSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Border Size"])
-	subpage.borderSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.borderSizeSlider, 0, 6, 1)
-	subpage.borderSizeSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.borderSizePx = value
-		end)
-	end)
+	local iconSizeSlider = iconRow:CreateControl("Slider", { labelKey = "Icon Size" })
+	iconSizeSlider:SetMinMaxValues(8, 128)
+	iconSizeSlider:SetStep(1)
+	iconSizeSlider:SetValueFormatter(FormatInteger)
+	iconSizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.iconSize
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.iconSize = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	subpage.borderColorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Border Color"])
-	subpage.borderColorPicker:SetLayoutWidth(174)
-	subpage.borderColorPicker:SetHasOpacity(false)
-	subpage.borderColorPicker:SetOnValueChanged(function(_, r, g, b)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.raidBuffReminder = section.widgets.icons.raidBuffReminder or {}
-			section.widgets.icons.raidBuffReminder.borderColor = { r = r, g = g, b = b, a = 1 }
-		end)
-	end)
+	local borderRow = subpage:CreateRow(4)
+	borderRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
 
-	subpage.controls = {
-		enabledCheckbox = subpage.enabledCheckbox,
-		showInCombatCheckbox = subpage.showInCombatCheckbox,
-		anchorDropdown = subpage.anchorDropdown,
-		offsetXSlider = subpage.offsetXSlider,
-		offsetYSlider = subpage.offsetYSlider,
-		iconSizeSlider = subpage.iconSizeSlider,
-		borderSizeSlider = subpage.borderSizeSlider,
-		borderColorPicker = subpage.borderColorPicker,
-	}
+	local borderSizeSlider = borderRow:CreateControl("Slider", { labelKey = "Border Size" })
+	borderSizeSlider:SetMinMaxValues(0, 6)
+	borderSizeSlider:SetStep(1)
+	borderSizeSlider:SetValueFormatter(FormatInteger)
+	borderSizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.borderSizePx
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.raidBuffReminder.borderSizePx = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
-	function subpage:UpdateLocale()
-		UpdateAnchorOptions()
-		self.enabledCheckbox:SetText(L["Enabled"])
-		self.showInCombatCheckbox:SetText(L["Show in Combat"])
-		self.anchorDropdown:SetLabel(L["Anchor"])
-		self.anchorDropdown:SetOptions(anchorOptions)
-		self.offsetXSlider:SetLabel(L["Offset X"])
-		self.offsetYSlider:SetLabel(L["Offset Y"])
-		self.iconSizeSlider:SetLabel(L["Icon Size"])
-		self.borderSizeSlider:SetLabel(L["Border Size"])
-		self.borderColorPicker:SetLabel(L["Border Color"])
-	end
-
-	function subpage:UpdateLayout()
-		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(50)
-		local topRowAdjustmentPx = addon.Utilities:ToPixels(8)
-		local sectionGapPx = addon.Utilities:ToPixels(16)
-		local columnGapPx = addon.Utilities:ToPixels(30)
-		local columnWidthPx = addon.Utilities:ToPixels(174)
-		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local firstRowOffsetPx = 0
-		local secondRowOffsetPx = rowStepPx - topRowAdjustmentPx
-		local thirdRowOffsetPx = secondRowOffsetPx + rowStepPx + sectionGapPx
-		local fourthRowOffsetPx = thirdRowOffsetPx + rowStepPx
-		local fifthRowOffsetPx = fourthRowOffsetPx + rowStepPx
-
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
-		end
-
-		controls.enabledCheckbox:ClearAllPoints()
-		controls.enabledCheckbox:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
-
-		controls.showInCombatCheckbox:ClearAllPoints()
-		controls.showInCombatCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(firstRowOffsetPx)
-		)
-
-		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(secondRowOffsetPx))
-
-		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(thirdRowOffsetPx))
-
-		controls.offsetYSlider:ClearAllPoints()
-		controls.offsetYSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(thirdRowOffsetPx)
-		)
-
-		controls.iconSizeSlider:ClearAllPoints()
-		controls.iconSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(fourthRowOffsetPx))
-
-		controls.borderSizeSlider:ClearAllPoints()
-		controls.borderSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(fifthRowOffsetPx))
-
-		controls.borderColorPicker:ClearAllPoints()
-		controls.borderColorPicker:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(fifthRowOffsetPx)
-		)
-	end
-
-	function subpage:UpdateState(profile)
-		if not profile then
-			return
-		end
-
-		local controls = self.controls
-		local mode = addon.Options.State:GetMode()
-		local section = profile[mode] or {}
-		local defaults = GetModeDefaults(mode)
-		local widgets = section.widgets or {}
-		local icons = widgets.icons or {}
-		local raidBuffReminder = icons.raidBuffReminder or {}
-		local borderColor = raidBuffReminder.borderColor or defaults.borderColor
-
-		controls.enabledCheckbox:SetChecked(ResolveBoolean(raidBuffReminder.enabled, defaults.enabled))
-		controls.showInCombatCheckbox:SetChecked(ResolveBoolean(raidBuffReminder.showInCombat, defaults.showInCombat))
-		controls.anchorDropdown:SetValue(raidBuffReminder.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValueSilently(raidBuffReminder.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValueSilently(raidBuffReminder.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValueSilently(raidBuffReminder.iconSize or defaults.iconSize)
-		controls.borderSizeSlider:SetValueSilently(raidBuffReminder.borderSizePx or defaults.borderSizePx)
-		controls.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
-	end
-
-	subpage:UpdateLocale()
+	local borderColorPicker = borderRow:CreateControl("ColorPicker", { labelKey = "Border Color" })
+	borderColorPicker:SetHasOpacity(false)
+	borderColorPicker:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.raidBuffReminder.borderColor
+		end,
+		set = function(profile, mode, value)
+			value.a = 1
+			profile[mode].widgets.icons.raidBuffReminder.borderColor = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
+		end,
+	})
 
 	return subpage
 end

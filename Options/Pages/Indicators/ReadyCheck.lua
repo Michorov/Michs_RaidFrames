@@ -7,252 +7,109 @@ addon.Options.Pages.Indicators.ReadyCheck = addon.Options.Pages.Indicators.Ready
 
 local ReadyCheck = addon.Options.Pages.Indicators.ReadyCheck
 
-local subpage
-local L = addon.L
-
 local anchorOptions = {
-	{ value = "TOPLEFT", text = L["Top Left"] },
-	{ value = "TOP", text = L["Top Center"] },
-	{ value = "TOPRIGHT", text = L["Top Right"] },
-	{ value = "LEFT", text = L["Left"] },
-	{ value = "CENTER", text = L["Center"] },
-	{ value = "RIGHT", text = L["Right"] },
-	{ value = "BOTTOMLEFT", text = L["Bottom Left"] },
-	{ value = "BOTTOM", text = L["Bottom Center"] },
-	{ value = "BOTTOMRIGHT", text = L["Bottom Right"] },
+	{ value = "TOPLEFT", textKey = "Top Left" },
+	{ value = "TOP", textKey = "Top Center" },
+	{ value = "TOPRIGHT", textKey = "Top Right" },
+	{ value = "LEFT", textKey = "Left" },
+	{ value = "CENTER", textKey = "Center" },
+	{ value = "RIGHT", textKey = "Right" },
+	{ value = "BOTTOMLEFT", textKey = "Bottom Left" },
+	{ value = "BOTTOM", textKey = "Bottom Center" },
+	{ value = "BOTTOMRIGHT", textKey = "Bottom Right" },
 }
-
-local function UpdateAnchorOptions()
-	anchorOptions[1].text = L["Top Left"]
-	anchorOptions[2].text = L["Top Center"]
-	anchorOptions[3].text = L["Top Right"]
-	anchorOptions[4].text = L["Left"]
-	anchorOptions[5].text = L["Center"]
-	anchorOptions[6].text = L["Right"]
-	anchorOptions[7].text = L["Bottom Left"]
-	anchorOptions[8].text = L["Bottom Center"]
-	anchorOptions[9].text = L["Bottom Right"]
-end
-
-local function GetModeDefaults()
-	return {
-		enabled = true,
-		anchor = "CENTER",
-		offsetX = 0,
-		offsetY = 0,
-		size = 36,
-	}
-end
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Ready Check indicator settings are disabled during combat."])
-end
-
-local function ApplyModeSetting(updateFn)
-	if InCombatLockdown() then
-		ShowCombatLockMessage()
-		if subpage and subpage.UpdateState then
-			subpage:UpdateState(addon.Database:GetProfile())
-		end
-		return
-	end
-
-	local profile = addon.Database:GetProfile()
-	local mode = addon.Options.State:GetMode()
-
-	profile[mode] = profile[mode] or {}
-	updateFn(profile[mode], mode)
-
-	addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
-end
 
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
 
-local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
-	slider:SetMinMaxValues(minValue, maxValue)
-	slider:SetStep(step or 1)
-	slider:SetValueFormatter(FormatInteger)
-end
+function ReadyCheck:Create(page)
+	local subpage = page:RegisterSubPage("readyCheck", { titleKey = "Ready Check" })
 
-function ReadyCheck:Ensure(parent)
-	if subpage then
-		return subpage
-	end
+	local enabledRow = subpage:CreateRow(4)
+	enabledRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	subpage = CreateFrame("Frame", nil, parent)
+	local enabledSlot = enabledRow:CreateCheckboxSlot("top")
+	local enabledCheckbox = enabledSlot:CreateControl("Checkbox", { labelKey = "Enabled" })
+	enabledCheckbox:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.readyCheck.enabled
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.readyCheck.enabled = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+		end,
+	})
 
-	subpage.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
-	subpage.enabledCheckbox:SetLayoutWidth(174)
-	subpage.enabledCheckbox:SetOnValueChanged(function(_, checked)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.indicators = section.widgets.indicators or {}
-			section.widgets.indicators.readyCheck = section.widgets.indicators.readyCheck or {}
-			section.widgets.indicators.readyCheck.enabled = checked == true
-		end)
-	end)
+	local anchorRow = subpage:CreateRow(4)
+	anchorRow:SetLayoutPoint("TOPLEFT", enabledRow.frame, "BOTTOMLEFT", 0, 0)
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Anchor"])
-	subpage.anchorDropdown:SetLayoutWidth(174)
-	subpage.anchorDropdown:SetOptions(anchorOptions)
-	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.indicators = section.widgets.indicators or {}
-			section.widgets.indicators.readyCheck = section.widgets.indicators.readyCheck or {}
-			section.widgets.indicators.readyCheck.anchor = value
-		end)
-	end)
+	local anchorDropdown = anchorRow:CreateControl("Dropdown", { labelKey = "Position" })
+	anchorDropdown:SetOptions(anchorOptions)
+	anchorDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.readyCheck.anchor
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.readyCheck.anchor = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+		end,
+	})
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
-	subpage.offsetXSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetXSlider, -100, 100, 1)
-	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.indicators = section.widgets.indicators or {}
-			section.widgets.indicators.readyCheck = section.widgets.indicators.readyCheck or {}
-			section.widgets.indicators.readyCheck.offsetX = value
-		end)
-	end)
+	local offsetXSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset X" })
+	offsetXSlider:SetMinMaxValues(-100, 100)
+	offsetXSlider:SetStep(1)
+	offsetXSlider:SetValueFormatter(FormatInteger)
+	offsetXSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.readyCheck.offsetX
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.readyCheck.offsetX = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+		end,
+	})
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
-	subpage.offsetYSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetYSlider, -100, 100, 1)
-	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.indicators = section.widgets.indicators or {}
-			section.widgets.indicators.readyCheck = section.widgets.indicators.readyCheck or {}
-			section.widgets.indicators.readyCheck.offsetY = value
-		end)
-	end)
+	local offsetYSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset Y" })
+	offsetYSlider:SetMinMaxValues(-100, 100)
+	offsetYSlider:SetStep(1)
+	offsetYSlider:SetValueFormatter(FormatInteger)
+	offsetYSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.readyCheck.offsetY
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.readyCheck.offsetY = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+		end,
+	})
 
-	subpage.sizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Size"])
-	subpage.sizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.sizeSlider, 8, 64, 1)
-	subpage.sizeSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.indicators = section.widgets.indicators or {}
-			section.widgets.indicators.readyCheck = section.widgets.indicators.readyCheck or {}
-			section.widgets.indicators.readyCheck.size = value
-		end)
-	end)
+	local sizeRow = subpage:CreateRow(4)
+	sizeRow:SetLayoutPoint("TOPLEFT", anchorRow.frame, "BOTTOMLEFT", 0, -16)
 
-	subpage.controls = {
-		enabledCheckbox = subpage.enabledCheckbox,
-		anchorDropdown = subpage.anchorDropdown,
-		offsetXSlider = subpage.offsetXSlider,
-		offsetYSlider = subpage.offsetYSlider,
-		sizeSlider = subpage.sizeSlider,
-	}
-
-	function subpage:UpdateLocale()
-		UpdateAnchorOptions()
-		self.enabledCheckbox:SetText(L["Enabled"])
-		self.anchorDropdown:SetLabel(L["Anchor"])
-		self.anchorDropdown:SetOptions(anchorOptions)
-		self.offsetXSlider:SetLabel(L["Offset X"])
-		self.offsetYSlider:SetLabel(L["Offset Y"])
-		self.sizeSlider:SetLabel(L["Size"])
-	end
-
-	function subpage:UpdateLayout()
-		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(50)
-		local anchorRowGapPx = addon.Utilities:ToPixels(16)
-		local columnGapPx = addon.Utilities:ToPixels(30)
-		local columnWidthPx = addon.Utilities:ToPixels(174)
-		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local sliderHeightPx = addon.Utilities:ToPixels(addon.Options.Controls.Slider.defaultHeight)
-		local checkboxHeightPx = addon.Utilities:ToPixels(controls.enabledCheckbox.layoutValues.height)
-		local checkboxOffsetPx =
-			addon.Utilities:RoundToNearestInt(math.max(0, (sliderHeightPx - checkboxHeightPx) / 2))
-		local enabledControlsOffsetPx = 0
-		local anchorControlsOffsetPx = rowStepPx
-		local offsetControlsOffsetPx = anchorControlsOffsetPx + rowStepPx + anchorRowGapPx
-		local sizeControlsOffsetPx = offsetControlsOffsetPx + rowStepPx
-
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
-		end
-
-		controls.enabledCheckbox:ClearAllPoints()
-		controls.enabledCheckbox:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(enabledControlsOffsetPx + checkboxOffsetPx)
-		)
-
-		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(anchorControlsOffsetPx)
-		)
-
-		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(offsetControlsOffsetPx)
-		)
-
-		controls.offsetYSlider:ClearAllPoints()
-		controls.offsetYSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(offsetControlsOffsetPx)
-		)
-
-		controls.sizeSlider:ClearAllPoints()
-		controls.sizeSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(sizeControlsOffsetPx)
-		)
-	end
-
-	function subpage:UpdateState(profile)
-		if not profile then
-			return
-		end
-
-		local controls = self.controls
-		local mode = addon.Options.State:GetMode()
-		local section = profile[mode] or {}
-		local defaults = GetModeDefaults()
-		local widgets = section.widgets or {}
-		local indicators = widgets.indicators or {}
-		local readyCheck = indicators.readyCheck or {}
-		local enabled = readyCheck.enabled
-		if enabled == nil then
-			enabled = defaults.enabled
-		end
-
-		controls.enabledCheckbox:SetChecked(enabled == true)
-		controls.anchorDropdown:SetValue(readyCheck.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValueSilently(readyCheck.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValueSilently(readyCheck.offsetY or defaults.offsetY)
-		controls.sizeSlider:SetValueSilently(readyCheck.size or defaults.size)
-	end
-
-	subpage:UpdateLocale()
+	local sizeSlider = sizeRow:CreateControl("Slider", { labelKey = "Size" })
+	sizeSlider:SetMinMaxValues(8, 64)
+	sizeSlider:SetStep(1)
+	sizeSlider:SetValueFormatter(FormatInteger)
+	sizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.readyCheck.size
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.readyCheck.size = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("readyCheckSettingsChanged")
+		end,
+	})
 
 	return subpage
 end

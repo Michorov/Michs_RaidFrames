@@ -1,62 +1,132 @@
-local _, addon = ...
+local addonName, addon = ...
 
 addon.Options = addon.Options or {}
 local Options = addon.Options
 local L = addon.L
-local theme = addon.Options.Theme
 
 local panel
 local deferredOpen = false
-local panelPosition = {
-	xRatio = 0.5,
-	yRatio = 0.5,
-}
+local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
 
-local layoutValues = {
-	panelWidth = 1020,
-	panelHeight = 500,
-	headerHeight = 40,
-	statusBarHeight = 32,
-	sideMenuWidth = 154,
-	previewWidth = 220,
-}
+local function GetDisplayProfileName(name)
+	if name == "Default" then
+		return L["Default"]
+	end
 
-local function SavePanelPosition()
+	return name
+end
+
+local function GetTestModeButtonText()
+	if addon.FrameRegistry:GetActiveTestMode() == panel:GetActiveMode() then
+		return L["Lock"]
+	end
+
+	return L["Unlock"]
+end
+
+local function GetModeOptions()
+	return {
+		{ value = "party", textKey = "Party" },
+		{ value = "raid", textKey = "Raid" },
+	}
+end
+
+local function RefreshTestModeButtons()
 	if not panel then
 		return
 	end
 
-	local parentWidthPx = addon.Utilities:ToPixels(UIParent:GetWidth())
-	local parentHeightPx = addon.Utilities:ToPixels(UIParent:GetHeight())
-	local panelWidthPx = addon.Utilities:ToPixels(panel:GetWidth())
-	local panelHeightPx = addon.Utilities:ToPixels(panel:GetHeight())
-
-	local availableWidthPx = math.max(0, parentWidthPx - panelWidthPx)
-	local availableHeightPx = math.max(0, parentHeightPx - panelHeightPx)
-
-	local leftPx = addon.Utilities:ToPixels(panel:GetLeft())
-	local bottomPx = addon.Utilities:ToPixels(panel:GetBottom())
-
-	if availableWidthPx > 0 then
-		panelPosition.xRatio = math.max(0, math.min(1, leftPx / availableWidthPx))
-	else
-		panelPosition.xRatio = 0.5
+	local layoutPage = panel:GetPage("layout")
+	if layoutPage then
+		layoutPage:SetHeaderButtonText(GetTestModeButtonText())
 	end
 
-	if availableHeightPx > 0 then
-		panelPosition.yRatio = math.max(0, math.min(1, bottomPx / availableHeightPx))
-	else
-		panelPosition.yRatio = 0.5
+	local framesPage = panel:GetPage("frames")
+	if framesPage then
+		framesPage:SetHeaderButtonText(GetTestModeButtonText())
 	end
 end
 
+local function SyncTestMode(mode)
+	local activeTestMode = addon.FrameRegistry:GetActiveTestMode()
+	if activeTestMode and activeTestMode ~= mode then
+		addon.FrameRegistry:ToggleTestMode(mode)
+	end
+end
+
+local function ToggleTestMode()
+	addon.FrameRegistry:ToggleTestMode(panel:GetActiveMode())
+	RefreshTestModeButtons()
+	panel:UpdateState()
+end
+
 function Options:Initialize()
-	SLASH_MICHRAIDFRAMES1 = "/mrf"
+	if panel then
+		return
+	end
+
+	panel = addon.OptionsUI:CreatePanel({
+		name = "MichsRaidFramesOptions",
+		titleKey = "Mich's Raid Frames",
+		localize = function(key)
+			return L[key]
+		end,
+		localeGetter = function()
+			return addon.Locale:GetCurrentLocale()
+		end,
+		previewEnabled = true,
+		modes = { "party", "raid" },
+		modeOptions = GetModeOptions(),
+		activeMode = "party",
+		profileGetter = function()
+			return addon.Database:GetProfile()
+		end,
+	})
+
+	panel.frame:HookScript("OnHide", function()
+		addon.FrameRegistry:DisableTestMode()
+		RefreshTestModeButtons()
+	end)
+
+	panel:SetFooterUpdater(function()
+		local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
+		return (L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName)
+	end)
+
+	panel:RegisterStateUpdater(Options, function(_, mode)
+		SyncTestMode(mode)
+		RefreshTestModeButtons()
+	end)
+
+	Options.Pages.General:Create(panel)
+
+	Options.Pages.Layout:Create(panel, {
+		headerButtonText = GetTestModeButtonText(),
+		headerButtonCallback = ToggleTestMode,
+	})
+
+	Options.Pages.Frames:Create(panel, {
+		headerButtonText = GetTestModeButtonText(),
+		headerButtonCallback = ToggleTestMode,
+	})
+
+	Options.Pages.Bars:Create(panel)
+
+	Options.Pages.Texts:Create(panel)
+
+	Options.Pages.Auras:Create(panel)
+
+	Options.Pages.Indicators:Create(panel)
+
+	Options.Pages.Profiles:Create(panel)
+	Options.Preview:Create(panel)
+	panel:SetDefaultPage("general")
 
 	addon.Locale:RegisterForUpdates("options", function()
 		Options:UpdateLocale()
 	end)
 
+	SLASH_MICHRAIDFRAMES1 = "/mrf"
 	SlashCmdList["MICHRAIDFRAMES"] = function(msg)
 		local normalizedMessage = (msg or ""):match("^%s*(.-)%s*$")
 
@@ -74,151 +144,6 @@ function Options:Initialize()
 	end
 end
 
-function Options:Ensure()
-	if panel then
-		return
-	end
-
-	panel = CreateFrame("Frame", "MichsRaidFramesOptionsPanel", UIParent, "BackdropTemplate")
-	panel:Hide()
-
-	panel:SetBackdrop({
-		bgFile = "Interface\\Buttons\\WHITE8x8",
-	})
-	panel:SetBackdropColor(theme:GetColor("panelBackground"))
-
-	panel:ClearAllPoints()
-	panel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-	panel:SetFrameStrata("DIALOG")
-
-	panel.topBorder = panel:CreateTexture(nil, "OVERLAY")
-	panel.topBorder:SetColorTexture(theme:GetColor("border"))
-	panel.topBorder:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, 0)
-	panel.topBorder:SetPoint("TOPRIGHT", panel, "TOPRIGHT", 0, 0)
-
-	panel.bottomBorder = panel:CreateTexture(nil, "OVERLAY")
-	panel.bottomBorder:SetColorTexture(theme:GetColor("border"))
-	panel.bottomBorder:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 0, 0)
-	panel.bottomBorder:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", 0, 0)
-
-	panel.leftBorder = panel:CreateTexture(nil, "OVERLAY")
-	panel.leftBorder:SetColorTexture(theme:GetColor("border"))
-	panel.leftBorder:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, 0)
-	panel.leftBorder:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 0, 0)
-
-	panel.rightBorder = panel:CreateTexture(nil, "OVERLAY")
-	panel.rightBorder:SetColorTexture(theme:GetColor("border"))
-	panel.rightBorder:SetPoint("TOPRIGHT", panel, "TOPRIGHT", 0, 0)
-	panel.rightBorder:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", 0, 0)
-
-	if panel:GetName() and not tContains(UISpecialFrames, panel:GetName()) then
-		table.insert(UISpecialFrames, panel:GetName())
-	end
-
-	panel:SetMovable(true)
-	panel:EnableMouse(true)
-	panel:RegisterForDrag("LeftButton")
-
-	panel:SetScript("OnDragStart", function(self)
-		self:StartMoving()
-	end)
-
-	panel:SetScript("OnDragStop", function(self)
-		self:StopMovingOrSizing()
-		SavePanelPosition()
-		Options:Snap()
-	end)
-
-	panel:HookScript("OnHide", function()
-		addon.FrameRegistry:DisableTestMode()
-	end)
-
-	panel.header = addon.Options.Sections.Header:Ensure(panel)
-	panel.header:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, 0)
-	panel.header:SetPoint("TOPRIGHT", panel, "TOPRIGHT", 0, 0)
-
-	panel.statusBar = addon.Options.Sections.StatusBar:Ensure(panel)
-	panel.statusBar:SetPoint("BOTTOMLEFT", panel, "BOTTOMLEFT", 0, 0)
-	panel.statusBar:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", 0, 0)
-
-	panel.sideMenu = addon.Options.Sections.SideMenu:Ensure(panel)
-	panel.sideMenu:SetPoint("TOPLEFT", panel.header, "BOTTOMLEFT", 0, 0)
-	panel.sideMenu:SetPoint("BOTTOMLEFT", panel.statusBar, "TOPLEFT", 0, 0)
-
-	panel.preview = addon.Options.Sections.Preview:Ensure(panel)
-	panel.preview:SetPoint("TOPRIGHT", panel.header, "BOTTOMRIGHT", 0, 0)
-	panel.preview:SetPoint("BOTTOMRIGHT", panel.statusBar, "TOPRIGHT", 0, 0)
-
-	panel.content = addon.Options.Sections.Content:Ensure(panel)
-	panel.content:SetPoint("TOPLEFT", panel.sideMenu, "TOPRIGHT", 0, 0)
-	panel.content:SetPoint("TOPRIGHT", panel.preview, "TOPLEFT", 0, 0)
-	panel.content:SetPoint("BOTTOMRIGHT", panel.preview, "BOTTOMLEFT", 0, 0)
-
-	self:UpdateLayout()
-	self:UpdateLocale()
-	self:SetActivePage(addon.Options.Sections.Content:GetActivePage())
-end
-
-function Options:UpdateLayout()
-	if not panel then
-		return
-	end
-
-	local panelWidth = addon.Utilities:ScaleEven(addon.Utilities:ToPixels(layoutValues.panelWidth))
-	local panelHeight = addon.Utilities:ScaleEven(addon.Utilities:ToPixels(layoutValues.panelHeight))
-	panel:SetSize(addon.Utilities:ToUI(panelWidth), addon.Utilities:ToUI(panelHeight))
-
-	local borderThicknessPx = addon.Utilities:ToPixels(1)
-	panel.topBorder:SetHeight(addon.Utilities:ToUI(borderThicknessPx))
-	panel.bottomBorder:SetHeight(addon.Utilities:ToUI(borderThicknessPx))
-	panel.leftBorder:SetWidth(addon.Utilities:ToUI(borderThicknessPx))
-	panel.rightBorder:SetWidth(addon.Utilities:ToUI(borderThicknessPx))
-
-	self:Snap()
-
-	panel.header:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.headerHeight)))
-	addon.Options.Sections.Header:UpdateLayout()
-
-	panel.statusBar:SetHeight(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.statusBarHeight)))
-	addon.Options.Sections.StatusBar:UpdateLayout()
-
-	panel.sideMenu:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.sideMenuWidth)))
-	addon.Options.Sections.SideMenu:UpdateLayout()
-
-	panel.preview:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.previewWidth)))
-	addon.Options.Sections.Preview:UpdateLayout()
-
-	addon.Options.Sections.Content:UpdateLayout()
-end
-
-function Options:Snap()
-	if not panel then
-		return
-	end
-
-	local parentWidthPx = addon.Utilities:ToPixels(UIParent:GetWidth())
-	local parentHeightPx = addon.Utilities:ToPixels(UIParent:GetHeight())
-	local panelWidthPx = addon.Utilities:ToPixels(panel:GetWidth())
-	local panelHeightPx = addon.Utilities:ToPixels(panel:GetHeight())
-
-	local availableWidthPx = math.max(0, parentWidthPx - panelWidthPx)
-	local availableHeightPx = math.max(0, parentHeightPx - panelHeightPx)
-
-	local leftPx = addon.Utilities:RoundToNearestInt(panelPosition.xRatio * availableWidthPx)
-	local bottomPx = addon.Utilities:RoundToNearestInt(panelPosition.yRatio * availableHeightPx)
-
-	panel:ClearAllPoints()
-	panel:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", addon.Utilities:ToUI(leftPx), addon.Utilities:ToUI(bottomPx))
-end
-
-function Options:IsOpen()
-	return panel and panel:IsShown() or false
-end
-
-function Options:ShouldOpenAfterCombat()
-	return deferredOpen
-end
-
 function Options:Open()
 	if InCombatLockdown() then
 		deferredOpen = true
@@ -227,17 +152,39 @@ function Options:Open()
 	end
 
 	deferredOpen = false
-	Options:Ensure()
-	addon.Options.Data:RefreshProfile()
+
+	if not panel then
+		self:Initialize()
+	end
+
 	panel:Show()
+	RefreshTestModeButtons()
 end
 
 function Options:Close()
-	if not panel then
-		return
+	if panel then
+		panel:Hide()
 	end
+end
 
-	panel:Hide()
+function Options:IsOpen()
+	return panel and panel:IsShown()
+end
+
+function Options:RefreshState()
+	if panel then
+		panel:UpdateState()
+	end
+end
+
+function Options:UpdateLayout()
+	if panel then
+		panel:UpdateLayout()
+	end
+end
+
+function Options:ShouldOpenAfterCombat()
+	return deferredOpen
 end
 
 function Options:UpdateLocale()
@@ -245,18 +192,7 @@ function Options:UpdateLocale()
 		return
 	end
 
-	addon.Options.Controls.Dropdown:CloseOpenDropdown()
-	addon.Options.Theme:RefreshFonts()
-
-	addon.Options.Sections.Header:UpdateLocale()
-	addon.Options.Sections.StatusBar:UpdateLocale()
-	addon.Options.Sections.SideMenu:UpdateLocale()
-	addon.Options.Sections.Preview:UpdateLocale()
-	addon.Options.Sections.Content:UpdateLocale()
-	addon.Options.Data:RefreshProfile()
-end
-
-function Options:SetActivePage(pageKey)
-	addon.Options.Sections.Content:SetActivePage(pageKey)
-	addon.Options.Sections.SideMenu:SetActivePage(pageKey)
+	panel:UpdateLocale()
+	Options.Preview:UpdateLocale()
+	RefreshTestModeButtons()
 end

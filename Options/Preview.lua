@@ -1,18 +1,17 @@
 local _, addon = ...
 
 addon.Options = addon.Options or {}
-addon.Options.Sections = addon.Options.Sections or {}
-addon.Options.Sections.Preview = addon.Options.Sections.Preview or {}
+addon.Options.Preview = addon.Options.Preview or {}
 
-local Preview = addon.Options.Sections.Preview
-
-local preview
-local activeMode = addon.Options.State:GetMode()
-local activePage = "general"
-local L = addon.L
-local theme = addon.Options.Theme
+local Preview = addon.Options.Preview
+local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
 local _, _, _, interfaceVersion = GetBuildInfo()
 local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
+
+local preview
+local panel
+local activeMode = "party"
+local activePage = "general"
 
 local layoutValues = {
 	outerInset = 8,
@@ -22,7 +21,7 @@ local layoutValues = {
 	bodyTopGap = 10,
 	bodyWidth = 200,
 	checkboxTopOffset = 220,
-	checkboxGap = 8,
+	checkboxGap = 4,
 }
 
 local auraPreviewControls = {
@@ -120,6 +119,10 @@ local previewPageWidgets = {
 Preview.WidgetFlags = previewWidgetFlags
 Preview.PageWidgets = previewPageWidgets
 
+local function Localize(key)
+	return panel and panel:Localize(key) or (addon.L and addon.L[key]) or key
+end
+
 local function NotifyPreviewStateChanged(changedWidgets)
 	local notifiedReasons = {}
 
@@ -153,21 +156,25 @@ local function ApplyPreviewWidgetFlag(widgetKey)
 	end
 end
 
-function Preview:Ensure(parent)
+function Preview:Create(ownerPanel)
 	if preview then
 		return preview
 	end
 
-	preview = CreateFrame("Frame", nil, parent)
-	preview.controls = {}
+	panel = ownerPanel
+	activeMode = panel:GetActiveMode() or activeMode
 
-	preview.leftBorder = preview:CreateTexture(nil, "OVERLAY")
-	preview.leftBorder:SetColorTexture(theme:GetColor("border"))
+	local PP = panel.instance.PP
+	local previewSection = panel.frame.preview
+	local canvas = previewSection:GetCanvas()
+	preview = CreateFrame("Frame", nil, canvas)
+	preview:SetAllPoints(canvas)
+	preview.controls = {}
 
 	preview.title = preview:CreateFontString(nil, "OVERLAY")
 	preview.title:SetJustifyH("CENTER")
-	theme:ApplyFont(preview.title, "arialNarrow", 20, "")
-	preview.title:SetTextColor(theme:GetTextColor("highlight"))
+	preview.title:SetTextColor(OptionsUILib.Theme:GetTextColor("highlight"))
+	OptionsUILib.Theme:ApplyFont(preview.title, PP:ScaleFont(20), "")
 
 	preview.body = CreateFrame("Frame", nil, preview)
 	preview.frameAreaBackground = preview.body:CreateTexture(nil, "BACKGROUND")
@@ -178,12 +185,14 @@ function Preview:Ensure(parent)
 	)
 	preview.frameAreaBackground:SetHorizTile(true)
 	preview.frameAreaBackground:SetVertTile(true)
-	preview.frameAreaBackground:SetVertexColor(theme:GetColor("buttonBackgroundHover", 0.45))
+	preview.frameAreaBackground:SetVertexColor(OptionsUILib.Theme:GetColor("buttonBackgroundHover", 0.45))
 
 	preview.partyFrame, preview.raidFrame = addon.FrameRegistry:CreatePreviewFrames(preview.body)
+	preview.partyFrame:SetParent(preview.body)
+	preview.raidFrame:SetParent(preview.body)
 
 	for widgetKey, flag in pairs(previewWidgetFlags) do
-		local checkbox = addon.Options.Controls.Checkbox:Create(preview.body, L[flag.label])
+		local checkbox = OptionsUILib.Controls.Checkbox:Create(preview.body, PP, Localize(flag.label))
 		local key = widgetKey
 
 		checkbox:SetLayoutWidth(layoutValues.bodyWidth)
@@ -196,10 +205,23 @@ function Preview:Ensure(parent)
 		preview.controls[widgetKey .. "Checkbox"] = checkbox
 	end
 
+	previewSection:SetPageUpdater(function(pageKey)
+		self:SetActivePage(pageKey)
+	end)
+
+	previewSection:SetLayoutUpdater(function()
+		self:UpdateLayout()
+	end)
+
+	panel:RegisterStateUpdater(self, function(_, mode)
+		self:SetMode(mode)
+		self:UpdateLayout()
+	end)
+
 	self:UpdateLocale()
 	self:UpdateLayout()
 	self:SetMode(activeMode)
-	self:SetActivePage(activePage)
+	self:SetActivePage(panel.activePageKey or activePage)
 
 	return preview
 end
@@ -209,11 +231,11 @@ function Preview:UpdateLocale()
 		return
 	end
 
-	preview.title:SetText(L["Preview"])
+	preview.title:SetText(Localize("Preview"))
 
 	for _, flag in pairs(previewWidgetFlags) do
 		if flag.checkbox then
-			flag.checkbox:SetText(L[flag.label])
+			flag.checkbox:SetText(Localize(flag.label))
 		end
 	end
 end
@@ -362,24 +384,20 @@ function Preview:UpdateLayout()
 		return
 	end
 
-	local outerInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.outerInset))
-	local titleInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.titleInset))
-	local titleTopInset = addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.titleTopInset))
-	local titleHeight = addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.titleHeight))
-	local bodyTopGap = addon.Utilities:ToUI(addon.Utilities:ToPixels(layoutValues.bodyTopGap))
-	local bodyWidthPx = addon.Utilities:ToPixels(layoutValues.bodyWidth)
-	local checkboxTopOffsetPx = addon.Utilities:ToPixels(layoutValues.checkboxTopOffset)
-	local checkboxGapPx = addon.Utilities:ToPixels(layoutValues.checkboxGap)
-
-	preview.leftBorder:ClearAllPoints()
-	preview.leftBorder:SetPoint("TOPLEFT", preview, "TOPLEFT", 0, -outerInset)
-	preview.leftBorder:SetPoint("BOTTOMLEFT", preview, "BOTTOMLEFT", 0, outerInset)
-	preview.leftBorder:SetWidth(addon.Utilities:ToUI(addon.Utilities:ToPixels(1)))
+	local PP = panel.instance.PP
+	local titleInset = PP:ToUIScaled(layoutValues.titleInset)
+	local titleTopInset = PP:ToUIScaled(layoutValues.titleTopInset)
+	local titleHeight = PP:ToUIScaled(layoutValues.titleHeight)
+	local bodyTopGap = PP:ToUIScaled(layoutValues.bodyTopGap)
+	local bodyWidth = PP:ToUIScaled(layoutValues.bodyWidth)
+	local checkboxTopOffset = layoutValues.checkboxTopOffset
+	local checkboxGap = layoutValues.checkboxGap
 
 	preview.title:ClearAllPoints()
 	preview.title:SetPoint("TOPLEFT", preview, "TOPLEFT", titleInset, -titleTopInset)
 	preview.title:SetPoint("TOPRIGHT", preview, "TOPRIGHT", -titleInset, -titleTopInset)
 	preview.title:SetHeight(titleHeight)
+	OptionsUILib.Theme:ApplyFont(preview.title, PP:ScaleFont(20), "")
 
 	preview.body:ClearAllPoints()
 	preview.body:SetPoint("TOPLEFT", preview.title, "BOTTOMLEFT", 0, -bodyTopGap)
@@ -389,37 +407,27 @@ function Preview:UpdateLayout()
 
 	preview.frameAreaBackground:ClearAllPoints()
 	preview.frameAreaBackground:SetPoint("TOPLEFT", preview.body, "TOPLEFT", 0, 0)
-	preview.frameAreaBackground:SetSize(addon.Utilities:ToUI(bodyWidthPx), addon.Utilities:ToUI(bodyWidthPx))
+	preview.frameAreaBackground:SetSize(bodyWidth, bodyWidth)
 
 	local profile = addon.Database:GetProfile()
 	self:UpdateFrameLayout(preview.partyFrame, profile.party or {})
 	self:UpdateFrameLayout(preview.raidFrame, profile.raid or {})
-	local checkboxIndex = 0
 
 	for _, control in pairs(preview.controls) do
-		if control.layoutValues then
-			control.layoutValues.width = addon.Utilities:ToUI(bodyWidthPx)
-		end
-
-		if control.UpdateLayout then
-			control:UpdateLayout()
-		end
-
-		if control.Hide then
-			control:Hide()
-		end
+		control:SetLayoutWidth(layoutValues.bodyWidth)
+		control:UpdateLayout()
+		control:Hide()
 	end
 
+	local checkboxIndex = 0
 	for _, widgetKey in ipairs((previewPageWidgets[activePage] or {}).controls or {}) do
 		local flag = previewWidgetFlags[widgetKey]
 		local checkbox = flag and flag.checkbox
 
 		if checkbox then
-			local checkboxHeightPx = addon.Utilities:ToPixels(checkbox.layoutValues.height)
-			local offsetYPx = checkboxTopOffsetPx + (checkboxIndex * (checkboxHeightPx + checkboxGapPx))
+			local offsetY = checkboxTopOffset + (checkboxIndex * (checkbox.layout.height + checkboxGap))
 
-			checkbox:ClearAllPoints()
-			checkbox:SetPoint("TOPLEFT", preview.body, "TOPLEFT", 0, -addon.Utilities:ToUI(offsetYPx))
+			checkbox:SetLayoutPoint("TOPLEFT", preview.body, "TOPLEFT", 0, -offsetY)
 			checkbox:SetChecked(flag.enabled == true)
 			checkbox:Show()
 

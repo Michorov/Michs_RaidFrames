@@ -4,298 +4,107 @@ addon.Options = addon.Options or {}
 addon.Options.Pages = addon.Options.Pages or {}
 addon.Options.Pages.Frames = addon.Options.Pages.Frames or {}
 
-local FramesPage = addon.Options.Pages.Frames
-
-local page
-local L = addon.L
-local theme = addon.Options.Theme
-local testModeButtonWidth = 116
-local testModeButtonHeight = 22
-
-local function GetTestModeButtonText()
-	if addon.FrameRegistry and addon.FrameRegistry.GetActiveTestMode and addon.FrameRegistry:GetActiveTestMode() then
-		return L["Lock"]
-	end
-
-	return L["Unlock"]
-end
-
-local function GetModeDefaults(mode)
-	if mode == "raid" then
-		return {
-			frameWidth = 110,
-			frameHeight = 56,
-			borderThickness = 1,
-			backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
-			borderColor = { r = 0, g = 0, b = 0, a = 1 },
-		}
-	end
-
-	return {
-		frameWidth = 128,
-		frameHeight = 64,
-		borderThickness = 1,
-		backgroundColor = { r = 0.12, g = 0.12, b = 0.12, a = 1.0 },
-		borderColor = { r = 0, g = 0, b = 0, a = 1 },
-	}
-end
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Frame changes are disabled during combat."])
-end
+local Frames = addon.Options.Pages.Frames
 
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
 
-local function ApplyModeSetting(updateFn, notifyEvent)
-	if InCombatLockdown() then
-		ShowCombatLockMessage()
-		if page and page.UpdateState then
-			page:UpdateState(addon.Database:GetProfile())
-		end
-		return
-	end
+function Frames:Create(panel, config)
+	config = config or {}
 
-	local profile = addon.Database:GetProfile()
-	local mode = addon.Options.State:GetMode()
+	local page = panel:RegisterPage("frames", {
+		titleKey = "Frames",
+		showHeader = true,
+		showModeSwitch = true,
+		modeSwitchType = "toggle",
+		showHeaderButton = true,
+		headerButtonText = config.headerButtonText,
+		headerButtonCallback = config.headerButtonCallback,
+	})
+	local subpage = page:RegisterSubPage("frames", { titleKey = "Frames" })
 
-	profile[mode] = profile[mode] or {}
-	updateFn(profile[mode], mode)
+	local frameRow = subpage:CreateRow(3)
+	frameRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	addon.UpdateScheduler:Notify(notifyEvent)
-end
+	local frameWidthSlider = frameRow:CreateControl("Slider", { labelKey = "Frame Width" })
+	frameWidthSlider:SetMinMaxValues(25, 200)
+	frameWidthSlider:SetStep(1)
+	frameWidthSlider:SetValueFormatter(FormatInteger)
+	frameWidthSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].size.width
+		end,
+		set = function(profile, mode, value)
+			profile[mode].size.width = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
 
-local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
-	slider:SetMinMaxValues(minValue, maxValue)
-	slider:SetStep(step or 1)
-	slider:SetValueFormatter(FormatInteger)
-end
+	local frameHeightSlider = frameRow:CreateControl("Slider", { labelKey = "Frame Height" })
+	frameHeightSlider:SetMinMaxValues(25, 200)
+	frameHeightSlider:SetStep(1)
+	frameHeightSlider:SetValueFormatter(FormatInteger)
+	frameHeightSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].size.height
+		end,
+		set = function(profile, mode, value)
+			profile[mode].size.height = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
 
-function FramesPage:Ensure(parent)
-	if page then
-		return page
-	end
+	local backgroundColorPicker = frameRow:CreateControl("ColorPicker", { labelKey = "Background Color" })
+	backgroundColorPicker:SetHasOpacity(true)
+	backgroundColorPicker:BindValue({
+		get = function(profile, mode)
+			return profile[mode].background.color
+		end,
+		set = function(profile, mode, value)
+			profile[mode].background.color = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("backgroundSettingsChanged")
+		end,
+	})
 
-	page = CreateFrame("Frame", nil, parent)
+	local borderRow = subpage:CreateRow(3)
+	borderRow:SetLayoutPoint("TOPLEFT", frameRow.frame, "BOTTOMLEFT", 0, -8)
 
-	page.header = CreateFrame("Frame", nil, page)
-	page.header:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
-	page.header:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, 0)
+	local frameBorderThicknessSlider = borderRow:CreateControl("Slider", { labelKey = "Border Size" })
+	frameBorderThicknessSlider:SetMinMaxValues(0, 6)
+	frameBorderThicknessSlider:SetStep(1)
+	frameBorderThicknessSlider:SetValueFormatter(FormatInteger)
+	frameBorderThicknessSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].border.thicknessPx
+		end,
+		set = function(profile, mode, value)
+			profile[mode].border.thicknessPx = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("borderSettingsChanged")
+		end,
+	})
 
-	page.body = CreateFrame("Frame", nil, page)
-	page.body:SetPoint("BOTTOMLEFT", page, "BOTTOMLEFT", 0, 0)
-	page.body:SetPoint("BOTTOMRIGHT", page, "BOTTOMRIGHT", 0, 0)
-
-	page.header.title = page.header:CreateFontString(nil, "OVERLAY")
-	page.header.title:SetPoint("LEFT", page.header, "LEFT", 0, 0)
-	page.header.title:SetJustifyH("LEFT")
-	theme:ApplyFont(page.header.title, "arialNarrow", 20, "")
-	page.header.title:SetTextColor(theme:GetTextColor("highlight"))
-	page.header.title:SetText(L["Frames"])
-
-	page.modeToggle = addon.Options.Controls.SegmentedToggle:Create(
-		page.header,
-		{ value = "party", text = L["Party"] },
-		{ value = "raid", text = L["Raid"] }
-	)
-	page.modeToggle:SetPoint("RIGHT", page.header, "RIGHT", 0, 0)
-	page.modeToggle:SetOnValueChanged(function(_, value)
-		addon.Options.Sections.Content:SetMode(value)
-		if page and page.UpdateLayout then
-			page:UpdateLayout()
-		end
-		if page and page.UpdateState then
-			page:UpdateState(addon.Database:GetProfile())
-		end
-	end)
-
-	page.testModeButton = addon.Options.Controls.Button:Create(page.header, GetTestModeButtonText())
-	page.testModeButton:SetLayoutSize(testModeButtonWidth, testModeButtonHeight)
-	page.testModeButton:SetOnClick(function()
-		addon.FrameRegistry:ToggleTestMode(addon.Options.State:GetMode())
-		if page and page.UpdateState then
-			page:UpdateState(addon.Database:GetProfile())
-		end
-	end)
-
-	page.frameWidthSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Width"])
-	page.frameWidthSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameWidthSlider, 25, 200, 1)
-	page.frameWidthSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.size = section.size or {}
-			section.size.width = value
-		end, "layoutChanged")
-	end)
-
-	page.frameHeightSlider = addon.Options.Controls.Slider:Create(page.body, L["Frame Height"])
-	page.frameHeightSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameHeightSlider, 25, 200, 1)
-	page.frameHeightSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.size = section.size or {}
-			section.size.height = value
-		end, "layoutChanged")
-	end)
-
-	page.frameBorderThicknessSlider = addon.Options.Controls.Slider:Create(page.body, L["Border Size"])
-	page.frameBorderThicknessSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(page.frameBorderThicknessSlider, 0, 6, 1)
-	page.frameBorderThicknessSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.border = section.border or {}
-			section.border.thicknessPx = value
-		end, "borderSettingsChanged")
-	end)
-
-	page.backgroundColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, L["Background Color"])
-	page.backgroundColorPicker:SetLayoutWidth(174)
-	page.backgroundColorPicker:SetHasOpacity(true)
-	page.backgroundColorPicker:SetOnValueChanged(function(_, r, g, b, a)
-		ApplyModeSetting(function(section)
-			section.background = section.background or {}
-			section.background.color = { r = r, g = g, b = b, a = a }
-		end, "backgroundSettingsChanged")
-	end)
-
-	page.borderColorPicker = addon.Options.Controls.ColorPicker:Create(page.body, L["Border Color"])
-	page.borderColorPicker:SetLayoutWidth(174)
-	page.borderColorPicker:SetHasOpacity(true)
-	page.borderColorPicker:SetOnValueChanged(function(_, r, g, b, a)
-		ApplyModeSetting(function(section)
-			section.border = section.border or {}
-			section.border.color = { r = r, g = g, b = b, a = a }
-		end, "borderSettingsChanged")
-	end)
-
-	page.controls = {
-		modeToggle = page.modeToggle,
-		testModeButton = page.testModeButton,
-		frameWidthSlider = page.frameWidthSlider,
-		frameHeightSlider = page.frameHeightSlider,
-		frameBorderThicknessSlider = page.frameBorderThicknessSlider,
-		backgroundColorPicker = page.backgroundColorPicker,
-		borderColorPicker = page.borderColorPicker,
-	}
-
-	function page:UpdateLocale()
-		self.header.title:SetText(L["Frames"])
-		self.modeToggle:SetOptions({ value = "party", text = L["Party"] }, { value = "raid", text = L["Raid"] })
-		self.testModeButton:SetText(GetTestModeButtonText())
-		self.frameWidthSlider:SetLabel(L["Frame Width"])
-		self.frameHeightSlider:SetLabel(L["Frame Height"])
-		self.frameBorderThicknessSlider:SetLabel(L["Border Size"])
-		self.backgroundColorPicker:SetLabel(L["Background Color"])
-		self.borderColorPicker:SetLabel(L["Border Color"])
-	end
-
-	function page:UpdateLayout()
-		local controls = self.controls
-		local headerHeightPx = addon.Utilities:ToPixels(32)
-		local firstControlOffsetPx = addon.Utilities:ToPixels(16)
-		local headerControlGapPx = addon.Utilities:ToPixels(8)
-		local rowStepPx = addon.Utilities:ToPixels(50)
-		local columnGapPx = addon.Utilities:ToPixels(30)
-		local threeColumnSlotWidthPx = addon.Utilities:ToPixels(174)
-		local threeColumnSecondOffsetPx = threeColumnSlotWidthPx + columnGapPx
-		local threeColumnThirdOffsetPx = (threeColumnSlotWidthPx * 2) + (columnGapPx * 2)
-		self.header:SetHeight(addon.Utilities:ToUI(headerHeightPx))
-
-		self.body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
-		self.body:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT", 0, -addon.Utilities:ToUI(firstControlOffsetPx))
-
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
-		end
-
-		controls.testModeButton:ClearAllPoints()
-		controls.testModeButton:SetPoint(
-			"RIGHT",
-			controls.modeToggle,
-			"LEFT",
-			-addon.Utilities:ToUI(headerControlGapPx),
-			0
-		)
-
-		controls.frameWidthSlider:ClearAllPoints()
-		controls.frameWidthSlider:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, 0)
-
-		controls.frameHeightSlider:ClearAllPoints()
-		controls.frameHeightSlider:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			0
-		)
-
-		controls.backgroundColorPicker:ClearAllPoints()
-		controls.backgroundColorPicker:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			addon.Utilities:ToUI(threeColumnThirdOffsetPx),
-			0
-		)
-
-		controls.frameBorderThicknessSlider:ClearAllPoints()
-		controls.frameBorderThicknessSlider:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(rowStepPx)
-		)
-
-		controls.borderColorPicker:ClearAllPoints()
-		controls.borderColorPicker:SetPoint(
-			"TOPLEFT",
-			self.body,
-			"TOPLEFT",
-			addon.Utilities:ToUI(threeColumnSecondOffsetPx),
-			-addon.Utilities:ToUI(rowStepPx)
-		)
-	end
-
-	function page:UpdateState(profile)
-		if not profile then
-			return
-		end
-
-		local controls = self.controls
-		local mode = addon.Options.State:GetMode()
-		local section = profile[mode] or {}
-		local defaults = GetModeDefaults(mode)
-		local size = section.size or {}
-		local background = section.background or {}
-		local border = section.border or {}
-		local backgroundColor = background.color or defaults.backgroundColor
-		local borderColor = border.color or defaults.borderColor
-
-		controls.modeToggle:SetValue(mode)
-		controls.testModeButton:SetText(GetTestModeButtonText())
-		controls.frameWidthSlider:SetValueSilently(size.width or defaults.frameWidth)
-		controls.frameHeightSlider:SetValueSilently(size.height or defaults.frameHeight)
-		controls.frameBorderThicknessSlider:SetValueSilently(border.thicknessPx or defaults.borderThickness)
-		controls.backgroundColorPicker:SetColor(
-			backgroundColor.r,
-			backgroundColor.g,
-			backgroundColor.b,
-			backgroundColor.a
-		)
-		controls.borderColorPicker:SetColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a)
-	end
-
-	addon.Options.Data:RegisterForUpdates(page, function(profile)
-		page:UpdateState(profile)
-	end)
-
-	page:UpdateLocale()
-	page:UpdateLayout()
-	page:UpdateState(addon.Database:GetProfile())
+	local borderColorPicker = borderRow:CreateControl("ColorPicker", { labelKey = "Border Color" })
+	borderColorPicker:SetHasOpacity(true)
+	borderColorPicker:BindValue({
+		get = function(profile, mode)
+			return profile[mode].border.color
+		end,
+		set = function(profile, mode, value)
+			profile[mode].border.color = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("borderSettingsChanged")
+		end,
+	})
 
 	return page
 end

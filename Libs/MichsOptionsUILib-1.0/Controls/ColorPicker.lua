@@ -1,14 +1,12 @@
-local _, addon = ...
+local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
+if not OptionsUILib then
+	return
+end
 
-addon.Options = addon.Options or {}
-addon.Options.Controls = addon.Options.Controls or {}
-addon.Options.Controls.ColorPicker = addon.Options.Controls.ColorPicker or {}
+OptionsUILib.Controls = OptionsUILib.Controls or {}
+OptionsUILib.Controls.ColorPicker = OptionsUILib.Controls.ColorPicker or {}
 
-local ColorPicker = addon.Options.Controls.ColorPicker
-local theme = addon.Options.Theme
-
-ColorPicker.defaultHeight = 44
-ColorPicker.compactHeight = 24
+local ColorPicker = OptionsUILib.Controls.ColorPicker
 
 local function ClampChannel(value, fallback)
 	value = tonumber(value)
@@ -19,36 +17,23 @@ local function ClampChannel(value, fallback)
 	return math.max(0, math.min(1, value))
 end
 
-local function CreateBorder(frame)
-	frame.topBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.topBorder:SetColorTexture(theme:GetColor("border"))
-	frame.topBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-	frame.topBorder:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-
-	frame.bottomBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.bottomBorder:SetColorTexture(theme:GetColor("border"))
-	frame.bottomBorder:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-	frame.bottomBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-
-	frame.leftBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.leftBorder:SetColorTexture(theme:GetColor("border"))
-	frame.leftBorder:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-	frame.leftBorder:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-
-	frame.rightBorder = frame:CreateTexture(nil, "OVERLAY")
-	frame.rightBorder:SetColorTexture(theme:GetColor("border"))
-	frame.rightBorder:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-	frame.rightBorder:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-end
-
 local function UpdateVisual(control)
 	control.swatchFill:SetColorTexture(control.r, control.g, control.b, control.a)
 	control.field.hoverTexture:SetShown(control.isHovered == true)
 end
 
 local function NotifyValueChanged(control)
-	if control.onValueChanged then
-		control.onValueChanged(control, control.r, control.g, control.b, control.a)
+	local value = {
+		r = control.r,
+		g = control.g,
+		b = control.b,
+		a = control.a,
+	}
+
+	if control.HandleValueChanged then
+		control:HandleValueChanged(value)
+	elseif control.onValueChanged then
+		control.onValueChanged(control, value)
 	end
 end
 
@@ -57,7 +42,9 @@ local function OpenPicker(control)
 		return
 	end
 
-	addon.Options.Controls.Dropdown:CloseOpenDropdown()
+	if OptionsUILib.Controls.Dropdown then
+		OptionsUILib.Controls.Dropdown:CloseOpenDropdown()
+	end
 
 	local initialR, initialG, initialB, initialA = control:GetColor()
 
@@ -94,20 +81,27 @@ local function OpenPicker(control)
 	})
 end
 
-function ColorPicker:Create(parent, labelText)
+function ColorPicker:Create(parent, PP, labelText)
 	local control = CreateFrame("Frame", nil, parent)
-	control.layoutValues = {
+
+	control.PP = PP
+	control.layout = {
+		parent = parent,
 		width = 220,
-		height = ColorPicker.defaultHeight,
+		height = 44,
 		pickerSize = 24,
 		labelInset = 8,
 		borderThickness = 1,
 		swatchInnerInset = 2,
 		fontSize = 12,
+		point = nil,
+		relativeTo = parent,
+		relativePoint = nil,
+		offsetX = 0,
+		offsetY = 0,
 	}
 	control.labelVisible = true
 	control.hasOpacity = false
-	control.isCompact = false
 	control.isHovered = false
 	control.r = 1
 	control.g = 1
@@ -115,8 +109,7 @@ function ColorPicker:Create(parent, labelText)
 	control.a = 1
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	theme:ApplyFont(control.label, "arialNarrow", control.layoutValues.fontSize, "")
-	control.label:SetTextColor(theme:GetTextColor("primary"))
+	control.label:SetTextColor(OptionsUILib.Theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
 	control.label:SetText(labelText or "Color")
@@ -126,11 +119,29 @@ function ColorPicker:Create(parent, labelText)
 		bgFile = "Interface\\Buttons\\WHITE8x8",
 	})
 	control.field:SetBackdropColor(0.02, 0.03, 0.04, 1)
-	CreateBorder(control.field)
 
-	control.field.hoverTexture = control.field:CreateTexture(nil, "ARTWORK")
-	control.field.hoverTexture:SetColorTexture(1, 1, 1, 0.08)
-	control.field.hoverTexture:SetDrawLayer("OVERLAY", 1)
+	control.field.topBorder = control.field:CreateTexture(nil, "OVERLAY")
+	control.field.topBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
+	control.field.topBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
+	control.field.topBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
+
+	control.field.bottomBorder = control.field:CreateTexture(nil, "OVERLAY")
+	control.field.bottomBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
+	control.field.bottomBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
+	control.field.bottomBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
+
+	control.field.leftBorder = control.field:CreateTexture(nil, "OVERLAY")
+	control.field.leftBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
+	control.field.leftBorder:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
+	control.field.leftBorder:SetPoint("BOTTOMLEFT", control.field, "BOTTOMLEFT", 0, 0)
+
+	control.field.rightBorder = control.field:CreateTexture(nil, "OVERLAY")
+	control.field.rightBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
+	control.field.rightBorder:SetPoint("TOPRIGHT", control.field, "TOPRIGHT", 0, 0)
+	control.field.rightBorder:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
+
+	control.field.hoverTexture = control.field:CreateTexture(nil, "OVERLAY", nil, 1)
+	control.field.hoverTexture:SetColorTexture(OptionsUILib.Theme:GetColor("controlHoverOverlay"))
 	control.field.hoverTexture:SetPoint("TOPLEFT", control.field, "TOPLEFT", 0, 0)
 	control.field.hoverTexture:SetPoint("BOTTOMRIGHT", control.field, "BOTTOMRIGHT", 0, 0)
 	control.field.hoverTexture:Hide()
@@ -142,40 +153,33 @@ function ColorPicker:Create(parent, labelText)
 	end
 
 	function control:SetLayoutWidth(width)
-		self.layoutValues.width = width
+		self.layout.width = width
 		self:UpdateLayout()
 	end
 
 	function control:SetLayoutHeight(height)
-		self.layoutValues.height = height
+		self.layout.height = height
 		self:UpdateLayout()
 	end
 
 	function control:SetLayoutSize(width, height)
-		self.layoutValues.width = width
-		self.layoutValues.height = height
-		self:UpdateLayout()
-	end
-
-	function control:SetCompact(isCompact)
-		self.isCompact = isCompact == true
-		self.layoutValues.height = self.isCompact and ColorPicker.compactHeight or ColorPicker.defaultHeight
+		self.layout.width = width
+		self.layout.height = height
 		self:UpdateLayout()
 	end
 
 	function control:SetPickerSize(size)
-		self.layoutValues.pickerSize = size
-		self.layoutValues.height = math.max(self.layoutValues.height, size or 0)
+		self.layout.pickerSize = size
 		self:UpdateLayout()
 	end
 
 	function control:SetBorderSize(borderThickness)
-		self.layoutValues.borderThickness = borderThickness
+		self.layout.borderThickness = borderThickness
 		self:UpdateLayout()
 	end
 
 	function control:SetFontSize(fontSize)
-		self.layoutValues.fontSize = fontSize
+		self.layout.fontSize = fontSize
 		self:UpdateLayout()
 	end
 
@@ -206,33 +210,41 @@ function ColorPicker:Create(parent, labelText)
 		UpdateVisual(self)
 	end
 
+	function control:SetBoundValue(value)
+		self:SetColor(value)
+	end
+
 	function control:GetColor()
 		return self.r, self.g, self.b, self.a
 	end
 
 	function control:SetOnValueChanged(callback)
-		self.onValueChanged = callback
+		self.onValueChanged = function(_, value)
+			if type(value) == "table" then
+				callback(self, value.r, value.g, value.b, value.a)
+			else
+				callback(self, self.r, self.g, self.b, self.a)
+			end
+		end
+	end
+
+	function control:SetLayoutPoint(point, relativeTo, relativePoint, offsetX, offsetY)
+		self.layout.point = point
+		self.layout.relativeTo = relativeTo or self.layout.parent
+		self.layout.relativePoint = relativePoint or point
+		self.layout.offsetX = offsetX or 0
+		self.layout.offsetY = offsetY or 0
+		self:UpdateLayout()
 	end
 
 	function control:UpdateLayout()
-		local widthPx = addon.Utilities:ToPixels(self.layoutValues.width)
-		local heightPx = addon.Utilities:ToPixels(self.layoutValues.height)
-		local pickerSizePx = addon.Utilities:ToPixels(self.layoutValues.pickerSize)
-		local labelInsetPx = addon.Utilities:ToPixels(self.layoutValues.labelInset)
-		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
-		local swatchInnerInsetPx = addon.Utilities:ToPixels(self.layoutValues.swatchInnerInset)
-		local pickerTopInsetPx = math.max(0, heightPx - pickerSizePx)
+		local pickerSize = PP:ToUIScaled(self.layout.pickerSize)
+		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
+		local swatchInnerInset = PP:ToUIScaled(self.layout.swatchInnerInset)
+		local pickerTopInset = PP:ToUIScaled(math.max(0, self.layout.height - self.layout.pickerSize))
 
-		local width = addon.Utilities:ToUI(widthPx)
-		local height = addon.Utilities:ToUI(heightPx)
-		local pickerSize = addon.Utilities:ToUI(pickerSizePx)
-		local labelInset = addon.Utilities:ToUI(labelInsetPx)
-		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
-		local swatchInnerInset = addon.Utilities:ToUI(swatchInnerInsetPx)
-		local pickerTopInset = addon.Utilities:ToUI(pickerTopInsetPx)
-
-		self:SetSize(width, height)
-		theme:ApplyFont(self.label, "arialNarrow", self.layoutValues.fontSize, "")
+		self:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
+		OptionsUILib.Theme:ApplyFont(self.label, PP:ScaleFont(self.layout.fontSize), "")
 
 		self.field:ClearAllPoints()
 		self.field:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -pickerTopInset)
@@ -248,15 +260,25 @@ function ColorPicker:Create(parent, labelText)
 		self.swatchFill:SetPoint("BOTTOMRIGHT", self.field, "BOTTOMRIGHT", -swatchInnerInset, swatchInnerInset)
 
 		self.label:ClearAllPoints()
-
 		if self.labelVisible then
 			self.label:Show()
-			self.label:SetPoint("LEFT", self.field, "RIGHT", labelInset, 0)
+			self.label:SetPoint("LEFT", self.field, "RIGHT", PP:ToUIScaled(self.layout.labelInset), 0)
 			self.label:SetPoint("RIGHT", self, "RIGHT", 0, 0)
 			self.label:SetPoint("TOP", self.field, "TOP", 0, 0)
 			self.label:SetPoint("BOTTOM", self.field, "BOTTOM", 0, 0)
 		else
 			self.label:Hide()
+		end
+
+		if self.layout.point then
+			self:ClearAllPoints()
+			self:SetPoint(
+				self.layout.point,
+				self.layout.relativeTo,
+				self.layout.relativePoint,
+				PP:ToUIScaled(self.layout.offsetX),
+				PP:ToUIScaled(self.layout.offsetY)
+			)
 		end
 	end
 

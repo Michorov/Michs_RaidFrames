@@ -6,14 +6,13 @@ addon.Options.Pages.Auras = addon.Options.Pages.Auras or {}
 addon.Options.Pages.Auras.BuffFilters = addon.Options.Pages.Auras.BuffFilters or {}
 
 local BuffFilters = addon.Options.Pages.Auras.BuffFilters
+local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
 
-local subpage
-local L = addon.L
-local theme = addon.Options.Theme
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Buff filters are disabled during combat."])
-end
+local layoutValues = {
+	rowHeight = 24,
+	rowOffset = 24,
+	columns = 2,
+}
 
 local function GetAuraDisplayName(spellId, fallbackName)
 	if addon.Locale and addon.Locale.GetAuraDisplayName then
@@ -23,31 +22,17 @@ local function GetAuraDisplayName(spellId, fallbackName)
 	return fallbackName
 end
 
-local function GetCurrentAuraEntries(profile)
-	profile = profile or addon.Database:GetProfile()
-
-	local mode = addon.Options.State:GetMode()
-	local section = profile[mode] or {}
-	local widgets = section.widgets or {}
-	local icons = widgets.icons or {}
-	local buffs = icons.buffs or {}
-	local customAuraValues = buffs.customAuraValues or {}
+local function GetCurrentAuraEntries(profile, mode)
+	local section = profile[mode]
+	local customAuraValues = section.widgets.icons.buffs.customAuraValues
 	local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
 	local classValues = customAuraValues[classFileName] or {}
 	local specID = addon.Utilities:GetPlayerSpecID()
+	local specName = specID and (select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))) or nil
 	local specValues = (specID and classValues[specID]) or nil
 	local entries = {}
-	local specName = specID and (select(2, GetSpecializationInfoByID(specID)) or ("Spec " .. tostring(specID))) or nil
 
-	if not specID then
-		return {
-			specID = nil,
-			specName = nil,
-			entries = entries,
-		}
-	end
-
-	if type(specValues) ~= "table" then
+	if not specID or type(specValues) ~= "table" then
 		return {
 			specID = specID,
 			specName = specName,
@@ -58,12 +43,12 @@ local function GetCurrentAuraEntries(profile)
 	for spellId, auraData in pairs(specValues) do
 		local fallbackName = auraData.name or ("Spell " .. tostring(spellId))
 
-		table.insert(entries, {
+		entries[#entries + 1] = {
 			specID = specID,
 			spellId = spellId,
 			name = GetAuraDisplayName(spellId, fallbackName),
 			enabled = auraData.enabled == true,
-		})
+		}
 	end
 
 	table.sort(entries, function(a, b)
@@ -77,142 +62,113 @@ local function GetCurrentAuraEntries(profile)
 	}
 end
 
-local function EnsureCheckboxPool(targetCount)
-	subpage.dynamicCheckboxes = subpage.dynamicCheckboxes or {}
-	subpage.controls = subpage.controls or {}
+function BuffFilters:Create(page)
+	local subpage = page:RegisterSubPage("buffFilters", { titleKey = "Buffs - Filters" })
+	local panel = page.panel
 
-	while #subpage.dynamicCheckboxes < targetCount do
-		local index = #subpage.dynamicCheckboxes + 1
-		local checkbox = addon.Options.Controls.Checkbox:Create(subpage, "")
-		checkbox:SetLayoutWidth(174)
-		checkbox:SetOnValueChanged(function(self, checked)
-			if InCombatLockdown() then
-				ShowCombatLockMessage()
-				if subpage and subpage.UpdateState then
-					subpage:UpdateState(addon.Database:GetProfile())
-				end
-				return
-			end
+	subpage.filterRows = {}
 
-			if not self.specID or not self.spellId then
-				return
-			end
-
-			local profile = addon.Database:GetProfile()
-			local mode = addon.Options.State:GetMode()
-			local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
-
-			profile[mode] = profile[mode] or {}
-			profile[mode].widgets = profile[mode].widgets or {}
-			profile[mode].widgets.icons = profile[mode].widgets.icons or {}
-			profile[mode].widgets.icons.buffs = profile[mode].widgets.icons.buffs or {}
-
-			local buffs = profile[mode].widgets.icons.buffs
-			buffs.customAuraValues = buffs.customAuraValues or {}
-			buffs.customAuraValues[classFileName] = buffs.customAuraValues[classFileName] or {}
-			buffs.customAuraValues[classFileName][self.specID] = buffs.customAuraValues[classFileName][self.specID] or {}
-			buffs.customAuraValues[classFileName][self.specID][self.spellId] =
-				buffs.customAuraValues[classFileName][self.specID][self.spellId] or {}
-			buffs.customAuraValues[classFileName][self.specID][self.spellId].enabled = checked == true
-
-			addon.UpdateScheduler:Notify("buffAuraFiltersChanged")
-			addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
-			addon.UpdateScheduler:Notify("aurasStateChanged")
-		end)
-
-		table.insert(subpage.dynamicCheckboxes, checkbox)
-		subpage.controls["filterCheckbox" .. tostring(index)] = checkbox
-	end
-end
-
-local function RefreshDynamicCheckboxes(profile)
-	local currentSpec = GetCurrentAuraEntries(profile)
-	local entries = currentSpec.entries
-
-	EnsureCheckboxPool(#entries)
-	subpage.activeEntries = entries
-	subpage.activeSpecID = currentSpec.specID
-	subpage.activeSpecName = currentSpec.specName
-
-	for index, checkbox in ipairs(subpage.dynamicCheckboxes) do
-		local entry = entries[index]
-
-		if entry then
-			checkbox.specID = entry.specID
-			checkbox.spellId = entry.spellId
-			checkbox:SetText(entry.name)
-			checkbox:SetChecked(entry.enabled)
-			checkbox:Show()
-		else
-			checkbox.specID = nil
-			checkbox.spellId = nil
-			checkbox:Hide()
-		end
-	end
-
-	if currentSpec.specName and #entries == 0 then
-		subpage.emptyText:Show()
-	else
-		subpage.emptyText:Hide()
-	end
-end
-
-function BuffFilters:Ensure(parent)
-	if subpage then
-		return subpage
-	end
-
-	subpage = CreateFrame("Frame", nil, parent)
-	subpage.controls = {}
-
-	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
+	subpage.emptyText = subpage.frame:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
-	theme:ApplyFont(subpage.emptyText, "arialNarrow", 14, "")
-	subpage.emptyText:SetTextColor(theme:GetTextColor("secondary"))
-	subpage.emptyText:SetText(L["No filter found for this specialization"])
+	subpage.emptyText:SetTextColor(OptionsUILib.Theme:GetTextColor("secondary"))
+	OptionsUILib.Theme:ApplyFont(subpage.emptyText, panel.instance.PP:ScaleFont(14), "")
+	subpage.emptyText:SetText(panel:Localize("No filter found for this specialization"))
 	subpage.emptyText:Hide()
 
-	function subpage:UpdateLocale()
-		self.emptyText:SetText(L["No filter found for this specialization"])
-		RefreshDynamicCheckboxes(addon.Database:GetProfile())
+	local function EnsureFilterEntry(profile, mode, specID, spellId)
+		local buffs = profile[mode].widgets.icons.buffs
+		local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
+
+		buffs.customAuraValues[classFileName] = buffs.customAuraValues[classFileName] or {}
+		buffs.customAuraValues[classFileName][specID] = buffs.customAuraValues[classFileName][specID] or {}
+		buffs.customAuraValues[classFileName][specID][spellId] = buffs.customAuraValues[classFileName][specID][spellId] or {}
+
+		return buffs.customAuraValues[classFileName][specID][spellId]
 	end
 
-	function subpage:UpdateLayout()
-		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(24)
+	local function EnsureRowPool(targetCount)
+		while #subpage.filterRows < targetCount do
+			local layoutRow = subpage:CreateRow(layoutValues.columns)
+			layoutRow:SetLayoutHeight(layoutValues.rowHeight)
 
-		RefreshDynamicCheckboxes(addon.Database:GetProfile())
+			local slot = layoutRow:CreateCheckboxSlot("top")
+			local checkbox = slot:CreateControl("Checkbox", "")
+			checkbox:SetOnValueChanged(function(control, checked)
+				if not control.specID or not control.spellId then
+					return
+				end
 
-		self.emptyText:ClearAllPoints()
-		self.emptyText:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+				panel:UpdateValue(function(profile, mode)
+					local filterEntry = EnsureFilterEntry(profile, mode, control.specID, control.spellId)
+					filterEntry.enabled = checked == true
+				end)
 
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
+				addon.UpdateScheduler:Notify("buffAuraFiltersChanged")
+				addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
+				addon.UpdateScheduler:Notify("aurasStateChanged")
+			end)
+
+			local row = {
+				layoutRow = layoutRow,
+				checkbox = checkbox,
+			}
+
+			subpage.filterRows[#subpage.filterRows + 1] = row
 		end
+	end
 
-		for index, checkbox in ipairs(self.dynamicCheckboxes or {}) do
-			local entry = self.activeEntries[index]
+	local function RefreshRows(profile, mode)
+		local currentSpec = GetCurrentAuraEntries(profile, mode)
+		local entries = currentSpec.entries
+
+		EnsureRowPool(#entries)
+
+		for rowIndex, row in ipairs(subpage.filterRows) do
+			local entry = entries[rowIndex]
+			local offsetY = -((rowIndex - 1) * layoutValues.rowOffset)
 
 			if entry then
-				checkbox:ClearAllPoints()
-				checkbox:SetPoint(
-					"TOPLEFT",
-					self,
-					"TOPLEFT",
-					0,
-					-addon.Utilities:ToUI((index - 1) * rowStepPx)
-				)
+				row.layoutRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, offsetY)
+				row.layoutRow.frame:Show()
+
+				row.checkbox.specID = entry.specID
+				row.checkbox.spellId = entry.spellId
+				row.checkbox:SetText(entry.name)
+				row.checkbox:SetChecked(entry.enabled)
+				row.checkbox:Show()
+			else
+				row.checkbox.specID = nil
+				row.checkbox.spellId = nil
+				row.checkbox:Hide()
+				row.layoutRow.frame:Hide()
 			end
 		end
+
+		subpage.emptyText:SetShown(currentSpec.specName ~= nil and #entries == 0)
 	end
 
-	function subpage:UpdateState(profile)
-		RefreshDynamicCheckboxes(profile)
+	subpage:SetStateUpdater(function(profile, mode)
+		RefreshRows(profile, mode)
+	end)
+
+	local baseUpdateLocale = subpage.UpdateLocale
+	function subpage:UpdateLocale()
+		baseUpdateLocale(self)
+		self.emptyText:SetText(panel:Localize("No filter found for this specialization"))
+		RefreshRows(panel.profileGetter(panel), panel:GetActiveMode())
 	end
 
-	subpage:UpdateLocale()
+	local baseUpdateLayout = subpage.UpdateLayout
+	function subpage:UpdateLayout()
+		baseUpdateLayout(self)
+
+		local PP = panel.instance.PP
+		self.emptyText:ClearAllPoints()
+		self.emptyText:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
+		OptionsUILib.Theme:ApplyFont(self.emptyText, PP:ScaleFont(14), "")
+	end
+
+	RefreshRows(panel.profileGetter(panel), panel:GetActiveMode())
 
 	return subpage
 end

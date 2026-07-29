@@ -6,14 +6,15 @@ addon.Options.Pages.Auras = addon.Options.Pages.Auras or {}
 addon.Options.Pages.Auras.BuffOverlay = addon.Options.Pages.Auras.BuffOverlay or {}
 
 local BuffOverlay = addon.Options.Pages.Auras.BuffOverlay
+local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
 
-local subpage
-local L = addon.L
-local theme = addon.Options.Theme
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Buff overlay settings are disabled during combat."])
-end
+local layoutValues = {
+	rowHeight = 88,
+	columnWidth = 132,
+	columnGap = 16,
+	controlHeight = 24,
+	controlRowHeight = 44,
+}
 
 local function GetAuraDisplayName(spellId, fallbackName)
 	if addon.Locale and addon.Locale.GetAuraDisplayName then
@@ -23,14 +24,24 @@ local function GetAuraDisplayName(spellId, fallbackName)
 	return fallbackName
 end
 
-local function GetCurrentSpecOverlayData(profile)
-	profile = profile or addon.Database:GetProfile()
+local function EnsureOverlaySpec(profile, mode, overlayKey, specID)
+	profile[mode].widgets.bars.buffOverlays[overlayKey] = profile[mode].widgets.bars.buffOverlays[overlayKey] or {}
 
-	local mode = addon.Options.State:GetMode()
-	local section = profile[mode] or {}
-	local widgets = section.widgets or {}
-	local bars = widgets.bars or {}
-	local buffOverlays = bars.buffOverlays or {}
+	local overlay = profile[mode].widgets.bars.buffOverlays[overlayKey]
+	overlay.bySpec = overlay.bySpec or {}
+	overlay.bySpec[specID] = overlay.bySpec[specID]
+		or {
+			enabled = false,
+			spellId = 0,
+			color = { r = 1, g = 1, b = 1 },
+		}
+
+	return overlay.bySpec[specID]
+end
+
+local function GetCurrentSpecOverlayData(profile, mode, panel)
+	local section = profile[mode]
+	local buffOverlays = section.widgets.bars.buffOverlays
 	local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
 	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
 	local classAuras = defaultAuraValues[classFileName] or {}
@@ -59,10 +70,10 @@ local function GetCurrentSpecOverlayData(profile)
 	for spellId, auraData in pairs(specAuras) do
 		local fallbackName = auraData.name or ("Spell " .. tostring(spellId))
 
-		table.insert(spellEntries, {
+		spellEntries[#spellEntries + 1] = {
 			spellId = spellId,
 			name = GetAuraDisplayName(spellId, fallbackName),
-		})
+		}
 	end
 
 	table.sort(spellEntries, function(a, b)
@@ -71,36 +82,35 @@ local function GetCurrentSpecOverlayData(profile)
 
 	local spellOptions = {
 		{
-			text = L["None"],
+			text = panel:Localize("None"),
 			value = 0,
 		},
 	}
 
 	for _, entry in ipairs(spellEntries) do
-		table.insert(spellOptions, {
+		spellOptions[#spellOptions + 1] = {
 			text = entry.name,
 			value = entry.spellId,
-		})
+		}
 	end
 
 	local overlayKeys = {}
 	for overlayKey in pairs(buffOverlays) do
-		table.insert(overlayKeys, overlayKey)
+		overlayKeys[#overlayKeys + 1] = overlayKey
 	end
 	table.sort(overlayKeys)
 
 	for _, overlayKey in ipairs(overlayKeys) do
-		local overlay = buffOverlays[overlayKey] or {}
-		local bySpec = overlay.bySpec or {}
-		local specSettings = bySpec[specID] or {}
+		local overlay = buffOverlays[overlayKey]
+		local specSettings = overlay.bySpec and overlay.bySpec[specID] or {}
 
-		table.insert(rows, {
+		rows[#rows + 1] = {
 			overlayKey = overlayKey,
 			enabled = specSettings.enabled == true,
 			spellId = specSettings.spellId or 0,
 			color = specSettings.color or { r = 1, g = 1, b = 1 },
 			spellOptions = spellOptions,
-		})
+		}
 	end
 
 	return {
@@ -110,287 +120,152 @@ local function GetCurrentSpecOverlayData(profile)
 	}
 end
 
-local function EnsureRowPool(targetCount)
-	subpage.dynamicRows = subpage.dynamicRows or {}
-	subpage.controls = subpage.controls or {}
+function BuffOverlay:Create(page)
+	local subpage = page:RegisterSubPage("buffOverlay", { titleKey = "Buffs - Overlay" })
+	local panel = page.panel
 
-	while #subpage.dynamicRows < targetCount do
-		local index = #subpage.dynamicRows + 1
-		local row = {}
+	subpage.overlayRows = {}
 
-		row.enabledCheckbox = addon.Options.Controls.Checkbox:Create(subpage, L["Enabled"])
-		row.enabledCheckbox:SetLayoutWidth(110)
-		row.enabledCheckbox:SetOnValueChanged(function(self, checked)
-			if InCombatLockdown() then
-				ShowCombatLockMessage()
-				if subpage and subpage.UpdateState then
-					subpage:UpdateState(addon.Database:GetProfile())
-				end
-				return
-			end
-
-			if not self.overlayKey or not self.specID then
-				return
-			end
-
-			local profile = addon.Database:GetProfile()
-			local mode = addon.Options.State:GetMode()
-
-			profile[mode] = profile[mode] or {}
-			profile[mode].widgets = profile[mode].widgets or {}
-			profile[mode].widgets.bars = profile[mode].widgets.bars or {}
-			profile[mode].widgets.bars.buffOverlays = profile[mode].widgets.bars.buffOverlays or {}
-			profile[mode].widgets.bars.buffOverlays[self.overlayKey] =
-				profile[mode].widgets.bars.buffOverlays[self.overlayKey] or {}
-
-			local overlay = profile[mode].widgets.bars.buffOverlays[self.overlayKey]
-			overlay.bySpec = overlay.bySpec or {}
-			overlay.bySpec[self.specID] = overlay.bySpec[self.specID]
-				or {
-					enabled = false,
-					spellId = 0,
-					color = { r = 1, g = 1, b = 1 },
-				}
-			overlay.bySpec[self.specID].enabled = checked == true
-
-			addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
-			addon.UpdateScheduler:Notify("aurasStateChanged")
-		end)
-
-		row.spellDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Buff"])
-		row.spellDropdown:SetLayoutWidth(174)
-		row.spellDropdown:SetLabelVisible(false)
-		row.spellDropdown:SetOnValueChanged(function(self, value)
-			if InCombatLockdown() then
-				ShowCombatLockMessage()
-				if subpage and subpage.UpdateState then
-					subpage:UpdateState(addon.Database:GetProfile())
-				end
-				return
-			end
-
-			if not self.overlayKey or not self.specID then
-				return
-			end
-
-			local profile = addon.Database:GetProfile()
-			local mode = addon.Options.State:GetMode()
-
-			profile[mode] = profile[mode] or {}
-			profile[mode].widgets = profile[mode].widgets or {}
-			profile[mode].widgets.bars = profile[mode].widgets.bars or {}
-			profile[mode].widgets.bars.buffOverlays = profile[mode].widgets.bars.buffOverlays or {}
-			profile[mode].widgets.bars.buffOverlays[self.overlayKey] =
-				profile[mode].widgets.bars.buffOverlays[self.overlayKey] or {}
-
-			local overlay = profile[mode].widgets.bars.buffOverlays[self.overlayKey]
-			overlay.bySpec = overlay.bySpec or {}
-			overlay.bySpec[self.specID] = overlay.bySpec[self.specID]
-				or {
-					enabled = false,
-					spellId = 0,
-					color = { r = 1, g = 1, b = 1 },
-				}
-			overlay.bySpec[self.specID].spellId = value or 0
-
-			addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
-			addon.UpdateScheduler:Notify("aurasStateChanged")
-		end)
-
-		row.colorPicker = addon.Options.Controls.ColorPicker:Create(subpage, L["Color"])
-		row.colorPicker:SetLayoutWidth(96)
-		row.colorPicker:SetCompact(true)
-		row.colorPicker:SetOnValueChanged(function(self, r, g, b)
-			if InCombatLockdown() then
-				ShowCombatLockMessage()
-				if subpage and subpage.UpdateState then
-					subpage:UpdateState(addon.Database:GetProfile())
-				end
-				return
-			end
-
-			if not self.overlayKey or not self.specID then
-				return
-			end
-
-			local profile = addon.Database:GetProfile()
-			local mode = addon.Options.State:GetMode()
-
-			profile[mode] = profile[mode] or {}
-			profile[mode].widgets = profile[mode].widgets or {}
-			profile[mode].widgets.bars = profile[mode].widgets.bars or {}
-			profile[mode].widgets.bars.buffOverlays = profile[mode].widgets.bars.buffOverlays or {}
-			profile[mode].widgets.bars.buffOverlays[self.overlayKey] =
-				profile[mode].widgets.bars.buffOverlays[self.overlayKey] or {}
-
-			local overlay = profile[mode].widgets.bars.buffOverlays[self.overlayKey]
-			overlay.bySpec = overlay.bySpec or {}
-			overlay.bySpec[self.specID] = overlay.bySpec[self.specID]
-				or {
-					enabled = false,
-					spellId = 0,
-					color = { r = 1, g = 1, b = 1 },
-				}
-			overlay.bySpec[self.specID].color = {
-				r = r,
-				g = g,
-				b = b,
-			}
-
-			addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
-			addon.UpdateScheduler:Notify("aurasStateChanged")
-		end)
-
-		table.insert(subpage.dynamicRows, row)
-		subpage.controls["overlayEnabledCheckbox" .. tostring(index)] = row.enabledCheckbox
-		subpage.controls["overlaySpellDropdown" .. tostring(index)] = row.spellDropdown
-		subpage.controls["overlayColorPicker" .. tostring(index)] = row.colorPicker
-	end
-end
-
-local function RefreshDynamicRows(profile)
-	local currentSpec = GetCurrentSpecOverlayData(profile)
-	local rows = currentSpec.rows
-
-	EnsureRowPool(#rows)
-	subpage.activeRows = rows
-	subpage.activeSpecID = currentSpec.specID
-	subpage.activeSpecName = currentSpec.specName
-
-	for index, row in ipairs(subpage.dynamicRows) do
-		local entry = rows[index]
-
-		if entry then
-			row.enabledCheckbox.overlayKey = entry.overlayKey
-			row.enabledCheckbox.specID = currentSpec.specID
-			row.enabledCheckbox:SetChecked(entry.enabled)
-			row.enabledCheckbox:Show()
-
-			row.spellDropdown.overlayKey = entry.overlayKey
-			row.spellDropdown.specID = currentSpec.specID
-			row.spellDropdown:SetOptions(entry.spellOptions)
-			row.spellDropdown:SetValue(entry.spellId)
-			row.spellDropdown:Show()
-
-			row.colorPicker.overlayKey = entry.overlayKey
-			row.colorPicker.specID = currentSpec.specID
-			row.colorPicker:SetColor(entry.color.r or 1, entry.color.g or 1, entry.color.b or 1, 1)
-			row.colorPicker:Show()
-		else
-			row.enabledCheckbox.overlayKey = nil
-			row.enabledCheckbox.specID = nil
-			row.enabledCheckbox:Hide()
-
-			row.spellDropdown.overlayKey = nil
-			row.spellDropdown.specID = nil
-			row.spellDropdown:Hide()
-
-			row.colorPicker.overlayKey = nil
-			row.colorPicker.specID = nil
-			row.colorPicker:Hide()
-		end
-	end
-
-	if currentSpec.specName and #rows == 0 then
-		subpage.emptyText:Show()
-	else
-		subpage.emptyText:Hide()
-	end
-end
-
-function BuffOverlay:Ensure(parent)
-	if subpage then
-		return subpage
-	end
-
-	subpage = CreateFrame("Frame", nil, parent)
-	subpage.controls = {}
-
-	subpage.emptyText = subpage:CreateFontString(nil, "OVERLAY")
+	subpage.emptyText = subpage.frame:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
-	theme:ApplyFont(subpage.emptyText, "arialNarrow", 14, "")
-	subpage.emptyText:SetTextColor(theme:GetTextColor("secondary"))
-	subpage.emptyText:SetText(L["No overlays available for this specialization"])
+	subpage.emptyText:SetTextColor(OptionsUILib.Theme:GetTextColor("secondary"))
+	OptionsUILib.Theme:ApplyFont(subpage.emptyText, panel.instance.PP:ScaleFont(14), "")
+	subpage.emptyText:SetText(panel:Localize("No overlays available for this specialization"))
 	subpage.emptyText:Hide()
 
-	function subpage:UpdateLocale()
-		self.emptyText:SetText(L["No overlays available for this specialization"])
+	local function UpdateOverlaySetting(overlayKey, specID, callback)
+		panel:UpdateValue(function(profile, mode)
+			callback(EnsureOverlaySpec(profile, mode, overlayKey, specID))
+		end)
 
-		for _, row in ipairs(self.dynamicRows or {}) do
-			row.enabledCheckbox:SetText(L["Enabled"])
-			row.spellDropdown:SetLabel(L["Buff"])
-			row.colorPicker:SetLabel(L["Color"])
-		end
-
-		RefreshDynamicRows(addon.Database:GetProfile())
+		addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
+		addon.UpdateScheduler:Notify("aurasStateChanged")
 	end
 
-	function subpage:UpdateLayout()
-		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(40)
-		local checkboxToDropdownGapPx = addon.Utilities:ToPixels(12)
-		local dropdownToColorGapPx = addon.Utilities:ToPixels(10)
+	local function EnsureRowPool(targetCount)
+		while #subpage.overlayRows < targetCount do
+			local row = {}
 
-		RefreshDynamicRows(addon.Database:GetProfile())
+			row.checkboxRow = subpage:CreateRow(4)
+			row.checkboxSlot = row.checkboxRow:CreateCheckboxSlot("top")
+			row.enabledCheckbox = row.checkboxSlot:CreateControl("Checkbox", { labelKey = "Enabled" })
+			row.enabledCheckbox:SetOnValueChanged(function(control, checked)
+				if not control.overlayKey or not control.specID then
+					return
+				end
 
-		self.emptyText:ClearAllPoints()
-		self.emptyText:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
+				UpdateOverlaySetting(control.overlayKey, control.specID, function(specSettings)
+					specSettings.enabled = checked == true
+				end)
+			end)
 
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
+			row.spellDropdown = subpage:CreateControl("Dropdown", { labelKey = "Buff" })
+			row.spellDropdown:SetLabelVisible(false)
+			row.spellDropdown:SetLayoutWidth(layoutValues.columnWidth)
+			row.spellDropdown:SetLayoutHeight(layoutValues.controlHeight)
+			row.spellDropdown:SetOnValueChanged(function(control, value)
+				if not control.overlayKey or not control.specID then
+					return
+				end
+
+				UpdateOverlaySetting(control.overlayKey, control.specID, function(specSettings)
+					specSettings.spellId = value or 0
+				end)
+			end)
+
+			row.colorPicker = subpage:CreateControl("ColorPicker", { labelKey = "Color" })
+			row.colorPicker:SetLabelVisible(false)
+			row.colorPicker:SetLayoutWidth(layoutValues.columnWidth)
+			row.colorPicker:SetLayoutHeight(layoutValues.controlHeight)
+			row.colorPicker:SetHasOpacity(false)
+			row.colorPicker:SetOnValueChanged(function(control, r, g, b)
+				if not control.overlayKey or not control.specID then
+					return
+				end
+
+				UpdateOverlaySetting(control.overlayKey, control.specID, function(specSettings)
+					specSettings.color = { r = r, g = g, b = b }
+				end)
+			end)
+
+			subpage.overlayRows[#subpage.overlayRows + 1] = row
 		end
+	end
 
-		for index, row in ipairs(self.dynamicRows or {}) do
-			local entry = self.activeRows[index]
+	local function RefreshRows(profile, mode)
+		local currentSpec = GetCurrentSpecOverlayData(profile, mode, panel)
+		local rows = currentSpec.rows
+		local secondColumnOffsetX = layoutValues.columnWidth + layoutValues.columnGap
+
+		EnsureRowPool(#rows)
+
+		for index, row in ipairs(subpage.overlayRows) do
+			local entry = rows[index]
+			local offsetY = -((index - 1) * layoutValues.rowHeight)
+			local secondRowOffsetY = offsetY - layoutValues.controlRowHeight
 
 			if entry then
-				local checkboxHeightPx = addon.Utilities:ToPixels(row.enabledCheckbox.layoutValues.height)
-				local dropdownHeightPx = addon.Utilities:ToPixels(row.spellDropdown.layoutValues.fieldHeight)
-				local checkboxOffsetPx =
-					addon.Utilities:RoundToNearestInt(math.max(0, (dropdownHeightPx - checkboxHeightPx) / 2))
-				local checkboxWidthPx = addon.Utilities:ToPixels(row.enabledCheckbox.layoutValues.width)
-				local dropdownWidthPx = addon.Utilities:ToPixels(row.spellDropdown.layoutValues.width)
-				local dropdownOffsetPx = checkboxWidthPx + checkboxToDropdownGapPx
-				local colorOffsetPx = dropdownOffsetPx + dropdownWidthPx + dropdownToColorGapPx
-				local rowOffsetPx = (index - 1) * rowStepPx
+				row.checkboxRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, offsetY)
+				row.checkboxRow.frame:Show()
 
-				row.enabledCheckbox:ClearAllPoints()
-				row.enabledCheckbox:SetPoint(
-					"TOPLEFT",
-					self,
-					"TOPLEFT",
-					0,
-					-addon.Utilities:ToUI(rowOffsetPx + checkboxOffsetPx)
-				)
+				row.enabledCheckbox.overlayKey = entry.overlayKey
+				row.enabledCheckbox.specID = currentSpec.specID
+				row.enabledCheckbox:SetChecked(entry.enabled)
+				row.enabledCheckbox:Show()
 
-				row.spellDropdown:ClearAllPoints()
-				row.spellDropdown:SetPoint(
-					"TOPLEFT",
-					self,
-					"TOPLEFT",
-					addon.Utilities:ToUI(dropdownOffsetPx),
-					-addon.Utilities:ToUI(rowOffsetPx)
-				)
+				row.spellDropdown.overlayKey = entry.overlayKey
+				row.spellDropdown.specID = currentSpec.specID
+				row.spellDropdown:SetOptions(entry.spellOptions)
+				row.spellDropdown:SetValue(entry.spellId)
+				row.spellDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, secondRowOffsetY)
+				row.spellDropdown:Show()
 
-				row.colorPicker:ClearAllPoints()
-				row.colorPicker:SetPoint(
-					"TOPLEFT",
-					self,
-					"TOPLEFT",
-					addon.Utilities:ToUI(colorOffsetPx),
-					-addon.Utilities:ToUI(rowOffsetPx)
-				)
+				row.colorPicker.overlayKey = entry.overlayKey
+				row.colorPicker.specID = currentSpec.specID
+				row.colorPicker:SetColor(entry.color.r or 1, entry.color.g or 1, entry.color.b or 1, 1)
+				row.colorPicker:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", secondColumnOffsetX, secondRowOffsetY)
+				row.colorPicker:Show()
+			else
+				row.checkboxRow.frame:Hide()
+
+				row.enabledCheckbox.overlayKey = nil
+				row.enabledCheckbox.specID = nil
+				row.enabledCheckbox:Hide()
+
+				row.spellDropdown.overlayKey = nil
+				row.spellDropdown.specID = nil
+				row.spellDropdown:Hide()
+
+				row.colorPicker.overlayKey = nil
+				row.colorPicker.specID = nil
+				row.colorPicker:Hide()
 			end
 		end
+
+		subpage.emptyText:SetShown(currentSpec.specName ~= nil and #rows == 0)
 	end
 
-	function subpage:UpdateState(profile)
-		RefreshDynamicRows(profile)
+	subpage:SetStateUpdater(function(profile, mode)
+		RefreshRows(profile, mode)
+	end)
+
+	local baseUpdateLocale = subpage.UpdateLocale
+	function subpage:UpdateLocale()
+		baseUpdateLocale(self)
+		self.emptyText:SetText(panel:Localize("No overlays available for this specialization"))
 	end
 
-	subpage:UpdateLocale()
+	local baseUpdateLayout = subpage.UpdateLayout
+	function subpage:UpdateLayout()
+		baseUpdateLayout(self)
+
+		local PP = panel.instance.PP
+		self.emptyText:ClearAllPoints()
+		self.emptyText:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
+		OptionsUILib.Theme:ApplyFont(self.emptyText, PP:ScaleFont(14), "")
+	end
+
+	RefreshRows(panel.profileGetter(panel), panel:GetActiveMode())
 
 	return subpage
 end

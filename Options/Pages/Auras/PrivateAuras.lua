@@ -7,261 +7,117 @@ addon.Options.Pages.Auras.PrivateAuras = addon.Options.Pages.Auras.PrivateAuras 
 
 local PrivateAuras = addon.Options.Pages.Auras.PrivateAuras
 
-local subpage
-local L = addon.L
-
 local anchorOptions = {
-	{ value = "LEFT", text = L["Left"] },
-	{ value = "RIGHT", text = L["Right"] },
+	{ value = "LEFT", textKey = "Left" },
+	{ value = "RIGHT", textKey = "Right" },
 }
-
-local function UpdateAnchorOptions()
-	anchorOptions[1].text = L["Left"]
-	anchorOptions[2].text = L["Right"]
-end
-
-local function GetModeDefaults(mode)
-	if mode == "raid" then
-		return {
-			anchor = "LEFT",
-			offsetX = 2,
-			offsetY = 2,
-			iconSize = 16,
-			spacing = 1,
-			maxIcons = 3,
-		}
-	end
-
-	return {
-		anchor = "LEFT",
-		offsetX = 2,
-		offsetY = 2,
-		iconSize = 20,
-		spacing = 1,
-		maxIcons = 3,
-	}
-end
-
-local function ShowCombatLockMessage()
-	print("|cffff9900Mich's RaidFrames:|r " .. L["Private Auras settings are disabled during combat."])
-end
-
-local function ApplyModeSetting(updateFn)
-	if InCombatLockdown() then
-		ShowCombatLockMessage()
-		if subpage and subpage.UpdateState then
-			subpage:UpdateState(addon.Database:GetProfile())
-		end
-		return
-	end
-
-	local profile = addon.Database:GetProfile()
-	local mode = addon.Options.State:GetMode()
-
-	profile[mode] = profile[mode] or {}
-	updateFn(profile[mode], mode)
-
-	addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
-end
 
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
 
-local function ConfigureIntegerSlider(slider, minValue, maxValue, step)
-	slider:SetMinMaxValues(minValue, maxValue)
-	slider:SetStep(step or 1)
-	slider:SetValueFormatter(FormatInteger)
-end
+function PrivateAuras:Create(page)
+	local subpage = page:RegisterSubPage("privateAuras", { titleKey = "Private Auras" })
 
-function PrivateAuras:Ensure(parent)
-	if subpage then
-		return subpage
-	end
+	local anchorRow = subpage:CreateRow(4)
+	anchorRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	subpage = CreateFrame("Frame", nil, parent)
+	local anchorDropdown = anchorRow:CreateControl("Dropdown", { labelKey = "Position" })
+	anchorDropdown:SetOptions(anchorOptions)
+	anchorDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.anchor
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.anchor = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
-	subpage.anchorDropdown = addon.Options.Controls.Dropdown:Create(subpage, L["Position"])
-	subpage.anchorDropdown:SetLayoutWidth(174)
-	subpage.anchorDropdown:SetOptions(anchorOptions)
-	subpage.anchorDropdown:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.anchor = value
-		end)
-	end)
+	local offsetXSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset X" })
+	offsetXSlider:SetMinMaxValues(-200, 200)
+	offsetXSlider:SetStep(1)
+	offsetXSlider:SetValueFormatter(FormatInteger)
+	offsetXSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.offsetX
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.offsetX = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
-	subpage.offsetXSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset X"])
-	subpage.offsetXSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetXSlider, -200, 200, 1)
-	subpage.offsetXSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.offsetX = value
-		end)
-	end)
+	local offsetYSlider = anchorRow:CreateControl("Slider", { labelKey = "Offset Y" })
+	offsetYSlider:SetMinMaxValues(-200, 200)
+	offsetYSlider:SetStep(1)
+	offsetYSlider:SetValueFormatter(FormatInteger)
+	offsetYSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.offsetY
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.offsetY = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
-	subpage.offsetYSlider = addon.Options.Controls.Slider:Create(subpage, L["Offset Y"])
-	subpage.offsetYSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.offsetYSlider, -200, 200, 1)
-	subpage.offsetYSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.offsetY = value
-		end)
-	end)
+	local iconRow = subpage:CreateRow(4)
+	iconRow:SetLayoutPoint("TOPLEFT", anchorRow.frame, "BOTTOMLEFT", 0, -16)
 
-	subpage.iconSizeSlider = addon.Options.Controls.Slider:Create(subpage, L["Icon Size"])
-	subpage.iconSizeSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.iconSizeSlider, 8, 64, 1)
-	subpage.iconSizeSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.iconSize = value
-		end)
-	end)
+	local maxIconsSlider = iconRow:CreateControl("Slider", { labelKey = "Max Icons" })
+	maxIconsSlider:SetMinMaxValues(1, 10)
+	maxIconsSlider:SetStep(1)
+	maxIconsSlider:SetValueFormatter(FormatInteger)
+	maxIconsSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.maxIcons
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.maxIcons = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
-	subpage.spacingSlider = addon.Options.Controls.Slider:Create(subpage, L["Spacing"])
-	subpage.spacingSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.spacingSlider, 0, 20, 1)
-	subpage.spacingSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.spacing = value
-		end)
-	end)
+	local iconSizeSlider = iconRow:CreateControl("Slider", { labelKey = "Icon Size" })
+	iconSizeSlider:SetMinMaxValues(8, 64)
+	iconSizeSlider:SetStep(1)
+	iconSizeSlider:SetValueFormatter(FormatInteger)
+	iconSizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.iconSize
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.iconSize = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
-	subpage.maxIconsSlider = addon.Options.Controls.Slider:Create(subpage, L["Max Icons"])
-	subpage.maxIconsSlider:SetLayoutWidth(174)
-	ConfigureIntegerSlider(subpage.maxIconsSlider, 1, 10, 1)
-	subpage.maxIconsSlider:SetOnValueChanged(function(_, value)
-		ApplyModeSetting(function(section)
-			section.widgets = section.widgets or {}
-			section.widgets.icons = section.widgets.icons or {}
-			section.widgets.icons.privateAuras = section.widgets.icons.privateAuras or {}
-			section.widgets.icons.privateAuras.maxIcons = value
-		end)
-	end)
-
-	subpage.controls = {
-		anchorDropdown = subpage.anchorDropdown,
-		offsetXSlider = subpage.offsetXSlider,
-		offsetYSlider = subpage.offsetYSlider,
-		iconSizeSlider = subpage.iconSizeSlider,
-		spacingSlider = subpage.spacingSlider,
-		maxIconsSlider = subpage.maxIconsSlider,
-	}
-
-	function subpage:UpdateLocale()
-		UpdateAnchorOptions()
-		self.anchorDropdown:SetLabel(L["Position"])
-		self.anchorDropdown:SetOptions(anchorOptions)
-		self.offsetXSlider:SetLabel(L["Offset X"])
-		self.offsetYSlider:SetLabel(L["Offset Y"])
-		self.iconSizeSlider:SetLabel(L["Icon Size"])
-		self.spacingSlider:SetLabel(L["Spacing"])
-		self.maxIconsSlider:SetLabel(L["Max Icons"])
-	end
-
-	function subpage:UpdateLayout()
-		local controls = self.controls
-		local rowStepPx = addon.Utilities:ToPixels(50)
-		local columnGapPx = addon.Utilities:ToPixels(30)
-		local columnWidthPx = addon.Utilities:ToPixels(174)
-		local secondColumnOffsetPx = columnWidthPx + columnGapPx
-		local thirdColumnOffsetPx = (columnWidthPx * 2) + (columnGapPx * 2)
-		local positionToSlidersGapPx = addon.Utilities:ToPixels(28)
-		local anchorDropdownHeightPx = addon.Utilities:ToPixels(
-			controls.anchorDropdown.layoutValues.labelHeight
-				+ controls.anchorDropdown.layoutValues.labelSpacing
-				+ controls.anchorDropdown.layoutValues.fieldHeight
-		)
-		local anchorRowOffsetPx = 0
-		local firstRowOffsetPx = anchorDropdownHeightPx + positionToSlidersGapPx
-		local secondRowOffsetPx = firstRowOffsetPx + rowStepPx
-
-		for _, control in pairs(controls) do
-			if control.UpdateLayout then
-				control:UpdateLayout()
-			end
-		end
-
-		controls.anchorDropdown:ClearAllPoints()
-		controls.anchorDropdown:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			0,
-			-addon.Utilities:ToUI(anchorRowOffsetPx)
-		)
-
-		controls.offsetXSlider:ClearAllPoints()
-		controls.offsetXSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(firstRowOffsetPx))
-
-		controls.offsetYSlider:ClearAllPoints()
-		controls.offsetYSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(firstRowOffsetPx)
-		)
-
-		controls.spacingSlider:ClearAllPoints()
-		controls.spacingSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(thirdColumnOffsetPx),
-			-addon.Utilities:ToUI(firstRowOffsetPx)
-		)
-
-		controls.iconSizeSlider:ClearAllPoints()
-		controls.iconSizeSlider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(secondRowOffsetPx))
-
-		controls.maxIconsSlider:ClearAllPoints()
-		controls.maxIconsSlider:SetPoint(
-			"TOPLEFT",
-			self,
-			"TOPLEFT",
-			addon.Utilities:ToUI(secondColumnOffsetPx),
-			-addon.Utilities:ToUI(secondRowOffsetPx)
-		)
-	end
-
-	function subpage:UpdateState(profile)
-		if not profile then
-			return
-		end
-
-		local controls = self.controls
-		local mode = addon.Options.State:GetMode()
-		local section = profile[mode] or {}
-		local defaults = GetModeDefaults(mode)
-		local widgets = section.widgets or {}
-		local icons = widgets.icons or {}
-		local privateAuras = icons.privateAuras or {}
-
-		controls.anchorDropdown:SetOptions(anchorOptions)
-		controls.anchorDropdown:SetValue(privateAuras.anchor or defaults.anchor)
-		controls.offsetXSlider:SetValueSilently(privateAuras.offsetX or defaults.offsetX)
-		controls.offsetYSlider:SetValueSilently(privateAuras.offsetY or defaults.offsetY)
-		controls.iconSizeSlider:SetValueSilently(privateAuras.iconSize or defaults.iconSize)
-		controls.spacingSlider:SetValueSilently(privateAuras.spacing or defaults.spacing)
-		controls.maxIconsSlider:SetValueSilently(privateAuras.maxIcons or defaults.maxIcons)
-	end
-
-	subpage:UpdateLocale()
+	local spacingSlider = iconRow:CreateControl("Slider", { labelKey = "Spacing" })
+	spacingSlider:SetMinMaxValues(0, 20)
+	spacingSlider:SetStep(1)
+	spacingSlider:SetValueFormatter(FormatInteger)
+	spacingSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.privateAuras.spacing
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.privateAuras.spacing = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("privateAurasSettingsChanged")
+		end,
+	})
 
 	return subpage
 end

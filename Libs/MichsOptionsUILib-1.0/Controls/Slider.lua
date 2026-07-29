@@ -1,15 +1,12 @@
-local _, addon = ...
+local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
+if not OptionsUILib then
+	return
+end
 
-addon.Options = addon.Options or {}
-addon.Options.Controls = addon.Options.Controls or {}
-addon.Options.Controls.Slider = addon.Options.Controls.Slider or {}
+OptionsUILib.Controls = OptionsUILib.Controls or {}
+OptionsUILib.Controls.Slider = OptionsUILib.Controls.Slider or {}
 
-local Slider = addon.Options.Controls.Slider
-
-local theme = addon.Options.Theme
-local hoverAccentColor = { 1.0, 0.74, 0.42, 1 }
-
-Slider.defaultHeight = 44
+local Slider = OptionsUILib.Controls.Slider
 
 local function UpdateVisuals(control)
 	local minValue, maxValue = control.slider:GetMinMaxValues()
@@ -23,30 +20,41 @@ local function UpdateVisuals(control)
 
 	control.fill:SetWidth(control.trackWidth * progress)
 
-	if control.handle then
-		local handleWidth = control.handle:GetWidth() or 0
-		local handleHalfWidth = handleWidth / 2
-		local handleTravelWidth = math.max(0, control.trackWidth - handleWidth)
-		local handleOffset = handleHalfWidth + (handleTravelWidth * progress)
+	local handleWidth = control.handle:GetWidth() or 0
+	local handleTravelWidth = math.max(0, control.trackWidth - handleWidth)
+	local handleOffset = (handleWidth / 2) + (handleTravelWidth * progress)
 
-		control.handle:ClearAllPoints()
-		control.handle:SetPoint("CENTER", control.track, "LEFT", handleOffset, 0)
-	end
+	control.handle:ClearAllPoints()
+	control.handle:SetPoint("CENTER", control.track, "LEFT", handleOffset, 0)
 end
 
 local function UpdateValueText(control, value)
-	local formatter = control.valueFormatter
-	if formatter then
-		control.valueInput:SetText(formatter(value))
-		return
-	end
-
-	if math.floor(value) == value then
+	if control.valueFormatter then
+		control.valueInput:SetText(control.valueFormatter(value))
+	elseif math.floor(value) == value then
 		control.valueInput:SetText(tostring(value))
-		return
+	else
+		control.valueInput:SetText(string.format("%.2f", value))
+	end
+end
+
+local function ParsePercentOrRaw(control, text)
+	local sanitizedText = (text or ""):gsub("%s+", ""):gsub(",", ".")
+	local hasPercent = sanitizedText:find("%%") ~= nil
+	local numericText = sanitizedText:gsub("%%", "")
+	local number = tonumber(numericText)
+
+	if not number then
+		return nil
 	end
 
-	control.valueInput:SetText(string.format("%.2f", value))
+	local _, maxValue = control.slider:GetMinMaxValues()
+
+	if hasPercent or number > maxValue then
+		return number / 100
+	end
+
+	return number
 end
 
 local function CommitValueInput(control)
@@ -56,12 +64,13 @@ local function CommitValueInput(control)
 
 	control.isCommittingValueInput = true
 
-	local parser = control.valueParser
 	local text = control.valueInput:GetText() or ""
 	local parsedValue
 
-	if parser then
-		parsedValue = parser(control, text)
+	if control.valueParser == "percent" then
+		parsedValue = ParsePercentOrRaw(control, text)
+	elseif control.valueParser then
+		parsedValue = control.valueParser(control, text)
 	else
 		parsedValue = tonumber(text)
 	end
@@ -89,9 +98,16 @@ local function CommitValueInput(control)
 	control.isCommittingValueInput = false
 end
 
-function Slider:Create(parent, text)
+function Slider:Create(parent, PP, text)
+	if not parent or not PP then
+		return nil
+	end
+
 	local control = CreateFrame("Frame", nil, parent)
-	control.layoutValues = {
+
+	control.PP = PP
+	control.layout = {
+		parent = parent,
 		width = 220,
 		fieldHeight = 24,
 		trackHeight = 4,
@@ -100,26 +116,27 @@ function Slider:Create(parent, text)
 		labelSpacing = 4,
 		borderThickness = 1,
 		fontSize = 12,
-		valueInputWidth = 40,
+		valueInputWidth = 34,
 		valueInputGap = 6,
+		point = nil,
+		relativeTo = parent,
+		relativePoint = nil,
+		offsetX = 0,
+		offsetY = 0,
 	}
 
 	control.label = control:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	theme:ApplyFont(control.label, "arialNarrow", control.layoutValues.fontSize, "")
-	control.label:SetTextColor(theme:GetTextColor("primary"))
+	control.label:SetTextColor(OptionsUILib.Theme:GetTextColor("primary"))
 	control.label:SetJustifyH("LEFT")
 	control.label:SetJustifyV("MIDDLE")
 	control.label:SetText(text or "Slider")
 
 	control.valueInput = CreateFrame("EditBox", nil, control)
 	control.valueInput:SetAutoFocus(false)
-	control.valueInput:SetPoint("TOPRIGHT", control, "TOPRIGHT", 0, 0)
-	theme:ApplyFont(control.valueInput, "arialNarrow", control.layoutValues.fontSize, "")
 	control.valueInput:SetTextColor(0.65, 0.65, 0.68, 1)
 	control.valueInput:SetJustifyH("RIGHT")
 	control.valueInput:SetTextInsets(0, 0, 0, 0)
 	control.valueInput:SetText("0")
-	control.valueInput:SetCursorPosition(0)
 
 	control.slider = CreateFrame("Slider", nil, control)
 	control.slider:SetOrientation("HORIZONTAL")
@@ -128,41 +145,38 @@ function Slider:Create(parent, text)
 	control.slider:SetObeyStepOnDrag(true)
 
 	control.track = control.slider:CreateTexture(nil, "BACKGROUND")
-	control.track:SetColorTexture(theme:GetColor("controlBackground"))
+	control.track:SetColorTexture(OptionsUILib.Theme:GetColor("controlBackground"))
 
 	control.trackTopBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackTopBorder:SetColorTexture(theme:GetColor("border"))
+	control.trackTopBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
 	control.trackTopBorder:SetPoint("TOPLEFT", control.track, "TOPLEFT", 0, 0)
 	control.trackTopBorder:SetPoint("TOPRIGHT", control.track, "TOPRIGHT", 0, 0)
 
 	control.trackBottomBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackBottomBorder:SetColorTexture(theme:GetColor("border"))
+	control.trackBottomBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
 	control.trackBottomBorder:SetPoint("BOTTOMLEFT", control.track, "BOTTOMLEFT", 0, 0)
 	control.trackBottomBorder:SetPoint("BOTTOMRIGHT", control.track, "BOTTOMRIGHT", 0, 0)
 
 	control.trackLeftBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackLeftBorder:SetColorTexture(theme:GetColor("border"))
+	control.trackLeftBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
 	control.trackLeftBorder:SetPoint("TOPLEFT", control.track, "TOPLEFT", 0, 0)
 	control.trackLeftBorder:SetPoint("BOTTOMLEFT", control.track, "BOTTOMLEFT", 0, 0)
 
 	control.trackRightBorder = control.slider:CreateTexture(nil, "OVERLAY")
-	control.trackRightBorder:SetColorTexture(theme:GetColor("border"))
+	control.trackRightBorder:SetColorTexture(OptionsUILib.Theme:GetColor("border"))
 	control.trackRightBorder:SetPoint("TOPRIGHT", control.track, "TOPRIGHT", 0, 0)
 	control.trackRightBorder:SetPoint("BOTTOMRIGHT", control.track, "BOTTOMRIGHT", 0, 0)
 
-	control.fill = control.slider:CreateTexture(nil, "ARTWORK")
-	control.fill:SetDrawLayer("ARTWORK", 1)
-	control.fill:SetColorTexture(theme:GetColor("brand"))
+	control.fill = control.slider:CreateTexture(nil, "ARTWORK", nil, 1)
+	control.fill:SetColorTexture(OptionsUILib.Theme:GetColor("brand"))
 	control.fill:SetPoint("LEFT", control.track, "LEFT", 0, 0)
-	control.fill:SetWidth(0)
 
 	control.slider:SetThumbTexture("Interface\\Buttons\\WHITE8x8")
 	control.thumb = control.slider:GetThumbTexture()
 	control.thumb:SetVertexColor(0, 0, 0, 0)
 
-	control.handle = control.slider:CreateTexture(nil, "OVERLAY")
-	control.handle:SetDrawLayer("OVERLAY", 2)
-	control.handle:SetColorTexture(theme:GetColor("brand"))
+	control.handle = control.slider:CreateTexture(nil, "OVERLAY", nil, 2)
+	control.handle:SetColorTexture(OptionsUILib.Theme:GetColor("brand"))
 
 	function control:SetLabel(value)
 		self.label:SetText(value or "")
@@ -196,74 +210,95 @@ function Slider:Create(parent, text)
 		self.slider:SetValue(value)
 	end
 
-	function control:SetLayoutWidth(width)
-		self.layoutValues.width = width
-		self:UpdateLayout()
-	end
-
-	function control:SetBorderSize(borderThickness)
-		self.layoutValues.borderThickness = borderThickness
-		self:UpdateLayout()
-	end
-
-	function control:SetFontSize(fontSize)
-		self.layoutValues.fontSize = fontSize
-		self:UpdateLayout()
-	end
-
 	function control:SetValueSilently(value)
 		self.suppressValueChanged = true
 		self.slider:SetValue(value)
 		self.suppressValueChanged = false
 	end
 
+	function control:SetBoundValue(value)
+		self:SetValueSilently(value)
+	end
+
 	function control:GetValue()
 		return self.slider:GetValue()
 	end
 
+	function control:SetLayoutWidth(width)
+		self.layout.width = width
+		self:UpdateLayout()
+	end
+
+	function control:SetBorderSize(borderThickness)
+		self.layout.borderThickness = borderThickness
+		self:UpdateLayout()
+	end
+
+	function control:SetFontSize(fontSize)
+		self.layout.fontSize = fontSize
+		self:UpdateLayout()
+	end
+
+	function control:SetLayoutPoint(point, relativeTo, relativePoint, offsetX, offsetY)
+		self.layout.point = point
+		self.layout.relativeTo = relativeTo or self.layout.parent
+		self.layout.relativePoint = relativePoint or point
+		self.layout.offsetX = offsetX or 0
+		self.layout.offsetY = offsetY or 0
+		self:UpdateLayout()
+	end
+
 	function control:UpdateLayout()
-		local controlWidthPx = addon.Utilities:ToPixels(self.layoutValues.width)
-		local fieldHeightPx = addon.Utilities:ToPixels(self.layoutValues.fieldHeight)
-		local trackHeightPx = addon.Utilities:ToPixels(self.layoutValues.trackHeight)
-		local thumbSizePx = addon.Utilities:ToPixels(self.layoutValues.thumbSize)
-		local topRowHeightPx = addon.Utilities:ToPixels(self.layoutValues.topRowHeight)
-		local labelSpacingPx = addon.Utilities:ToPixels(self.layoutValues.labelSpacing)
-		local borderThicknessPx = addon.Utilities:ToPixels(self.layoutValues.borderThickness)
-		local valueInputWidthPx = addon.Utilities:ToPixels(self.layoutValues.valueInputWidth)
-		local valueInputGapPx = addon.Utilities:ToPixels(self.layoutValues.valueInputGap)
-		local sliderTopOffsetPx = topRowHeightPx + labelSpacingPx
-		local controlHeightPx = topRowHeightPx + labelSpacingPx + fieldHeightPx
+		local PP = self.PP
+		local width = PP:ToUIScaled(self.layout.width)
+		local topRowHeight = PP:ToUIScaled(self.layout.topRowHeight)
+		local labelSpacing = PP:ToUIScaled(self.layout.labelSpacing)
+		local fieldHeight = PP:ToUIScaled(self.layout.fieldHeight)
+		local thumbSize = PP:ToUIScaled(self.layout.thumbSize)
+		local trackHeight = PP:ToUIScaled(self.layout.trackHeight)
+		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
+		local sliderTopOffset = topRowHeight + labelSpacing
 
-		self.trackWidth = addon.Utilities:ToUI(controlWidthPx)
+		self.trackWidth = width
+		self:SetSize(width, topRowHeight + labelSpacing + fieldHeight)
+		OptionsUILib.Theme:ApplyFont(self.label, PP:ScaleFont(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.valueInput, PP:ScaleFont(self.layout.fontSize), "")
 
-		self:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(controlHeightPx))
-		self.valueInput:SetSize(addon.Utilities:ToUI(valueInputWidthPx), addon.Utilities:ToUI(topRowHeightPx))
-		theme:ApplyFont(self.label, "arialNarrow", self.layoutValues.fontSize, "")
-		theme:ApplyFont(self.valueInput, "arialNarrow", self.layoutValues.fontSize, "")
+		self.valueInput:ClearAllPoints()
+		self.valueInput:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+		self.valueInput:SetSize(PP:ToUIScaled(self.layout.valueInputWidth), topRowHeight)
 
 		self.label:ClearAllPoints()
 		self.label:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)
-		self.label:SetPoint("TOPRIGHT", self.valueInput, "TOPLEFT", -addon.Utilities:ToUI(valueInputGapPx), 0)
-		self.label:SetHeight(addon.Utilities:ToUI(topRowHeightPx))
+		self.label:SetPoint("TOPRIGHT", self.valueInput, "TOPLEFT", PP:ToUIScaled(-self.layout.valueInputGap), 0)
+		self.label:SetHeight(topRowHeight)
 
 		self.slider:ClearAllPoints()
-		self.slider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
-		self.slider:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -addon.Utilities:ToUI(sliderTopOffsetPx))
-		self.slider:SetHeight(addon.Utilities:ToUI(fieldHeightPx))
+		self.slider:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -sliderTopOffset)
+		self.slider:SetSize(width, fieldHeight)
 
-		self.track:SetSize(addon.Utilities:ToUI(controlWidthPx), addon.Utilities:ToUI(trackHeightPx))
-		self.track:ClearAllPoints()
-		self.track:SetPoint("CENTER", self.slider, "CENTER", 0, 0)
+		self.track:SetSize(width, trackHeight)
+		PP:CenterElement(self.track, self.slider, 0, 0)
 
-		local borderThickness = addon.Utilities:ToUI(borderThicknessPx)
 		self.trackTopBorder:SetHeight(borderThickness)
 		self.trackBottomBorder:SetHeight(borderThickness)
 		self.trackLeftBorder:SetWidth(borderThickness)
 		self.trackRightBorder:SetWidth(borderThickness)
 
-		self.fill:SetHeight(addon.Utilities:ToUI(trackHeightPx))
-		self.thumb:SetSize(addon.Utilities:ToUI(thumbSizePx), addon.Utilities:ToUI(thumbSizePx))
-		self.handle:SetSize(addon.Utilities:ToUI(thumbSizePx), addon.Utilities:ToUI(thumbSizePx))
+		self.fill:SetHeight(trackHeight)
+		self.thumb:SetSize(thumbSize, thumbSize)
+		self.handle:SetSize(thumbSize, thumbSize)
+
+		if self.layout.point then
+			self:ClearAllPoints()
+			self:SetPoint(
+				self.layout.point,
+				self.layout.relativeTo,
+				self.layout.relativePoint,
+				PP:ToUIScaled(self.layout.offsetX),
+				PP:ToUIScaled(self.layout.offsetY)
+			)
+		end
 
 		UpdateVisuals(self)
 	end
@@ -292,35 +327,25 @@ function Slider:Create(parent, text)
 	end)
 
 	control.slider:SetScript("OnEnter", function()
-		control.handle:SetColorTexture(
-			hoverAccentColor[1],
-			hoverAccentColor[2],
-			hoverAccentColor[3],
-			hoverAccentColor[4]
-		)
-		control.fill:SetColorTexture(
-			hoverAccentColor[1],
-			hoverAccentColor[2],
-			hoverAccentColor[3],
-			hoverAccentColor[4]
-		)
+		control.handle:SetColorTexture(1, 0.74, 0.42, 1)
+		control.fill:SetColorTexture(1, 0.74, 0.42, 1)
 	end)
 
 	control.slider:SetScript("OnLeave", function()
-		control.handle:SetColorTexture(theme:GetColor("brand"))
-		control.fill:SetColorTexture(theme:GetColor("brand"))
+		control.handle:SetColorTexture(OptionsUILib.Theme:GetColor("brand"))
+		control.fill:SetColorTexture(OptionsUILib.Theme:GetColor("brand"))
 	end)
 
 	control.slider:SetScript("OnValueChanged", function(_, value)
 		UpdateVisuals(control)
 		UpdateValueText(control, value)
 
-		if control.suppressValueChanged then
-			return
-		end
-
-		if control.onValueChanged then
-			control.onValueChanged(control, value)
+		if not control.suppressValueChanged then
+			if control.HandleValueChanged then
+				control:HandleValueChanged(value)
+			elseif control.onValueChanged then
+				control.onValueChanged(control, value)
+			end
 		end
 	end)
 

@@ -6,8 +6,10 @@
 ## SavedVariables: Michs_RaidFramesDB
 ## OptionalDeps: MiniCC
 
-# Ace3
+# Libs
 Libs/LibStub/LibStub.lua
+Libs/MichsPixelPerfectLib-1.0/MichsPixelPerfectLib-1.0.lua
+Libs/MichsOptionsUILib-1.0/MichsOptionsUILib-1.0.xml
 Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
 Libs/AceEvent-3.0/AceEvent-3.0.xml
 Libs/AceDB-3.0/AceDB-3.0.xml
@@ -27,6 +29,7 @@ Locales/zhCN.lua
 Locales/zhTW.lua
 
 # Helpers
+Libraries.lua
 Utilities.lua
 Database.lua
 AuraHandler.lua
@@ -92,28 +95,19 @@ Infrastructure/EventHandler.lua
 Infrastructure/FrameRegistry.lua
 
 # Options
-Options/Theme.lua
-Options/Data.lua
-Options/State.lua
-Options/Controls/Button.lua
-Options/Controls/Checkbox.lua
-Options/Controls/Dropdown.lua
-Options/Controls/Input.lua
-Options/Controls/ColorPicker.lua
-Options/Controls/SegmentedToggle.lua
-Options/Controls/Slider.lua
 Options/Pages/General.lua
 Options/Pages/Layout.lua
 Options/Pages/Frames.lua
+Options/Pages/Bars.lua
 Options/Pages/Bars/Health.lua
 Options/Pages/Bars/Power.lua
 Options/Pages/Bars/HealAbsorbs.lua
 Options/Pages/Bars/Absorbs.lua
-Options/Pages/Bars.lua
+Options/Pages/Texts.lua
 Options/Pages/Texts/Name.lua
 Options/Pages/Texts/Away.lua
 Options/Pages/Texts/HealAbsorbs.lua
-Options/Pages/Texts.lua
+Options/Pages/Auras.lua
 Options/Pages/Auras/Buffs.lua
 Options/Pages/Auras/BuffFilters.lua
 Options/Pages/Auras/BuffOverlay.lua
@@ -123,20 +117,15 @@ Options/Pages/Auras/Dispels.lua
 Options/Pages/Auras/BigDefensive.lua
 Options/Pages/Auras/PrivateAuras.lua
 Options/Pages/Auras/RaidBuffReminder.lua
-Options/Pages/Auras.lua
+Options/Pages/Indicators.lua
 Options/Pages/Indicators/ReadyCheck.lua
 Options/Pages/Indicators/PendingSummon.lua
 Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
 Options/Pages/Indicators/GroupStatus.lua
 Options/Pages/Indicators/Threat.lua
-Options/Pages/Indicators.lua
 Options/Pages/Profiles.lua
-Options/Sections/Header.lua
-Options/Sections/Content.lua
-Options/Sections/SideMenu.lua
-Options/Sections/Preview.lua
-Options/Sections/StatusBar.lua
+Options/Preview.lua
 Options/Options.lua
 
 # Entry Point
