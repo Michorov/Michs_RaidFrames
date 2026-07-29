@@ -129,19 +129,7 @@ function OptionsNew:Initialize()
 	end
 	aurasPage:RegisterSubPage("raidBuffReminder", { titleKey = "Raid Buff Reminder" })
 
-	local indicatorsPage = panel:RegisterPage("indicators", {
-		titleKey = "Indicators",
-		showHeader = true,
-		showSubpageDropdown = true,
-		showModeSwitch = true,
-		modeSwitchType = "toggle",
-	})
-	indicatorsPage:RegisterSubPage("readyCheck", { titleKey = "Ready Check" })
-	indicatorsPage:RegisterSubPage("pendingSummon", { titleKey = "Summon" })
-	indicatorsPage:RegisterSubPage("raidMarker", { titleKey = "Raid Marker" })
-	indicatorsPage:RegisterSubPage("roleIcon", { titleKey = "Role Indicator" })
-	indicatorsPage:RegisterSubPage("groupStatus", { titleKey = "Group Leader" })
-	indicatorsPage:RegisterSubPage("threat", { titleKey = "Threat" })
+	OptionsNew.Pages.Indicators:Create(panel)
 
 	OptionsNew.Pages.Profiles:Create(panel)
 	panel:SetDefaultPage("general")
