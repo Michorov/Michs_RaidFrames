@@ -126,13 +126,21 @@ function OptionsNew:Initialize()
 		OptionsNew:UpdateLocale()
 	end)
 
-	SLASH_MICHRAIDFRAMESNEW1 = "/mrfnew"
-	SlashCmdList["MICHRAIDFRAMESNEW"] = function()
+	SLASH_MICHRAIDFRAMES1 = "/mrf"
+	SlashCmdList["MICHRAIDFRAMES"] = function(msg)
+		local normalizedMessage = (msg or ""):match("^%s*(.-)%s*$")
+
+		if normalizedMessage ~= "" then
+			print("|cffff9900Mich's RaidFrames:|r " .. L["Unknown command. Use /mrf"])
+			return
+		end
+
 		if OptionsNew:IsOpen() then
 			OptionsNew:Close()
-		else
-			OptionsNew:Open()
+			return
 		end
+
+		OptionsNew:Open()
 	end
 end
 
@@ -166,6 +174,12 @@ end
 function OptionsNew:RefreshState()
 	if panel then
 		panel:UpdateState()
+	end
+end
+
+function OptionsNew:UpdateLayout()
+	if panel then
+		panel:UpdateLayout()
 	end
 end
 
