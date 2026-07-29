@@ -1227,8 +1227,8 @@ function Database:Initialize()
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 		NormalizeCurrentProfileFontSettings(self.db.profile)
 
-		if addon.OptionsNew and addon.OptionsNew.RefreshState then
-			addon.OptionsNew:RefreshState()
+		if addon.Options and addon.Options.RefreshState then
+			addon.Options:RefreshState()
 		end
 
 		addon.Frames.RangeChecker:UpdateSettings()
