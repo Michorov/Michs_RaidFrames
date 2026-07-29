@@ -5,6 +5,7 @@ local OptionsNew = addon.OptionsNew
 local L = addon.L
 
 local panel
+local deferredOpen = false
 local addonVersion = C_AddOns.GetAddOnMetadata(addonName, "Version") or ""
 
 local function GetDisplayProfileName(name)
@@ -82,6 +83,11 @@ function OptionsNew:Initialize()
 		end,
 	})
 
+	panel.frame:HookScript("OnHide", function()
+		addon.FrameRegistry:DisableTestMode()
+		RefreshTestModeButtons()
+	end)
+
 	panel:SetFooterUpdater(function()
 		local profileName = GetDisplayProfileName(addon.Database:GetCurrentProfileName() or "Default")
 		return (L["Version %s | Active Profile: |cff00ff00%s|r"]):format(addonVersion, profileName)
@@ -135,6 +141,14 @@ function OptionsNew:Initialize()
 end
 
 function OptionsNew:Open()
+	if InCombatLockdown() then
+		deferredOpen = true
+		print("|cffff9900Mich's RaidFrames:|r " .. L["Options will open after combat."])
+		return
+	end
+
+	deferredOpen = false
+
 	if not panel then
 		self:Initialize()
 	end
@@ -151,6 +165,10 @@ end
 
 function OptionsNew:IsOpen()
 	return panel and panel:IsShown()
+end
+
+function OptionsNew:ShouldOpenAfterCombat()
+	return deferredOpen
 end
 
 function OptionsNew:UpdateLocale()
