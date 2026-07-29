@@ -21,7 +21,7 @@ local layoutValues = {
 	bodyTopGap = 10,
 	bodyWidth = 200,
 	checkboxTopOffset = 220,
-	checkboxGap = 8,
+	checkboxGap = 4,
 }
 
 local auraPreviewControls = {
@@ -165,7 +165,8 @@ function Preview:Create(ownerPanel)
 	activeMode = panel:GetActiveMode() or activeMode
 
 	local PP = panel.instance.PP
-	local canvas = panel:GetPreviewCanvas()
+	local previewSection = panel.frame.preview
+	local canvas = previewSection:GetCanvas()
 	preview = CreateFrame("Frame", nil, canvas)
 	preview:SetAllPoints(canvas)
 	preview.controls = {}
@@ -204,8 +205,12 @@ function Preview:Create(ownerPanel)
 		preview.controls[widgetKey .. "Checkbox"] = checkbox
 	end
 
-	panel:RegisterPageUpdater(self, function(pageKey)
+	previewSection:SetPageUpdater(function(pageKey)
 		self:SetActivePage(pageKey)
+	end)
+
+	previewSection:SetLayoutUpdater(function()
+		self:UpdateLayout()
 	end)
 
 	panel:RegisterStateUpdater(self, function(_, mode)
