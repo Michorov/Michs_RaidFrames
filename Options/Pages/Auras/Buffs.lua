@@ -204,7 +204,7 @@ function Buffs:Create(page)
 	local stacksRow = subpage:CreateRow(4)
 	stacksRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local showStacksDropdown = stacksRow:CreateControl("Dropdown", { labelKey = "Show Stacks" })
+	local showStacksDropdown = stacksRow:CreateControl("Dropdown", { labelKey = "Stacks" })
 	showStacksDropdown:SetOptions(visibilityOptions)
 	showStacksDropdown:BindValue({
 		get = function(profile, mode)
@@ -237,7 +237,7 @@ function Buffs:Create(page)
 	local cooldownRow = subpage:CreateRow(4)
 	cooldownRow:SetLayoutPoint("TOPLEFT", stacksRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local showCooldownDropdown = cooldownRow:CreateControl("Dropdown", { labelKey = "Show Duration" })
+	local showCooldownDropdown = cooldownRow:CreateControl("Dropdown", { labelKey = "Duration" })
 	showCooldownDropdown:SetOptions(visibilityOptions)
 	showCooldownDropdown:BindValue({
 		get = function(profile, mode)
