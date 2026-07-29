@@ -116,20 +116,8 @@ function EventHandler:PARTY_LEADER_CHANGED()
 end
 
 function EventHandler:PLAYER_REGEN_ENABLED()
-	local openedDeferredOptions = false
-
 	if addon.OptionsNew and addon.OptionsNew.ShouldOpenAfterCombat and addon.OptionsNew:ShouldOpenAfterCombat() then
 		addon.OptionsNew:Open()
-		openedDeferredOptions = true
-	end
-
-	if
-		not openedDeferredOptions
-		and addon.Options
-		and addon.Options.ShouldOpenAfterCombat
-		and addon.Options:ShouldOpenAfterCombat()
-	then
-		addon.Options:Open()
 	end
 
 	if addon.FrameRegistry.restoreLiveDriversAfterCombat then
@@ -146,10 +134,6 @@ end
 function EventHandler:PLAYER_REGEN_DISABLED()
 	if addon.OptionsNew and addon.OptionsNew.IsOpen and addon.OptionsNew:IsOpen() then
 		addon.OptionsNew:Close()
-	end
-
-	if addon.Options and addon.Options.IsOpen and addon.Options:IsOpen() then
-		addon.Options:Close()
 	end
 
 	addon.UpdateScheduler:Notify("combatStarted")
@@ -301,29 +285,29 @@ function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
 	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 
-	if addon.Options and addon.Options.Data and addon.Options.Data.RefreshProfile then
-		addon.Options.Data:RefreshProfile()
-	end
-
 	if addon.OptionsNew and addon.OptionsNew.RefreshState then
 		addon.OptionsNew:RefreshState()
 	end
 
-	if addon.Options and addon.Options.UpdateLayout then
-		addon.Options:UpdateLayout()
+	if addon.OptionsNew and addon.OptionsNew.UpdateLayout then
+		addon.OptionsNew:UpdateLayout()
 	end
 end
 
 function EventHandler:UI_SCALE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
-	addon.Options:UpdateLayout()
+	if addon.OptionsNew and addon.OptionsNew.UpdateLayout then
+		addon.OptionsNew:UpdateLayout()
+	end
 end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Modules:RequestUpdateAll()
-	addon.Options:UpdateLayout()
+	if addon.OptionsNew and addon.OptionsNew.UpdateLayout then
+		addon.OptionsNew:UpdateLayout()
+	end
 end
 
 function EventHandler:RAID_TARGET_UPDATE()
