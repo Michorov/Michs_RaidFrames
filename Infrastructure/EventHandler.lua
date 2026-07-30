@@ -17,7 +17,7 @@ local unitEventDispatcher = {
 	UNIT_IN_RANGE_UPDATE = NotifyRangeStateChanged,
 	UNIT_PHASE = NotifyRangeStateChanged,
 	UNIT_AURA = function(eventUnit)
-		addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
+		addon.FrameRegistry:UpdateManagedContainersVisibility(eventUnit)
 	end,
 }
 
