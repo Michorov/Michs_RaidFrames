@@ -155,6 +155,18 @@ function DataProvider.Live:GetHealth(frame)
 	return UnitHealth(frame.unit), UnitHealthMax(frame.unit)
 end
 
+function DataProvider.Live:Scale(frame, value)
+	return addon.Utilities:Scale(value)
+end
+
+function DataProvider.Live:ScaleFont(frame, value)
+	return addon.Utilities:ScaleFont(value)
+end
+
+function DataProvider.Live:ScaleEven(frame, value)
+	return addon.Utilities:ScaleEven(value)
+end
+
 function DataProvider.Test:GetHealth(frame)
 	local healthSamples = {
 		{ current = 100000, max = 100000 },
@@ -165,6 +177,30 @@ function DataProvider.Test:GetHealth(frame)
 	local sample = healthSamples[healthIndex] or healthSamples[1]
 
 	return sample.current, sample.max
+end
+
+function DataProvider.Test:Scale(frame, value)
+	if frame and frame.previewWidgetVisibility ~= nil then
+		return value or 0
+	end
+
+	return addon.Utilities:Scale(value)
+end
+
+function DataProvider.Test:ScaleFont(frame, value)
+	if frame and frame.previewWidgetVisibility ~= nil then
+		return value or 0
+	end
+
+	return addon.Utilities:ScaleFont(value)
+end
+
+function DataProvider.Test:ScaleEven(frame, value)
+	if frame and frame.previewWidgetVisibility ~= nil then
+		return value or 0
+	end
+
+	return addon.Utilities:ScaleEven(value)
 end
 
 function DataProvider.Live:GetName(frame)

@@ -165,10 +165,10 @@ local function ApplyPreviewGradient(texture, aura, color, gradientDirection)
 	texture:Show()
 end
 
-local function ApplyPreviewBorder(border, color)
+local function ApplyPreviewBorder(frame, border, color)
 	border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
-		edgeSize = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1))),
+		edgeSize = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1))),
 	})
 	border:SetBackdropBorderColor(color.r, color.g, color.b, 1)
 	border:Show()
@@ -193,16 +193,16 @@ local function ShowPreview(frame, cachedSettings)
 	container:Show()
 
 	ApplyPreviewGradient(container.previewGradient, firstAura, color, cachedSettings.gradientDirection)
-	local borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
+	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
 	container.previewBorder:ClearAllPoints()
 	container.previewBorder:SetPoint("TOPLEFT", container, "TOPLEFT", borderInset, -borderInset)
 	container.previewBorder:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -borderInset, borderInset)
 	container.previewBorder:SetFrameLevel(container:GetFrameLevel() + 1)
-	ApplyPreviewBorder(container.previewBorder, color)
+	ApplyPreviewBorder(frame, container.previewBorder, color)
 
-	local iconSizePx = addon.Utilities:Scale(addon.Utilities:ToPixels(15))
-	local spacingPx = addon.Utilities:Scale(addon.Utilities:ToPixels(0))
-	local insetPx = addon.Utilities:Scale(addon.Utilities:ToPixels(2))
+	local iconSizePx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(15))
+	local spacingPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(0))
+	local insetPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(2))
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
 
 	for index = 1, 3 do

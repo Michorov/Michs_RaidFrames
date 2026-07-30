@@ -53,9 +53,9 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 	local text = frame.healAbsorbText.text
 
-	local scaledPositionX = addon.Utilities:Scale(cachedSettings.positionX)
-	local scaledPositionY = addon.Utilities:Scale(cachedSettings.positionY)
-	local scaledFontSize = addon.Utilities:ScaleFont(cachedSettings.size)
+	local scaledPositionX = frame.dataProvider:Scale(frame, cachedSettings.positionX)
+	local scaledPositionY = frame.dataProvider:Scale(frame, cachedSettings.positionY)
+	local scaledFontSize = frame.dataProvider:ScaleFont(frame, cachedSettings.size)
 
 	text:ClearAllPoints()
 	text:SetPoint(

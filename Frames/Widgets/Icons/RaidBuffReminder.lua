@@ -61,11 +61,11 @@ function RaidBuffReminder:UpdateSettings(frame, settings)
 		icon = frame.raidBuffReminderIcon
 	end
 
-	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local offsetXPx = frame.dataProvider:Scale(frame, cachedSettings.offsetXPx)
+	local offsetYPx = frame.dataProvider:Scale(frame, cachedSettings.offsetYPx)
 
-	addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, cachedSettings)
-	addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
+	addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, cachedSettings, frame)
+	addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings, frame)
 	addon.Frames.Managers.IconManager:ApplyBorderColor(icon, cachedSettings.borderColor)
 
 	icon:ClearAllPoints()

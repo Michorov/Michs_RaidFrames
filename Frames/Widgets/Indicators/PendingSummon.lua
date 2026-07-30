@@ -63,9 +63,9 @@ function PendingSummon:UpdateSettings(frame, settings)
 		return
 	end
 
-	local sizePx = addon.Utilities:Scale(cachedSettings.sizePx)
-	local offsetX = addon.Utilities:Scale(cachedSettings.offsetXPx)
-	local offsetY = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local sizePx = frame.dataProvider:Scale(frame, cachedSettings.sizePx)
+	local offsetX = frame.dataProvider:Scale(frame, cachedSettings.offsetXPx)
+	local offsetY = frame.dataProvider:Scale(frame, cachedSettings.offsetYPx)
 	local statusSizePx = math.max(1, math.floor(sizePx * 0.45))
 
 	container:ClearAllPoints()

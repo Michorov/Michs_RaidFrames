@@ -109,8 +109,8 @@ local function EnsureTestPrivateAuraPreview(frame, privateAuraSettings)
 	frame.privateAurasPreviewIcons = frame.privateAurasPreviewIcons or {}
 
 	local previewIcons = frame.privateAurasPreviewIcons
-	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	local iconSizePx = frame.dataProvider:Scale(frame, privateAuraSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, privateAuraSettings.spacingPx)
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
 	local anchor = privateAuraSettings.anchor
 	local xDirection = anchor == "RIGHT" and -1 or 1
@@ -163,8 +163,8 @@ local function EnsurePrivateAuraAnchors(frame, privateAuraSettings)
 
 	frame.privateAurasAnchorIDs = frame.privateAurasAnchorIDs or {}
 
-	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
+	local iconSizePx = frame.dataProvider:Scale(frame, privateAuraSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, privateAuraSettings.spacingPx)
 	local anchor = privateAuraSettings.anchor
 	local xDirection = anchor == "RIGHT" and -1 or 1
 	local anchorLayoutKey = table.concat({
@@ -261,10 +261,10 @@ end
 local function ApplyContainerLayout(frame, privateAuraSettings)
 	local container = frame.privateAurasContainer
 
-	local iconSizePx = addon.Utilities:Scale(privateAuraSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(privateAuraSettings.spacingPx)
-	local offsetXPx = addon.Utilities:Scale(privateAuraSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(privateAuraSettings.offsetYPx)
+	local iconSizePx = frame.dataProvider:Scale(frame, privateAuraSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, privateAuraSettings.spacingPx)
+	local offsetXPx = frame.dataProvider:Scale(frame, privateAuraSettings.offsetXPx)
+	local offsetYPx = frame.dataProvider:Scale(frame, privateAuraSettings.offsetYPx)
 
 	local widthPx = (privateAuraSettings.maxIcons * iconSizePx) + ((privateAuraSettings.maxIcons - 1) * spacingPx)
 	local heightPx = iconSizePx

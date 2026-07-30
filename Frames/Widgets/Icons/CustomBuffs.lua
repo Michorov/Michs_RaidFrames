@@ -100,9 +100,9 @@ function CustomBuffs:UpdateSettings(frame, settings)
 			end
 
 			local s = cachedSettings.iconSettings[spellId]
-			local scaledIconSizePx = addon.Utilities:ScaleEven(s.iconSizePx)
-			local scaledOffsetXPx = addon.Utilities:Scale(s.offsetXPx)
-			local scaledOffsetYPx = addon.Utilities:Scale(s.offsetYPx)
+			local scaledIconSizePx = frame.dataProvider:ScaleEven(frame, s.iconSizePx)
+			local scaledOffsetXPx = frame.dataProvider:Scale(frame, s.offsetXPx)
+			local scaledOffsetYPx = frame.dataProvider:Scale(frame, s.offsetYPx)
 
 			icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 			icon:ClearAllPoints()
@@ -114,9 +114,9 @@ function CustomBuffs:UpdateSettings(frame, settings)
 				addon.Utilities:ToUI(scaledOffsetYPx)
 			)
 
-			addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, s)
-			addon.Frames.Managers.IconManager:ApplyCountSettings(icon, s)
-			addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, s)
+			addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, s, frame)
+			addon.Frames.Managers.IconManager:ApplyCountSettings(icon, s, frame)
+			addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, s, frame)
 		elseif icon then
 			icon:Hide()
 		end

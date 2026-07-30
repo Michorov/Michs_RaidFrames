@@ -111,10 +111,10 @@ local function UpdateContainerSettings(frame, settings)
 	local container = frame.debuffsContainer
 	local cachedSettings = settingsCache[settings]
 
-	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
-	local containerOffsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
-	local containerOffsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
+	local iconSizePx = frame.dataProvider:Scale(frame, cachedSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, cachedSettings.spacingPx)
+	local containerOffsetXPx = frame.dataProvider:Scale(frame, cachedSettings.offsetXPx)
+	local containerOffsetYPx = frame.dataProvider:Scale(frame, cachedSettings.offsetYPx)
 	local anchor = cachedSettings.anchor
 
 	container:ClearAllPoints()
@@ -139,8 +139,8 @@ local function UpdateIconSettings(frame, settings)
 	local container = frame.debuffsContainer
 	local cachedSettings = settingsCache[settings]
 
-	local iconSizePx = addon.Utilities:Scale(cachedSettings.iconSizePx)
-	local spacingPx = addon.Utilities:Scale(cachedSettings.spacingPx)
+	local iconSizePx = frame.dataProvider:Scale(frame, cachedSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, cachedSettings.spacingPx)
 	local stepPx = iconSizePx + spacingPx
 	local anchor = cachedSettings.anchor
 
@@ -154,10 +154,10 @@ local function UpdateIconSettings(frame, settings)
 			container.icons[i] = icon
 		end
 
-		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyIconSizeSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings, frame)
 
 		local gridIndex = i - 1
 		local column = gridIndex % cachedSettings.iconsPerRow

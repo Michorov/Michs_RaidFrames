@@ -63,9 +63,9 @@ function BigDefensive:UpdateSettings(frame, settings)
 
 	local cachedSettings = settingsCache[settings]
 
-	local offsetXPx = addon.Utilities:Scale(cachedSettings.offsetXPx)
-	local offsetYPx = addon.Utilities:Scale(cachedSettings.offsetYPx)
-	local iconSizePx = addon.Utilities:ScaleEven(cachedSettings.iconSizePx)
+	local offsetXPx = frame.dataProvider:Scale(frame, cachedSettings.offsetXPx)
+	local offsetYPx = frame.dataProvider:Scale(frame, cachedSettings.offsetYPx)
+	local iconSizePx = frame.dataProvider:ScaleEven(frame, cachedSettings.iconSizePx)
 
 	container:ClearAllPoints()
 	container:SetPoint(
@@ -85,10 +85,10 @@ function BigDefensive:UpdateSettings(frame, settings)
 			container.icons[i] = icon
 		end
 
-		addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings)
-		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings)
+		addon.Frames.Managers.IconManager:ApplyEvenIconSizeSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings, frame)
+		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings, frame)
 
 		icon:ClearAllPoints()
 		icon:SetPoint("CENTER", container, "CENTER", 0, 0)
