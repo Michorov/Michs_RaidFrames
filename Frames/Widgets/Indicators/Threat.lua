@@ -75,9 +75,9 @@ function Threat:UpdateSettings(frame, settings)
 		return
 	end
 
-	local scaledBorderSizePx = math.max(1, addon.Utilities:Scale(cachedSettings.borderSizePx))
+	local scaledBorderSizePx = math.max(1, frame.dataProvider:Scale(frame, cachedSettings.borderSizePx))
 	local uiBorderSize = addon.Utilities:ToUI(scaledBorderSizePx)
-	local scaledFrameBorderSizePx = addon.Utilities:Scale(cachedSettings.frameBorderSizePx)
+	local scaledFrameBorderSizePx = frame.dataProvider:Scale(frame, cachedSettings.frameBorderSizePx)
 	local insetPx = scaledFrameBorderSizePx > 0 and scaledFrameBorderSizePx or 0
 	local inset = addon.Utilities:ToUI(insetPx)
 

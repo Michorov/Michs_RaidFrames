@@ -87,8 +87,8 @@ function Power:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local powerBar = frame.powerBar
-	local scaledHeightPx = math.max(1, addon.Utilities:Scale(cachedSettings.heightPx))
-	local scaledBorderPx = addon.Utilities:Scale(cachedSettings.borderThicknessPx)
+	local scaledHeightPx = math.max(1, frame.dataProvider:Scale(frame, cachedSettings.heightPx))
+	local scaledBorderPx = frame.dataProvider:Scale(frame, cachedSettings.borderThicknessPx)
 
 	powerBar:SetStatusBarTexture(cachedSettings.texture)
 	powerBar:SetHeight(addon.Utilities:ToUI(scaledHeightPx))

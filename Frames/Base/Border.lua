@@ -50,7 +50,7 @@ function Border:UpdateSettings(frame, settings)
 
 	local border = frame.border
 
-	local scaledThickness = addon.Utilities:Scale(cachedSettings.thicknessPx)
+	local scaledThickness = frame.dataProvider:Scale(frame, cachedSettings.thicknessPx)
 
 	if scaledThickness == 0 then
 		border:Hide()

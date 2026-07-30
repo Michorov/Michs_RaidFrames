@@ -92,8 +92,9 @@ function IconManager:CreateIcon(container, iconFrameLevelDelta)
 	return icon
 end
 
-local function ApplyTextureInsets(icon, settings)
-	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
+local function ApplyTextureInsets(icon, settings, frame)
+	local dataProvider = frame.dataProvider
+	local scaledBorderSizePx = math.max(0, dataProvider:Scale(frame, settings.borderSizePx))
 
 	icon.texture:ClearAllPoints()
 	icon.texture:SetPoint(
@@ -112,13 +113,15 @@ local function ApplyTextureInsets(icon, settings)
 	)
 end
 
-function IconManager:ApplyIconSizeSettings(icon, settings)
-	local scaledIconSizePx = addon.Utilities:Scale(settings.iconSizePx)
+function IconManager:ApplyIconSizeSettings(icon, settings, frame)
+	local dataProvider = frame.dataProvider
+	local scaledIconSizePx = dataProvider:Scale(frame, settings.iconSizePx)
 	icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 end
 
-function IconManager:ApplyEvenIconSizeSettings(icon, settings)
-	local scaledIconSizePx = addon.Utilities:ScaleEven(settings.iconSizePx)
+function IconManager:ApplyEvenIconSizeSettings(icon, settings, frame)
+	local dataProvider = frame.dataProvider
+	local scaledIconSizePx = dataProvider:ScaleEven(frame, settings.iconSizePx)
 	icon:SetSize(addon.Utilities:ToUI(scaledIconSizePx), addon.Utilities:ToUI(scaledIconSizePx))
 end
 
@@ -134,10 +137,11 @@ function IconManager:ApplyBorderColor(icon, color)
 	icon.border:SetBackdropBorderColor(color.r, color.g, color.b, color.a or 1)
 end
 
-function IconManager:ApplyBorderSettings(icon, settings)
-	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
+function IconManager:ApplyBorderSettings(icon, settings, frame)
+	local dataProvider = frame.dataProvider
+	local scaledBorderSizePx = math.max(0, dataProvider:Scale(frame, settings.borderSizePx))
 
-	ApplyTextureInsets(icon, settings)
+	ApplyTextureInsets(icon, settings, frame)
 
 	if scaledBorderSizePx <= 0 then
 		icon.border:SetBackdrop(nil)
@@ -154,9 +158,10 @@ function IconManager:ApplyBorderSettings(icon, settings)
 	self:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
 end
 
-function IconManager:ApplyCountSettings(icon, settings)
-	local scaledFontSize = addon.Utilities:ScaleFont(settings.stacksFontSize)
-	local scaledBorderSizePx = math.max(0, addon.Utilities:Scale(settings.borderSizePx))
+function IconManager:ApplyCountSettings(icon, settings, frame)
+	local dataProvider = frame.dataProvider
+	local scaledFontSize = dataProvider:ScaleFont(frame, settings.stacksFontSize)
+	local scaledBorderSizePx = math.max(0, dataProvider:Scale(frame, settings.borderSizePx))
 	local countOffsetPx = scaledBorderSizePx > 0 and scaledBorderSizePx - 2 or 0
 
 	icon.countText:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledFontSize, "OUTLINE")
@@ -172,13 +177,14 @@ function IconManager:ApplyCountSettings(icon, settings)
 	)
 end
 
-function IconManager:ApplyCooldownSettings(icon, settings)
+function IconManager:ApplyCooldownSettings(icon, settings, frame)
 	if icon.cooldown and icon.cooldown.SetHideCountdownNumbers then
 		icon.cooldown:SetHideCountdownNumbers(not settings.showCooldown)
 	end
 
 	if settings.showCooldown and icon.cooldown and icon.cooldown.SetCountdownFont then
-		local scaledSize = addon.Utilities:ScaleFont(settings.cooldownFontSize)
+		local dataProvider = frame.dataProvider
+		local scaledSize = dataProvider:ScaleFont(frame, settings.cooldownFontSize)
 		local fontName = "MRF_CooldownFont_" .. tostring(scaledSize)
 		local cooldownFont = _G[fontName]
 		if not cooldownFont then
