@@ -12,6 +12,8 @@ local function InitializeAddon()
 	local flushCallback = addon.Updater:CreateFlushCallback()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
+	addon.Styles.Textures:RegisterCallbacks()
+
 	addon.Modules:Initialize()
 
 	addon.Options:Initialize()

@@ -312,6 +312,7 @@ local DEFAULTS = {
 			hideBlizzardRaidFrameManager = false,
 			outOfRangeAlpha = 0.5,
 			uiScale = 1.0,
+			lsmTexture = "M-SolidDarker",
 		},
 		party = {
 			size = { width = 128, height = 64 },
@@ -327,7 +328,7 @@ local DEFAULTS = {
 				},
 			},
 			health = {
-				texture = "Interface\\Buttons\\WHITE8x8",
+				lsmTexture = -1,
 				classColor = true,
 				color = {
 					r = 0.12,
@@ -640,7 +641,7 @@ local DEFAULTS = {
 				},
 			},
 			health = {
-				texture = "Interface\\Buttons\\WHITE8x8",
+				lsmTexture = -1,
 				classColor = true,
 				color = {
 					r = 0.12,

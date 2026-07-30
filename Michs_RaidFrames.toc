@@ -8,9 +8,10 @@
 
 # Libs
 Libs/LibStub/LibStub.lua
+Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
+Libs/LibSharedMedia-3.0/lib.xml
 Libs/MichsPixelPerfectLib-1.0/MichsPixelPerfectLib-1.0.lua
 Libs/MichsOptionsUILib-1.0/MichsOptionsUILib-1.0.xml
-Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
 Libs/AceEvent-3.0/AceEvent-3.0.xml
 Libs/AceDB-3.0/AceDB-3.0.xml
 
@@ -34,6 +35,9 @@ Utilities.lua
 Database.lua
 AuraHandler.lua
 Modules.lua
+
+# Style
+Styles/Textures.lua
 
 # Frame Managers
 Frames/Managers/IconManager.lua
