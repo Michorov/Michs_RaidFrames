@@ -303,6 +303,26 @@ function FrameRegistry:GetSettingsForFrame(frame)
 	return nil
 end
 
+function FrameRegistry:UpdateManagedContainersVisibility(unit)
+	if not initialized then
+		return
+	end
+
+	local frame = unitFrameMap[unit]
+	if not frame then
+		return
+	end
+
+	local managedContainers = frame.managedContainers
+	if not managedContainers then
+		return
+	end
+
+	if managedContainers.defensives then
+		addon.Frames.ManagedContainers.Defensives:UpdateState(frame)
+	end
+end
+
 local function UpdateFrame(frame, settings, stateCallback, settingsCallback)
 	if (not InCombatLockdown()) and type(settingsCallback) == "function" then
 		settingsCallback(frame, settings)
