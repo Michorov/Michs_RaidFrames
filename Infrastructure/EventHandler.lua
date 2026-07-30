@@ -9,29 +9,54 @@ local initialized = false
 
 local IsSupportedUnit = addon.Utilities.IsSupportedUnit
 
-local function CreateRangeTrackers()
-	local function CreateRangeTracker(unit)
+local function NotifyRangeStateChanged(eventUnit)
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
+	end
+end
+
+local unitEventDispatcher = {
+	UNIT_IN_RANGE_UPDATE = NotifyRangeStateChanged,
+	UNIT_PHASE = NotifyRangeStateChanged,
+	UNIT_AURA = function(eventUnit)
+		addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
+	end,
+}
+
+local function CreateUnitEventTrackers()
+	local function CreateUnitEventTracker(unit)
 		local frame = CreateFrame("Frame")
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
+
+		if addon.IsRestrictedAuraAPI then
+			frame:RegisterUnitEvent("UNIT_AURA", unit)
+		end
+
 		frame:SetScript("OnEvent", function(_, event, eventUnit)
-			addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
+			local handler = unitEventDispatcher[event]
+			if handler then
+				handler(eventUnit)
+			end
 		end)
+
 		return frame
 	end
 
 	local trackers = {}
 
-	trackers.player = CreateRangeTracker("player")
+	trackers.player = CreateUnitEventTracker("player")
 
 	for i = 1, 4 do
 		local unit = "party" .. i
-		trackers[unit] = CreateRangeTracker(unit)
+		trackers[unit] = CreateUnitEventTracker(unit)
 	end
 
 	for i = 1, 40 do
 		local unit = "raid" .. i
-		trackers[unit] = CreateRangeTracker(unit)
+		trackers[unit] = CreateUnitEventTracker(unit)
 	end
 
 	return trackers
@@ -78,15 +103,7 @@ function EventHandler:Initialize()
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
 	addon.Frames.RangeChecker:UpdateSettings()
-	self.rangeTrackers = CreateRangeTrackers()
-
-	if addon.IsRestrictedAuraAPI and not self.unitVisibilityTicker then
-		self.unitVisibilityTicker = C_Timer.NewTicker(0.25, function()
-			if IsInGroup() or IsInRaid() then
-				addon.UpdateScheduler:Notify("unitVisibilityChanged")
-			end
-		end)
-	end
+	self.unitEventTrackers = CreateUnitEventTrackers()
 
 	initialized = true
 end
@@ -98,17 +115,29 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged")
+	end
 end
 
 function EventHandler:ZONE_CHANGED_NEW_AREA()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged")
+	end
 end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged")
+	end
 end
 
 function EventHandler:PARTY_LEADER_CHANGED()
@@ -266,6 +295,10 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
+	end
 end
 
 function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
@@ -274,6 +307,10 @@ function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("awayStateChanged", unit)
+
+	if addon.IsRestrictedAuraAPI then
+		addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
+	end
 end
 
 function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
