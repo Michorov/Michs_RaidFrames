@@ -98,6 +98,10 @@ function Utilities:NormalizeFontOutline(outline, fallback)
 end
 
 function Utilities.IsSupportedUnit(unit)
+	if issecretvalue and issecretvalue(unit) then
+		return false
+	end
+
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
