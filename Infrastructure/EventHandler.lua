@@ -11,10 +11,6 @@ local IsSupportedUnit = addon.Utilities.IsSupportedUnit
 
 local function NotifyRangeStateChanged(eventUnit)
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged", eventUnit)
-	end
 end
 
 local unitEventDispatcher = {
@@ -115,29 +111,17 @@ function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged")
-	end
 end
 
 function EventHandler:ZONE_CHANGED_NEW_AREA()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("layoutChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged")
-	end
 end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged")
-	end
 end
 
 function EventHandler:PARTY_LEADER_CHANGED()
@@ -295,10 +279,6 @@ function EventHandler:UNIT_CONNECTION(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
-	end
 end
 
 function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
@@ -307,10 +287,6 @@ function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
 	end
 
 	addon.UpdateScheduler:Notify("awayStateChanged", unit)
-
-	if addon.IsRestrictedAuraAPI then
-		addon.UpdateScheduler:Notify("unitVisibilityChanged", unit)
-	end
 end
 
 function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
