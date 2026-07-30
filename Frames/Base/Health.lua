@@ -5,16 +5,27 @@ addon.Frames.Base = addon.Frames.Base or {}
 addon.Frames.Base.Health = addon.Frames.Base.Health or {}
 
 local Health = addon.Frames.Base.Health
+local LSM = LibStub("LibSharedMedia-3.0")
 
 local settingsCache = setmetatable({}, { __mode = "k" })
-local CLASS_COLOR_TEXTURE = "Interface\\AddOns\\Michs_RaidFrames\\Media\\Textures\\M-SolidDarker"
-local STATIC_COLOR_TEXTURE = "Interface\\Buttons\\WHITE8x8"
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 
 	local health = (settings and settings.health) or {}
+	local profile = addon.Database:GetProfile()
+	local core = (profile and profile.core) or {}
 	local color = health.color or {}
+	local texture = health.lsmTexture
+
+	if texture == -1 then
+		texture = core.lsmTexture
+	end
+
+	texture = texture or "Solid"
+	if not LSM:IsValid("statusbar", texture) then
+		texture = "Solid"
+	end
 
 	local result = {
 		classColor = health.classColor == true,
@@ -24,9 +35,8 @@ local function UpdateSettingsCache(settings)
 			b = color.b or 0.10,
 			a = color.a or 1.0,
 		},
+		texture = texture,
 	}
-
-	result.texture = result.classColor and CLASS_COLOR_TEXTURE or STATIC_COLOR_TEXTURE
 
 	settingsCache[settings] = result
 end
@@ -77,7 +87,7 @@ function Health:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local healthBar = frame.healthBar
-	healthBar:SetStatusBarTexture(cachedSettings.texture)
+	healthBar:SetStatusBarTexture(addon.Styles.Textures:Fetch(cachedSettings.texture))
 end
 
 function Health:UpdateState(frame, settings)

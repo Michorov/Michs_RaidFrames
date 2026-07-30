@@ -38,6 +38,21 @@ function General:Create(panel)
 		addon.Locale:SetLocaleOverride(value)
 	end)
 
+	local textureDropdown = subpage:CreateControl("Dropdown", { labelKey = "Global Texture" })
+	textureDropdown:SetLayoutWidth(174)
+	textureDropdown:SetOptions(addon.Styles.Textures:GetOptions())
+	textureDropdown:BindValue({
+		get = function(profile)
+			return profile.core.lsmTexture
+		end,
+		set = function(profile, _, value)
+			profile.core.lsmTexture = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("healthSettingsChanged")
+		end,
+	})
+
 	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", { labelKey = "Show Solo Party Frame" })
 	showSoloPartyFrameCheckbox:BindValue({
 		get = function(profile)
@@ -51,10 +66,8 @@ function General:Create(panel)
 		end,
 	})
 
-	local hideBlizzardPartyRaidFramesCheckbox = subpage:CreateControl(
-		"Checkbox",
-		{ labelKey = "Hide Blizzard Party/Raid Frames" }
-	)
+	local hideBlizzardPartyRaidFramesCheckbox =
+		subpage:CreateControl("Checkbox", { labelKey = "Hide Blizzard Party/Raid Frames" })
 	hideBlizzardPartyRaidFramesCheckbox:BindValue({
 		get = function(profile)
 			return profile.core.hideBlizzardRaidFrames
@@ -67,10 +80,8 @@ function General:Create(panel)
 		end,
 	})
 
-	local hideBlizzardRaidFrameManagerCheckbox = subpage:CreateControl(
-		"Checkbox",
-		{ labelKey = "Hide Blizzard Raid Frame Manager" }
-	)
+	local hideBlizzardRaidFrameManagerCheckbox =
+		subpage:CreateControl("Checkbox", { labelKey = "Hide Blizzard Raid Frame Manager" })
 	hideBlizzardRaidFrameManagerCheckbox:BindValue({
 		get = function(profile)
 			return profile.core.hideBlizzardRaidFrameManager
@@ -125,12 +136,20 @@ function General:Create(panel)
 	subpage:SetStateUpdater(function()
 		languageDropdown:SetOptions(GetLanguageOptions())
 		languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
+		textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(addon.Database:GetProfile().core.lsmTexture))
 	end)
 
 	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
-	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, -72)
+	textureDropdown:SetLayoutPoint("TOPLEFT", languageDropdown, "BOTTOMLEFT", 0, -32)
+	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", textureDropdown, "BOTTOMLEFT", 0, -32)
 	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
-	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint("TOPLEFT", hideBlizzardPartyRaidFramesCheckbox, "BOTTOMLEFT", 0, -12)
+	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint(
+		"TOPLEFT",
+		hideBlizzardPartyRaidFramesCheckbox,
+		"BOTTOMLEFT",
+		0,
+		-12
+	)
 	globalScaleSlider:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "TOPLEFT", 291, 0)
 	outOfRangeAlphaSlider:SetLayoutPoint("TOPLEFT", globalScaleSlider, "BOTTOMLEFT", 0, -12)
 
