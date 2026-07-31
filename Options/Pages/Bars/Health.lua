@@ -15,8 +15,25 @@ local colorModeOptions = {
 function Health:Create(page)
 	local subpage = page:RegisterSubPage("health", { titleKey = "Health" })
 
+	local textureRow = subpage:CreateRow(4)
+	textureRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+
+	local textureDropdown = textureRow:CreateControl("Dropdown", { labelKey = "Texture" })
+	textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(nil, true))
+	textureDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].health.lsmTexture
+		end,
+		set = function(profile, mode, value)
+			profile[mode].health.lsmTexture = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("healthSettingsChanged")
+		end,
+	})
+
 	local colorRow = subpage:CreateRow(4)
-	colorRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	colorRow:SetLayoutPoint("TOPLEFT", textureRow.frame, "BOTTOMLEFT", 0, -24)
 
 	local colorModeDropdown = colorRow:CreateControl("Dropdown", { labelKey = "Color" })
 	colorModeDropdown:SetOptions(colorModeOptions)
@@ -40,23 +57,6 @@ function Health:Create(page)
 		end,
 		set = function(profile, mode, value)
 			profile[mode].health.color = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("healthSettingsChanged")
-		end,
-	})
-
-	local textureRow = subpage:CreateRow(4)
-	textureRow:SetLayoutPoint("TOPLEFT", colorRow.frame, "BOTTOMLEFT", 0, -16)
-
-	local textureDropdown = textureRow:CreateControl("Dropdown", { labelKey = "Texture" })
-	textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(nil, true))
-	textureDropdown:BindValue({
-		get = function(profile, mode)
-			return profile[mode].health.lsmTexture
-		end,
-		set = function(profile, mode, value)
-			profile[mode].health.lsmTexture = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("healthSettingsChanged")

@@ -156,9 +156,9 @@ function General:Create(panel)
 	end)
 
 	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
-	textureDropdown:SetLayoutPoint("TOPLEFT", languageDropdown, "BOTTOMLEFT", 0, -32)
-	fontDropdown:SetLayoutPoint("TOPLEFT", textureDropdown, "TOPLEFT", 291, 0)
-	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", textureDropdown, "BOTTOMLEFT", 0, -32)
+	fontDropdown:SetLayoutPoint("TOPLEFT", languageDropdown, "BOTTOMLEFT", 0, -32)
+	textureDropdown:SetLayoutPoint("TOPLEFT", fontDropdown, "TOPLEFT", 291, 0)
+	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", fontDropdown, "BOTTOMLEFT", 0, -32)
 	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
 	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint(
 		"TOPLEFT",
