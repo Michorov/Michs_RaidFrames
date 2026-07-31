@@ -22,9 +22,9 @@ local function UpdateSettingsCache(settings)
 		texture = core.lsmTexture
 	end
 
-	texture = texture or "Solid"
+	texture = texture or "M-SolidDarker"
 	if not LSM:IsValid("statusbar", texture) then
-		texture = "Solid"
+		texture = "M-SolidDarker"
 	end
 
 	local result = {
