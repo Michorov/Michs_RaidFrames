@@ -6,6 +6,7 @@ addon.Styles.Textures = addon.Styles.Textures or {}
 local Textures = addon.Styles.Textures
 local LSM = LibStub("LibSharedMedia-3.0")
 local callbacksRegistered = false
+local FALLBACK_TEXTURE = "M-SolidDarker"
 
 LSM:Register(
 	"statusbar",
@@ -57,6 +58,10 @@ function Textures:GetOptions(selectedTextureName, includeGlobal)
 end
 
 function Textures:Fetch(textureName)
+	if not LSM:IsValid("statusbar", textureName) then
+		textureName = FALLBACK_TEXTURE
+	end
+
 	return LSM:Fetch("statusbar", textureName)
 end
 
