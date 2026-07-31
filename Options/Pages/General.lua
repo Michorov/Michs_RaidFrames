@@ -66,6 +66,9 @@ function General:Create(panel)
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("nameSettingsChanged")
+			addon.UpdateScheduler:Notify("statusTextSettingsChanged")
+			addon.UpdateScheduler:Notify("awayTextSettingsChanged")
+			addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
 		end,
 	})
 

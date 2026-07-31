@@ -7,6 +7,23 @@ addon.Frames.Widgets.Texts.StatusText = addon.Frames.Widgets.Texts.StatusText or
 
 local StatusText = addon.Frames.Widgets.Texts.StatusText
 
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
+	local widgets = (settings and settings.widgets) or {}
+	local texts = widgets.texts or {}
+	local statusText = texts.statusText or {}
+
+	local result = {
+		font = addon.Styles.Fonts:Resolve(statusText.lsmFont),
+		size = statusText.size or 16,
+	}
+
+	settingsCache[settings] = result
+end
+
 function StatusText:Ensure(frame)
 	if not frame.statusText then
 		local statusFrame = CreateFrame("Frame", nil, frame)
@@ -15,7 +32,7 @@ function StatusText:Ensure(frame)
 
 		local text = statusFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 		text:SetPoint("CENTER", statusFrame, "CENTER", 0, 0)
-		text:SetFont(addon.Utilities:GetGameFontNormalPath(), frame.dataProvider:ScaleFont(frame, 16), "")
+		text:SetFont(addon.Styles.Fonts:Resolve(-1), frame.dataProvider:ScaleFont(frame, 16), "")
 		text:SetTextColor(0.55, 0.55, 0.55, 1)
 		text:SetShadowColor(0, 0, 0, 0.9)
 		text:SetShadowOffset(1, -1)
@@ -24,6 +41,14 @@ function StatusText:Ensure(frame)
 		statusFrame.text = text
 		frame.statusText = statusFrame
 	end
+end
+
+function StatusText:UpdateSettings(frame, settings)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+	local scaledFontSize = frame.dataProvider:ScaleFont(frame, cachedSettings.size)
+
+	frame.statusText.text:SetFont(cachedSettings.font, scaledFontSize, "")
 end
 
 function StatusText:UpdateState(frame)
@@ -58,6 +83,7 @@ end
 function StatusText:Init()
 	addon.Modules:Register({
 		module = self,
+		settingsReason = "statusTextSettingsChanged",
 		stateReason = "statusStateChanged",
 	})
 end

@@ -35,7 +35,7 @@ local function UpdateSettingsCache(settings)
 			b = color.b or 1,
 			a = color.a or 1,
 		},
-		font = addon.Styles.Fonts:Fetch(font),
+		font = addon.Styles.Fonts:Resolve(font),
 		size = name.size or 12,
 		outline = addon.Utilities:NormalizeFontOutline(name.outline),
 		truncate = name.truncate == true,
