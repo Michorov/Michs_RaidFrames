@@ -289,6 +289,13 @@ local function NormalizeProfileTextSettings(profileSection)
 			texts.away.outline = addon.Utilities:NormalizeFontOutline(outline)
 		end
 	end
+
+	if type(texts.statusText) == "table" then
+		local outline = texts.statusText.outline
+		if outline ~= nil then
+			texts.statusText.outline = addon.Utilities:NormalizeFontOutline(outline)
+		end
+	end
 end
 
 local function NormalizeCurrentProfileFontSettings(profile)
@@ -342,7 +349,6 @@ local DEFAULTS = {
 				enabled = true,
 				healerOnly = false,
 				lsmTexture = -1,
-				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 8,
 				borderThicknessPx = 1,
 			},
@@ -365,7 +371,6 @@ local DEFAULTS = {
 							b = 1,
 							a = 1,
 						},
-						font = "Fonts\\ARIALN.TTF",
 						lsmFont = -1,
 						size = 12,
 						outline = "",
@@ -408,8 +413,20 @@ local DEFAULTS = {
 						},
 					},
 					statusText = {
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = 0,
+						},
 						lsmFont = -1,
 						size = 16,
+						outline = "",
+						color = {
+							r = 0.55,
+							g = 0.55,
+							b = 0.55,
+							a = 1,
+						},
 					},
 				},
 				icons = {
@@ -663,7 +680,6 @@ local DEFAULTS = {
 				enabled = true,
 				healerOnly = false,
 				lsmTexture = -1,
-				texture = "Interface\\Buttons\\WHITE8x8",
 				height = 6,
 				borderThicknessPx = 1,
 			},
@@ -686,7 +702,6 @@ local DEFAULTS = {
 							b = 1,
 							a = 1,
 						},
-						font = "Fonts\\ARIALN.TTF",
 						lsmFont = -1,
 						size = 10,
 						outline = "",
@@ -729,8 +744,20 @@ local DEFAULTS = {
 						},
 					},
 					statusText = {
+						anchor = "CENTER",
+						position = {
+							x = 0,
+							y = 0,
+						},
 						lsmFont = -1,
 						size = 16,
+						outline = "",
+						color = {
+							r = 0.55,
+							g = 0.55,
+							b = 0.55,
+							a = 1,
+						},
 					},
 				},
 				icons = {

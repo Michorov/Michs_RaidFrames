@@ -96,8 +96,8 @@ local previewPageWidgets = {
 	},
 	texts = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
-		controls = { "name", "away", "healAbsorbsText" },
-		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+		controls = { "name", "statusText", "away", "healAbsorbsText" },
+		testData = { testHealthIndex = 1, testPowerIndex = 1, testStatusText = "Dead" },
 	},
 	auras = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },

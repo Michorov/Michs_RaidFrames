@@ -215,6 +215,31 @@ function DataProvider.Test:GetName(frame)
 	return frame and frame.testName or ""
 end
 
+function DataProvider.Live:GetStatusText(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil
+	end
+
+	if UnitIsConnected(unit) == false then
+		return "Offline"
+	end
+
+	if UnitIsGhost(unit) then
+		return "Ghost"
+	end
+
+	if UnitIsDead(unit) then
+		return "Dead"
+	end
+
+	return nil
+end
+
+function DataProvider.Test:GetStatusText(frame)
+	return (frame and frame.testStatusText) or "Dead"
+end
+
 function DataProvider.Live:GetAwayStatus(frame)
 	local unit = frame and frame.unit
 	if type(unit) ~= "string" or unit == "" then
