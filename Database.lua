@@ -313,6 +313,7 @@ local DEFAULTS = {
 			outOfRangeAlpha = 0.5,
 			uiScale = 1.0,
 			lsmTexture = "M-SolidDarker",
+			lsmFont = -2,
 		},
 		party = {
 			size = { width = 128, height = 64 },
@@ -364,6 +365,7 @@ local DEFAULTS = {
 							a = 1,
 						},
 						font = "Fonts\\ARIALN.TTF",
+						lsmFont = -1,
 						size = 12,
 						outline = "",
 						truncate = false,
@@ -677,6 +679,7 @@ local DEFAULTS = {
 							a = 1,
 						},
 						font = "Fonts\\ARIALN.TTF",
+						lsmFont = -1,
 						size = 10,
 						outline = "",
 						truncate = false,

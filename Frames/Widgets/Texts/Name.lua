@@ -16,6 +16,13 @@ local function UpdateSettingsCache(settings)
 	local name = texts.name or {}
 	local position = name.position or {}
 	local color = name.color or {}
+	local profile = addon.Database:GetProfile()
+	local core = (profile and profile.core) or {}
+	local font = name.lsmFont
+
+	if font == -1 then
+		font = core.lsmFont
+	end
 
 	local result = {
 		anchor = name.anchor or "TOPLEFT",
@@ -28,7 +35,7 @@ local function UpdateSettingsCache(settings)
 			b = color.b or 1,
 			a = color.a or 1,
 		},
-		font = name.font or "Fonts\\ARIALN.TTF",
+		font = addon.Styles.Fonts:Fetch(font),
 		size = name.size or 12,
 		outline = addon.Utilities:NormalizeFontOutline(name.outline),
 		truncate = name.truncate == true,
