@@ -43,25 +43,8 @@ end
 function Name:Create(page)
 	local subpage = page:RegisterSubPage("name", { titleKey = "Name" })
 
-	local fontSelectRow = subpage:CreateRow(4)
-	fontSelectRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
-
-	local fontDropdown = fontSelectRow:CreateControl("Dropdown", { labelKey = "Font" })
-	fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions(nil, true))
-	fontDropdown:BindValue({
-		get = function(profile, mode)
-			return profile[mode].widgets.texts.name.lsmFont
-		end,
-		set = function(profile, mode, value)
-			profile[mode].widgets.texts.name.lsmFont = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("nameSettingsChanged")
-		end,
-	})
-
 	local positionRow = subpage:CreateRow(4)
-	positionRow:SetLayoutPoint("TOPLEFT", fontSelectRow.frame, "BOTTOMLEFT", 0, -16)
+	positionRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local anchorDropdown = positionRow:CreateControl("Dropdown", { labelKey = "Position" })
 	anchorDropdown:SetOptions(anchorOptions)
@@ -111,6 +94,20 @@ function Name:Create(page)
 
 	local fontRow = subpage:CreateRow(4)
 	fontRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local fontDropdown = fontRow:CreateControl("Dropdown", { labelKey = "Font" })
+	fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions(nil, true))
+	fontDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.texts.name.lsmFont
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.texts.name.lsmFont = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("nameSettingsChanged")
+		end,
+	})
 
 	local sizeSlider = fontRow:CreateControl("Slider", { labelKey = "Font Size" })
 	sizeSlider:SetMinMaxValues(6, 32)
