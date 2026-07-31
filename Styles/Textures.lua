@@ -28,7 +28,7 @@ function Textures:GetOptions(selectedTextureName, includeGlobal)
 	if includeGlobal then
 		options[#options + 1] = {
 			value = -1,
-			text = "Use Global",
+			textKey = "Use Global",
 			textColor = { 0.50, 0.52, 0.56, 1 },
 		}
 	end
