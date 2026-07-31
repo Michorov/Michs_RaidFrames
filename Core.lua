@@ -13,6 +13,7 @@ local function InitializeAddon()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
 
 	addon.Styles.Textures:RegisterCallbacks()
+	addon.Styles.Fonts:RegisterCallbacks()
 
 	addon.Modules:Initialize()
 

@@ -88,7 +88,15 @@ local function UpdateSelectionText(control)
 
 	ApplyOptionTexture(control.selectionTexture, selectedOption)
 	ApplyOptionTextStyle(control, control.selectionText, selectedOption, isPlaceholder)
-	control.selectionText:SetText(displayText)
+
+	if selectedOption and selectedOption.font then
+		control.selectionText:SetText("")
+		C_Timer.After(0, function()
+			control.selectionText:SetText(displayText)
+		end)
+	else
+		control.selectionText:SetText(displayText)
+	end
 end
 
 local function SetArrowColor(control, color)
@@ -228,7 +236,17 @@ local function EnsureListRows(control)
 		button.value = option.value
 		ApplyOptionTexture(button.previewTexture, option)
 		ApplyOptionTextStyle(control, button.text, option, false)
-		button.text:SetText(GetOptionText(control, option) or "")
+
+		local optionText = GetOptionText(control, option) or ""
+		if option.font then
+			button.text:SetText("")
+			C_Timer.After(0, function()
+				button.text:SetText(optionText)
+			end)
+		else
+			button.text:SetText(optionText)
+		end
+
 		button.text:ClearAllPoints()
 		button.text:SetPoint("LEFT", button, "LEFT", PP:ToUIScaled(control.layout.textInset), 0)
 		button.text:SetPoint("RIGHT", button, "RIGHT", PP:ToUIScaled(-control.layout.textInset), 0)
@@ -248,12 +266,9 @@ local function UpdateListLayout(control)
 	local listPadding = PP:ToUIScaled(control.layout.listPadding)
 	local optionCount = #control.options
 	local visibleCount = math.min(optionCount, control.layout.maxVisibleRows)
-	local contentHeight = (optionCount * rowHeight)
-		+ (math.max(0, optionCount - 1) * rowSpacing)
-	local visibleHeight = (visibleCount * rowHeight)
-		+ (math.max(0, visibleCount - 1) * rowSpacing)
-	local listHeight = visibleHeight
-		+ (listPadding * 2)
+	local contentHeight = (optionCount * rowHeight) + (math.max(0, optionCount - 1) * rowSpacing)
+	local visibleHeight = (visibleCount * rowHeight) + (math.max(0, visibleCount - 1) * rowSpacing)
+	local listHeight = visibleHeight + (listPadding * 2)
 	local isScrollable = optionCount > control.layout.maxVisibleRows
 	local scrollBarWidth = PP:ToUIScaled(control.layout.scrollBarWidth)
 	local scrollBarSpacing = PP:ToUIScaled(control.layout.scrollBarSpacing)

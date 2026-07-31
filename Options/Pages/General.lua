@@ -53,6 +53,21 @@ function General:Create(panel)
 		end,
 	})
 
+	local fontDropdown = subpage:CreateControl("Dropdown", { labelKey = "Global Font" })
+	fontDropdown:SetLayoutWidth(174)
+	fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions())
+	fontDropdown:BindValue({
+		get = function(profile)
+			return profile.core.lsmFont
+		end,
+		set = function(profile, _, value)
+			profile.core.lsmFont = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("nameSettingsChanged")
+		end,
+	})
+
 	local showSoloPartyFrameCheckbox = subpage:CreateControl("Checkbox", { labelKey = "Show Solo Party Frame" })
 	showSoloPartyFrameCheckbox:BindValue({
 		get = function(profile)
@@ -137,10 +152,12 @@ function General:Create(panel)
 		languageDropdown:SetOptions(GetLanguageOptions())
 		languageDropdown:SetValue(addon.Locale:GetLocaleOverride())
 		textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(addon.Database:GetProfile().core.lsmTexture))
+		fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions(addon.Database:GetProfile().core.lsmFont))
 	end)
 
 	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 	textureDropdown:SetLayoutPoint("TOPLEFT", languageDropdown, "BOTTOMLEFT", 0, -32)
+	fontDropdown:SetLayoutPoint("TOPLEFT", textureDropdown, "TOPLEFT", 291, 0)
 	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", textureDropdown, "BOTTOMLEFT", 0, -32)
 	hideBlizzardPartyRaidFramesCheckbox:SetLayoutPoint("TOPLEFT", showSoloPartyFrameCheckbox, "BOTTOMLEFT", 0, -12)
 	hideBlizzardRaidFrameManagerCheckbox:SetLayoutPoint(

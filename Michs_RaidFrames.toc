@@ -38,6 +38,7 @@ Modules.lua
 
 # Style
 Styles/Textures.lua
+Styles/Fonts.lua
 
 # Frame Managers
 Frames/Managers/IconManager.lua
