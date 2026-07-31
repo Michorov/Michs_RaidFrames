@@ -81,15 +81,25 @@ function Textures:RegisterCallbacks()
 
 		local profile = addon.Database:GetProfile()
 		local coreTexture = profile and profile.core and profile.core.lsmTexture
-		local partyTexture = profile and profile.party and profile.party.health and profile.party.health.lsmTexture
-		local raidTexture = profile and profile.raid and profile.raid.health and profile.raid.health.lsmTexture
+		local partyHealthTexture = profile and profile.party and profile.party.health and profile.party.health.lsmTexture
+		local raidHealthTexture = profile and profile.raid and profile.raid.health and profile.raid.health.lsmTexture
+		local partyPowerTexture = profile and profile.party and profile.party.power and profile.party.power.lsmTexture
+		local raidPowerTexture = profile and profile.raid and profile.raid.power and profile.raid.power.lsmTexture
 
 		if
-			partyTexture == textureName
-			or raidTexture == textureName
-			or (coreTexture == textureName and (partyTexture == -1 or raidTexture == -1))
+			partyHealthTexture == textureName
+			or raidHealthTexture == textureName
+			or (coreTexture == textureName and (partyHealthTexture == -1 or raidHealthTexture == -1))
 		then
 			addon.UpdateScheduler:Notify("healthSettingsChanged")
+		end
+
+		if
+			partyPowerTexture == textureName
+			or raidPowerTexture == textureName
+			or (coreTexture == textureName and (partyPowerTexture == -1 or raidPowerTexture == -1))
+		then
+			addon.UpdateScheduler:Notify("powerSettingsChanged")
 		end
 	end)
 

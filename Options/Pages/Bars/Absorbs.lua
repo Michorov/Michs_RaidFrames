@@ -18,7 +18,7 @@ function Absorbs:Create(page)
 	local row = subpage:CreateRow(4)
 	row:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	local textureDropdown = row:CreateControl("Dropdown", { labelKey = "Shield Texture" })
+	local textureDropdown = row:CreateControl("Dropdown", { labelKey = "Texture" })
 	textureDropdown:SetOptions(textureOptions)
 	textureDropdown:BindValue({
 		get = function(profile, mode)
