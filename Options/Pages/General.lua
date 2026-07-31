@@ -50,6 +50,7 @@ function General:Create(panel)
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("healthSettingsChanged")
+			addon.UpdateScheduler:Notify("powerSettingsChanged")
 		end,
 	})
 

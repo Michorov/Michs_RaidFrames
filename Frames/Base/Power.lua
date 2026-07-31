@@ -29,11 +29,20 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 
 	local power = (settings and settings.power) or {}
+	local profile = addon.Database:GetProfile()
+	local core = (profile and profile.core) or {}
+	local texture = power.lsmTexture
+
+	if texture == -1 then
+		texture = core.lsmTexture
+	end
+
+	texture = texture or "M-SolidDarker"
 
 	local result = {
 		enabled = power.enabled == true,
 		healerOnly = power.healerOnly == true,
-		texture = power.texture or "Interface\\Buttons\\WHITE8x8",
+		texture = texture,
 		heightPx = addon.Utilities:ToPixels(power.height or 4),
 		borderThicknessPx = addon.Utilities:ToPixels(power.borderThicknessPx or 1),
 	}
@@ -90,7 +99,7 @@ function Power:UpdateSettings(frame, settings)
 	local scaledHeightPx = math.max(1, frame.dataProvider:Scale(frame, cachedSettings.heightPx))
 	local scaledBorderPx = frame.dataProvider:Scale(frame, cachedSettings.borderThicknessPx)
 
-	powerBar:SetStatusBarTexture(cachedSettings.texture)
+	powerBar:SetStatusBarTexture(addon.Styles.Textures:Fetch(cachedSettings.texture))
 	powerBar:SetHeight(addon.Utilities:ToUI(scaledHeightPx))
 
 	powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)

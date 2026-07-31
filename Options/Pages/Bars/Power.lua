@@ -45,8 +45,25 @@ function Power:Create(page)
 		end,
 	})
 
+	local textureRow = subpage:CreateRow(4)
+	textureRow:SetLayoutPoint("TOPLEFT", checkboxRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local textureDropdown = textureRow:CreateControl("Dropdown", { labelKey = "Texture" })
+	textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(nil, true))
+	textureDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].power.lsmTexture
+		end,
+		set = function(profile, mode, value)
+			profile[mode].power.lsmTexture = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("powerSettingsChanged")
+		end,
+	})
+
 	local sliderRow = subpage:CreateRow(4)
-	sliderRow:SetLayoutPoint("TOPLEFT", checkboxRow.frame, "BOTTOMLEFT", 0, -24)
+	sliderRow:SetLayoutPoint("TOPLEFT", textureRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local heightSlider = sliderRow:CreateControl("Slider", { labelKey = "Height" })
 	heightSlider:SetMinMaxValues(1, 20)
@@ -79,6 +96,11 @@ function Power:Create(page)
 			addon.UpdateScheduler:Notify("powerSettingsChanged")
 		end,
 	})
+
+	subpage:SetStateUpdater(function(profile, mode)
+		local settings = profile[mode].power
+		textureDropdown:SetOptions(addon.Styles.Textures:GetOptions(settings.lsmTexture, true))
+	end)
 
 	return subpage
 end
