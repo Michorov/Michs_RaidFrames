@@ -15,10 +15,22 @@ local function UpdateSettingsCache(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local texts = widgets.texts or {}
 	local statusText = texts.statusText or {}
+	local position = statusText.position or {}
+	local color = statusText.color or {}
 
 	local result = {
+		anchor = statusText.anchor or "CENTER",
+		positionX = addon.Utilities:ToPixels(position.x or 0),
+		positionY = addon.Utilities:ToPixels(position.y or 0),
 		font = addon.Styles.Fonts:Resolve(statusText.lsmFont),
 		size = statusText.size or 16,
+		outline = addon.Utilities:NormalizeFontOutline(statusText.outline),
+		color = {
+			r = color.r or 0.55,
+			g = color.g or 0.55,
+			b = color.b or 0.55,
+			a = color.a or 1,
+		},
 	}
 
 	settingsCache[settings] = result
@@ -47,8 +59,21 @@ function StatusText:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local scaledFontSize = frame.dataProvider:ScaleFont(frame, cachedSettings.size)
+	local scaledPositionX = frame.dataProvider:Scale(frame, cachedSettings.positionX)
+	local scaledPositionY = frame.dataProvider:Scale(frame, cachedSettings.positionY)
+	local text = frame.statusText.text
 
-	frame.statusText.text:SetFont(cachedSettings.font, scaledFontSize, "")
+	text:ClearAllPoints()
+	text:SetPoint(
+		cachedSettings.anchor,
+		frame.statusText,
+		cachedSettings.anchor,
+		addon.Utilities:ToUI(scaledPositionX),
+		addon.Utilities:ToUI(scaledPositionY)
+	)
+
+	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
+	text:SetTextColor(cachedSettings.color.r, cachedSettings.color.g, cachedSettings.color.b, cachedSettings.color.a)
 end
 
 function StatusText:UpdateState(frame)
@@ -59,21 +84,9 @@ function StatusText:UpdateState(frame)
 		return
 	end
 
-	local unit = frame.unit
-
-	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
-		text:Hide()
-		return
-	end
-
-	if UnitIsConnected(unit) == false then
-		text:SetText("Offline")
-		text:Show()
-	elseif UnitIsGhost(unit) then
-		text:SetText("Ghost")
-		text:Show()
-	elseif UnitIsDead(unit) then
-		text:SetText("Dead")
+	local statusText = frame.dataProvider:GetStatusText(frame)
+	if statusText then
+		text:SetText(statusText)
 		text:Show()
 	else
 		text:Hide()

@@ -60,6 +60,11 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.statusTextSettingsChanged then
+			addon.Frames.Widgets.Texts.StatusText:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame, settings)
+		end
+
 		if updateReasons.awayTextSettingsChanged then
 			addon.Frames.Widgets.Texts.Away:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Texts.Away:UpdateState(frame, settings)
