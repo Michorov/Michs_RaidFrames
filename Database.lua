@@ -380,6 +380,7 @@ local DEFAULTS = {
 							x = 0,
 							y = 0,
 						},
+						lsmFont = -1,
 						size = 10,
 						outline = "OUTLINE",
 						color = {
@@ -396,6 +397,7 @@ local DEFAULTS = {
 							x = 0,
 							y = -18,
 						},
+						lsmFont = -1,
 						size = 10,
 						outline = "",
 						color = {
@@ -404,6 +406,10 @@ local DEFAULTS = {
 							b = 1,
 							a = 1,
 						},
+					},
+					statusText = {
+						lsmFont = -1,
+						size = 16,
 					},
 				},
 				icons = {
@@ -695,6 +701,7 @@ local DEFAULTS = {
 							x = 0,
 							y = 0,
 						},
+						lsmFont = -1,
 						size = 10,
 						outline = "OUTLINE",
 						color = {
@@ -711,6 +718,7 @@ local DEFAULTS = {
 							x = 0,
 							y = -18,
 						},
+						lsmFont = -1,
 						size = 10,
 						outline = "",
 						color = {
@@ -719,6 +727,10 @@ local DEFAULTS = {
 							b = 1,
 							a = 1,
 						},
+					},
+					statusText = {
+						lsmFont = -1,
+						size = 16,
 					},
 				},
 				icons = {

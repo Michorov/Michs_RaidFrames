@@ -9,6 +9,13 @@ local fontTable = LSM:HashTable("font")
 local WOW_DEFAULT_FONT = -2
 local callbacksRegistered = false
 
+local fontSettingReasons = {
+	{ key = "name", reason = "nameSettingsChanged" },
+	{ key = "away", reason = "awayTextSettingsChanged" },
+	{ key = "healAbsorbs", reason = "healAbsorbsTextSettingsChanged" },
+	{ key = "statusText", reason = "statusTextSettingsChanged" },
+}
+
 LSM:Register(
 	"font",
 	"Philosopher Bold",
@@ -63,6 +70,32 @@ function Fonts:Fetch(fontName)
 	return LSM:Fetch("font", fontName)
 end
 
+function Fonts:Resolve(fontName)
+	if fontName == -1 then
+		local profile = addon.Database:GetProfile()
+		fontName = profile and profile.core and profile.core.lsmFont
+	end
+
+	return self:Fetch(fontName)
+end
+
+local function GetTextFont(profile, mode, key)
+	return profile
+		and profile[mode]
+		and profile[mode].widgets
+		and profile[mode].widgets.texts
+		and profile[mode].widgets.texts[key]
+		and profile[mode].widgets.texts[key].lsmFont
+end
+
+local function ShouldUpdateTextFont(profile, key, fontName)
+	local coreFont = profile and profile.core and profile.core.lsmFont
+	local partyFont = GetTextFont(profile, "party", key)
+	local raidFont = GetTextFont(profile, "raid", key)
+
+	return partyFont == fontName or raidFont == fontName or (coreFont == fontName and (partyFont == -1 or raidFont == -1))
+end
+
 function Fonts:RegisterCallbacks()
 	if callbacksRegistered then
 		return
@@ -78,26 +111,10 @@ function Fonts:RegisterCallbacks()
 		end
 
 		local profile = addon.Database:GetProfile()
-		local coreFont = profile and profile.core and profile.core.lsmFont
-		local partyFont = profile
-			and profile.party
-			and profile.party.widgets
-			and profile.party.widgets.texts
-			and profile.party.widgets.texts.name
-			and profile.party.widgets.texts.name.lsmFont
-		local raidFont = profile
-			and profile.raid
-			and profile.raid.widgets
-			and profile.raid.widgets.texts
-			and profile.raid.widgets.texts.name
-			and profile.raid.widgets.texts.name.lsmFont
-
-		if
-			partyFont == fontName
-			or raidFont == fontName
-			or (coreFont == fontName and (partyFont == -1 or raidFont == -1))
-		then
-			addon.UpdateScheduler:Notify("nameSettingsChanged")
+		for _, setting in ipairs(fontSettingReasons) do
+			if ShouldUpdateTextFont(profile, setting.key, fontName) then
+				addon.UpdateScheduler:Notify(setting.reason)
+			end
 		end
 	end)
 

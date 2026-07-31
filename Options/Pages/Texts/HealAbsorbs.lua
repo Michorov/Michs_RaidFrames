@@ -116,6 +116,20 @@ function HealAbsorbs:Create(page)
 	local sizeRow = subpage:CreateRow(4)
 	sizeRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -16)
 
+	local fontDropdown = sizeRow:CreateControl("Dropdown", { labelKey = "Font" })
+	fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions(nil, true))
+	fontDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.texts.healAbsorbs.lsmFont
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.texts.healAbsorbs.lsmFont = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
+		end,
+	})
+
 	local sizeSlider = sizeRow:CreateControl("Slider", { labelKey = "Font Size" })
 	sizeSlider:SetMinMaxValues(6, 32)
 	sizeSlider:SetStep(1)
@@ -162,6 +176,11 @@ function HealAbsorbs:Create(page)
 			addon.UpdateScheduler:Notify("healAbsorbsTextSettingsChanged")
 		end,
 	})
+
+	subpage:SetStateUpdater(function(profile, mode)
+		local settings = profile[mode].widgets.texts.healAbsorbs
+		fontDropdown:SetOptions(addon.Styles.Fonts:GetOptions(settings.lsmFont, true))
+	end)
 
 	return subpage
 end

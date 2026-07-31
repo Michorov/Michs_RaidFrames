@@ -82,6 +82,7 @@ local function UpdateSettingsCache(settings)
 		anchor = away.anchor or "CENTER",
 		positionX = addon.Utilities:ToPixels(position.x or 0),
 		positionY = addon.Utilities:ToPixels(position.y or -18),
+		font = addon.Styles.Fonts:Resolve(away.lsmFont),
 		size = away.size or 10,
 		outline = addon.Utilities:NormalizeFontOutline(away.outline),
 		color = {
@@ -125,7 +126,7 @@ function Away:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	text:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledFontSize, cachedSettings.outline)
+	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
 	text:SetShadowColor(0, 0, 0, 0.9)
 	text:SetShadowOffset(1, -1)
 

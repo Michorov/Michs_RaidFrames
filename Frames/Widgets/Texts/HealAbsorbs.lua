@@ -23,6 +23,7 @@ local function UpdateSettingsCache(settings)
 		anchor = healAbsorbs.anchor or "CENTER",
 		positionX = addon.Utilities:ToPixels(position.x or 0),
 		positionY = addon.Utilities:ToPixels(position.y or 0),
+		font = addon.Styles.Fonts:Resolve(healAbsorbs.lsmFont),
 		size = healAbsorbs.size or 10,
 		outline = addon.Utilities:NormalizeFontOutline(healAbsorbs.outline, "OUTLINE"),
 		color = {
@@ -66,7 +67,7 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(scaledPositionY)
 	)
 
-	text:SetFont(addon.Utilities:GetGameFontNormalPath(), scaledFontSize, cachedSettings.outline)
+	text:SetFont(cachedSettings.font, scaledFontSize, cachedSettings.outline)
 	text:SetShadowColor(0, 0, 0, 0.9)
 	text:SetShadowOffset(1, -1)
 
