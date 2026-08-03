@@ -8,6 +8,11 @@ addon.Frames.Widgets.Indicators.RaidMarker = addon.Frames.Widgets.Indicators.Rai
 local RaidMarker = addon.Frames.Widgets.Indicators.RaidMarker
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local EVENTS = {
+	"RAID_TARGET_UPDATE",
+}
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -26,6 +31,27 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyRaidMarker = profile.party.widgets.indicators.raidMarker
+	local raidRaidMarker = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.raidMarker
+	local shouldRegister = partyRaidMarker.enabled == true or raidRaidMarker.enabled == true
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedEvent(event, RaidMarker)
+		else
+			addon.EventHandler:UnregisterTrackedEvent(event, RaidMarker)
+		end
+	end
+end
+
 function RaidMarker:Ensure(frame)
 	if not frame.raidMarker then
 		local container = CreateFrame("Frame", nil, frame)
@@ -42,6 +68,11 @@ function RaidMarker:UpdateSettings(frame, settings)
 	local container = frame.raidMarker
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then

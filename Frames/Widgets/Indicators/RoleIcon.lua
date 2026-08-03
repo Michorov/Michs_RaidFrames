@@ -8,6 +8,11 @@ addon.Frames.Widgets.Indicators.RoleIcon = addon.Frames.Widgets.Indicators.RoleI
 local RoleIcon = addon.Frames.Widgets.Indicators.RoleIcon
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local EVENTS = {
+	"PLAYER_ROLES_ASSIGNED",
+}
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -27,6 +32,27 @@ local function UpdateSettingsCache(settings)
 	}
 
 	settingsCache[settings] = result
+end
+
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyRoleIcon = profile.party.widgets.indicators.roleIcon
+	local raidRoleIcon = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.roleIcon
+	local shouldRegister = partyRoleIcon.enabled == true or raidRoleIcon.enabled == true
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedEvent(event, RoleIcon)
+		else
+			addon.EventHandler:UnregisterTrackedEvent(event, RoleIcon)
+		end
+	end
 end
 
 local function ApplyRoleAtlas(texture, role)
@@ -74,6 +100,11 @@ function RoleIcon:UpdateSettings(frame, settings)
 	local container = frame.roleIcon
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then

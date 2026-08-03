@@ -10,7 +10,7 @@ local Threat = addon.Frames.Widgets.Indicators.Threat
 local settingsCache = setmetatable({}, { __mode = "k" })
 local eventsRegistered = nil
 
-local THREAT_UNIT_EVENTS = {
+local UNIT_EVENTS = {
 	"UNIT_THREAT_SITUATION_UPDATE",
 }
 
@@ -40,7 +40,7 @@ local function UpdateEvents()
 
 	eventsRegistered = shouldRegister
 
-	for _, event in ipairs(THREAT_UNIT_EVENTS) do
+	for _, event in ipairs(UNIT_EVENTS) do
 		if shouldRegister then
 			addon.EventHandler:RegisterTrackedUnitEvent(event, Threat)
 		else
