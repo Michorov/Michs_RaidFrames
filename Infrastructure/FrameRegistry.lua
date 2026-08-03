@@ -179,6 +179,8 @@ function MRF_OnUnitChanged(frame, unit)
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
+
+	addon.Modules:RequestUpdateState(unit)
 end
 
 local function ApplyBlizzardFramesVisibility()
