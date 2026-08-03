@@ -6,7 +6,11 @@ addon.EventHandler = EventHandler
 LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
-local trackedUnitEvents = {}
+
+local trackedEvents = {
+	unit = {},
+	global = {},
+}
 
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
@@ -18,7 +22,6 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
-		frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_HEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
@@ -54,24 +57,44 @@ local function CreateUnitEventTrackers()
 	return trackers
 end
 
-function EventHandler:RegisterTrackedUnitEvent(event)
-	if trackedUnitEvents[event] then
+function EventHandler:RegisterTrackedUnitEvent(event, owner)
+	local trackedEvent = trackedEvents.unit[event]
+
+	if not trackedEvent then
+		trackedEvent = {
+			owners = {},
+		}
+		trackedEvents.unit[event] = trackedEvent
+	end
+
+	if trackedEvent.owners[owner] then
 		return
 	end
 
-	trackedUnitEvents[event] = true
+	local shouldRegister = next(trackedEvent.owners) == nil
+	trackedEvent.owners[owner] = true
 
-	for _, tracker in pairs(self.unitEventTrackers or {}) do
-		tracker:RegisterUnitEvent(event, tracker.unit)
+	if shouldRegister then
+		for _, tracker in pairs(self.unitEventTrackers or {}) do
+			tracker:RegisterUnitEvent(event, tracker.unit)
+		end
 	end
 end
 
-function EventHandler:UnregisterTrackedUnitEvent(event)
-	if not trackedUnitEvents[event] then
+function EventHandler:UnregisterTrackedUnitEvent(event, owner)
+	local trackedEvent = trackedEvents.unit[event]
+
+	if not trackedEvent or not trackedEvent.owners[owner] then
 		return
 	end
 
-	trackedUnitEvents[event] = nil
+	trackedEvent.owners[owner] = nil
+
+	if next(trackedEvent.owners) then
+		return
+	end
+
+	trackedEvents.unit[event] = nil
 
 	for _, tracker in pairs(self.unitEventTrackers or {}) do
 		tracker:UnregisterEvent(event)
@@ -214,7 +237,6 @@ function EventHandler:UNIT_HEALTH(unit)
 end
 
 function EventHandler:UNIT_POWER_UPDATE(unit)
-	print("UNIT_POWER_UPDATE")
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 

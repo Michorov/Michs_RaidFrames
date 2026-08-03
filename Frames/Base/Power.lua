@@ -7,7 +7,7 @@ addon.Frames.Base.Power = addon.Frames.Base.Power or {}
 local Power = addon.Frames.Base.Power
 
 local settingsCache = setmetatable({}, { __mode = "k" })
-local powerEventsRegistered = nil
+local eventsRegistered = nil
 
 local POWER_UNIT_EVENTS = {
 	"UNIT_POWER_UPDATE",
@@ -57,25 +57,23 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-local function IsPowerEnabled(settings)
-	return settings and settings.power and settings.power.enabled == true
-end
-
-local function RefreshPowerUnitEvents()
+local function UpdateEvents()
 	local profile = addon.Database:GetProfile()
-	local shouldRegister = IsPowerEnabled(profile.party) or IsPowerEnabled(addon.FrameRegistry:ResolveRaidSettings(profile))
+	local partyPower = profile.party.power
+	local raidPower = addon.FrameRegistry:ResolveRaidSettings(profile).power
+	local shouldRegister = partyPower.enabled == true or raidPower.enabled == true
 
-	if powerEventsRegistered == shouldRegister then
+	if eventsRegistered == shouldRegister then
 		return
 	end
 
-	powerEventsRegistered = shouldRegister
+	eventsRegistered = shouldRegister
 
 	for _, event in ipairs(POWER_UNIT_EVENTS) do
 		if shouldRegister then
-			addon.EventHandler:RegisterTrackedUnitEvent(event)
+			addon.EventHandler:RegisterTrackedUnitEvent(event, Power)
 		else
-			addon.EventHandler:UnregisterTrackedUnitEvent(event)
+			addon.EventHandler:UnregisterTrackedUnitEvent(event, Power)
 		end
 	end
 end
@@ -125,7 +123,7 @@ function Power:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
 	if frame.dataProvider == addon.Frames.DataProvider.Live then
-		RefreshPowerUnitEvents()
+		UpdateEvents()
 	end
 
 	local cachedSettings = settingsCache[settings]

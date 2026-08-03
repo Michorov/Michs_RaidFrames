@@ -8,6 +8,11 @@ addon.Frames.Widgets.Indicators.Threat = addon.Frames.Widgets.Indicators.Threat 
 local Threat = addon.Frames.Widgets.Indicators.Threat
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local THREAT_UNIT_EVENTS = {
+	"UNIT_THREAT_SITUATION_UPDATE",
+}
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -21,6 +26,27 @@ local function UpdateSettingsCache(settings)
 		borderSizePx = addon.Utilities:ToPixels(threat.borderSize or 2),
 		frameBorderSizePx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 	}
+end
+
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyThreat = profile.party.widgets.indicators.threat
+	local raidThreat = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.threat
+	local shouldRegister = partyThreat.enabled == true or raidThreat.enabled == true
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(THREAT_UNIT_EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedUnitEvent(event, Threat)
+		else
+			addon.EventHandler:UnregisterTrackedUnitEvent(event, Threat)
+		end
+	end
 end
 
 local function ApplyThreatColor(container, threatStatus)
@@ -68,6 +94,11 @@ function Threat:UpdateSettings(frame, settings)
 	local container = frame.threat
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled or cachedSettings.borderSizePx <= 0 then
