@@ -16,8 +16,54 @@ end
 local unitEventDispatcher = {
 	UNIT_IN_RANGE_UPDATE = NotifyRangeStateChanged,
 	UNIT_PHASE = NotifyRangeStateChanged,
-	UNIT_AURA = function(eventUnit)
-		addon.FrameRegistry:UpdateManagedContainersVisibility(eventUnit)
+	UNIT_THREAT_SITUATION_UPDATE = function(eventUnit)
+		addon.UpdateScheduler:Notify("threatStateChanged", eventUnit)
+	end,
+	UNIT_MAXHEALTH = function(eventUnit)
+		addon.UpdateScheduler:Notify("healthStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
+	end,
+	UNIT_HEALTH = function(eventUnit)
+		addon.UpdateScheduler:Notify("healthStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
+		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
+	end,
+	UNIT_POWER_UPDATE = function(eventUnit)
+		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
+	end,
+	UNIT_MAXPOWER = function(eventUnit)
+		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
+	end,
+	UNIT_DISPLAYPOWER = function(eventUnit)
+		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
+	end,
+	UNIT_ABSORB_AMOUNT_CHANGED = function(eventUnit)
+		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
+	end,
+	UNIT_HEAL_ABSORB_AMOUNT_CHANGED = function(eventUnit)
+		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
+	end,
+	UNIT_AURA = function(eventUnit, updateInfo)
+		if addon.IsRestrictedAuraAPI then
+			addon.FrameRegistry:UpdateManagedContainersVisibility(eventUnit)
+			return
+		end
+
+		addon.AuraHandler:UpdateAurasForUnit(eventUnit, updateInfo)
+		addon.UpdateScheduler:Notify("aurasStateChanged", eventUnit)
+	end,
+	UNIT_NAME_UPDATE = function(eventUnit)
+		addon.UpdateScheduler:Notify("nameStateChanged", eventUnit)
+
+		C_Timer.After(1, function()
+			addon.UpdateScheduler:Notify("nameStateChanged", eventUnit)
+		end)
+	end,
+	UNIT_CONNECTION = function(eventUnit)
+		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
 	end,
 }
 
@@ -26,15 +72,22 @@ local function CreateUnitEventTrackers()
 		local frame = CreateFrame("Frame")
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
+		frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
+		frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
+		frame:RegisterUnitEvent("UNIT_HEALTH", unit)
+		frame:RegisterUnitEvent("UNIT_POWER_UPDATE", unit)
+		frame:RegisterUnitEvent("UNIT_MAXPOWER", unit)
+		frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", unit)
+		frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
+		frame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", unit)
+		frame:RegisterUnitEvent("UNIT_AURA", unit)
+		frame:RegisterUnitEvent("UNIT_NAME_UPDATE", unit)
+		frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
 
-		if addon.IsRestrictedAuraAPI then
-			frame:RegisterUnitEvent("UNIT_AURA", unit)
-		end
-
-		frame:SetScript("OnEvent", function(_, event, eventUnit)
+		frame:SetScript("OnEvent", function(_, event, eventUnit, ...)
 			local handler = unitEventDispatcher[event]
 			if handler then
-				handler(eventUnit)
+				handler(eventUnit, ...)
 			end
 		end)
 
@@ -79,20 +132,8 @@ function EventHandler:Initialize()
 	self:RegisterEvent("RAID_TARGET_UPDATE")
 	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
 	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
-
-	self:RegisterEvent("UNIT_MAXHEALTH")
-	self:RegisterEvent("UNIT_HEALTH")
-	self:RegisterEvent("UNIT_POWER_UPDATE")
-	self:RegisterEvent("UNIT_MAXPOWER")
-	self:RegisterEvent("UNIT_DISPLAYPOWER")
-	self:RegisterEvent("UNIT_ABSORB_AMOUNT_CHANGED")
-	self:RegisterEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED")
-	self:RegisterEvent("UNIT_AURA")
 
 	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	self:RegisterEvent("UNIT_NAME_UPDATE")
-	self:RegisterEvent("UNIT_CONNECTION")
 	self:RegisterEvent("PLAYER_FLAGS_CHANGED")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
@@ -186,101 +227,6 @@ function EventHandler:INCOMING_SUMMON_CHANGED(event, unit)
 	addon.UpdateScheduler:Notify("pendingSummonStateChanged", unit)
 end
 
-function EventHandler:UNIT_ABSORB_AMOUNT_CHANGED(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
-end
-
-function EventHandler:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
-end
-
-function EventHandler:UNIT_NAME_UPDATE(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("nameStateChanged", unit)
-
-	C_Timer.After(1, function()
-		addon.UpdateScheduler:Notify("nameStateChanged", unit)
-	end)
-end
-
-function EventHandler:UNIT_HEALTH(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("healthStateChanged", unit)
-	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
-	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
-	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-end
-
-function EventHandler:UNIT_MAXHEALTH(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("healthStateChanged", unit)
-	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
-	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
-	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-end
-
-function EventHandler:UNIT_POWER_UPDATE(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("powerStateChanged", unit)
-end
-
-function EventHandler:UNIT_MAXPOWER(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("powerStateChanged", unit)
-end
-
-function EventHandler:UNIT_DISPLAYPOWER(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("powerStateChanged", unit)
-end
-
-function EventHandler:UNIT_AURA(event, unit, updateInfo)
-	if addon.IsRestrictedAuraAPI then
-		return
-	end
-
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
-	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
-end
-
-function EventHandler:UNIT_CONNECTION(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("statusStateChanged", unit)
-end
-
 function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
 	if not IsSupportedUnit(unit) then
 		return
@@ -331,10 +277,3 @@ function EventHandler:PLAYER_ROLES_ASSIGNED()
 	addon.UpdateScheduler:Notify("roleIconStateChanged")
 end
 
-function EventHandler:UNIT_THREAT_SITUATION_UPDATE(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("threatStateChanged", unit)
-end
