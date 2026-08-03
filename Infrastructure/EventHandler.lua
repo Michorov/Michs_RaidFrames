@@ -17,7 +17,6 @@ local function CreateUnitEventTrackers()
 		local frame = CreateFrame("Frame")
 		frame.unit = unit
 
-		frame:RegisterUnitEvent("READY_CHECK_CONFIRM", unit)
 		frame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", unit)
 		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
@@ -155,8 +154,6 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_ALIVE")
 	self:RegisterEvent("PLAYER_UNGHOST")
 
-	self:RegisterEvent("READY_CHECK")
-	self:RegisterEvent("READY_CHECK_FINISHED")
 	self:RegisterEvent("RAID_TARGET_UPDATE")
 	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 

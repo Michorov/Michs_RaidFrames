@@ -8,6 +8,16 @@ addon.Frames.Widgets.Indicators.ReadyCheck = addon.Frames.Widgets.Indicators.Rea
 local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local READY_CHECK_EVENTS = {
+	"READY_CHECK",
+	"READY_CHECK_FINISHED",
+}
+
+local READY_CHECK_UNIT_EVENTS = {
+	"READY_CHECK_CONFIRM",
+}
 
 local READY_CHECK_HOLD = 5
 
@@ -34,6 +44,35 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyReadyCheck = profile.party.widgets.indicators.readyCheck
+	local raidReadyCheck = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.readyCheck
+	local shouldRegister = partyReadyCheck.enabled ~= false or raidReadyCheck.enabled ~= false
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(READY_CHECK_EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedEvent(event, ReadyCheck)
+		else
+			addon.EventHandler:UnregisterTrackedEvent(event, ReadyCheck)
+		end
+	end
+
+	for _, event in ipairs(READY_CHECK_UNIT_EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedUnitEvent(event, ReadyCheck)
+		else
+			addon.EventHandler:UnregisterTrackedUnitEvent(event, ReadyCheck)
+		end
+	end
+end
+
 function ReadyCheck:Ensure(frame)
 	if not frame.readyCheck then
 		local container = CreateFrame("Frame", nil, frame)
@@ -51,6 +90,11 @@ function ReadyCheck:UpdateSettings(frame, settings)
 	local container = frame.readyCheck
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
