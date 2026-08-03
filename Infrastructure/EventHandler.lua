@@ -7,13 +7,22 @@ LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
 
-local IsSupportedUnit = addon.Utilities.IsSupportedUnit
-
 local function NotifyRangeStateChanged(eventUnit)
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
 end
 
 local unitEventDispatcher = {
+	READY_CHECK_CONFIRM = function(eventUnit)
+		addon.FrameRegistry:UpdateUnit(eventUnit, function(frame, settings)
+			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
+		end)
+	end,
+	INCOMING_SUMMON_CHANGED = function(eventUnit)
+		addon.UpdateScheduler:Notify("pendingSummonStateChanged", eventUnit)
+	end,
+	PLAYER_FLAGS_CHANGED = function(eventUnit)
+		addon.UpdateScheduler:Notify("awayStateChanged", eventUnit)
+	end,
 	UNIT_IN_RANGE_UPDATE = NotifyRangeStateChanged,
 	UNIT_PHASE = NotifyRangeStateChanged,
 	UNIT_THREAT_SITUATION_UPDATE = function(eventUnit)
@@ -70,6 +79,9 @@ local unitEventDispatcher = {
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
 		local frame = CreateFrame("Frame")
+		frame:RegisterUnitEvent("READY_CHECK_CONFIRM", unit)
+		frame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", unit)
+		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
 		frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
@@ -127,14 +139,11 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_UNGHOST")
 
 	self:RegisterEvent("READY_CHECK")
-	self:RegisterEvent("READY_CHECK_CONFIRM")
 	self:RegisterEvent("READY_CHECK_FINISHED")
 	self:RegisterEvent("RAID_TARGET_UPDATE")
-	self:RegisterEvent("INCOMING_SUMMON_CHANGED")
 	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 
-	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-	self:RegisterEvent("PLAYER_FLAGS_CHANGED")
+	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED")
@@ -205,41 +214,11 @@ function EventHandler:READY_CHECK()
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
 end
 
-function EventHandler:READY_CHECK_CONFIRM(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.FrameRegistry:UpdateUnit(unit, function(frame, settings)
-		addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
-	end)
-end
-
 function EventHandler:READY_CHECK_FINISHED()
 	addon.UpdateScheduler:Notify("readyCheckStateFinished")
 end
 
-function EventHandler:INCOMING_SUMMON_CHANGED(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("pendingSummonStateChanged", unit)
-end
-
-function EventHandler:PLAYER_FLAGS_CHANGED(event, unit)
-	if not IsSupportedUnit(unit) then
-		return
-	end
-
-	addon.UpdateScheduler:Notify("awayStateChanged", unit)
-end
-
-function EventHandler:PLAYER_SPECIALIZATION_CHANGED(event, unit)
-	if unit ~= "player" then
-		return
-	end
-
+function EventHandler:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
 	addon.Database:ApplyProfileForCurrentSpec()
 	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
@@ -276,4 +255,3 @@ end
 function EventHandler:PLAYER_ROLES_ASSIGNED()
 	addon.UpdateScheduler:Notify("roleIconStateChanged")
 end
-
