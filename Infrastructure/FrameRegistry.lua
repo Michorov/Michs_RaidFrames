@@ -180,7 +180,7 @@ function MRF_OnUnitChanged(frame, unit)
 		end
 	end
 
-	addon.Modules:RequestUpdateState(unit)
+	addon.UpdateScheduler:Notify("rosterChanged")
 end
 
 local function ApplyBlizzardFramesVisibility()
