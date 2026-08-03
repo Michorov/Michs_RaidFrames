@@ -4,10 +4,10 @@ local _, _, _, interfaceVersion = GetBuildInfo()
 addon.IsRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local function InitializeAddon()
+    addon.Utilities:RefreshPixelGrid()
+
 	addon.Database:Initialize()
 	addon.Locale:Initialize()
-
-	addon.Utilities:RefreshPixelGrid()
 
 	local flushCallback = addon.Updater:CreateFlushCallback()
 	addon.UpdateScheduler:SetFlushCallback(flushCallback)
@@ -17,9 +17,9 @@ local function InitializeAddon()
 
 	addon.Modules:Initialize()
 
-	addon.Options:Initialize()
-
 	addon.EventHandler:Initialize()
+
+	addon.Options:Initialize()
 end
 
 local core = CreateFrame("Frame")
