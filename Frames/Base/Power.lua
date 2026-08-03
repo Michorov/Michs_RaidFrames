@@ -9,7 +9,7 @@ local Power = addon.Frames.Base.Power
 local settingsCache = setmetatable({}, { __mode = "k" })
 local eventsRegistered = nil
 
-local POWER_UNIT_EVENTS = {
+local UNIT_EVENTS = {
 	"UNIT_POWER_UPDATE",
 	"UNIT_MAXPOWER",
 	"UNIT_DISPLAYPOWER",
@@ -69,7 +69,7 @@ local function UpdateEvents()
 
 	eventsRegistered = shouldRegister
 
-	for _, event in ipairs(POWER_UNIT_EVENTS) do
+	for _, event in ipairs(UNIT_EVENTS) do
 		if shouldRegister then
 			addon.EventHandler:RegisterTrackedUnitEvent(event, Power)
 		else

@@ -10,12 +10,12 @@ local ReadyCheck = addon.Frames.Widgets.Indicators.ReadyCheck
 local settingsCache = setmetatable({}, { __mode = "k" })
 local eventsRegistered = nil
 
-local READY_CHECK_EVENTS = {
+local EVENTS = {
 	"READY_CHECK",
 	"READY_CHECK_FINISHED",
 }
 
-local READY_CHECK_UNIT_EVENTS = {
+local UNIT_EVENTS = {
 	"READY_CHECK_CONFIRM",
 }
 
@@ -56,7 +56,7 @@ local function UpdateEvents()
 
 	eventsRegistered = shouldRegister
 
-	for _, event in ipairs(READY_CHECK_EVENTS) do
+	for _, event in ipairs(EVENTS) do
 		if shouldRegister then
 			addon.EventHandler:RegisterTrackedEvent(event, ReadyCheck)
 		else
@@ -64,7 +64,7 @@ local function UpdateEvents()
 		end
 	end
 
-	for _, event in ipairs(READY_CHECK_UNIT_EVENTS) do
+	for _, event in ipairs(UNIT_EVENTS) do
 		if shouldRegister then
 			addon.EventHandler:RegisterTrackedUnitEvent(event, ReadyCheck)
 		else

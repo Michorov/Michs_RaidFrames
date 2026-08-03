@@ -17,7 +17,6 @@ local function CreateUnitEventTrackers()
 		local frame = CreateFrame("Frame")
 		frame.unit = unit
 
-		frame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", unit)
 		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
@@ -147,15 +146,10 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 	self:RegisterEvent("GROUP_ROSTER_UPDATE")
-	self:RegisterEvent("PARTY_LEADER_CHANGED")
-
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("PLAYER_ALIVE")
 	self:RegisterEvent("PLAYER_UNGHOST")
-
-	self:RegisterEvent("RAID_TARGET_UPDATE")
-	self:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 
 	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 

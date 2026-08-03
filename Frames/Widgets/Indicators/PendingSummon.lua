@@ -8,6 +8,11 @@ addon.Frames.Widgets.Indicators.PendingSummon = addon.Frames.Widgets.Indicators.
 local PendingSummon = addon.Frames.Widgets.Indicators.PendingSummon
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local UNIT_EVENTS = {
+	"INCOMING_SUMMON_CHANGED",
+}
 
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
@@ -30,6 +35,27 @@ local function UpdateSettingsCache(settings)
 	}
 
 	settingsCache[settings] = result
+end
+
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyPendingSummon = profile.party.widgets.indicators.pendingSummon
+	local raidPendingSummon = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.pendingSummon
+	local shouldRegister = partyPendingSummon.enabled ~= false or raidPendingSummon.enabled ~= false
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(UNIT_EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedUnitEvent(event, PendingSummon)
+		else
+			addon.EventHandler:UnregisterTrackedUnitEvent(event, PendingSummon)
+		end
+	end
 end
 
 function PendingSummon:Ensure(frame)
@@ -56,6 +82,11 @@ function PendingSummon:UpdateSettings(frame, settings)
 	local container = frame.pendingSummon
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then

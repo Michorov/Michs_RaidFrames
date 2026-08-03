@@ -8,6 +8,11 @@ addon.Frames.Widgets.Indicators.GroupStatus = addon.Frames.Widgets.Indicators.Gr
 local GroupStatus = addon.Frames.Widgets.Indicators.GroupStatus
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local eventsRegistered = nil
+
+local EVENTS = {
+	"PARTY_LEADER_CHANGED",
+}
 
 local LEADER_ICON = "Interface\\GroupFrame\\UI-Group-LeaderIcon"
 local ASSISTANT_ICON = "Interface\\GroupFrame\\UI-Group-AssistantIcon"
@@ -31,6 +36,27 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
+local function UpdateEvents()
+	local profile = addon.Database:GetProfile()
+	local partyGroupStatus = profile.party.widgets.indicators.groupStatus
+	local raidGroupStatus = addon.FrameRegistry:ResolveRaidSettings(profile).widgets.indicators.groupStatus
+	local shouldRegister = partyGroupStatus.enabled == true or raidGroupStatus.enabled == true
+
+	if eventsRegistered == shouldRegister then
+		return
+	end
+
+	eventsRegistered = shouldRegister
+
+	for _, event in ipairs(EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedEvent(event, GroupStatus)
+		else
+			addon.EventHandler:UnregisterTrackedEvent(event, GroupStatus)
+		end
+	end
+end
+
 function GroupStatus:Ensure(frame)
 	if not frame.groupStatus then
 		local container = CreateFrame("Frame", nil, frame)
@@ -46,6 +72,11 @@ function GroupStatus:UpdateSettings(frame, settings)
 	local container = frame.groupStatus
 
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		UpdateEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	if not cachedSettings.enabled then
