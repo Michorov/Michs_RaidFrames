@@ -101,6 +101,45 @@ function EventHandler:UnregisterTrackedUnitEvent(event, owner)
 	end
 end
 
+function EventHandler:RegisterTrackedEvent(event, owner)
+	local trackedEvent = trackedEvents.global[event]
+
+	if not trackedEvent then
+		trackedEvent = {
+			owners = {},
+		}
+		trackedEvents.global[event] = trackedEvent
+	end
+
+	if trackedEvent.owners[owner] then
+		return
+	end
+
+	local shouldRegister = next(trackedEvent.owners) == nil
+	trackedEvent.owners[owner] = true
+
+	if shouldRegister then
+		self:RegisterEvent(event)
+	end
+end
+
+function EventHandler:UnregisterTrackedEvent(event, owner)
+	local trackedEvent = trackedEvents.global[event]
+
+	if not trackedEvent or not trackedEvent.owners[owner] then
+		return
+	end
+
+	trackedEvent.owners[owner] = nil
+
+	if next(trackedEvent.owners) then
+		return
+	end
+
+	trackedEvents.global[event] = nil
+	self:UnregisterEvent(event)
+end
+
 function EventHandler:Initialize()
 	if initialized then
 		error("EventHandler already initialized", 2)
