@@ -7,6 +7,13 @@ addon.Frames.Base.Power = addon.Frames.Base.Power or {}
 local Power = addon.Frames.Base.Power
 
 local settingsCache = setmetatable({}, { __mode = "k" })
+local powerEventsRegistered = nil
+
+local POWER_UNIT_EVENTS = {
+	"UNIT_POWER_UPDATE",
+	"UNIT_MAXPOWER",
+	"UNIT_DISPLAYPOWER",
+}
 
 local POWER_COLORS = {
 	MANA = { r = 0.00, g = 0.45, b = 1.00, a = 1.0 },
@@ -48,6 +55,29 @@ local function UpdateSettingsCache(settings)
 	}
 
 	settingsCache[settings] = result
+end
+
+local function IsPowerEnabled(settings)
+	return settings and settings.power and settings.power.enabled == true
+end
+
+local function RefreshPowerUnitEvents()
+	local profile = addon.Database:GetProfile()
+	local shouldRegister = IsPowerEnabled(profile.party) or IsPowerEnabled(addon.FrameRegistry:ResolveRaidSettings(profile))
+
+	if powerEventsRegistered == shouldRegister then
+		return
+	end
+
+	powerEventsRegistered = shouldRegister
+
+	for _, event in ipairs(POWER_UNIT_EVENTS) do
+		if shouldRegister then
+			addon.EventHandler:RegisterTrackedUnitEvent(event)
+		else
+			addon.EventHandler:UnregisterTrackedUnitEvent(event)
+		end
+	end
 end
 
 local function IsPowerBarEnabled(frame, cachedSettings)
@@ -93,6 +123,11 @@ end
 
 function Power:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
+
+	if frame.dataProvider == addon.Frames.DataProvider.Live then
+		RefreshPowerUnitEvents()
+	end
+
 	local cachedSettings = settingsCache[settings]
 
 	local powerBar = frame.powerBar

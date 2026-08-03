@@ -6,10 +6,13 @@ addon.EventHandler = EventHandler
 LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
+local trackedUnitEvents = {}
 
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
 		local frame = CreateFrame("Frame")
+		frame.unit = unit
+
 		frame:RegisterUnitEvent("READY_CHECK_CONFIRM", unit)
 		frame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", unit)
 		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
@@ -18,9 +21,6 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_HEALTH", unit)
-		frame:RegisterUnitEvent("UNIT_POWER_UPDATE", unit)
-		frame:RegisterUnitEvent("UNIT_MAXPOWER", unit)
-		frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", unit)
 		frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_AURA", unit)
@@ -52,6 +52,30 @@ local function CreateUnitEventTrackers()
 	end
 
 	return trackers
+end
+
+function EventHandler:RegisterTrackedUnitEvent(event)
+	if trackedUnitEvents[event] then
+		return
+	end
+
+	trackedUnitEvents[event] = true
+
+	for _, tracker in pairs(self.unitEventTrackers or {}) do
+		tracker:RegisterUnitEvent(event, tracker.unit)
+	end
+end
+
+function EventHandler:UnregisterTrackedUnitEvent(event)
+	if not trackedUnitEvents[event] then
+		return
+	end
+
+	trackedUnitEvents[event] = nil
+
+	for _, tracker in pairs(self.unitEventTrackers or {}) do
+		tracker:UnregisterEvent(event)
+	end
 end
 
 function EventHandler:Initialize()
@@ -190,6 +214,7 @@ function EventHandler:UNIT_HEALTH(unit)
 end
 
 function EventHandler:UNIT_POWER_UPDATE(unit)
+	print("UNIT_POWER_UPDATE")
 	addon.UpdateScheduler:Notify("powerStateChanged", unit)
 end
 
