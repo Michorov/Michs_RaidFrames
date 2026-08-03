@@ -1,5 +1,6 @@
 ## Interface: 120007, 120100
 ## Title: Mich's RaidFrames
+## Category: Mich's Toolkit
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
 ## Version: 3.0.5
