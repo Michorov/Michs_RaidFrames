@@ -7,75 +7,6 @@ LibStub("AceEvent-3.0"):Embed(EventHandler)
 
 local initialized = false
 
-local function NotifyRangeStateChanged(eventUnit)
-	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", eventUnit)
-end
-
-local unitEventDispatcher = {
-	READY_CHECK_CONFIRM = function(eventUnit)
-		addon.FrameRegistry:UpdateUnit(eventUnit, function(frame, settings)
-			addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
-		end)
-	end,
-	INCOMING_SUMMON_CHANGED = function(eventUnit)
-		addon.UpdateScheduler:Notify("pendingSummonStateChanged", eventUnit)
-	end,
-	PLAYER_FLAGS_CHANGED = function(eventUnit)
-		addon.UpdateScheduler:Notify("awayStateChanged", eventUnit)
-	end,
-	UNIT_IN_RANGE_UPDATE = NotifyRangeStateChanged,
-	UNIT_PHASE = NotifyRangeStateChanged,
-	UNIT_THREAT_SITUATION_UPDATE = function(eventUnit)
-		addon.UpdateScheduler:Notify("threatStateChanged", eventUnit)
-	end,
-	UNIT_MAXHEALTH = function(eventUnit)
-		addon.UpdateScheduler:Notify("healthStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
-	end,
-	UNIT_HEALTH = function(eventUnit)
-		addon.UpdateScheduler:Notify("healthStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
-		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
-	end,
-	UNIT_POWER_UPDATE = function(eventUnit)
-		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
-	end,
-	UNIT_MAXPOWER = function(eventUnit)
-		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
-	end,
-	UNIT_DISPLAYPOWER = function(eventUnit)
-		addon.UpdateScheduler:Notify("powerStateChanged", eventUnit)
-	end,
-	UNIT_ABSORB_AMOUNT_CHANGED = function(eventUnit)
-		addon.UpdateScheduler:Notify("absorbsStateChanged", eventUnit)
-	end,
-	UNIT_HEAL_ABSORB_AMOUNT_CHANGED = function(eventUnit)
-		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", eventUnit)
-	end,
-	UNIT_AURA = function(eventUnit, updateInfo)
-		if addon.IsRestrictedAuraAPI then
-			addon.FrameRegistry:UpdateManagedContainersVisibility(eventUnit)
-			return
-		end
-
-		addon.AuraHandler:UpdateAurasForUnit(eventUnit, updateInfo)
-		addon.UpdateScheduler:Notify("aurasStateChanged", eventUnit)
-	end,
-	UNIT_NAME_UPDATE = function(eventUnit)
-		addon.UpdateScheduler:Notify("nameStateChanged", eventUnit)
-
-		C_Timer.After(1, function()
-			addon.UpdateScheduler:Notify("nameStateChanged", eventUnit)
-		end)
-	end,
-	UNIT_CONNECTION = function(eventUnit)
-		addon.UpdateScheduler:Notify("statusStateChanged", eventUnit)
-	end,
-}
-
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
 		local frame = CreateFrame("Frame")
@@ -97,9 +28,9 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
 
 		frame:SetScript("OnEvent", function(_, event, eventUnit, ...)
-			local handler = unitEventDispatcher[event]
+			local handler = EventHandler[event]
 			if handler then
-				handler(eventUnit, ...)
+				handler(EventHandler, eventUnit, ...)
 			end
 		end)
 
@@ -214,8 +145,90 @@ function EventHandler:READY_CHECK()
 	addon.UpdateScheduler:Notify("readyCheckStateChanged")
 end
 
+function EventHandler:READY_CHECK_CONFIRM(unit)
+	addon.FrameRegistry:UpdateUnit(unit, function(frame, settings)
+		addon.Frames.Widgets.Indicators.ReadyCheck:UpdateState(frame, settings)
+	end)
+end
+
 function EventHandler:READY_CHECK_FINISHED()
 	addon.UpdateScheduler:Notify("readyCheckStateFinished")
+end
+
+function EventHandler:INCOMING_SUMMON_CHANGED(unit)
+	addon.UpdateScheduler:Notify("pendingSummonStateChanged", unit)
+end
+
+function EventHandler:PLAYER_FLAGS_CHANGED(unit)
+	addon.UpdateScheduler:Notify("awayStateChanged", unit)
+end
+
+function EventHandler:UNIT_IN_RANGE_UPDATE(unit)
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
+end
+
+function EventHandler:UNIT_PHASE(unit)
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
+end
+
+function EventHandler:UNIT_THREAT_SITUATION_UPDATE(unit)
+	addon.UpdateScheduler:Notify("threatStateChanged", unit)
+end
+
+function EventHandler:UNIT_MAXHEALTH(unit)
+	addon.UpdateScheduler:Notify("healthStateChanged", unit)
+	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+end
+
+function EventHandler:UNIT_HEALTH(unit)
+	addon.UpdateScheduler:Notify("healthStateChanged", unit)
+	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+end
+
+function EventHandler:UNIT_POWER_UPDATE(unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
+end
+
+function EventHandler:UNIT_MAXPOWER(unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
+end
+
+function EventHandler:UNIT_DISPLAYPOWER(unit)
+	addon.UpdateScheduler:Notify("powerStateChanged", unit)
+end
+
+function EventHandler:UNIT_ABSORB_AMOUNT_CHANGED(unit)
+	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
+end
+
+function EventHandler:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unit)
+	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+end
+
+function EventHandler:UNIT_AURA(unit, updateInfo)
+	if addon.IsRestrictedAuraAPI then
+		addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
+		return
+	end
+
+	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
+	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
+end
+
+function EventHandler:UNIT_NAME_UPDATE(unit)
+	addon.UpdateScheduler:Notify("nameStateChanged", unit)
+
+	C_Timer.After(1, function()
+		addon.UpdateScheduler:Notify("nameStateChanged", unit)
+	end)
+end
+
+function EventHandler:UNIT_CONNECTION(unit)
+	addon.UpdateScheduler:Notify("statusStateChanged", unit)
 end
 
 function EventHandler:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
