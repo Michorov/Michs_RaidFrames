@@ -85,7 +85,7 @@ local function ShouldShow(frame, cachedSettings)
 	end
 
 	local unit = frame.unit
-	if not unit or not UnitExists(unit) or not UnitIsVisible(unit) then
+	if not addon.Utilities:IsManagedAuraUnitVisible(unit) then
 		return false
 	end
 

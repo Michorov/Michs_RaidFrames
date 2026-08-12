@@ -223,7 +223,7 @@ function CustomBuffs:UpdateState(frame, settings)
 	end
 
 	local unit = frame.unit
-	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
+	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
 	local container = frame.managedContainers.customBuffs
 
 	if container.isShown ~= shouldShow then

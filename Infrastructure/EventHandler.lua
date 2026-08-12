@@ -151,6 +151,13 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_ALIVE")
 	self:RegisterEvent("PLAYER_UNGHOST")
 
+	if addon.IsRestrictedAuraAPI then
+		self:RegisterEvent("CINEMATIC_START")
+		self:RegisterEvent("CINEMATIC_STOP")
+		self:RegisterEvent("PLAY_MOVIE")
+		self:RegisterEvent("STOP_MOVIE")
+	end
+
 	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
@@ -295,6 +302,16 @@ function EventHandler:UNIT_AURA(unit, updateInfo)
 	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
 	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 end
+
+function EventHandler:CINEMATIC_START()
+	C_Timer.After(0.25, function()
+		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+	end)
+end
+
+EventHandler.CINEMATIC_STOP = EventHandler.CINEMATIC_START
+EventHandler.PLAY_MOVIE = EventHandler.CINEMATIC_START
+EventHandler.STOP_MOVIE = EventHandler.CINEMATIC_START
 
 function EventHandler:UNIT_NAME_UPDATE(unit)
 	addon.UpdateScheduler:Notify("nameStateChanged", unit)
