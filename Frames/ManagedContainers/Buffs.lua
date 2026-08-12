@@ -194,6 +194,25 @@ function Buffs:UpdateFilters(frame, settings)
 	})
 end
 
+function Buffs:UpdateState(frame, settings)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	if not frame.managedContainers or not frame.managedContainers.buffs then
+		return
+	end
+
+	local unit = frame.unit
+	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
+	local container = frame.managedContainers.buffs
+
+	if container.isShown ~= shouldShow then
+		container.isShown = shouldShow
+		container:SetShown(shouldShow)
+	end
+end
+
 function Buffs:Init()
 	addon.Modules:Register({
 		module = self,

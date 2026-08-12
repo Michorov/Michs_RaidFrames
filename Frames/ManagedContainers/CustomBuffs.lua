@@ -213,6 +213,25 @@ function CustomBuffs:UpdateSettings(frame, settings)
 	UpdateFilters(frame, settings)
 end
 
+function CustomBuffs:UpdateState(frame, settings)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	if not frame.managedContainers or not frame.managedContainers.customBuffs then
+		return
+	end
+
+	local unit = frame.unit
+	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
+	local container = frame.managedContainers.customBuffs
+
+	if container.isShown ~= shouldShow then
+		container.isShown = shouldShow
+		container:SetShown(shouldShow)
+	end
+end
+
 function CustomBuffs:Init()
 	addon.Modules:Register({
 		module = self,

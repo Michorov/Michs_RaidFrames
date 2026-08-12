@@ -320,8 +320,30 @@ function FrameRegistry:UpdateManagedContainersVisibility(unit)
 		return
 	end
 
+	local settings = self:GetSettingsForFrame(frame)
+
+	if managedContainers.buffs then
+		addon.Frames.ManagedContainers.Buffs:UpdateState(frame, settings)
+	end
+
+	if managedContainers.customBuffs then
+		addon.Frames.ManagedContainers.CustomBuffs:UpdateState(frame, settings)
+	end
+
+	if managedContainers.debuffs then
+		addon.Frames.ManagedContainers.Debuffs:UpdateState(frame, settings)
+	end
+
 	if managedContainers.defensives then
-		addon.Frames.ManagedContainers.Defensives:UpdateState(frame)
+		addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
+	end
+
+	if managedContainers.buffOverlay then
+		addon.Frames.ManagedContainers.BuffOverlay:UpdateState(frame, settings)
+	end
+
+	if managedContainers.raidBuffReminder and settings then
+		addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
 	end
 end
 
