@@ -138,30 +138,30 @@ function MRF_OnUnitChanged(frame, unit)
 	local isSupportedUnit = IsSupportedUnit(unit)
 
 	if addon.IsRestrictedAuraAPI and frame.managedContainers then
-		local managedUnit = isSupportedUnit and unit or "none"
+		local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 
 		if frame.managedContainers.debuffs then
-			frame.managedContainers.debuffs:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.buffs then
-			frame.managedContainers.buffs:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.customBuffs then
-			frame.managedContainers.customBuffs:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.defensives then
-			frame.managedContainers.defensives:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.buffOverlay then
-			frame.managedContainers.buffOverlay:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.raidBuffReminder then
-			frame.managedContainers.raidBuffReminder:SetUnit(managedUnit)
+			addon.Frames.ManagedContainers.RaidBuffReminder:SetUnit(frame, settings)
 		end
 	end
 
@@ -347,6 +347,84 @@ function FrameRegistry:UpdateManagedContainersVisibility(unit)
 	end
 end
 
+function FrameRegistry:UpdateManagedContainersUnit(unit)
+	if not initialized then
+		return
+	end
+
+	local frame = unitFrameMap[unit]
+	if not frame or not frame.managedContainers then
+		return
+	end
+
+	local settings = self:GetSettingsForFrame(frame)
+
+	if frame.managedContainers.buffs then
+		addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
+	end
+
+	if frame.managedContainers.customBuffs then
+		addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
+	end
+
+	if frame.managedContainers.debuffs then
+		addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+	end
+
+	if frame.managedContainers.defensives then
+		addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
+	end
+
+	if frame.managedContainers.buffOverlay then
+		addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
+	end
+
+	if frame.managedContainers.raidBuffReminder then
+		addon.Frames.ManagedContainers.RaidBuffReminder:SetUnit(frame, settings)
+	end
+end
+
+function FrameRegistry:HideManagedContainers(unit)
+	if not initialized then
+		return
+	end
+
+	local frame = unitFrameMap[unit]
+	local managedContainers = frame and frame.managedContainers
+	if not managedContainers then
+		return
+	end
+
+	if managedContainers.buffs then
+		managedContainers.buffs.isShown = false
+		managedContainers.buffs:Hide()
+	end
+
+	if managedContainers.customBuffs then
+		managedContainers.customBuffs.isShown = false
+		managedContainers.customBuffs:Hide()
+	end
+
+	if managedContainers.debuffs then
+		managedContainers.debuffs.isShown = false
+		managedContainers.debuffs:Hide()
+	end
+
+	if managedContainers.defensives then
+		managedContainers.defensives.isShown = false
+		managedContainers.defensives:Hide()
+	end
+
+	if managedContainers.buffOverlay then
+		managedContainers.buffOverlay.isShown = false
+		managedContainers.buffOverlay:Hide()
+	end
+
+	if managedContainers.raidBuffReminder then
+		managedContainers.raidBuffReminder.wrapper:Hide()
+	end
+end
+
 function FrameRegistry:UpdateAllManagedContainersVisibility()
 	if not initialized then
 		return
@@ -354,6 +432,16 @@ function FrameRegistry:UpdateAllManagedContainersVisibility()
 
 	for unit in pairs(unitFrameMap) do
 		self:UpdateManagedContainersVisibility(unit)
+	end
+end
+
+function FrameRegistry:HideAllManagedContainers()
+	if not initialized then
+		return
+	end
+
+	for unit in pairs(unitFrameMap) do
+		self:HideManagedContainers(unit)
 	end
 end
 

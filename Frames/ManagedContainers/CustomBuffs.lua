@@ -232,6 +232,20 @@ function CustomBuffs:UpdateState(frame, settings)
 	end
 end
 
+function CustomBuffs:SetUnit(frame)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	local container = frame.managedContainers and frame.managedContainers.customBuffs
+	if not container then
+		return
+	end
+
+	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
+	container:UpdateAllAuras()
+end
+
 function CustomBuffs:Init()
 	addon.Modules:Register({
 		module = self,
