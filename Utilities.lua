@@ -105,6 +105,10 @@ function Utilities.IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
+function Utilities:IsManagedAuraUnitVisible(unit)
+	return unit and UnitExists(unit) and UnitIsVisible(unit)
+end
+
 function Utilities:GetGameFontNormalPath()
 	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
 		or STANDARD_TEXT_FONT

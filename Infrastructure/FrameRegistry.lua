@@ -347,6 +347,16 @@ function FrameRegistry:UpdateManagedContainersVisibility(unit)
 	end
 end
 
+function FrameRegistry:UpdateAllManagedContainersVisibility()
+	if not initialized then
+		return
+	end
+
+	for unit in pairs(unitFrameMap) do
+		self:UpdateManagedContainersVisibility(unit)
+	end
+end
+
 local function UpdateFrame(frame, settings, stateCallback, settingsCallback)
 	if (not InCombatLockdown()) and type(settingsCallback) == "function" then
 		settingsCallback(frame, settings)
