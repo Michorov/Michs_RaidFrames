@@ -105,10 +105,6 @@ function Utilities.IsSupportedUnit(unit)
 	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
 end
 
-function Utilities:IsManagedAuraUnitVisible(unit)
-	return unit and UnitExists(unit) and UnitIsVisible(unit)
-end
-
 function Utilities:GetManagedAuraUnit(unit)
 	if not Utilities.IsSupportedUnit(unit) then
 		return nil
@@ -142,6 +138,29 @@ function Utilities:GetManagedAuraUnit(unit)
 	end
 
 	return unit
+end
+
+function Utilities:ShouldHideManagedAurasForVehicle(unit)
+	return UnitInVehicle
+		and UnitInVehicle(unit)
+		and (not UnitTargetsVehicleInRaidUI or not UnitTargetsVehicleInRaidUI(unit))
+end
+
+function Utilities:IsManagedAuraUnitVisible(unit)
+	local auraUnit = self:GetManagedAuraUnit(unit)
+	if not auraUnit then
+		return false
+	end
+
+	if auraUnit ~= unit then
+		return UnitExists(auraUnit) and UnitIsVisible(auraUnit)
+	end
+
+	if self:ShouldHideManagedAurasForVehicle(unit) then
+		return false
+	end
+
+	return UnitExists(unit) and UnitIsVisible(unit)
 end
 
 function Utilities:GetGameFontNormalPath()
