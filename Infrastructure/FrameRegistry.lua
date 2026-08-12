@@ -396,32 +396,44 @@ function FrameRegistry:HideManagedContainers(unit)
 	end
 
 	if managedContainers.buffs then
-		managedContainers.buffs.isShown = false
-		managedContainers.buffs:Hide()
+		if managedContainers.buffs.isShown ~= false or managedContainers.buffs:IsShown() then
+			managedContainers.buffs.isShown = false
+			managedContainers.buffs:Hide()
+		end
 	end
 
 	if managedContainers.customBuffs then
-		managedContainers.customBuffs.isShown = false
-		managedContainers.customBuffs:Hide()
+		if managedContainers.customBuffs.isShown ~= false or managedContainers.customBuffs:IsShown() then
+			managedContainers.customBuffs.isShown = false
+			managedContainers.customBuffs:Hide()
+		end
 	end
 
 	if managedContainers.debuffs then
-		managedContainers.debuffs.isShown = false
-		managedContainers.debuffs:Hide()
+		if managedContainers.debuffs.isShown ~= false or managedContainers.debuffs:IsShown() then
+			managedContainers.debuffs.isShown = false
+			managedContainers.debuffs:Hide()
+		end
 	end
 
 	if managedContainers.defensives then
-		managedContainers.defensives.isShown = false
-		managedContainers.defensives:Hide()
+		if managedContainers.defensives.isShown ~= false or managedContainers.defensives:IsShown() then
+			managedContainers.defensives.isShown = false
+			managedContainers.defensives:Hide()
+		end
 	end
 
 	if managedContainers.buffOverlay then
-		managedContainers.buffOverlay.isShown = false
-		managedContainers.buffOverlay:Hide()
+		if managedContainers.buffOverlay.isShown ~= false or managedContainers.buffOverlay:IsShown() then
+			managedContainers.buffOverlay.isShown = false
+			managedContainers.buffOverlay:Hide()
+		end
 	end
 
 	if managedContainers.raidBuffReminder then
-		managedContainers.raidBuffReminder.wrapper:Hide()
+		if managedContainers.raidBuffReminder.wrapper:IsShown() then
+			managedContainers.raidBuffReminder.wrapper:Hide()
+		end
 	end
 end
 
