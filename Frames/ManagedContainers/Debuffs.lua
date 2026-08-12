@@ -154,6 +154,25 @@ function Debuffs:UpdateSettings(frame, settings)
 	UpdateAuraGroupSettings(frame, settings)
 end
 
+function Debuffs:UpdateState(frame, settings)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	if not frame.managedContainers or not frame.managedContainers.debuffs then
+		return
+	end
+
+	local unit = frame.unit
+	local shouldShow = unit and UnitExists(unit) and UnitIsVisible(unit)
+	local container = frame.managedContainers.debuffs
+
+	if container.isShown ~= shouldShow then
+		container.isShown = shouldShow
+		container:SetShown(shouldShow)
+	end
+end
+
 function Debuffs:Init()
 	addon.Modules:Register({
 		module = self,
