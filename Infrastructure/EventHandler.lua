@@ -12,6 +12,8 @@ local trackedEvents = {
 	global = {},
 }
 
+local unitInTransition = {}
+
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
 		local frame = CreateFrame("Frame")
@@ -27,6 +29,10 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("UNIT_AURA", unit)
 		frame:RegisterUnitEvent("UNIT_NAME_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
+		frame:RegisterUnitEvent("UNIT_ENTERING_VEHICLE", unit)
+		frame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", unit)
+		frame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", unit)
+		frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", unit)
 
 		frame:SetScript("OnEvent", function(_, event, eventUnit, ...)
 			local handler = EventHandler[event]
@@ -295,6 +301,11 @@ end
 
 function EventHandler:UNIT_AURA(unit, updateInfo)
 	if addon.IsRestrictedAuraAPI then
+		if unitInTransition.all or unitInTransition[unit] then
+			addon.FrameRegistry:HideManagedContainers(unit)
+			return
+		end
+
 		addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
 		return
 	end
@@ -304,14 +315,46 @@ function EventHandler:UNIT_AURA(unit, updateInfo)
 end
 
 function EventHandler:CINEMATIC_START()
-	C_Timer.After(0.25, function()
-		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+	unitInTransition.all = true
+	addon.FrameRegistry:HideAllManagedContainers()
+end
+
+function EventHandler:CINEMATIC_STOP()
+	unitInTransition.all = nil
+end
+
+function EventHandler:PLAY_MOVIE()
+	unitInTransition.all = true
+	addon.FrameRegistry:HideAllManagedContainers()
+end
+
+function EventHandler:STOP_MOVIE()
+	unitInTransition.all = nil
+end
+
+function EventHandler:UNIT_ENTERING_VEHICLE(unit)
+	if not addon.IsRestrictedAuraAPI or not addon.Utilities.IsSupportedUnit(unit) then
+		return
+	end
+
+	unitInTransition[unit] = true
+	addon.FrameRegistry:HideManagedContainers(unit)
+end
+
+function EventHandler:UNIT_ENTERED_VEHICLE(unit)
+	if not addon.IsRestrictedAuraAPI or not addon.Utilities.IsSupportedUnit(unit) then
+		return
+	end
+
+	addon.FrameRegistry:UpdateManagedContainersUnit(unit)
+	C_Timer.After(0, function()
+		unitInTransition[unit] = nil
+		addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
 	end)
 end
 
-EventHandler.CINEMATIC_STOP = EventHandler.CINEMATIC_START
-EventHandler.PLAY_MOVIE = EventHandler.CINEMATIC_START
-EventHandler.STOP_MOVIE = EventHandler.CINEMATIC_START
+EventHandler.UNIT_EXITING_VEHICLE = EventHandler.UNIT_ENTERING_VEHICLE
+EventHandler.UNIT_EXITED_VEHICLE = EventHandler.UNIT_ENTERED_VEHICLE
 
 function EventHandler:UNIT_NAME_UPDATE(unit)
 	addon.UpdateScheduler:Notify("nameStateChanged", unit)

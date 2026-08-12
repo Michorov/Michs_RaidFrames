@@ -258,6 +258,20 @@ function RaidBuffReminder:UpdateState(frame, settings)
 	container.wrapper:SetShown(ShouldShow(frame, settingsCache[settings]))
 end
 
+function RaidBuffReminder:SetUnit(frame)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	local container = frame.managedContainers and frame.managedContainers.raidBuffReminder
+	if not container then
+		return
+	end
+
+	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
+	container:UpdateAllAuras()
+end
+
 function RaidBuffReminder:Init()
 	addon.Modules:Register({
 		module = self,

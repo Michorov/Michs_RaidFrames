@@ -188,10 +188,15 @@ function Buffs:UpdateFilters(frame, settings)
 
 	local container = frame.managedContainers.buffs
 	local cachedSettings = settingsCache[settings]
+	local auraUnit = addon.Utilities:GetManagedAuraUnit(frame.unit)
 
-	container:SetAuraGroupCandidateFilters("buffs", {
-		includeSpellIDs = cachedSettings.includeSpellIDs,
-	})
+	if auraUnit == "vehicle" then
+		container:SetAuraGroupCandidateFilters("buffs", {})
+	else
+		container:SetAuraGroupCandidateFilters("buffs", {
+			includeSpellIDs = cachedSettings.includeSpellIDs,
+		})
+	end
 end
 
 function Buffs:UpdateState(frame, settings)
@@ -211,6 +216,39 @@ function Buffs:UpdateState(frame, settings)
 		container.isShown = shouldShow
 		container:SetShown(shouldShow)
 	end
+end
+
+function Buffs:SetUnit(frame, settings)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	local container = frame.managedContainers and frame.managedContainers.buffs
+	if not container then
+		return
+	end
+
+	local auraUnit = addon.Utilities:GetManagedAuraUnit(frame.unit)
+	if container.SetAuraGroupFilter then
+		container:SetAuraGroupFilter("buffs", auraUnit == "vehicle" and "HELPFUL" or "HELPFUL|PLAYER")
+	end
+
+	if auraUnit == "vehicle" then
+		container:SetAuraGroupCandidateFilters("buffs", {})
+	else
+		local cachedSettings = settingsCache[settings]
+		if not cachedSettings and settings then
+			UpdateSettingsCache(settings)
+			cachedSettings = settingsCache[settings]
+		end
+
+		container:SetAuraGroupCandidateFilters("buffs", {
+			includeSpellIDs = cachedSettings and cachedSettings.includeSpellIDs or {},
+		})
+	end
+
+	container:SetUnit(auraUnit or "none")
+	container:UpdateAllAuras()
 end
 
 function Buffs:Init()

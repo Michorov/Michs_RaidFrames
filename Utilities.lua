@@ -109,6 +109,41 @@ function Utilities:IsManagedAuraUnitVisible(unit)
 	return unit and UnitExists(unit) and UnitIsVisible(unit)
 end
 
+function Utilities:GetManagedAuraUnit(unit)
+	if not Utilities.IsSupportedUnit(unit) then
+		return nil
+	end
+
+	if not UnitTargetsVehicleInRaidUI or not UnitTargetsVehicleInRaidUI(unit) then
+		return unit
+	end
+
+	if
+		unit == "player"
+		and UnitExists("vehicle")
+	then
+		return "vehicle"
+	end
+
+	local partyIndex = unit:match("^party(%d)$")
+	if partyIndex then
+		local vehicleUnit = "partypet" .. partyIndex
+		if UnitExists(vehicleUnit) then
+			return vehicleUnit
+		end
+	end
+
+	local raidIndex = unit:match("^raid(%d+)$")
+	if raidIndex then
+		local vehicleUnit = "raidpet" .. raidIndex
+		if UnitExists(vehicleUnit) then
+			return vehicleUnit
+		end
+	end
+
+	return unit
+end
+
 function Utilities:GetGameFontNormalPath()
 	return (GameFontNormal and select(1, GameFontNormal:GetFont()))
 		or STANDARD_TEXT_FONT

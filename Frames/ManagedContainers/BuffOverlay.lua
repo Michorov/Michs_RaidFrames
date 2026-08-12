@@ -147,6 +147,20 @@ function BuffOverlay:UpdateState(frame, settings)
 	end
 end
 
+function BuffOverlay:SetUnit(frame)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	local container = frame.managedContainers and frame.managedContainers.buffOverlay
+	if not container then
+		return
+	end
+
+	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
+	container:UpdateAllAuras()
+end
+
 function BuffOverlay:Init()
 	addon.Modules:Register({
 		module = self,

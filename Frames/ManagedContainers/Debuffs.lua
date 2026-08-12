@@ -173,6 +173,20 @@ function Debuffs:UpdateState(frame, settings)
 	end
 end
 
+function Debuffs:SetUnit(frame)
+	if not ShouldUseManagedContainer(frame) then
+		return
+	end
+
+	local container = frame.managedContainers and frame.managedContainers.debuffs
+	if not container then
+		return
+	end
+
+	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
+	container:UpdateAllAuras()
+end
+
 function Debuffs:Init()
 	addon.Modules:Register({
 		module = self,
