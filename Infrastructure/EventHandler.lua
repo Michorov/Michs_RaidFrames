@@ -15,6 +15,7 @@ local trackedEvents = {
 local vehicleAuraHiddenUnits = {}
 local vehicleTransitionUnits = {}
 local isCinematicPlaying = false
+local isClientScenePlaying = false
 
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
@@ -164,6 +165,8 @@ function EventHandler:Initialize()
 		self:RegisterEvent("CINEMATIC_STOP")
 		self:RegisterEvent("PLAY_MOVIE")
 		self:RegisterEvent("STOP_MOVIE")
+		self:RegisterEvent("CLIENT_SCENE_OPENED")
+		self:RegisterEvent("CLIENT_SCENE_CLOSED")
 	end
 
 	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
@@ -303,7 +306,7 @@ end
 
 function EventHandler:UNIT_AURA(unit, updateInfo)
 	if addon.IsRestrictedAuraAPI then
-		if isCinematicPlaying then
+		if isCinematicPlaying or isClientScenePlaying then
 			return
 		end
 
@@ -347,6 +350,18 @@ end
 function EventHandler:STOP_MOVIE()
 	isCinematicPlaying = false
 	C_Timer.After(0.25, function()
+		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+	end)
+end
+
+function EventHandler:CLIENT_SCENE_OPENED()
+	isClientScenePlaying = true
+	addon.FrameRegistry:HideAllManagedContainers()
+end
+
+function EventHandler:CLIENT_SCENE_CLOSED()
+	isClientScenePlaying = false
+	C_Timer.After(0.1, function()
 		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
 	end)
 end
