@@ -336,9 +336,9 @@ function EventHandler:CINEMATIC_START()
 end
 
 function EventHandler:CINEMATIC_STOP()
-	isCinematicPlaying = false
 	C_Timer.After(0.25, function()
 		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+		isCinematicPlaying = false
 	end)
 end
 
@@ -348,9 +348,9 @@ function EventHandler:PLAY_MOVIE()
 end
 
 function EventHandler:STOP_MOVIE()
-	isCinematicPlaying = false
 	C_Timer.After(0.25, function()
 		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+		isCinematicPlaying = false
 	end)
 end
 
@@ -360,9 +360,9 @@ function EventHandler:CLIENT_SCENE_OPENED()
 end
 
 function EventHandler:CLIENT_SCENE_CLOSED()
-	isClientScenePlaying = false
-	C_Timer.After(0.1, function()
+	C_Timer.After(0.25, function()
 		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
+		isClientScenePlaying = false
 	end)
 end
 
