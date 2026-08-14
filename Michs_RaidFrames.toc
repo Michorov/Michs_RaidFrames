@@ -3,7 +3,7 @@
 ## Category: Mich's Toolkit
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
-## Version: 3.0.10
+## Version: 3.0.11
 ## SavedVariables: Michs_RaidFramesDB
 ## OptionalDeps: MiniCC
 
