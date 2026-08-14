@@ -160,6 +160,10 @@ function Utilities:IsManagedAuraUnitVisible(unit)
 		return false
 	end
 
+	if not UnitCanAssist("player", unit) then
+		return false
+	end
+
 	return UnitExists(unit) and UnitIsVisible(unit)
 end
 

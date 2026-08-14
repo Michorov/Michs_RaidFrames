@@ -148,7 +148,7 @@ function Defensives:UpdateState(frame, settings)
 	end
 end
 
-function Defensives:SetUnit(frame)
+function Defensives:SetUnit(frame, settings)
 	if not ShouldUseManagedContainer(frame) then
 		return
 	end
@@ -160,6 +160,7 @@ function Defensives:SetUnit(frame)
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()
+	self:UpdateState(frame, settings)
 end
 
 function Defensives:Init()

@@ -232,7 +232,7 @@ function CustomBuffs:UpdateState(frame, settings)
 	end
 end
 
-function CustomBuffs:SetUnit(frame)
+function CustomBuffs:SetUnit(frame, settings)
 	if not ShouldUseManagedContainer(frame) then
 		return
 	end
@@ -244,6 +244,7 @@ function CustomBuffs:SetUnit(frame)
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()
+	self:UpdateState(frame, settings)
 end
 
 function CustomBuffs:Init()
