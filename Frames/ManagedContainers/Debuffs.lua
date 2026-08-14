@@ -9,6 +9,16 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
+local SATED_DEBUFF_SPELL_IDS = {
+	[57723] = true,
+	[57724] = true,
+	[80354] = true,
+	[95809] = true,
+	[160455] = true,
+	[264689] = true,
+	[390435] = true,
+}
+
 local function ShouldUseManagedContainer(frame)
 	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
 end
@@ -128,8 +138,16 @@ function Debuffs:Ensure(frame, settings)
 	frame.managedContainers.debuffs = container
 	UpdateContainerSettings(frame, settings)
 
+	local excludeSpellIDs = {}
+	for spellID in pairs(SATED_DEBUFF_SPELL_IDS) do
+		excludeSpellIDs[spellID] = true
+	end
+
 	container:AddAuraGroup("debuffs", "HARMFUL", {
 		maxFrameCount = 0,
+		candidateFilters = {
+			excludeSpellIDs = excludeSpellIDs,
+		},
 		sortMethod = AuraContainerSortMethod.UnitFrameDebuff,
 		sortDirection = AuraContainerSortDirection.Normal,
 		initializeFrame = function(button)
