@@ -249,6 +249,7 @@ function Buffs:SetUnit(frame, settings)
 
 	container:SetUnit(auraUnit or "none")
 	container:UpdateAllAuras()
+	self:UpdateState(frame, settings)
 end
 
 function Buffs:Init()

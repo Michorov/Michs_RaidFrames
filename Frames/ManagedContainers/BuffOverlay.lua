@@ -147,7 +147,7 @@ function BuffOverlay:UpdateState(frame, settings)
 	end
 end
 
-function BuffOverlay:SetUnit(frame)
+function BuffOverlay:SetUnit(frame, settings)
 	if not ShouldUseManagedContainer(frame) then
 		return
 	end
@@ -159,6 +159,7 @@ function BuffOverlay:SetUnit(frame)
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()
+	self:UpdateState(frame, settings)
 end
 
 function BuffOverlay:Init()

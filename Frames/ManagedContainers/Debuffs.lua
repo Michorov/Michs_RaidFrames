@@ -173,7 +173,7 @@ function Debuffs:UpdateState(frame, settings)
 	end
 end
 
-function Debuffs:SetUnit(frame)
+function Debuffs:SetUnit(frame, settings)
 	if not ShouldUseManagedContainer(frame) then
 		return
 	end
@@ -185,6 +185,7 @@ function Debuffs:SetUnit(frame)
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()
+	self:UpdateState(frame, settings)
 end
 
 function Debuffs:Init()

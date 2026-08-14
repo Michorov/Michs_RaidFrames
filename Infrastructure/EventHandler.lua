@@ -14,8 +14,6 @@ local trackedEvents = {
 
 local vehicleAuraHiddenUnits = {}
 local vehicleTransitionUnits = {}
-local isCinematicPlaying = false
-local isClientScenePlaying = false
 
 local function CreateUnitEventTrackers()
 	local function CreateUnitEventTracker(unit)
@@ -25,6 +23,7 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_PHASE", unit)
+		frame:RegisterUnitEvent("UNIT_FACTION", unit)
 		frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_HEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
@@ -160,15 +159,6 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_ALIVE")
 	self:RegisterEvent("PLAYER_UNGHOST")
 
-	if addon.IsRestrictedAuraAPI then
-		self:RegisterEvent("CINEMATIC_START")
-		self:RegisterEvent("CINEMATIC_STOP")
-		self:RegisterEvent("PLAY_MOVIE")
-		self:RegisterEvent("STOP_MOVIE")
-		self:RegisterEvent("CLIENT_SCENE_OPENED")
-		self:RegisterEvent("CLIENT_SCENE_CLOSED")
-	end
-
 	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 
 	self:RegisterEvent("UI_SCALE_CHANGED")
@@ -266,6 +256,14 @@ function EventHandler:UNIT_PHASE(unit)
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
 end
 
+function EventHandler:UNIT_FACTION(unit)
+	if not addon.IsRestrictedAuraAPI then
+		return
+	end
+
+	addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
+end
+
 function EventHandler:UNIT_THREAT_SITUATION_UPDATE(unit)
 	addon.UpdateScheduler:Notify("threatStateChanged", unit)
 end
@@ -306,10 +304,6 @@ end
 
 function EventHandler:UNIT_AURA(unit, updateInfo)
 	if addon.IsRestrictedAuraAPI then
-		if isCinematicPlaying or isClientScenePlaying then
-			return
-		end
-
 		if vehicleTransitionUnits[unit] then
 			return
 		end
@@ -330,44 +324,8 @@ function EventHandler:UNIT_AURA(unit, updateInfo)
 	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 end
 
-function EventHandler:CINEMATIC_START()
-	isCinematicPlaying = true
-	addon.FrameRegistry:HideAllManagedContainers()
-end
-
-function EventHandler:CINEMATIC_STOP()
-	C_Timer.After(0.25, function()
-		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
-		isCinematicPlaying = false
-	end)
-end
-
-function EventHandler:PLAY_MOVIE()
-	isCinematicPlaying = true
-	addon.FrameRegistry:HideAllManagedContainers()
-end
-
-function EventHandler:STOP_MOVIE()
-	C_Timer.After(0.25, function()
-		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
-		isCinematicPlaying = false
-	end)
-end
-
-function EventHandler:CLIENT_SCENE_OPENED()
-	isClientScenePlaying = true
-	addon.FrameRegistry:HideAllManagedContainers()
-end
-
-function EventHandler:CLIENT_SCENE_CLOSED()
-	C_Timer.After(0.25, function()
-		addon.FrameRegistry:UpdateAllManagedContainersVisibility()
-		isClientScenePlaying = false
-	end)
-end
-
 function EventHandler:UNIT_ENTERING_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI or not addon.Utilities.IsSupportedUnit(unit) then
+	if not addon.IsRestrictedAuraAPI then
 		return
 	end
 
@@ -376,7 +334,7 @@ function EventHandler:UNIT_ENTERING_VEHICLE(unit)
 end
 
 function EventHandler:UNIT_ENTERED_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI or not addon.Utilities.IsSupportedUnit(unit) then
+	if not addon.IsRestrictedAuraAPI then
 		return
 	end
 
@@ -387,23 +345,24 @@ function EventHandler:UNIT_ENTERED_VEHICLE(unit)
 		return
 	end
 
-	addon.FrameRegistry:UpdateManagedContainersUnit(unit)
 	C_Timer.After(0, function()
+		addon.FrameRegistry:UpdateManagedContainersUnit(unit)
 		vehicleTransitionUnits[unit] = nil
-		addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
 	end)
 end
 
 EventHandler.UNIT_EXITING_VEHICLE = EventHandler.UNIT_ENTERING_VEHICLE
 
 function EventHandler:UNIT_EXITED_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI or not addon.Utilities.IsSupportedUnit(unit) then
+	if not addon.IsRestrictedAuraAPI then
 		return
 	end
 
-	addon.FrameRegistry:UpdateManagedContainersUnit(unit)
-	vehicleTransitionUnits[unit] = nil
-	vehicleAuraHiddenUnits[unit] = nil
+	C_Timer.After(0, function()
+		addon.FrameRegistry:UpdateManagedContainersUnit(unit)
+		vehicleTransitionUnits[unit] = nil
+		vehicleAuraHiddenUnits[unit] = nil
+	end)
 end
 
 function EventHandler:UNIT_NAME_UPDATE(unit)
