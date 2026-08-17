@@ -59,20 +59,6 @@ function Debuffs:Create(page)
 		end,
 	})
 
-	local secondSlot = topRow:CreateCheckboxSlot("top")
-	local colorByDebuffTypeCheckbox = secondSlot:CreateControl("Checkbox", { labelKey = "Color By Debuff Type" })
-	colorByDebuffTypeCheckbox:BindValue({
-		get = function(profile, mode)
-			return profile[mode].widgets.icons.debuffs.borderColorByDebuffType
-		end,
-		set = function(profile, mode, value)
-			profile[mode].widgets.icons.debuffs.borderColorByDebuffType = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
-		end,
-	})
-
 	local positionRow = subpage:CreateRow(4)
 	positionRow:SetLayoutPoint("TOPLEFT", topRow.frame, "BOTTOMLEFT", 0, -16)
 
@@ -189,16 +175,31 @@ function Debuffs:Create(page)
 		end,
 	})
 
-	local borderSizeSlider = iconRow:CreateControl("Slider", { labelKey = "Border Size" })
-	borderSizeSlider:SetMinMaxValues(0, 4)
-	borderSizeSlider:SetStep(1)
-	borderSizeSlider:SetValueFormatter(FormatInteger)
-	borderSizeSlider:BindValue({
+	local borderRow = subpage:CreateRow(4)
+	borderRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].widgets.icons.debuffs.borderSizePx
+			return (profile[mode].widgets.icons.debuffs.borderSizePx or 1) ~= 0
 		end,
 		set = function(profile, mode, value)
-			profile[mode].widgets.icons.debuffs.borderSizePx = value
+			profile[mode].widgets.icons.debuffs.borderSizePx = value and 1 or 0
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+		end,
+	})
+
+	local borderColorDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Debuff Type Color" })
+	borderColorDropdown:SetOptions(visibilityOptions)
+	borderColorDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.debuffs.borderColorByDebuffType
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.debuffs.borderColorByDebuffType = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
@@ -206,7 +207,7 @@ function Debuffs:Create(page)
 	})
 
 	local stacksRow = subpage:CreateRow(4)
-	stacksRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
+	stacksRow:SetLayoutPoint("TOPLEFT", borderRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local showStacksDropdown = stacksRow:CreateControl("Dropdown", { labelKey = "Stacks" })
 	showStacksDropdown:SetOptions(visibilityOptions)
