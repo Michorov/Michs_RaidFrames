@@ -55,6 +55,19 @@ function AuraButtons:Initialize(button, container)
 	}
 	button.border = border
 
+	local innerBorder = CreateFrame("Frame", nil, button)
+	innerBorder:SetFrameLevel(buttonFrameLevel + 2)
+	innerBorder.edges = {
+		top = CreateBorderTexture(innerBorder, "TOPLEFT", "TOPRIGHT"),
+		bottom = CreateBorderTexture(innerBorder, "BOTTOMLEFT", "BOTTOMRIGHT"),
+		left = CreateBorderTexture(innerBorder, "TOPLEFT", "BOTTOMLEFT"),
+		right = CreateBorderTexture(innerBorder, "TOPRIGHT", "BOTTOMRIGHT"),
+	}
+	for _, edge in pairs(innerBorder.edges) do
+		edge:SetColorTexture(1, 1, 1, 0)
+	end
+	button.innerBorder = innerBorder
+
 	local textLayer = CreateFrame("Frame", nil, button)
 	textLayer:SetAllPoints(button)
 	textLayer:SetFrameLevel(buttonFrameLevel + 3)
@@ -118,6 +131,8 @@ function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 	local borderSize = addon.Utilities:ToUI(scaledBorderSizePx)
 	local border = button.border
 	local edges = border.edges
+	local innerBorder = button.innerBorder
+	local innerEdges = innerBorder and innerBorder.edges
 
 	ApplyIconInsets(button, cachedSettings)
 
@@ -126,6 +141,18 @@ function AuraButtons:ApplyBorderSettings(button, cachedSettings)
 	edges.bottom:SetHeight(borderSize)
 	edges.left:SetWidth(borderSize)
 	edges.right:SetWidth(borderSize)
+
+	if innerBorder and innerEdges then
+		innerBorder:SetShown(scaledBorderSizePx > 0)
+		innerBorder:ClearAllPoints()
+		innerBorder:SetPoint("TOPLEFT", button, "TOPLEFT", borderSize, -borderSize)
+		innerBorder:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -borderSize, borderSize)
+
+		innerEdges.top:SetHeight(borderSize)
+		innerEdges.bottom:SetHeight(borderSize)
+		innerEdges.left:SetWidth(borderSize)
+		innerEdges.right:SetWidth(borderSize)
+	end
 
 	if button.SetHitRectInsets then
 		button:SetHitRectInsets(borderSize, borderSize, borderSize, borderSize)

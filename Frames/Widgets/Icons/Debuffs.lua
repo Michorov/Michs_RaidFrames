@@ -63,6 +63,60 @@ local function IsBlacklistedAura(aura)
 	return DEBUFF_BLACKLIST[spellId] == true
 end
 
+local function EnsureDebuffTypeBorder(icon)
+	if not icon or icon.debuffTypeBorder then
+		return icon and icon.debuffTypeBorder
+	end
+
+	local border = CreateFrame("Frame", nil, icon, "BackdropTemplate")
+	border:SetFrameLevel(icon:GetFrameLevel() + 3)
+	icon.debuffTypeBorder = border
+
+	return border
+end
+
+local function UpdateDebuffTypeBorderSettings(icon, cachedSettings, frame)
+	local border = EnsureDebuffTypeBorder(icon)
+	if not border then
+		return
+	end
+
+	local scaledBorderSizePx = math.max(0, frame.dataProvider:Scale(frame, cachedSettings.borderSizePx))
+	if scaledBorderSizePx <= 0 or not cachedSettings.borderColorByDebuffType then
+		border:SetBackdrop(nil)
+		border:Hide()
+		return
+	end
+
+	local borderSize = addon.Utilities:ToUI(scaledBorderSizePx)
+
+	border:ClearAllPoints()
+	border:SetPoint("TOPLEFT", icon, "TOPLEFT", borderSize, -borderSize)
+	border:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -borderSize, borderSize)
+	border:SetBackdrop({
+		edgeFile = "Interface\\Buttons\\WHITE8x8",
+		edgeSize = borderSize,
+	})
+	border:Show()
+end
+
+local function UpdateDebuffTypeBorderColor(icon, color)
+	local border = icon and icon.debuffTypeBorder
+	if not border then
+		return
+	end
+
+	if not border:IsShown() then
+		return
+	end
+
+	if color then
+		border:SetBackdropBorderColor(color.r, color.g, color.b, color.a or 1)
+	else
+		border:SetBackdropBorderColor(0, 0, 0, 1)
+	end
+end
+
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -158,6 +212,7 @@ local function UpdateIconSettings(frame, settings)
 		addon.Frames.Managers.IconManager:ApplyBorderSettings(icon, cachedSettings, frame)
 		addon.Frames.Managers.IconManager:ApplyCountSettings(icon, cachedSettings, frame)
 		addon.Frames.Managers.IconManager:ApplyCooldownSettings(icon, cachedSettings, frame)
+		UpdateDebuffTypeBorderSettings(icon, cachedSettings, frame)
 
 		local gridIndex = i - 1
 		local column = gridIndex % cachedSettings.iconsPerRow
@@ -256,13 +311,9 @@ function Debuffs:UpdateState(frame, settings)
 
 				if cachedSettings.borderColorByDebuffType then
 					local color = provider:GetAuraDispelTypeColor(frame, aura, dispelCurve)
-					if color then
-						addon.Frames.Managers.IconManager:ApplyBorderColor(icon, color)
-					else
-						addon.Frames.Managers.IconManager:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
-					end
+					UpdateDebuffTypeBorderColor(icon, color)
 				else
-					addon.Frames.Managers.IconManager:ApplyBorderColor(icon, { r = 0, g = 0, b = 0, a = 1 })
+					UpdateDebuffTypeBorderColor(icon)
 				end
 			end
 		end

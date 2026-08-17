@@ -43,6 +43,7 @@ local function UpdateSettingsCache(settings)
 		showCooldown = debuffs.showCooldown == true,
 		cooldownFontSize = debuffs.cooldownFontSize or 10,
 		showTooltips = debuffs.showTooltips == true,
+		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
 	}
 
@@ -104,6 +105,67 @@ local function UpdateAuraGroupSettings(frame, settings)
 	})
 end
 
+local function ClearDebuffTypeBorder(button, edges)
+	if button.RemoveDispelTypeTexture and button.debuffTypeBorderTextureIndexes then
+		for i = #button.debuffTypeBorderTextureIndexes, 1, -1 do
+			button:RemoveDispelTypeTexture(button.debuffTypeBorderTextureIndexes[i])
+		end
+	end
+
+	if edges then
+		for _, edge in pairs(edges) do
+			edge:SetColorTexture(1, 1, 1, 0)
+		end
+	end
+
+	button.debuffTypeBorderTextureIndexes = nil
+	button.debuffTypeBorderRegistered = false
+end
+
+local function UpdateDebuffTypeBorder(button, cachedSettings)
+	if not button or not cachedSettings then
+		return
+	end
+
+	local border = button.innerBorder
+	local edges = border and border.edges
+	if not edges then
+		return
+	end
+
+	if not cachedSettings.borderColorByDebuffType then
+		ClearDebuffTypeBorder(button, edges)
+		return
+	end
+
+	if button.debuffTypeBorderRegistered or not button.AddDispelTypeTexture then
+		return
+	end
+
+	local styleEnum = Enum and Enum.CustomAuraButtonDispelTypeTextureStyle
+	if not styleEnum then
+		return
+	end
+
+	local options = {
+		showWhenHarmful = true,
+		showWithoutDispelType = true,
+		style = styleEnum.PreserveAsset,
+	}
+
+	button.debuffTypeBorderTextureIndexes = {}
+
+	for _, edge in pairs(edges) do
+		edge:SetColorTexture(1, 1, 1, 1)
+		local index = button:AddDispelTypeTexture(edge, options)
+		if index then
+			table.insert(button.debuffTypeBorderTextureIndexes, index)
+		end
+	end
+
+	button.debuffTypeBorderRegistered = true
+end
+
 local function UpdateButtonsSettings(frame, settings)
 	local container = frame.managedContainers.debuffs
 	local cachedSettings = settingsCache[settings]
@@ -114,6 +176,7 @@ local function UpdateButtonsSettings(frame, settings)
 		AuraButtons:ApplyCooldownSettings(button, cachedSettings)
 		AuraButtons:ApplyCountSettings(button, cachedSettings)
 		AuraButtons:ApplyTooltipSettings(button, cachedSettings)
+		UpdateDebuffTypeBorder(button, cachedSettings)
 	end
 end
 
@@ -152,6 +215,7 @@ function Debuffs:Ensure(frame, settings)
 		sortDirection = AuraContainerSortDirection.Normal,
 		initializeFrame = function(button)
 			AuraButtons:Initialize(button, container)
+			UpdateDebuffTypeBorder(button, settingsCache[settings])
 		end,
 	})
 end
