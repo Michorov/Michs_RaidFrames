@@ -76,16 +76,14 @@ function BigDefensive:Create(page)
 	local borderRow = subpage:CreateRow(4)
 	borderRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local borderSizeSlider = borderRow:CreateControl("Slider", { labelKey = "Border Size" })
-	borderSizeSlider:SetMinMaxValues(0, 6)
-	borderSizeSlider:SetStep(1)
-	borderSizeSlider:SetValueFormatter(FormatInteger)
-	borderSizeSlider:BindValue({
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].widgets.icons.bigDefensive.borderSizePx
+			return (profile[mode].widgets.icons.bigDefensive.borderSizePx or 1) ~= 0
 		end,
 		set = function(profile, mode, value)
-			profile[mode].widgets.icons.bigDefensive.borderSizePx = value
+			profile[mode].widgets.icons.bigDefensive.borderSizePx = value and 1 or 0
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("bigDefensiveAurasSettingsChanged")

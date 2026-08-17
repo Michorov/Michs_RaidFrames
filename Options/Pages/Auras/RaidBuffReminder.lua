@@ -19,6 +19,11 @@ local anchorOptions = {
 	{ value = "BOTTOMRIGHT", textKey = "Bottom Right" },
 }
 
+local visibilityOptions = {
+	{ value = true, textKey = "Show" },
+	{ value = false, textKey = "Hide" },
+}
+
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
@@ -127,16 +132,14 @@ function RaidBuffReminder:Create(page)
 	local borderRow = subpage:CreateRow(4)
 	borderRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local borderSizeSlider = borderRow:CreateControl("Slider", { labelKey = "Border Size" })
-	borderSizeSlider:SetMinMaxValues(0, 6)
-	borderSizeSlider:SetStep(1)
-	borderSizeSlider:SetValueFormatter(FormatInteger)
-	borderSizeSlider:BindValue({
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].widgets.icons.raidBuffReminder.borderSizePx
+			return (profile[mode].widgets.icons.raidBuffReminder.borderSizePx or 1) ~= 0
 		end,
 		set = function(profile, mode, value)
-			profile[mode].widgets.icons.raidBuffReminder.borderSizePx = value
+			profile[mode].widgets.icons.raidBuffReminder.borderSizePx = value and 1 or 0
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("raidBuffReminderSettingsChanged")
