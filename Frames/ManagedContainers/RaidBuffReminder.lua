@@ -191,8 +191,6 @@ function RaidBuffReminder:Ensure(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	frame.managedContainers = frame.managedContainers or {}
-
 	if frame.managedContainers.raidBuffReminder then
 		return
 	end
@@ -233,7 +231,7 @@ function RaidBuffReminder:UpdateSettings(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.raidBuffReminder then
+	if not frame.managedContainers.raidBuffReminder then
 		self:Ensure(frame, settings)
 	end
 
@@ -250,7 +248,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.raidBuffReminder then
+	if not frame.managedContainers.raidBuffReminder then
 		return
 	end
 
@@ -263,10 +261,7 @@ function RaidBuffReminder:SetUnit(frame, settings)
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.raidBuffReminder
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.raidBuffReminder
 
 	container:SetUnit(frame.unit or "none")
 	container:UpdateAllAuras()

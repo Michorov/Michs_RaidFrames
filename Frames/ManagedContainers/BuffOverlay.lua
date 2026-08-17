@@ -89,8 +89,6 @@ function BuffOverlay:Ensure(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	frame.managedContainers = frame.managedContainers or {}
-
 	if frame.managedContainers.buffOverlay then
 		return
 	end
@@ -120,7 +118,7 @@ function BuffOverlay:UpdateSettings(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.buffOverlay then
+	if not frame.managedContainers.buffOverlay then
 		self:Ensure(frame, settings)
 	end
 
@@ -133,7 +131,7 @@ function BuffOverlay:UpdateState(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.buffOverlay then
+	if not frame.managedContainers.buffOverlay then
 		return
 	end
 
@@ -152,10 +150,7 @@ function BuffOverlay:SetUnit(frame, settings)
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.buffOverlay
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.buffOverlay
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()

@@ -134,8 +134,6 @@ function Buffs:Ensure(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	frame.managedContainers = frame.managedContainers or {}
-
 	if frame.managedContainers.buffs then
 		return
 	end
@@ -166,7 +164,7 @@ function Buffs:UpdateSettings(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.buffs then
+	if not frame.managedContainers.buffs then
 		self:Ensure(frame, settings)
 	end
 
@@ -182,7 +180,7 @@ function Buffs:UpdateFilters(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.buffs then
+	if not frame.managedContainers.buffs then
 		self:Ensure(frame, settings)
 	end
 
@@ -204,7 +202,7 @@ function Buffs:UpdateState(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.buffs then
+	if not frame.managedContainers.buffs then
 		return
 	end
 
@@ -223,10 +221,7 @@ function Buffs:SetUnit(frame, settings)
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.buffs
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.buffs
 
 	local auraUnit = addon.Utilities:GetManagedAuraUnit(frame.unit)
 	if container.SetAuraGroupFilter then
