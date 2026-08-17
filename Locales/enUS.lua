@@ -58,6 +58,7 @@ L["Created '%s' by copying '%s' and set it as the active profile."] =
 	"Created '%s' by copying '%s' and set it as the active profile."
 L["Custom buff settings are disabled during combat."] = "Custom buff settings are disabled during combat."
 L["Debuff settings are disabled during combat."] = "Debuff settings are disabled during combat."
+L["Debuff Type Color"] = "Debuff Type Color"
 L["Debuffs"] = "Debuffs"
 L["Default"] = "Default"
 L["Default profile cannot be deleted."] = "Default profile cannot be deleted."
