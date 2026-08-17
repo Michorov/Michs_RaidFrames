@@ -177,8 +177,6 @@ function CustomBuffs:Ensure(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	frame.managedContainers = frame.managedContainers or {}
-
 	if frame.managedContainers.customBuffs then
 		return
 	end
@@ -202,7 +200,7 @@ function CustomBuffs:UpdateSettings(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.customBuffs then
+	if not frame.managedContainers.customBuffs then
 		self:Ensure(frame, settings)
 	end
 
@@ -218,7 +216,7 @@ function CustomBuffs:UpdateState(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.customBuffs then
+	if not frame.managedContainers.customBuffs then
 		return
 	end
 
@@ -237,10 +235,7 @@ function CustomBuffs:SetUnit(frame, settings)
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.customBuffs
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.customBuffs
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()

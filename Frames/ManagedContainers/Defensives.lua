@@ -90,8 +90,6 @@ function Defensives:Ensure(frame, settings)
 		UpdateSettingsCache(settings)
 	end
 
-	frame.managedContainers = frame.managedContainers or {}
-
 	if frame.managedContainers.defensives then
 		return
 	end
@@ -119,7 +117,7 @@ function Defensives:UpdateSettings(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.defensives then
+	if not frame.managedContainers.defensives then
 		self:Ensure(frame, settings)
 	end
 
@@ -134,7 +132,7 @@ function Defensives:UpdateState(frame, settings)
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.defensives then
+	if not frame.managedContainers.defensives then
 		return
 	end
 
@@ -153,10 +151,7 @@ function Defensives:SetUnit(frame, settings)
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.defensives
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.defensives
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()

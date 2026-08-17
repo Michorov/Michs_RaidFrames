@@ -100,6 +100,7 @@ end
 
 function MRF_OnUnitFrameLoad(frame)
 	frame.dataProvider = addon.Frames.DataProvider.Live
+	frame.managedContainers = {}
 
 	local targetedSpellsApi = _G.TargetedSpellsAPI
 	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then

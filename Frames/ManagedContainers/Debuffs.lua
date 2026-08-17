@@ -19,10 +19,6 @@ local SATED_DEBUFF_SPELL_IDS = {
 	[390435] = true,
 }
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -105,65 +101,47 @@ local function UpdateAuraGroupSettings(frame, settings)
 	})
 end
 
-local function ClearDebuffTypeBorder(button, edges)
-	if button.RemoveDispelTypeTexture and button.debuffTypeBorderTextureIndexes then
-		for i = #button.debuffTypeBorderTextureIndexes, 1, -1 do
-			button:RemoveDispelTypeTexture(button.debuffTypeBorderTextureIndexes[i])
+local function UnregisterDebuffBorder(button)
+	local edges = button.innerBorder.edges
+
+	if button.debuffBorderTextureIndexes then
+		for i = #button.debuffBorderTextureIndexes, 1, -1 do
+			button:RemoveDispelTypeTexture(button.debuffBorderTextureIndexes[i])
 		end
 	end
 
-	if edges then
-		for _, edge in pairs(edges) do
-			edge:SetColorTexture(1, 1, 1, 0)
-		end
+	for _, edge in pairs(edges) do
+		edge:SetColorTexture(1, 1, 1, 0)
 	end
 
-	button.debuffTypeBorderTextureIndexes = nil
-	button.debuffTypeBorderRegistered = false
+	button.debuffBorderTextureIndexes = nil
+	button.debuffBorderRegistered = false
 end
 
-local function UpdateDebuffTypeBorder(button, cachedSettings)
-	if not button or not cachedSettings then
+local function RegisterDebuffBorder(button)
+	if button.debuffBorderRegistered then
 		return
 	end
 
-	local border = button.innerBorder
-	local edges = border and border.edges
-	if not edges then
-		return
-	end
-
-	if not cachedSettings.borderColorByDebuffType then
-		ClearDebuffTypeBorder(button, edges)
-		return
-	end
-
-	if button.debuffTypeBorderRegistered or not button.AddDispelTypeTexture then
-		return
-	end
-
-	local styleEnum = Enum and Enum.CustomAuraButtonDispelTypeTextureStyle
-	if not styleEnum then
-		return
-	end
+	local edges = button.innerBorder.edges
 
 	local options = {
 		showWhenHarmful = true,
 		showWithoutDispelType = true,
-		style = styleEnum.PreserveAsset,
+		style = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
 	}
 
-	button.debuffTypeBorderTextureIndexes = {}
+	button.debuffBorderTextureIndexes = {}
 
 	for _, edge in pairs(edges) do
 		edge:SetColorTexture(1, 1, 1, 1)
 		local index = button:AddDispelTypeTexture(edge, options)
 		if index then
-			table.insert(button.debuffTypeBorderTextureIndexes, index)
+			table.insert(button.debuffBorderTextureIndexes, index)
 		end
 	end
 
-	button.debuffTypeBorderRegistered = true
+	button.debuffBorderRegistered = true
 end
 
 local function UpdateButtonsSettings(frame, settings)
@@ -176,20 +154,23 @@ local function UpdateButtonsSettings(frame, settings)
 		AuraButtons:ApplyCooldownSettings(button, cachedSettings)
 		AuraButtons:ApplyCountSettings(button, cachedSettings)
 		AuraButtons:ApplyTooltipSettings(button, cachedSettings)
-		UpdateDebuffTypeBorder(button, cachedSettings)
+
+		if cachedSettings.borderColorByDebuffType then
+			RegisterDebuffBorder(button)
+		else
+			UnregisterDebuffBorder(button)
+		end
 	end
 end
 
 function Debuffs:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.previewWidgetVisibility then
 		return
 	end
 
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
-
-	frame.managedContainers = frame.managedContainers or {}
 
 	if frame.managedContainers.debuffs then
 		return
@@ -215,7 +196,11 @@ function Debuffs:Ensure(frame, settings)
 		sortDirection = AuraContainerSortDirection.Normal,
 		initializeFrame = function(button)
 			AuraButtons:Initialize(button, container)
-			UpdateDebuffTypeBorder(button, settingsCache[settings])
+			if settingsCache[settings].borderColorByDebuffType then
+				RegisterDebuffBorder(button)
+			else
+				UnregisterDebuffBorder(button)
+			end
 		end,
 	})
 end
@@ -223,12 +208,12 @@ end
 function Debuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.previewWidgetVisibility then
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.debuffs then
-		self:Ensure(frame, settings)
+	if not frame.managedContainers.debuffs then
+		return
 	end
 
 	UpdateButtonsSettings(frame, settings)
@@ -237,11 +222,11 @@ function Debuffs:UpdateSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.previewWidgetVisibility then
 		return
 	end
 
-	if not frame.managedContainers or not frame.managedContainers.debuffs then
+	if not frame.managedContainers.debuffs then
 		return
 	end
 
@@ -256,14 +241,11 @@ function Debuffs:UpdateState(frame, settings)
 end
 
 function Debuffs:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.previewWidgetVisibility then
 		return
 	end
 
-	local container = frame.managedContainers and frame.managedContainers.debuffs
-	if not container then
-		return
-	end
+	local container = frame.managedContainers.debuffs
 
 	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
 	container:UpdateAllAuras()
