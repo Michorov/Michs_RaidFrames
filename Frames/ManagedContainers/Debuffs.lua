@@ -9,14 +9,21 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local SATED_DEBUFF_SPELL_IDS = {
-	[57723] = true,
-	[57724] = true,
-	[80354] = true,
-	[95809] = true,
-	[160455] = true,
-	[264689] = true,
-	[390435] = true,
+local DEBUFF_BLACKLIST = {
+	[57723] = true, -- Exhaustion
+	[57724] = true, -- Sated
+	[80354] = true, -- Temporal Displacement
+	[95809] = true, -- Hunter Pet Insanity
+	[160455] = true, -- Hunter Pet Fatigued
+	[264689] = true, -- Hunter Pet Fatigued
+	[390435] = true, -- Exhaustion
+
+	[26013] = true, -- BG Deserter
+	[71041] = true, -- Dungeon Deserter
+
+	[427490] = true, -- Ride Along Available
+	[447959] = true, -- Ride Along Active
+	[447960] = true, -- Ride Along Inactive
 }
 
 local function UpdateSettingsCache(settings)
@@ -183,7 +190,7 @@ function Debuffs:Ensure(frame, settings)
 	UpdateContainerSettings(frame, settings)
 
 	local excludeSpellIDs = {}
-	for spellID in pairs(SATED_DEBUFF_SPELL_IDS) do
+	for spellID in pairs(DEBUFF_BLACKLIST) do
 		excludeSpellIDs[spellID] = true
 	end
 
