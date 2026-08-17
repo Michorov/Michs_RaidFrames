@@ -185,16 +185,17 @@ function Buffs:Create(page)
 		end,
 	})
 
-	local borderSizeSlider = iconRow:CreateControl("Slider", { labelKey = "Border Size" })
-	borderSizeSlider:SetMinMaxValues(0, 4)
-	borderSizeSlider:SetStep(1)
-	borderSizeSlider:SetValueFormatter(FormatInteger)
-	borderSizeSlider:BindValue({
+	local borderRow = subpage:CreateRow(4)
+	borderRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].widgets.icons.buffs.borderSizePx
+			return (profile[mode].widgets.icons.buffs.borderSizePx or 1) ~= 0
 		end,
 		set = function(profile, mode, value)
-			profile[mode].widgets.icons.buffs.borderSizePx = value
+			profile[mode].widgets.icons.buffs.borderSizePx = value and 1 or 0
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("buffAurasSettingsChanged")
@@ -202,7 +203,7 @@ function Buffs:Create(page)
 	})
 
 	local stacksRow = subpage:CreateRow(4)
-	stacksRow:SetLayoutPoint("TOPLEFT", iconRow.frame, "BOTTOMLEFT", 0, -16)
+	stacksRow:SetLayoutPoint("TOPLEFT", borderRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local showStacksDropdown = stacksRow:CreateControl("Dropdown", { labelKey = "Stacks" })
 	showStacksDropdown:SetOptions(visibilityOptions)
