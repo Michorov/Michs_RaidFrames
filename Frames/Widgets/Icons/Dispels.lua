@@ -240,7 +240,7 @@ function Dispels:Ensure(frame)
 		frame.dispelsContainer = container
 	end
 
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		EnsurePreview(frame.dispelsContainer)
 	end
 end
@@ -251,7 +251,7 @@ function Dispels:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		RemoveAnchor(frame)
 		ShowPreview(frame, cachedSettings)
 		return

@@ -278,6 +278,7 @@ function Frames:CreatePreviewFrame(parent)
 
 	local frame = CreateFrame("Button", nil, parent)
 
+	frame.isPreview = true
 	frame.unit = nil
 	frame.testName = UnitName("player") or ""
 

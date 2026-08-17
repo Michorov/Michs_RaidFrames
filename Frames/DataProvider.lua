@@ -180,7 +180,7 @@ function DataProvider.Test:GetHealth(frame)
 end
 
 function DataProvider.Test:Scale(frame, value)
-	if frame and frame.previewWidgetVisibility ~= nil then
+	if frame and frame.isPreview then
 		return value or 0
 	end
 
@@ -188,7 +188,7 @@ function DataProvider.Test:Scale(frame, value)
 end
 
 function DataProvider.Test:ScaleFont(frame, value)
-	if frame and frame.previewWidgetVisibility ~= nil then
+	if frame and frame.isPreview then
 		return value or 0
 	end
 
@@ -196,7 +196,7 @@ function DataProvider.Test:ScaleFont(frame, value)
 end
 
 function DataProvider.Test:ScaleEven(frame, value)
-	if frame and frame.previewWidgetVisibility ~= nil then
+	if frame and frame.isPreview then
 		return value or 0
 	end
 

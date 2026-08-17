@@ -8,10 +8,6 @@ local BuffOverlay = addon.Frames.ManagedContainers.BuffOverlay
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function GetCurrentOverlaySettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
@@ -80,7 +76,7 @@ local function UpdateFilters(frame, settings)
 end
 
 function BuffOverlay:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
@@ -114,12 +110,8 @@ end
 function BuffOverlay:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.buffOverlay then
-		self:Ensure(frame, settings)
 	end
 
 	UpdateOverlayButtonSettings(frame, settings)
@@ -127,17 +119,17 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
-	if not frame.managedContainers.buffOverlay then
+	local container = frame.managedContainers.buffOverlay
+	if not container then
 		return
 	end
 
 	local unit = frame.unit
 	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
-	local container = frame.managedContainers.buffOverlay
 
 	if container.isShown ~= shouldShow then
 		container.isShown = shouldShow
@@ -146,7 +138,7 @@ function BuffOverlay:UpdateState(frame, settings)
 end
 
 function BuffOverlay:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 

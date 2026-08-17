@@ -9,10 +9,6 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function GetEnabledBuffSpellIDs(buffs)
 	local customAuraValues = buffs.customAuraValues or {}
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
@@ -125,7 +121,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Buffs:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
@@ -160,12 +156,8 @@ end
 function Buffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.buffs then
-		self:Ensure(frame, settings)
 	end
 
 	UpdateButtonsSettings(frame, settings)
@@ -176,12 +168,8 @@ end
 function Buffs:UpdateFilters(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.buffs then
-		self:Ensure(frame, settings)
 	end
 
 	local container = frame.managedContainers.buffs
@@ -198,17 +186,17 @@ function Buffs:UpdateFilters(frame, settings)
 end
 
 function Buffs:UpdateState(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
-	if not frame.managedContainers.buffs then
+	local container = frame.managedContainers.buffs
+	if not container then
 		return
 	end
 
 	local unit = frame.unit
 	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
-	local container = frame.managedContainers.buffs
 
 	if container.isShown ~= shouldShow then
 		container.isShown = shouldShow
@@ -217,7 +205,7 @@ function Buffs:UpdateState(frame, settings)
 end
 
 function Buffs:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 

@@ -8,10 +8,6 @@ local RaidBuffReminder = addon.Frames.ManagedContainers.RaidBuffReminder
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function CreateIcon(parent)
 	local icon = CreateFrame("Frame", nil, parent, "DisableUntrustedLayoutScriptsTemplate")
 	icon:EnableMouse(false)
@@ -182,7 +178,7 @@ local function UpdateManagedSettings(frame, settings)
 end
 
 function RaidBuffReminder:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
@@ -227,12 +223,8 @@ end
 function RaidBuffReminder:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.raidBuffReminder then
-		self:Ensure(frame, settings)
 	end
 
 	UpdateManagedSettings(frame, settings)
@@ -244,20 +236,20 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		UpdateSettingsCache(settings)
 	end
 
-	if not ShouldUseManagedContainer(frame) then
-		return
-	end
-
-	if not frame.managedContainers.raidBuffReminder then
+	if frame.isPreview then
 		return
 	end
 
 	local container = frame.managedContainers.raidBuffReminder
+	if not container then
+		return
+	end
+
 	container.wrapper:SetShown(ShouldShow(frame, settingsCache[settings]))
 end
 
 function RaidBuffReminder:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
