@@ -59,7 +59,7 @@ local function ApplyNameColor(text, frame, settings)
 
 	local classToken
 
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		classToken = select(2, UnitClass("player"))
 	else
 		local unit = frame and frame.unit

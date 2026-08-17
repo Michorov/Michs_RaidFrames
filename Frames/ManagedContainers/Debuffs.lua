@@ -164,7 +164,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Debuffs:Ensure(frame, settings)
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		return
 	end
 
@@ -208,11 +208,7 @@ end
 function Debuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.previewWidgetVisibility then
-		return
-	end
-
-	if not frame.managedContainers.debuffs then
+	if frame.isPreview then
 		return
 	end
 
@@ -222,17 +218,17 @@ function Debuffs:UpdateSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		return
 	end
 
-	if not frame.managedContainers.debuffs then
+	local container = frame.managedContainers.debuffs
+	if not container then
 		return
 	end
 
 	local unit = frame.unit
 	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
-	local container = frame.managedContainers.debuffs
 
 	if container.isShown ~= shouldShow then
 		container.isShown = shouldShow
@@ -241,7 +237,7 @@ function Debuffs:UpdateState(frame, settings)
 end
 
 function Debuffs:SetUnit(frame, settings)
-	if frame.previewWidgetVisibility then
+	if frame.isPreview then
 		return
 	end
 

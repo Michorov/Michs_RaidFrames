@@ -43,7 +43,7 @@ local function UpdateSettingsCache(settings)
 end
 
 function Buffs:Ensure(frame)
-	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+	if addon.IsRestrictedAuraAPI and not frame.isPreview then
 		return
 	end
 
@@ -132,7 +132,7 @@ end
 function Buffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+	if addon.IsRestrictedAuraAPI and not frame.isPreview then
 		return
 	end
 
@@ -146,7 +146,7 @@ function Buffs:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility then
+	if addon.IsRestrictedAuraAPI and not frame.isPreview then
 		return
 	end
 

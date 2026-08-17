@@ -9,10 +9,6 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function GetSlotKey(spellID)
 	return "CustomBuff" .. tostring(spellID)
 end
@@ -170,7 +166,7 @@ local function UpdateFilters(frame, settings)
 end
 
 function CustomBuffs:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
@@ -196,12 +192,8 @@ function CustomBuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.customBuffs then
-		self:Ensure(frame, settings)
 	end
 
 	for slotKey, slotSettings in pairs(cachedSettings.slotSettings) do
@@ -212,17 +204,17 @@ function CustomBuffs:UpdateSettings(frame, settings)
 end
 
 function CustomBuffs:UpdateState(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
-	if not frame.managedContainers.customBuffs then
+	local container = frame.managedContainers.customBuffs
+	if not container then
 		return
 	end
 
 	local unit = frame.unit
 	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
-	local container = frame.managedContainers.customBuffs
 
 	if container.isShown ~= shouldShow then
 		container.isShown = shouldShow
@@ -231,7 +223,7 @@ function CustomBuffs:UpdateState(frame, settings)
 end
 
 function CustomBuffs:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 

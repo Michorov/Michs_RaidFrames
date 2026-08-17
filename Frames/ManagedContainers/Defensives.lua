@@ -9,10 +9,6 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function ShouldUseManagedContainer(frame)
-	return addon.IsRestrictedAuraAPI and not frame.previewWidgetVisibility
-end
-
 local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 	local widgets = (settings and settings.widgets) or {}
@@ -82,7 +78,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Defensives:Ensure(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
@@ -113,12 +109,8 @@ end
 function Defensives:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
-	end
-
-	if not frame.managedContainers.defensives then
-		self:Ensure(frame, settings)
 	end
 
 	UpdateButtonsSettings(frame, settings)
@@ -128,17 +120,17 @@ function Defensives:UpdateSettings(frame, settings)
 end
 
 function Defensives:UpdateState(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
-	if not frame.managedContainers.defensives then
+	local container = frame.managedContainers.defensives
+	if not container then
 		return
 	end
 
 	local unit = frame.unit
 	local shouldShow = addon.Utilities:IsManagedAuraUnitVisible(unit)
-	local container = frame.managedContainers.defensives
 
 	if container.isShown ~= shouldShow then
 		container.isShown = shouldShow
@@ -147,7 +139,7 @@ function Defensives:UpdateState(frame, settings)
 end
 
 function Defensives:SetUnit(frame, settings)
-	if not ShouldUseManagedContainer(frame) then
+	if frame.isPreview then
 		return
 	end
 
