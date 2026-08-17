@@ -23,7 +23,7 @@ local function UpdateSettingsCache(settings)
 		offsetYPx = addon.Utilities:ToPixels(bigDefensive.offsetY or 0),
 		maxIcons = math.max(1, bigDefensive.maxIcons or 1),
 		iconSizePx = addon.Utilities:ToPixels(bigDefensive.iconSize or 32),
-		borderSizePx = addon.Utilities:ToPixels(bigDefensive.borderSizePx or 1),
+		borderSizePx = addon.Utilities:ToPixels((bigDefensive.borderSizePx ~= 0) and 1 or 0),
 		showStacks = bigDefensive.showStacks ~= false,
 		stacksFontSize = bigDefensive.stacksFontSize or 16,
 		showCooldown = bigDefensive.showCooldown == true,

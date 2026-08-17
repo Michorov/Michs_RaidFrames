@@ -58,7 +58,7 @@ local function UpdateSettingsCache(settings)
 		offsetXPx = addon.Utilities:ToPixels(raidBuffReminder.offsetX or 0),
 		offsetYPx = addon.Utilities:ToPixels(raidBuffReminder.offsetY or 0),
 		iconSizePx = addon.Utilities:ToPixels(raidBuffReminder.iconSize or 32),
-		borderSizePx = addon.Utilities:ToPixels(raidBuffReminder.borderSizePx or 1),
+		borderSizePx = addon.Utilities:ToPixels((raidBuffReminder.borderSizePx ~= 0) and 1 or 0),
 		borderColor = {
 			r = borderColor.r or 1,
 			g = borderColor.g or 0,
