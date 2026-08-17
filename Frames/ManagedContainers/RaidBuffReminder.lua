@@ -51,7 +51,7 @@ local function UpdateSettingsCache(settings)
 	local spellIDs = GetReminderSpellIDs()
 	local borderColor = raidBuffReminder.borderColor or {}
 
-	settingsCache[settings] = {
+	local result = {
 		enabled = raidBuffReminder.enabled ~= false,
 		showInCombat = raidBuffReminder.showInCombat == true,
 		anchor = raidBuffReminder.anchor or "CENTER",
@@ -69,6 +69,8 @@ local function UpdateSettingsCache(settings)
 		includeSpellIDs = BuildIncludeSpellIDs(spellIDs),
 		hasSpellIDs = spellIDs ~= nil and #spellIDs > 0,
 	}
+
+	settingsCache[settings] = result
 end
 
 local function ShouldShow(frame, cachedSettings)

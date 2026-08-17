@@ -8,7 +8,9 @@ local BuffOverlay = addon.Frames.ManagedContainers.BuffOverlay
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function GetCurrentOverlaySettings(settings)
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+
 	local widgets = (settings and settings.widgets) or {}
 	local bars = widgets.bars or {}
 	local buffOverlays = bars.buffOverlays or {}
@@ -24,7 +26,7 @@ local function GetCurrentOverlaySettings(settings)
 	local isAllowedAura = specAuras[spellID] ~= nil
 	local enabled = specSettings and specSettings.enabled == true and spellID ~= 0 and isAllowedAura
 
-	return {
+	local result = {
 		enabled = enabled,
 		spellID = spellID,
 		color = {
@@ -34,10 +36,8 @@ local function GetCurrentOverlaySettings(settings)
 		},
 		includeSpellIDs = enabled and { [spellID] = true } or {},
 	}
-end
 
-local function UpdateSettingsCache(settings)
-	settingsCache[settings] = GetCurrentOverlaySettings(settings)
+	settingsCache[settings] = result
 end
 
 local function InitializeOverlayButton(button)
