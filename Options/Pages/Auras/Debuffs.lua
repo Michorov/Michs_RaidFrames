@@ -28,11 +28,11 @@ end
 function Debuffs:Create(page)
 	local subpage = page:RegisterSubPage("debuffs", { titleKey = "Debuffs" })
 
-	local topRow = subpage:CreateRow(2)
+	local topRow = subpage:CreateRow(4)
 	topRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
-	local topSlot = topRow:CreateCheckboxSlot("top")
-	local enabledCheckbox = topSlot:CreateControl("Checkbox", { labelKey = "Enabled" })
+	local firstSlot = topRow:CreateCheckboxSlot("top")
+	local enabledCheckbox = firstSlot:CreateControl("Checkbox", { labelKey = "Enabled" })
 	enabledCheckbox:BindValue({
 		get = function(profile, mode)
 			return profile[mode].widgets.icons.debuffs.enabled
@@ -46,23 +46,27 @@ function Debuffs:Create(page)
 		end,
 	})
 
-	local secondaryCheckbox = topSlot:CreateControl("Checkbox", {
-		labelKey = isRestrictedAuraAPI and "Show Tooltips" or "Color By Debuff Type",
-	})
-	secondaryCheckbox:BindValue({
+	local showTooltipsCheckbox = firstSlot:CreateControl("Checkbox", { labelKey = "Show Tooltips" })
+	showTooltipsCheckbox:BindValue({
 		get = function(profile, mode)
-			if isRestrictedAuraAPI then
-				return profile[mode].widgets.icons.debuffs.showTooltips
-			end
+			return profile[mode].widgets.icons.debuffs.showTooltips
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.debuffs.showTooltips = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+		end,
+	})
 
+	local secondSlot = topRow:CreateCheckboxSlot("top")
+	local colorByDebuffTypeCheckbox = secondSlot:CreateControl("Checkbox", { labelKey = "Color By Debuff Type" })
+	colorByDebuffTypeCheckbox:BindValue({
+		get = function(profile, mode)
 			return profile[mode].widgets.icons.debuffs.borderColorByDebuffType
 		end,
 		set = function(profile, mode, value)
-			if isRestrictedAuraAPI then
-				profile[mode].widgets.icons.debuffs.showTooltips = value
-			else
-				profile[mode].widgets.icons.debuffs.borderColorByDebuffType = value
-			end
+			profile[mode].widgets.icons.debuffs.borderColorByDebuffType = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
