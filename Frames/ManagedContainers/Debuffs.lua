@@ -40,7 +40,7 @@ local function UpdateSettingsCache(settings)
 		cooldownFontSize = debuffs.cooldownFontSize or 10,
 		showTooltips = debuffs.showTooltips == true,
 		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
-		borderSizePx = addon.Utilities:ToPixels(debuffs.borderSizePx or 1),
+		borderSizePx = addon.Utilities:ToPixels((debuffs.borderSizePx ~= 0) and 1 or 0),
 	}
 
 	settingsCache[settings] = result

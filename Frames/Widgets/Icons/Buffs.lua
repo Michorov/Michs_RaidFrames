@@ -35,7 +35,7 @@ local function UpdateSettingsCache(settings)
 		showCooldown = buffs.showCooldown == true,
 		cooldownFontSize = buffs.cooldownFontSize or 10,
 		showExternals = buffs.showExternals == true,
-		borderSizePx = addon.Utilities:ToPixels(buffs.borderSizePx or 1),
+		borderSizePx = addon.Utilities:ToPixels((buffs.borderSizePx ~= 0) and 1 or 0),
 		specAuras = specAuras,
 	}
 
