@@ -17,9 +17,12 @@ local DEBUFF_BLACKLIST = {
 	[160455] = true, -- Hunter Pet Fatigued
 	[264689] = true, -- Hunter Pet Fatigued
 	[390435] = true, -- Exhaustion
+	[308312] = true, -- Time Trial Practice
+	[1254550] = true, -- Arcane Empowerment
 
 	[26013] = true, -- BG Deserter
 	[71041] = true, -- Dungeon Deserter
+	[405692] = true, -- Deserter
 
 	[427490] = true, -- Ride Along Available
 	[447959] = true, -- Ride Along Active
@@ -198,6 +201,7 @@ function Debuffs:Ensure(frame, settings)
 		maxFrameCount = 0,
 		candidateFilters = {
 			excludeSpellIDs = excludeSpellIDs,
+			maxDuration = 100000,
 		},
 		sortMethod = AuraContainerSortMethod.UnitFrameDebuff,
 		sortDirection = AuraContainerSortDirection.Normal,
