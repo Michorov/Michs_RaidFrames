@@ -59,6 +59,37 @@ function Debuffs:Create(page)
 		end,
 	})
 
+	local filterSlot = topRow:CreateCheckboxSlot("top")
+	local filterBlacklistedDebuffsCheckbox = filterSlot:CreateControl("Checkbox", {
+		labelKey = "Hide Unimportant",
+	})
+	filterBlacklistedDebuffsCheckbox:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.debuffs.filterBlacklistedDebuffs ~= false
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.debuffs.filterBlacklistedDebuffs = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+		end,
+	})
+
+	local filterPermanentDebuffsCheckbox = filterSlot:CreateControl("Checkbox", {
+		labelKey = "Hide Permanent",
+	})
+	filterPermanentDebuffsCheckbox:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.debuffs.filterPermanentDebuffs ~= false
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.debuffs.filterPermanentDebuffs = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("debuffAurasSettingsChanged")
+		end,
+	})
+
 	local positionRow = subpage:CreateRow(4)
 	positionRow:SetLayoutPoint("TOPLEFT", topRow.frame, "BOTTOMLEFT", 0, -16)
 

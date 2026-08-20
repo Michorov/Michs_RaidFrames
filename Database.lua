@@ -237,12 +237,11 @@ local function SyncProfileCustomAuraDefaults(profileSection)
 	local buffSettings = profileSection.widgets.icons.buffs
 	buffSettings.customAuraValues = SyncCustomAuraDefaults(buffSettings.customAuraValues, CUSTOM_AURA_DEFAULTS)
 
-	profileSection.widgets.icons.customBuffs =
-		SyncCustomAuraDefaults(
-			profileSection.widgets.icons.customBuffs,
-			CUSTOM_AURA_DEFAULTS,
-			CUSTOM_BUFF_SETTING_DEFAULTS
-		)
+	profileSection.widgets.icons.customBuffs = SyncCustomAuraDefaults(
+		profileSection.widgets.icons.customBuffs,
+		CUSTOM_AURA_DEFAULTS,
+		CUSTOM_BUFF_SETTING_DEFAULTS
+	)
 end
 
 local function SyncAllProfilesCustomAuraDefaults(profile)
@@ -475,6 +474,8 @@ local DEFAULTS = {
 
 						borderSizePx = 1,
 						borderColorByDebuffType = false,
+						filterBlacklistedDebuffs = true,
+						filterPermanentDebuffs = false,
 					},
 					privateAuras = {
 						anchor = "LEFT",
@@ -806,6 +807,8 @@ local DEFAULTS = {
 
 						borderSizePx = 1,
 						borderColorByDebuffType = false,
+						filterBlacklistedDebuffs = true,
+						filterPermanentDebuffs = false,
 					},
 					privateAuras = {
 						anchor = "LEFT",
