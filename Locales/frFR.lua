@@ -59,6 +59,8 @@ L["Custom buff settings are disabled during combat."] =
 	"Les parametres des ameliorations personnalisees sont desactives en combat."
 L["Debuff settings are disabled during combat."] = "Les parametres des debuffs sont desactives en combat."
 L["Debuffs"] = "Debuffs"
+L["Hide Unimportant"] = "Masquer sans importance"
+L["Hide Permanent"] = "Masquer permanents"
 L["Default"] = "Par defaut"
 L["Default profile cannot be deleted."] = "Le profil par defaut ne peut pas etre supprime."
 L["Delete"] = "Supprimer"

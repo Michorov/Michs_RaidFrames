@@ -51,9 +51,29 @@ local function UpdateSettingsCache(settings)
 		showTooltips = debuffs.showTooltips == true,
 		borderColorByDebuffType = debuffs.borderColorByDebuffType == true,
 		borderSizePx = addon.Utilities:ToPixels((debuffs.borderSizePx ~= 0) and 1 or 0),
+		filterBlacklistedDebuffs = debuffs.filterBlacklistedDebuffs ~= false,
+		filterPermanentDebuffs = debuffs.filterPermanentDebuffs ~= false,
 	}
 
 	settingsCache[settings] = result
+end
+
+local function BuildCandidateFilters(cachedSettings)
+	local candidateFilters = {}
+
+	if cachedSettings.filterBlacklistedDebuffs then
+		local excludeSpellIDs = {}
+		for spellID in pairs(DEBUFF_BLACKLIST) do
+			excludeSpellIDs[spellID] = true
+		end
+		candidateFilters.excludeSpellIDs = excludeSpellIDs
+	end
+
+	if cachedSettings.filterPermanentDebuffs then
+		candidateFilters.maxDuration = 100000
+	end
+
+	return candidateFilters
 end
 
 local function UpdateContainerSettings(frame, settings)
@@ -109,6 +129,8 @@ local function UpdateAuraGroupSettings(frame, settings)
 		elementSpacing = spacing,
 		lineSpacing = spacing,
 	})
+	container:SetAuraGroupCandidateFilters("debuffs", BuildCandidateFilters(cachedSettings))
+	container:UpdateAllAuras()
 end
 
 local function UnregisterDebuffBorder(button)
@@ -192,17 +214,9 @@ function Debuffs:Ensure(frame, settings)
 	frame.managedContainers.debuffs = container
 	UpdateContainerSettings(frame, settings)
 
-	local excludeSpellIDs = {}
-	for spellID in pairs(DEBUFF_BLACKLIST) do
-		excludeSpellIDs[spellID] = true
-	end
-
 	container:AddAuraGroup("debuffs", "HARMFUL", {
 		maxFrameCount = 0,
-		candidateFilters = {
-			excludeSpellIDs = excludeSpellIDs,
-			maxDuration = 100000,
-		},
+		candidateFilters = BuildCandidateFilters(settingsCache[settings]),
 		sortMethod = AuraContainerSortMethod.UnitFrameDebuff,
 		sortDirection = AuraContainerSortDirection.Normal,
 		initializeFrame = function(button)
