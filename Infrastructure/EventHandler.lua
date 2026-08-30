@@ -379,6 +379,7 @@ end
 
 function EventHandler:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
 	addon.Database:ApplyProfileForCurrentSpec()
+	addon.UpdateScheduler:Notify("clickCastingSettingsChanged")
 	addon.UpdateScheduler:Notify("buffOverlaySettingsChanged")
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 
