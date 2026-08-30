@@ -324,15 +324,25 @@ local DEFAULTS = {
 				source = "external",
 				bindings = {
 					{
-						button = "LeftButton",
-						modifiers = "",
-						type = "target",
+						action = "target",
+						button = "1",
+						modifier = "",
+						type = "action",
 					},
 					{
-						button = "RightButton",
-						modifiers = "",
-						type = "togglemenu",
+						action = "togglemenu",
+						button = "2",
+						modifier = "",
+						type = "action",
 					},
+					{},
+					{},
+					{},
+					{},
+					{},
+					{},
+					{},
+					{},
 				},
 			},
 		},
@@ -999,6 +1009,7 @@ local DEFAULTS = {
 }
 
 local PRUNE_PROFILE_DEFAULTS_SKIP_PATHS = {
+	["core.clickCasting.bindings"] = true,
 	["party.widgets.icons.buffs.customAuraValues"] = true,
 	["party.widgets.icons.customBuffs"] = true,
 	["raid.widgets.icons.buffs.customAuraValues"] = true,
