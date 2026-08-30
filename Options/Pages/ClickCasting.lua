@@ -8,9 +8,8 @@ local ClickCasting = addon.Options.Pages.ClickCasting
 local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
 
 local sourceOptions = {
-	{ value = "blizzard", textKey = "Blizzard Click Casting" },
-	{ value = "mrf", textKey = "MRF Click Casting" },
-	{ value = "external", textKey = "Other Addon" },
+	{ value = "local", textKey = "MRF" },
+	{ value = "external", textKey = "Clique" },
 }
 
 function ClickCasting:Create(panel)
