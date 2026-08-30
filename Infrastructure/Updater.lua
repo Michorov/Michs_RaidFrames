@@ -241,6 +241,11 @@ local function Flush(updateReasons)
 		globalReasons.rosterChanged = nil
 	end
 
+	if globalReasons.clickCastingSettingsChanged then
+		addon.FrameRegistry:UpdateClickCasting()
+		globalReasons.clickCastingSettingsChanged = nil
+	end
+
 	local hasUnits = next(updateReasons.units or {}) ~= nil
 	local hasGlobal = next(globalReasons) ~= nil
 	if not hasUnits and not hasGlobal then
