@@ -49,6 +49,17 @@ local miniCCRefreshQueued = false
 
 local IsSupportedUnit = addon.Utilities.IsSupportedUnit
 
+local function UpdateLiveFrameClickCasting(frame)
+	if InCombatLockdown() then
+		return
+	end
+
+	local profile = addon.Database:GetProfile()
+	local clickCasting = profile and profile.core and profile.core.clickCasting
+
+	addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+end
+
 local function GetFrames()
 	local frames = {}
 
@@ -110,7 +121,7 @@ function MRF_OnUnitFrameLoad(frame)
 		end
 	end
 
-	addon.FrameRegistry:UpdateClickCasting()
+	UpdateLiveFrameClickCasting(frame)
 
 	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 	if settings then
@@ -304,19 +315,6 @@ function FrameRegistry:GetSettingsForFrame(frame)
 	return nil
 end
 
-local function UpdateCliqueRegistration(frame, source)
-	local clickCastFrames = _G.ClickCastFrames
-	if not frame or not clickCastFrames then
-		return
-	end
-
-	if source == "external" then
-		clickCastFrames[frame] = true
-	else
-		clickCastFrames[frame] = nil
-	end
-end
-
 function FrameRegistry:UpdateClickCasting()
 	if InCombatLockdown() then
 		return
@@ -324,17 +322,18 @@ function FrameRegistry:UpdateClickCasting()
 
 	local profile = addon.Database:GetProfile()
 	local clickCasting = profile and profile.core and profile.core.clickCasting
-	local source = clickCasting and clickCasting.source == "local" and "local" or "external"
 
 	if partyHeader.container then
 		for i = 1, 5 do
-			UpdateCliqueRegistration(partyHeader.container:GetAttribute("child" .. i), source)
+			local frame = partyHeader.container:GetAttribute("child" .. i)
+			addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
 		end
 	end
 
 	for _, header in ipairs(raidHeaders.containers) do
 		for i = 1, 5 do
-			UpdateCliqueRegistration(header:GetAttribute("child" .. i), source)
+			local frame = header:GetAttribute("child" .. i)
+			addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
 		end
 	end
 end

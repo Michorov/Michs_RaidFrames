@@ -153,6 +153,71 @@ local CUSTOM_BUFF_SETTING_DEFAULTS = {
 	},
 }
 
+local function CreateDefaultClickCastingBindings()
+	local bindings = {
+		{
+			action = "target",
+			button = "1",
+			modifier = "",
+			type = "action",
+		},
+		{
+			action = "togglemenu",
+			button = "2",
+			modifier = "",
+			type = "action",
+		},
+	}
+
+	for i = 3, 10 do
+		bindings[i] = {}
+	end
+
+	return bindings
+end
+
+local function GetPlayerSpecIDs()
+	local specIDs = {}
+	local _, _, classID = UnitClass("player")
+
+	if not classID then
+		return specIDs
+	end
+
+	local specCount = C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0
+	for specIndex = 1, specCount do
+		local specID = GetSpecializationInfoForClassID(classID, specIndex)
+		specIDs[#specIDs + 1] = specID
+	end
+
+	return specIDs
+end
+
+local function SyncClickCastingDefaults(profile)
+	if type(profile) ~= "table" then
+		return
+	end
+
+	profile.core = profile.core or {}
+	profile.core.clickCasting = profile.core.clickCasting or {}
+
+	local clickCasting = profile.core.clickCasting
+	clickCasting.source = clickCasting.source == "local" and "local" or "external"
+	clickCasting.specs = type(clickCasting.specs) == "table" and clickCasting.specs or {}
+
+	for _, specID in ipairs(GetPlayerSpecIDs()) do
+		local specSettings = clickCasting.specs[specID]
+		if type(specSettings) ~= "table" then
+			specSettings = {}
+			clickCasting.specs[specID] = specSettings
+		end
+
+		if type(specSettings.bindings) ~= "table" then
+			specSettings.bindings = CreateDefaultClickCastingBindings()
+		end
+	end
+end
+
 local function SyncCustomAuraDefaults(currentValues, defaultValues, entrySettingDefaults)
 	currentValues = currentValues or {}
 	defaultValues = defaultValues or {}
@@ -322,28 +387,7 @@ local DEFAULTS = {
 			lsmFont = -2,
 			clickCasting = {
 				source = "external",
-				bindings = {
-					{
-						action = "target",
-						button = "1",
-						modifier = "",
-						type = "action",
-					},
-					{
-						action = "togglemenu",
-						button = "2",
-						modifier = "",
-						type = "action",
-					},
-					{},
-					{},
-					{},
-					{},
-					{},
-					{},
-					{},
-					{},
-				},
+				specs = {},
 			},
 		},
 		party = {
@@ -1009,7 +1053,7 @@ local DEFAULTS = {
 }
 
 local PRUNE_PROFILE_DEFAULTS_SKIP_PATHS = {
-	["core.clickCasting.bindings"] = true,
+	["core.clickCasting.specs"] = true,
 	["party.widgets.icons.buffs.customAuraValues"] = true,
 	["party.widgets.icons.customBuffs"] = true,
 	["raid.widgets.icons.buffs.customAuraValues"] = true,
@@ -1252,6 +1296,8 @@ function Database:ApplyProfileForSpec(specID)
 		return true
 	end
 
+	SyncClickCastingDefaults(self.db.profile)
+
 	return false
 end
 
@@ -1292,11 +1338,13 @@ function Database:Initialize()
 		self.db.char.baseProfile = self.db:GetCurrentProfile()
 	end
 
+	SyncClickCastingDefaults(self.db.profile)
 	PruneProfileValuesMissingFromDefaults(self.db.profile)
 	SyncAllProfilesCustomAuraDefaults(self.db.profile)
 	NormalizeCurrentProfileFontSettings(self.db.profile)
 
 	local function OnProfileChanged()
+		SyncClickCastingDefaults(self.db.profile)
 		PruneProfileValuesMissingFromDefaults(self.db.profile)
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 		NormalizeCurrentProfileFontSettings(self.db.profile)
@@ -1306,6 +1354,7 @@ function Database:Initialize()
 		end
 
 		addon.Frames.RangeChecker:UpdateSettings()
+		addon.UpdateScheduler:Notify("clickCastingSettingsChanged")
 		addon.Modules:RequestUpdateAll()
 	end
 
