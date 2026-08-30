@@ -320,6 +320,21 @@ local DEFAULTS = {
 			uiScale = 1.0,
 			lsmTexture = "M-SolidDarker",
 			lsmFont = -2,
+			clickCasting = {
+				source = "external",
+				bindings = {
+					{
+						button = "LeftButton",
+						modifiers = "",
+						type = "target",
+					},
+					{
+						button = "RightButton",
+						modifiers = "",
+						type = "togglemenu",
+					},
+				},
+			},
 		},
 		party = {
 			size = { width = 128, height = 64 },
