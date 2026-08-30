@@ -118,6 +118,8 @@ function Options:Initialize()
 
 	Options.Pages.Indicators:Create(panel)
 
+	Options.Pages.ClickCasting:Create(panel)
+
 	Options.Pages.Profiles:Create(panel)
 	Options.Preview:Create(panel)
 	panel:SetDefaultPage("general")
