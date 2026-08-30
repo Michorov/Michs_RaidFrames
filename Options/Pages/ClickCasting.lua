@@ -5,12 +5,23 @@ addon.Options.Pages = addon.Options.Pages or {}
 addon.Options.Pages.ClickCasting = addon.Options.Pages.ClickCasting or {}
 
 local ClickCasting = addon.Options.Pages.ClickCasting
-local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
 
 local sourceOptions = {
 	{ value = "local", textKey = "MRF" },
 	{ value = "external", textKey = "Clique" },
 }
+
+local typeOptions = {
+	{ value = "spell", textKey = "Spell" },
+	{ value = "target", textKey = "Target" },
+	{ value = "togglemenu", textKey = "Menu" },
+}
+
+local function GetClickCastingSource(profile)
+	local source = profile.core.clickCasting.source
+
+	return source == "local" and "local" or "external"
+end
 
 function ClickCasting:Create(panel)
 	local page = panel:RegisterPage("clickCasting", {
@@ -26,42 +37,36 @@ function ClickCasting:Create(panel)
 	sourceDropdown:SetOptions(sourceOptions)
 	sourceDropdown:BindValue({
 		get = function(profile)
-			return profile.core.clickCasting.source
+			return GetClickCastingSource(profile)
 		end,
 		set = function(profile, _, value)
 			profile.core.clickCasting.source = value
 		end,
 		onChange = function()
+			panel:UpdateState()
 			addon.UpdateScheduler:Notify("clickCastingSettingsChanged")
 		end,
 	})
 
-	subpage.pageText = subpage.frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	subpage.pageText:SetJustifyH("LEFT")
-	subpage.pageText:SetText(panel:Localize("Click Casting page"))
-	if OptionsUILib then
-		subpage.pageText:SetTextColor(OptionsUILib.Theme:GetTextColor("primary"))
-	end
+	local externalMessage = subpage:CreateControl("Label", {
+		textKey = "Configure click casting bindings in the Clique addon.",
+	})
+	externalMessage:SetLayoutWidth(576)
+	externalMessage:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local baseUpdateLocale = subpage.UpdateLocale
-	function subpage:UpdateLocale()
-		baseUpdateLocale(self)
-		self.pageText:SetText(panel:Localize("Click Casting page"))
-	end
+	local localTypeRow = subpage:CreateRow(3)
+	localTypeRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local baseUpdateLayout = subpage.UpdateLayout
-	function subpage:UpdateLayout()
-		baseUpdateLayout(self)
+	local typeDropdown = localTypeRow:CreateControl("Dropdown", { labelKey = "Type" })
+	typeDropdown:SetOptions(typeOptions)
+	typeDropdown:SetValue("spell")
 
-		local PP = panel.instance.PP
-		self.pageText:ClearAllPoints()
-		self.pageText:SetPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, PP:ToUIScaled(-16))
-		if OptionsUILib then
-			OptionsUILib.Theme:ApplyFont(self.pageText, PP:ScaleFont(14), "")
-		end
-	end
+	subpage:SetStateUpdater(function(profile)
+		local isLocal = GetClickCastingSource(profile) == "local"
 
-	subpage:UpdateLayout()
+		externalMessage:SetShown(not isLocal)
+		localTypeRow.frame:SetShown(isLocal)
+	end)
 
 	return page
 end
