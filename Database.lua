@@ -1356,6 +1356,7 @@ function Database:Initialize()
 
 		addon.Frames.RangeChecker:UpdateSettings()
 		addon.UpdateScheduler:Notify("clickCastingSettingsChanged")
+		addon.UpdateScheduler:Notify("rosterChanged")
 		addon.Modules:RequestUpdateAll()
 	end
 
