@@ -115,6 +115,20 @@ function Layout:Create(panel, config)
 	})
 
 	local reverseSlot = orientationRow:CreateCheckboxSlot()
+	local showGroupLabelCheckbox = reverseSlot:CreateControl("Checkbox", { labelKey = "Show Group Label" })
+	showGroupLabelCheckbox:BindValue({
+		get = function(profile)
+			return profile.raid.showGroupLabel
+		end,
+		set = function(profile, _, value)
+			profile.raid.showGroupLabel = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("rosterChanged")
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
+
 	local reverseGroupOrderCheckbox = reverseSlot:CreateControl("Checkbox", { labelKey = "Reverse Group Order" })
 	reverseGroupOrderCheckbox:BindValue({
 		get = function(profile)
@@ -162,6 +176,7 @@ function Layout:Create(panel, config)
 	subpage:SetStateUpdater(function(_, mode)
 		local isRaidMode = mode == "raid"
 
+		showGroupLabelCheckbox:SetShown(isRaidMode)
 		reverseGroupOrderCheckbox:SetShown(isRaidMode)
 		for _, checkbox in ipairs(raidGroupCheckboxes) do
 			checkbox:SetShown(isRaidMode)

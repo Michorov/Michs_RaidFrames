@@ -728,6 +728,7 @@ local DEFAULTS = {
 			},
 			direction = "HORIZONTAL",
 			reverse = false,
+			showGroupLabel = false,
 			background = {
 				color = {
 					r = 0.12,

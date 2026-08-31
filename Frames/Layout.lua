@@ -42,6 +42,7 @@ local function UpdateTestRaidLayout(group, settings)
 	local frameHeightPx = layout.frameHeightPx
 	local spacingXPx = layout.spacingXPx
 	local spacingYPx = layout.spacingYPx
+	local showGroupLabel = settings.showGroupLabel == true
 
 	local slotMap = {}
 	local frameIndex = 1
@@ -94,6 +95,10 @@ local function UpdateTestRaidLayout(group, settings)
 			end
 		end
 
+		for _, text in ipairs(group.container.groupTexts) do
+			text:Hide()
+		end
+
 		return
 	end
 
@@ -126,6 +131,7 @@ local function UpdateTestRaidLayout(group, settings)
 	local scaledFrameHeightPx = addon.Utilities:ScaleEven(frameHeightPx)
 	local scaledSpacingXPx = addon.Utilities:Scale(spacingXPx)
 	local scaledSpacingYPx = addon.Utilities:Scale(spacingYPx)
+	local groupTextOffsetPx = addon.Utilities:Scale(addon.Utilities:ToPixels(4))
 
 	local scaledContainerWidthPx = (totalCols * scaledFrameWidthPx) + ((totalCols - 1) * scaledSpacingXPx)
 	local scaledContainerHeightPx = (totalRows * scaledFrameHeightPx) + ((totalRows - 1) * scaledSpacingYPx)
@@ -148,6 +154,8 @@ local function UpdateTestRaidLayout(group, settings)
 	group.container:SetSize(addon.Utilities:ToUI(scaledContainerWidthPx), addon.Utilities:ToUI(scaledContainerHeightPx))
 
 	for groupPos, subgroup in ipairs(orderedGroups) do
+		local groupText = group.container.groupTexts[subgroup]
+
 		for slot = 1, 5 do
 			local frame = slotMap[subgroup][slot]
 			if frame then
@@ -176,6 +184,23 @@ local function UpdateTestRaidLayout(group, settings)
 				frame:SetSize(addon.Utilities:ToUI(scaledFrameWidthPx), addon.Utilities:ToUI(scaledFrameHeightPx))
 				frame:Show()
 			end
+		end
+
+		local anchorFrame = slotMap[subgroup][1]
+		groupText:ClearAllPoints()
+
+		if isVertical then
+			groupText:SetPoint("RIGHT", anchorFrame, "LEFT", addon.Utilities:ToUI(-groupTextOffsetPx), 0)
+		else
+			groupText:SetPoint("BOTTOM", anchorFrame, "TOP", 0, addon.Utilities:ToUI(groupTextOffsetPx))
+		end
+
+		groupText:SetShown(showGroupLabel)
+	end
+
+	for subgroup = 1, 8 do
+		if not enabledSet[subgroup] then
+			group.container.groupTexts[subgroup]:Hide()
 		end
 	end
 end
@@ -263,6 +288,7 @@ local function UpdateRaidHeaderLayout(group, settings)
 	local positionXPx = layout.positionX
 	local positionYPx = layout.positionY
 	local isVertical = not layout.isHorizontal
+	local groupTextOffsetPx = addon.Utilities:Scale(addon.Utilities:ToPixels(4))
 
 	local enabled = layout.enabled
 	local reverse = layout.reverse
@@ -343,6 +369,8 @@ local function UpdateRaidHeaderLayout(group, settings)
 					addon.Utilities:ToUI(originXPx),
 					addon.Utilities:ToUI(originYPx - groupPos * (frameHeightPx + spacingYPx))
 				)
+				header.groupText:ClearAllPoints()
+				header.groupText:SetPoint("RIGHT", header, "LEFT", addon.Utilities:ToUI(-groupTextOffsetPx), 0)
 			else
 				header:SetPoint(
 					"TOP",
@@ -351,6 +379,8 @@ local function UpdateRaidHeaderLayout(group, settings)
 					addon.Utilities:ToUI(originXPx + groupPos * (frameWidthPx + spacingXPx) + frameWidthPx / 2),
 					addon.Utilities:ToUI(originYPx)
 				)
+				header.groupText:ClearAllPoints()
+				header.groupText:SetPoint("BOTTOM", header, "TOP", 0, addon.Utilities:ToUI(groupTextOffsetPx))
 			end
 
 			groupPos = groupPos + 1
