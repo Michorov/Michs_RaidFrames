@@ -5,8 +5,6 @@ addon.Frames.ClickCasting = addon.Frames.ClickCasting or {}
 
 local ClickCasting = addon.Frames.ClickCasting
 
-local CLICK_CASTING_BINDING_ROWS = 10
-
 local CLICK_CASTING_MODIFIERS = {
 	"",
 	"shift-",
@@ -30,7 +28,6 @@ local CLICK_CASTING_BUTTON_ATTRIBUTES = {
 	"type",
 	"spell",
 	"macro",
-	"macrotext",
 }
 
 local CLICK_CASTING_FRAME_ATTRIBUTES = {
@@ -38,11 +35,7 @@ local CLICK_CASTING_FRAME_ATTRIBUTES = {
 	"clickbutton",
 }
 
-local function GetClickCastingButton(frame)
-	if not frame then
-		return nil
-	end
-
+function ClickCasting:CreateClickCastingButton(frame)
 	if frame.ClickCastingButton then
 		return frame.ClickCastingButton
 	end
@@ -83,8 +76,6 @@ local function ClearClickCastingBinds(frame)
 		return
 	end
 
-	local clickCastingButton = frame.ClickCastingButton
-
 	for _, modifier in ipairs(CLICK_CASTING_MODIFIERS) do
 		for _, button in ipairs(CLICK_CASTING_BUTTONS) do
 			for _, attribute in ipairs(CLICK_CASTING_FRAME_ATTRIBUTES) do
@@ -93,10 +84,7 @@ local function ClearClickCastingBinds(frame)
 
 			for _, attribute in ipairs(CLICK_CASTING_BUTTON_ATTRIBUTES) do
 				frame:SetAttribute(modifier .. attribute .. button, nil)
-
-				if clickCastingButton then
-					clickCastingButton:SetAttribute(modifier .. attribute .. button, nil)
-				end
+				frame.ClickCastingButton:SetAttribute(modifier .. attribute .. button, nil)
 			end
 		end
 	end
@@ -147,15 +135,10 @@ local function UpdateLocalBinds(frame, settings)
 		return
 	end
 
-	local clickCastingButton = GetClickCastingButton(frame)
-	if not clickCastingButton then
-		return
-	end
+	RouteFrameClicksToClickCastingButton(frame, frame.ClickCastingButton)
 
-	RouteFrameClicksToClickCastingButton(frame, clickCastingButton)
-
-	for i = 1, CLICK_CASTING_BINDING_ROWS do
-		ApplyLocalBinding(clickCastingButton, specSettings.bindings[i])
+	for i = 1, 10 do
+		ApplyLocalBinding(frame.ClickCastingButton, specSettings.bindings[i])
 	end
 end
 
@@ -166,12 +149,10 @@ function ClickCasting:UpdateClickCastBindsForFrame(frame, settings)
 
 	local source = settings and settings.source == "local" and "local" or "external"
 
-	if source == "external" then
-		ClearClickCastingBinds(frame)
-		UpdateCliqueRegistration(frame, source)
-	else
-		UpdateCliqueRegistration(frame, source)
-		ClearClickCastingBinds(frame)
+	UpdateCliqueRegistration(frame, source)
+	ClearClickCastingBinds(frame)
+
+	if source == "local" then
 		UpdateLocalBinds(frame, settings)
 	end
 end

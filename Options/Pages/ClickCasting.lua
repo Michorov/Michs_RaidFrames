@@ -10,8 +10,8 @@ local MAX_BINDING_ROWS = 10
 local CLEAR_TYPE = "clear"
 
 local sourceOptions = {
-	{ value = "local", textKey = "MRF" },
-	{ value = "external", textKey = "Clique" },
+	{ value = "local", text = "Mich's Raid Frames" },
+	{ value = "external", text = "Clique" },
 }
 
 local typeOptions = {
