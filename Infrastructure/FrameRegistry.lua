@@ -49,6 +49,17 @@ local miniCCRefreshQueued = false
 
 local IsSupportedUnit = addon.Utilities.IsSupportedUnit
 
+local function UpdateLiveFrameClickCasting(frame)
+	if InCombatLockdown() then
+		return
+	end
+
+	local profile = addon.Database:GetProfile()
+	local clickCasting = profile and profile.core and profile.core.clickCasting
+
+	addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+end
+
 local function GetFrames()
 	local frames = {}
 
@@ -101,6 +112,7 @@ end
 function MRF_OnUnitFrameLoad(frame)
 	frame.dataProvider = addon.Frames.DataProvider.Live
 	frame.managedContainers = {}
+	addon.Frames.ClickCasting:CreateClickCastingButton(frame)
 
 	local targetedSpellsApi = _G.TargetedSpellsAPI
 	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then
@@ -110,9 +122,7 @@ function MRF_OnUnitFrameLoad(frame)
 		end
 	end
 
-	if _G.ClickCastFrames then
-		_G.ClickCastFrames[frame] = true
-	end
+	UpdateLiveFrameClickCasting(frame)
 
 	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 	if settings then
@@ -304,6 +314,29 @@ function FrameRegistry:GetSettingsForFrame(frame)
 	end
 
 	return nil
+end
+
+function FrameRegistry:UpdateClickCasting()
+	if InCombatLockdown() then
+		return
+	end
+
+	local profile = addon.Database:GetProfile()
+	local clickCasting = profile and profile.core and profile.core.clickCasting
+
+	if partyHeader.container then
+		for i = 1, 5 do
+			local frame = partyHeader.container:GetAttribute("child" .. i)
+			addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+		end
+	end
+
+	for _, header in ipairs(raidHeaders.containers) do
+		for i = 1, 5 do
+			local frame = header:GetAttribute("child" .. i)
+			addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+		end
+	end
 end
 
 function FrameRegistry:UpdateManagedContainersVisibility(unit)
@@ -584,6 +617,7 @@ function FrameRegistry:Initialize()
 	self:UpdateStateDrivers(true)
 
 	initialized = true
+	self:UpdateClickCasting()
 
 	addon.Frames:UpdateLayout(partyHeader, partySettings)
 	addon.Frames:UpdateLayout(raidHeaders, raidSettings)

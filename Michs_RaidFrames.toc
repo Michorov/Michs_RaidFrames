@@ -84,6 +84,7 @@ Frames/Widgets/Bars/BuffOverlay.lua
 # Frames
 Frames/DataProvider.lua
 Frames/RangeChecker.lua
+Frames/ClickCasting.lua
 Frames/Layout.lua
 Frames/Factory.lua
 Frames/UnitFrameTemplate.xml
@@ -131,6 +132,7 @@ Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
 Options/Pages/Indicators/GroupStatus.lua
 Options/Pages/Indicators/Threat.lua
+Options/Pages/ClickCasting.lua
 Options/Pages/Profiles.lua
 Options/Preview.lua
 Options/Options.lua

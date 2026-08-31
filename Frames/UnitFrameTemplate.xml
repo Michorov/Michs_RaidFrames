@@ -8,7 +8,7 @@
         </Attributes>
         <Scripts>
             <OnLoad>
-                self:RegisterForClicks("AnyUp")
+                self:RegisterForClicks("AnyDown")
 
                 self:HookScript("OnEnter", function(self)
                     if not self.unit then

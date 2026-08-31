@@ -79,6 +79,11 @@ local previewPageWidgets = {
 		controls = {},
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
+	clickCasting = {
+		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
+		controls = {},
+		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+	},
 	layout = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
 		controls = {},
