@@ -96,7 +96,7 @@ local function EnsureCurrentSpecSettings(profile)
 	return specSettings
 end
 
-local function AddActionOption(options, seen, value, text, texture)
+local function AddActionOption(options, seen, value, text)
 	if not value or value == "" or seen[value] then
 		return
 	end
@@ -105,7 +105,6 @@ local function AddActionOption(options, seen, value, text, texture)
 	options[#options + 1] = {
 		value = value,
 		text = text or value,
-		texture = texture,
 	}
 end
 
@@ -189,7 +188,7 @@ local function BuildSpellOptions()
 							and not itemInfo.isPassive
 							and not itemInfo.isOffSpec
 						then
-							AddActionOption(options, seen, itemInfo.name, itemInfo.name, itemInfo.iconID)
+							AddActionOption(options, seen, itemInfo.name, itemInfo.name)
 						end
 					end
 				end
@@ -206,9 +205,7 @@ local function BuildSpellOptions()
 
 					if (itemType == "SPELL" or itemType == "FUTURESPELL") and not isPassive then
 						local name = GetSpellBookItemName(slotIndex, BOOKTYPE_SPELL)
-						local texture = GetSpellTexture and GetSpellTexture(slotIndex, BOOKTYPE_SPELL)
-
-						AddActionOption(options, seen, name, name, texture)
+						AddActionOption(options, seen, name, name)
 					end
 				end
 			end
@@ -235,7 +232,7 @@ local function GetMaxCharacterMacros()
 end
 
 local function AddMacroOption(options, macroIndex)
-	local name, texture = GetMacroInfo(macroIndex)
+	local name = GetMacroInfo(macroIndex)
 	if not name or name == "" then
 		return
 	end
@@ -243,7 +240,6 @@ local function AddMacroOption(options, macroIndex)
 	options[#options + 1] = {
 		value = macroIndex,
 		text = name,
-		texture = texture,
 	}
 end
 
