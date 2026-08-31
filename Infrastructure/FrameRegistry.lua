@@ -55,7 +55,7 @@ local function UpdateLiveFrameClickCasting(frame)
 	end
 
 	local profile = addon.Database:GetProfile()
-	local clickCasting = profile and profile.core and profile.core.clickCasting
+	local clickCasting = profile.core.clickCasting
 
 	addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
 end
@@ -322,7 +322,7 @@ function FrameRegistry:UpdateClickCasting()
 	end
 
 	local profile = addon.Database:GetProfile()
-	local clickCasting = profile and profile.core and profile.core.clickCasting
+	local clickCasting = profile.core.clickCasting
 
 	if partyHeader.container then
 		for i = 1, 5 do

@@ -60,7 +60,7 @@ end
 
 local function UpdateCliqueRegistration(frame, source)
 	local clickCastFrames = _G.ClickCastFrames
-	if not frame or not clickCastFrames then
+	if not clickCastFrames then
 		return
 	end
 
@@ -72,10 +72,6 @@ local function UpdateCliqueRegistration(frame, source)
 end
 
 local function ClearClickCastingBinds(frame)
-	if not frame then
-		return
-	end
-
 	for _, modifier in ipairs(CLICK_CASTING_MODIFIERS) do
 		for _, button in ipairs(CLICK_CASTING_BUTTONS) do
 			for _, attribute in ipairs(CLICK_CASTING_FRAME_ATTRIBUTES) do
@@ -125,15 +121,8 @@ local function ApplyLocalBinding(clickCastingButton, binding)
 end
 
 local function UpdateLocalBinds(frame, settings)
-	if type(settings) ~= "table" then
-		return
-	end
-
 	local specID = addon.Utilities:GetPlayerSpecID()
-	local specSettings = specID and type(settings.specs) == "table" and settings.specs[specID] or nil
-	if type(specSettings) ~= "table" or type(specSettings.bindings) ~= "table" then
-		return
-	end
+	local specSettings = settings.specs[specID]
 
 	RouteFrameClicksToClickCastingButton(frame, frame.ClickCastingButton)
 
@@ -143,11 +132,11 @@ local function UpdateLocalBinds(frame, settings)
 end
 
 function ClickCasting:UpdateClickCastBindsForFrame(frame, settings)
-	if not frame or InCombatLockdown() then
+	if InCombatLockdown() then
 		return
 	end
 
-	local source = settings and settings.source == "local" and "local" or "external"
+	local source = settings.source == "local" and "local" or "external"
 
 	UpdateCliqueRegistration(frame, source)
 	ClearClickCastingBinds(frame)
