@@ -112,6 +112,7 @@ end
 function MRF_OnUnitFrameLoad(frame)
 	frame.dataProvider = addon.Frames.DataProvider.Live
 	frame.managedContainers = {}
+	addon.Frames.ClickCasting:CreateClickCastingButton(frame)
 
 	local targetedSpellsApi = _G.TargetedSpellsAPI
 	if targetedSpellsApi and targetedSpellsApi.RegisterFrameByName then
