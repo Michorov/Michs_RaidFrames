@@ -103,6 +103,11 @@ function Frames:CreateRaidHeader(raidSettings, groupIndex)
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
 	header.HeaderKind = "raid"
+	header.GroupIndex = groupIndex
+
+	header.groupText = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	header.groupText:SetText("Group " .. groupIndex)
+	header.groupText:Hide()
 
 	header:SetAttribute("point", "TOP")
 	header:SetAttribute("xOffset", 0)
@@ -186,6 +191,17 @@ function Frames:CreateTestGroup(groupType)
 	group:EnableMouse(true)
 	group:RegisterForDrag("LeftButton")
 	group.dragOverlay = CreateTestGroupDragOverlay(group)
+
+	if groupType == "Raid" then
+		group.groupTexts = {}
+
+		for groupIndex = 1, 8 do
+			local text = group:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+			text:SetText("Group " .. groupIndex)
+			text:Hide()
+			group.groupTexts[groupIndex] = text
+		end
+	end
 
 	group:SetScript("OnDragStart", function(self)
 		if InCombatLockdown() then

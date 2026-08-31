@@ -541,6 +541,27 @@ function FrameRegistry:UpdateRoster()
 		error("FrameRegistry is not initialized", 2)
 	end
 
+	local profile = addon.Database:GetProfile()
+	local showGroupLabel = profile.raid and profile.raid.showGroupLabel == true
+
+	for _, header in ipairs(raidHeaders.containers) do
+		if not showGroupLabel then
+			header.groupText:Hide()
+		else
+			local hasUnits = false
+
+			for i = 1, 5 do
+				local frame = header:GetAttribute("child" .. i)
+				if frame.unit and UnitExists(frame.unit) then
+					hasUnits = true
+					break
+				end
+			end
+
+			header.groupText:SetShown(hasUnits)
+		end
+	end
+
 	for unit, frame in pairs(unitFrameMap) do
 		if not IsSupportedUnit(unit) then
 			frame.RosterKey = nil
