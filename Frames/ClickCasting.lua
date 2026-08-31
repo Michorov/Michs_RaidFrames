@@ -5,7 +5,7 @@ addon.Frames.ClickCasting = addon.Frames.ClickCasting or {}
 
 local ClickCasting = addon.Frames.ClickCasting
 
-local CLICK_CASTING_MODIFIERS = {
+local MODIFIERS = {
 	"",
 	"shift-",
 	"ctrl-",
@@ -16,7 +16,7 @@ local CLICK_CASTING_MODIFIERS = {
 	"alt-ctrl-shift-",
 }
 
-local CLICK_CASTING_BUTTONS = {
+local BUTTONS = {
 	"1",
 	"2",
 	"3",
@@ -24,16 +24,67 @@ local CLICK_CASTING_BUTTONS = {
 	"5",
 }
 
-local CLICK_CASTING_BUTTON_ATTRIBUTES = {
-	"type",
-	"spell",
-	"macro",
-}
+local function RouteClicks(frame)
+	for _, modifier in ipairs(MODIFIERS) do
+		for _, button in ipairs(BUTTONS) do
+			frame:SetAttribute(modifier .. "type" .. button, "click")
+			frame:SetAttribute(modifier .. "clickbutton" .. button, frame.ClickCastingButton)
+		end
+	end
+end
 
-local CLICK_CASTING_FRAME_ATTRIBUTES = {
-	"type",
-	"clickbutton",
-}
+local function ClearLocalBinds(frame)
+	for _, modifier in ipairs(MODIFIERS) do
+		for _, button in ipairs(BUTTONS) do
+			frame:SetAttribute(modifier .. "type" .. button, nil)
+			frame:SetAttribute(modifier .. "clickbutton" .. button, nil)
+
+			frame.ClickCastingButton:SetAttribute(modifier .. "type" .. button, nil)
+			frame.ClickCastingButton:SetAttribute(modifier .. "spell" .. button, nil)
+			frame.ClickCastingButton:SetAttribute(modifier .. "macro" .. button, nil)
+		end
+	end
+end
+
+local function UpdateExternalBinds(frame, source)
+	local clickCastFrames = _G.ClickCastFrames
+	if not clickCastFrames then
+		return
+	end
+
+	if source == "external" then
+		clickCastFrames[frame] = true
+	else
+		clickCastFrames[frame] = nil
+	end
+end
+
+local function UpdateLocalBinds(frame, settings)
+	local specID = addon.Utilities:GetPlayerSpecID()
+	local specSettings = settings.specs[specID]
+
+	RouteClicks(frame)
+
+	for i = 1, 10 do
+		local binding = specSettings.bindings[i]
+		local type = binding.type
+		local action = binding.action
+		local button = binding.button
+		local modifier = binding.modifier or ""
+
+		if type and type ~= "" and action and action ~= "" and button and button ~= "" then
+			if type == "action" and (action == "target" or action == "togglemenu") then
+				frame.ClickCastingButton:SetAttribute(modifier .. "type" .. button, action)
+			elseif type == "spell" then
+				frame.ClickCastingButton:SetAttribute(modifier .. "type" .. button, "spell")
+				frame.ClickCastingButton:SetAttribute(modifier .. "spell" .. button, action)
+			elseif type == "macro" then
+				frame.ClickCastingButton:SetAttribute(modifier .. "type" .. button, "macro")
+				frame.ClickCastingButton:SetAttribute(modifier .. "macro" .. button, action)
+			end
+		end
+	end
+end
 
 function ClickCasting:CreateClickCastingButton(frame)
 	if frame.ClickCastingButton then
@@ -58,90 +109,15 @@ function ClickCasting:CreateClickCastingButton(frame)
 	return button
 end
 
-local function UpdateCliqueRegistration(frame, source)
-	local clickCastFrames = _G.ClickCastFrames
-	if not clickCastFrames then
-		return
-	end
-
-	if source == "external" then
-		clickCastFrames[frame] = true
-	else
-		clickCastFrames[frame] = nil
-	end
-end
-
-local function ClearClickCastingBinds(frame)
-	for _, modifier in ipairs(CLICK_CASTING_MODIFIERS) do
-		for _, button in ipairs(CLICK_CASTING_BUTTONS) do
-			for _, attribute in ipairs(CLICK_CASTING_FRAME_ATTRIBUTES) do
-				frame:SetAttribute(modifier .. attribute .. button, nil)
-			end
-
-			for _, attribute in ipairs(CLICK_CASTING_BUTTON_ATTRIBUTES) do
-				frame:SetAttribute(modifier .. attribute .. button, nil)
-				frame.ClickCastingButton:SetAttribute(modifier .. attribute .. button, nil)
-			end
-		end
-	end
-end
-
-local function RouteFrameClicksToClickCastingButton(frame, clickCastingButton)
-	for _, modifier in ipairs(CLICK_CASTING_MODIFIERS) do
-		for _, button in ipairs(CLICK_CASTING_BUTTONS) do
-			frame:SetAttribute(modifier .. "type" .. button, "click")
-			frame:SetAttribute(modifier .. "clickbutton" .. button, clickCastingButton)
-		end
-	end
-end
-
-local function ApplyLocalBinding(clickCastingButton, binding)
-	if type(binding) ~= "table" then
-		return
-	end
-
-	local bindingType = binding.type
-	local action = binding.action
-	local button = binding.button
-	local modifier = binding.modifier or ""
-
-	if not bindingType or bindingType == "" or not action or action == "" or not button or button == "" then
-		return
-	end
-
-	if bindingType == "action" and (action == "target" or action == "togglemenu") then
-		clickCastingButton:SetAttribute(modifier .. "type" .. button, action)
-	elseif bindingType == "spell" then
-		clickCastingButton:SetAttribute(modifier .. "type" .. button, "spell")
-		clickCastingButton:SetAttribute(modifier .. "spell" .. button, action)
-	elseif bindingType == "macro" then
-		clickCastingButton:SetAttribute(modifier .. "type" .. button, "macro")
-		clickCastingButton:SetAttribute(modifier .. "macro" .. button, action)
-	end
-end
-
-local function UpdateLocalBinds(frame, settings)
-	local specID = addon.Utilities:GetPlayerSpecID()
-	local specSettings = settings.specs[specID]
-
-	RouteFrameClicksToClickCastingButton(frame, frame.ClickCastingButton)
-
-	for i = 1, 10 do
-		ApplyLocalBinding(frame.ClickCastingButton, specSettings.bindings[i])
-	end
-end
-
 function ClickCasting:UpdateClickCastBindsForFrame(frame, settings)
 	if InCombatLockdown() then
 		return
 	end
 
-	local source = settings.source == "local" and "local" or "external"
+	ClearLocalBinds(frame)
+	UpdateExternalBinds(frame, settings.source)
 
-	UpdateCliqueRegistration(frame, source)
-	ClearClickCastingBinds(frame)
-
-	if source == "local" then
+	if settings.source == "local" then
 		UpdateLocalBinds(frame, settings)
 	end
 end
