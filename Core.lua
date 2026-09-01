@@ -20,6 +20,7 @@ local function InitializeAddon()
 	addon.EventHandler:Initialize()
 
 	addon.Options:Initialize()
+	addon.Options.Minimap:Initialize()
 end
 
 local core = CreateFrame("Frame")
