@@ -436,6 +436,57 @@ local function UpdateTestPartyLayout(group, settings)
 	end
 end
 
+local function UpdateBossUnitGroupLayout(group, settings)
+	local defaultWidth = group.type == "party" and 128 or 112
+	local defaultHeight = group.type == "party" and 64 or 56
+	local defaultDirection = group.type == "party" and "VERTICAL" or "HORIZONTAL"
+	local layout = GetLayoutSettings(settings, defaultWidth, defaultHeight, defaultDirection)
+	local isHorizontal = layout.isHorizontal
+
+	local frameWidth = addon.Utilities:ScaleEven(layout.frameWidthPx)
+	local frameHeight = addon.Utilities:ScaleEven(layout.frameHeightPx)
+	local spacingX = addon.Utilities:Scale(layout.spacingXPx)
+	local spacingY = addon.Utilities:Scale(layout.spacingYPx)
+	local positionX = layout.positionX + addon.Utilities:ToPixels(150)
+	local positionY = layout.positionY
+	local frameCount = #group.frames
+
+	local containerWidth = isHorizontal and (frameCount * frameWidth + (frameCount - 1) * spacingX) or frameWidth
+	local containerHeight = isHorizontal and frameHeight or (frameCount * frameHeight + (frameCount - 1) * spacingY)
+
+	if (containerWidth % 2) ~= 0 then
+		containerWidth = containerWidth + 1
+	end
+	if (containerHeight % 2) ~= 0 then
+		containerHeight = containerHeight + 1
+	end
+
+	group.container:ClearAllPoints()
+	group.container:SetPoint(
+		"CENTER",
+		UIParent,
+		"CENTER",
+		addon.Utilities:ToUI(positionX),
+		addon.Utilities:ToUI(positionY)
+	)
+	group.container:SetSize(addon.Utilities:ToUI(containerWidth), addon.Utilities:ToUI(containerHeight))
+
+	for i, frame in ipairs(group.frames) do
+		local offsetX = isHorizontal and (i - 1) * (frameWidth + spacingX) or 0
+		local offsetY = isHorizontal and 0 or (i - 1) * (frameHeight + spacingY)
+
+		frame:ClearAllPoints()
+		frame:SetPoint(
+			"TOPLEFT",
+			group.container,
+			"TOPLEFT",
+			addon.Utilities:ToUI(offsetX),
+			-addon.Utilities:ToUI(offsetY)
+		)
+		frame:SetSize(addon.Utilities:ToUI(frameWidth), addon.Utilities:ToUI(frameHeight))
+	end
+end
+
 local function UpdatePartyHeaderLayout(group, settings)
 	local header = group.container
 	local layout = GetLayoutSettings(settings, 128, 64, "VERTICAL")
@@ -503,6 +554,11 @@ local function UpdatePartyHeaderLayout(group, settings)
 end
 
 function Frames:UpdateLayout(group, settings)
+	if group.isBossGroup then
+		UpdateBossUnitGroupLayout(group, settings)
+		return
+	end
+
 	if group.type == "party" then
 		if group.isTestGroup then
 			UpdateTestPartyLayout(group, settings)
