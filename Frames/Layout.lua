@@ -475,6 +475,11 @@ local function UpdateBossUnitGroupLayout(group, settings)
 	)
 	group.container:SetSize(addon.Utilities:ToUI(containerWidth), addon.Utilities:ToUI(containerHeight))
 
+	if group.container.dragOverlay and group.container.dragOverlay.statusText then
+		local statusText = settings.npcEnabled == false and addon.L["Disabled"] or ""
+		group.container.dragOverlay.statusText:SetText(statusText)
+	end
+
 	for i, frame in ipairs(group.frames) do
 		local offsetX = isHorizontal and (i - 1) * (frameWidth + spacingX) or 0
 		local offsetY = isHorizontal and 0 or (i - 1) * (frameHeight + spacingY)
