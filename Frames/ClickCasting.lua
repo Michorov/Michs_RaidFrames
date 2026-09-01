@@ -68,6 +68,8 @@ local function UpdateLocalBinds(frame, settings)
 	end
 
 	RouteClicks(frame)
+	frame.ClickCastingButton:SetAttribute("type1", "target")
+	frame.ClickCastingButton:SetAttribute("type2", "togglemenu")
 
 	for i = 1, 10 do
 		local binding = specSettings.bindings[i]

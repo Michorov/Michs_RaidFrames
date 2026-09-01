@@ -157,22 +157,9 @@ local CUSTOM_BUFF_SETTING_DEFAULTS = {
 }
 
 local function CreateDefaultClickCastingBindings()
-	local bindings = {
-		{
-			action = "target",
-			button = "1",
-			modifier = "",
-			type = "action",
-		},
-		{
-			action = "togglemenu",
-			button = "2",
-			modifier = "",
-			type = "action",
-		},
-	}
+	local bindings = {}
 
-	for i = 3, 10 do
+	for i = 1, 10 do
 		bindings[i] = {}
 	end
 
