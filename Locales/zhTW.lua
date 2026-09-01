@@ -5,6 +5,12 @@ if not L then
 	return
 end
 
+L["Disabled"] = "停用"
+L["NPC Frames"] = "NPC框架"
+L["NPC Frames Direction"] = "NPC框架方向"
+L["NPC Horizontal Position"] = "NPC水平位置"
+L["NPC Vertical Position"] = "NPC垂直位置"
+
 L["Class Color"] = "職業顏色"
 L["Full Name"] = "完整"
 L["Hide"] = "隱藏"

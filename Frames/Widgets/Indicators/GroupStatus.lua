@@ -58,6 +58,10 @@ local function UpdateEvents()
 end
 
 function GroupStatus:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.groupStatus then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetFrameLevel(33)
@@ -69,6 +73,10 @@ function GroupStatus:Ensure(frame)
 end
 
 function GroupStatus:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.groupStatus
 
 	UpdateSettingsCache(settings)
@@ -100,6 +108,10 @@ function GroupStatus:UpdateSettings(frame, settings)
 end
 
 function GroupStatus:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.groupStatus
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.groupStatus ~= true then
@@ -125,9 +137,9 @@ function GroupStatus:UpdateState(frame, settings)
 
 	local texturePath
 	local status = provider:GetGroupStatus(frame)
-	if status == "leader" and (frame.isPreview or cachedSettings.showLeader) then
+	if status == "leader" and (frame.frameType == "preview" or cachedSettings.showLeader) then
 		texturePath = LEADER_ICON
-	elseif status == "assistant" and (frame.isPreview or cachedSettings.showAssistant) then
+	elseif status == "assistant" and (frame.frameType == "preview" or cachedSettings.showAssistant) then
 		texturePath = ASSISTANT_ICON
 	end
 

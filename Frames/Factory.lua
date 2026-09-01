@@ -4,7 +4,7 @@ addon.Frames = addon.Frames or {}
 local Frames = addon.Frames
 
 local function SaveTestGroupPosition(group)
-	local groupType = group and group.testGroupType
+	local groupType = group and group.settingsType
 	if groupType ~= "party" and groupType ~= "raid" then
 		return
 	end
@@ -20,9 +20,11 @@ local function SaveTestGroupPosition(group)
 
 	local profile = addon.Database:GetProfile()
 	profile[groupType] = profile[groupType] or {}
-	profile[groupType].position = profile[groupType].position or {}
-	profile[groupType].position.x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
-	profile[groupType].position.y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
+
+	local positionKey = group.testPositionKey or "position"
+	profile[groupType][positionKey] = profile[groupType][positionKey] or {}
+	profile[groupType][positionKey].x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
+	profile[groupType][positionKey].y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
 
 	if addon.Options and addon.Options.RefreshState then
 		addon.Options:RefreshState()
@@ -60,6 +62,15 @@ local function CreateTestGroupDragOverlay(group)
 	text:SetTextColor(1, 1, 1, 1)
 	text:SetText("Drag to Move")
 	overlay.text = text
+
+	local statusText = overlay:CreateFontString(nil, "OVERLAY")
+	statusText:SetPoint("TOP", text, "BOTTOM", 0, addon.Utilities:ToUI(addon.Utilities:Scale(2)))
+	statusText:SetFont(addon.Utilities:GetGameFontNormalPath(), addon.Utilities:ScaleFont(12), "OUTLINE")
+	statusText:SetJustifyH("CENTER")
+	statusText:SetJustifyV("MIDDLE")
+	statusText:SetTextColor(1, 0.25, 0.25, 1)
+	statusText:SetText("")
+	overlay.statusText = statusText
 
 	local border = {}
 	local thickness = addon.Utilities:ToUI(addon.Utilities:Scale(4))
@@ -102,7 +113,8 @@ function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
-	header.HeaderKind = "raid"
+	header.frameType = "raid"
+	header.settingsType = "raid"
 	header.GroupIndex = groupIndex
 
 	header.groupText = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -144,7 +156,8 @@ function Frames:CreatePartyHeader(partySettings)
 	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_PartyHeader", UIParent, "SecureGroupHeaderTemplate")
-	header.HeaderKind = "party"
+	header.frameType = "party"
+	header.settingsType = "party"
 
 	local totalHeight = (5 * frameHeight) + (4 * spacingY)
 	header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)
@@ -173,6 +186,61 @@ function Frames:CreatePartyHeader(partySettings)
 	return header
 end
 
+function Frames:CreateBossUnitGroup(name, settingsType)
+	local container = CreateFrame("Frame", name, UIParent)
+	container.frameType = "boss"
+	container.settingsType = settingsType
+	container.frames = {}
+
+	for i = 1, 5 do
+		local unit = "boss" .. i
+		local frame = CreateFrame("Button", name .. "UnitButton" .. i, container, "MRF_UnitFrameTemplate")
+
+		frame.frameType = "boss"
+		frame.settingsType = settingsType
+		frame.bossUnitIndex = i
+		frame:SetAttribute("unit", unit)
+
+		RegisterStateDriver(frame, "visibility", ("[@%s,exists,help] show; hide"):format(unit))
+
+		container.frames[i] = frame
+	end
+
+	return container
+end
+
+function Frames:CreateBossTestGroup(name, settingsType)
+	local container = CreateFrame("Frame", name, UIParent)
+	container.frameType = "test"
+	container.settingsType = settingsType
+	container.name = name
+	container.testPositionKey = "npcPosition"
+	container.frames = {}
+	container:SetSize(1, 1)
+	container:ClearAllPoints()
+	container:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+	container:SetMovable(true)
+	container:SetClampedToScreen(true)
+	container:EnableMouse(true)
+	container:RegisterForDrag("LeftButton")
+	container.dragOverlay = CreateTestGroupDragOverlay(container)
+
+	container:SetScript("OnDragStart", function(self)
+		if InCombatLockdown() then
+			return
+		end
+
+		self:StartMoving()
+	end)
+
+	container:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		SaveTestGroupPosition(self)
+	end)
+
+	return container
+end
+
 function Frames:CreateTestGroup(groupType)
 	if type(groupType) ~= "string" or groupType == "" then
 		error("Frames:CreateTestGroup requires a non-empty group type", 2)
@@ -181,7 +249,8 @@ function Frames:CreateTestGroup(groupType)
 	local groupName = "MRF_Test" .. groupType .. "Group"
 	local group = CreateFrame("Frame", groupName, UIParent)
 	group.name = groupName
-	group.testGroupType = string.lower(groupType)
+	group.frameType = "test"
+	group.settingsType = string.lower(groupType)
 
 	group:SetSize(1, 1)
 	group:ClearAllPoints()
@@ -227,6 +296,8 @@ function Frames:CreateTestFrame(group, frameIndex)
 	local frameName = group.name .. "_Frame" .. frameIndex
 	local frame = CreateFrame("Button", frameName, group)
 
+	frame.frameType = "test"
+	frame.settingsType = group.settingsType
 	frame.unit = nil
 	frame.testName = "Test Frame"
 
@@ -243,7 +314,7 @@ function Frames:CreateTestFrame(group, frameIndex)
 	frame.testBackground:SetAllPoints(frame)
 	frame.testBackground:SetColorTexture(0.10, 0.10, 0.10, 1)
 
-	local borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(1))
+	local borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
 	frame.testBorder = {}
 
 	frame.testBorder.top = frame:CreateTexture(nil, "BORDER")
@@ -287,14 +358,15 @@ function Frames:CreateTestFrame(group, frameIndex)
 	return frame
 end
 
-function Frames:CreatePreviewFrame(parent)
+function Frames:CreatePreviewFrame(parent, settingsType)
 	if not parent then
 		error("Frames:CreatePreviewFrame requires parent", 2)
 	end
 
 	local frame = CreateFrame("Button", nil, parent)
 
-	frame.isPreview = true
+	frame.frameType = "preview"
+	frame.settingsType = settingsType
 	frame.unit = nil
 	frame.testName = UnitName("player") or ""
 

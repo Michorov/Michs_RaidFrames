@@ -59,6 +59,10 @@ local function UpdateEvents()
 end
 
 function PendingSummon:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.pendingSummon then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetFrameLevel(70)
@@ -79,6 +83,10 @@ function PendingSummon:Ensure(frame)
 end
 
 function PendingSummon:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.pendingSummon
 
 	UpdateSettingsCache(settings)
@@ -123,6 +131,10 @@ function PendingSummon:UpdateSettings(frame, settings)
 end
 
 function PendingSummon:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.pendingSummon
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.pendingSummon ~= true then

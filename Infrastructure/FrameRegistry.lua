@@ -9,19 +9,33 @@ FrameRegistry.restoreLiveDriversAfterCombat = false
 FrameRegistry.needsLayoutUpdateAfterCombat = false
 
 local partyHeader = {
-	type = "party",
+	settingsType = "party",
 	isSecureHeader = true,
 	container = nil,
 }
 
 local raidHeaders = {
-	type = "raid",
+	settingsType = "raid",
 	isSecureHeader = true,
 	containers = {},
 }
 
+local partyBossGroup = {
+	settingsType = "party",
+	isBossGroup = true,
+	container = nil,
+	frames = {},
+}
+
+local raidBossGroup = {
+	settingsType = "raid",
+	isBossGroup = true,
+	container = nil,
+	frames = {},
+}
+
 local testPartyGroup = {
-	type = "party",
+	settingsType = "party",
 	isTestGroup = true,
 	isActive = false,
 	container = nil,
@@ -29,7 +43,25 @@ local testPartyGroup = {
 }
 
 local testRaidGroup = {
-	type = "raid",
+	settingsType = "raid",
+	isTestGroup = true,
+	isActive = false,
+	container = nil,
+	frames = {},
+}
+
+local testPartyBossGroup = {
+	settingsType = "party",
+	isBossGroup = true,
+	isTestGroup = true,
+	isActive = false,
+	container = nil,
+	frames = {},
+}
+
+local testRaidBossGroup = {
+	settingsType = "raid",
+	isBossGroup = true,
 	isTestGroup = true,
 	isActive = false,
 	container = nil,
@@ -110,6 +142,12 @@ local function RegisterMiniCCProvider()
 end
 
 function MRF_OnUnitFrameLoad(frame)
+	local parent = frame:GetParent()
+	local parentFrameType = parent and parent.frameType
+	local parentSettingsType = parent and parent.settingsType
+
+	frame.frameType = frame.frameType or parentFrameType
+	frame.settingsType = frame.settingsType or parentSettingsType
 	frame.dataProvider = addon.Frames.DataProvider.Live
 	frame.managedContainers = {}
 	addon.Frames.ClickCasting:CreateClickCastingButton(frame)
@@ -132,6 +170,34 @@ function MRF_OnUnitFrameLoad(frame)
 end
 
 function MRF_OnUnitChanged(frame, unit)
+	if frame.frameType == "boss" then
+		if addon.IsRestrictedAuraAPI and frame.managedContainers then
+			local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
+
+			if frame.managedContainers.debuffs then
+				addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.buffs then
+				addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.customBuffs then
+				addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.defensives then
+				addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.buffOverlay then
+				addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
+			end
+		end
+
+		return
+	end
+
 	frame.RosterKey = nil
 
 	for k, v in pairs(unitFrameMap) do
@@ -220,26 +286,42 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	local profile = addon.Database:GetProfile()
 	local showSoloPartyFrame = profile and profile.core and profile.core.showSoloPartyFrame == true
 	local testModeActive = testPartyGroup.isActive or testRaidGroup.isActive
+	local partySettings = profile.party or {}
+	local raidSettings = self:ResolveRaidSettings(profile)
+	local npcPartyEnabled = partySettings.npcEnabled == true
+	local npcRaidEnabled = raidSettings.npcEnabled == true
 
 	if InCombatLockdown() and allowInCombat ~= true then
 		return
 	end
 
 	UnregisterStateDriver(partyHeader.container, "visibility")
+	UnregisterStateDriver(partyBossGroup.container, "visibility")
 	for _, raidContainer in ipairs(raidHeaders.containers) do
 		UnregisterStateDriver(raidContainer, "visibility")
 	end
+	UnregisterStateDriver(raidBossGroup.container, "visibility")
 
 	local raidGroupSettings = (profile.raid and profile.raid.groups) or {}
 
 	if testModeActive then
 		if showSoloPartyFrame then
 			RegisterStateDriver(partyHeader.container, "visibility", "[@player,combat,nogroup:raid] show; hide")
+			RegisterStateDriver(
+				partyBossGroup.container,
+				"visibility",
+				npcPartyEnabled and "[@player,combat,nogroup:raid] show; hide" or "hide"
+			)
 		else
 			RegisterStateDriver(
 				partyHeader.container,
 				"visibility",
 				"[@player,combat,group:party,nogroup:raid] show; hide"
+			)
+			RegisterStateDriver(
+				partyBossGroup.container,
+				"visibility",
+				npcPartyEnabled and "[@player,combat,group:party,nogroup:raid] show; hide" or "hide"
 			)
 		end
 
@@ -250,6 +332,11 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 				RegisterStateDriver(raidContainer, "visibility", "hide")
 			end
 		end
+		RegisterStateDriver(
+			raidBossGroup.container,
+			"visibility",
+			npcRaidEnabled and "[@player,combat,group:raid] show; hide" or "hide"
+		)
 
 		self.restoreLiveDriversAfterCombat = false
 		NotifyMiniCCFramesChanged()
@@ -258,8 +345,18 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 
 	if showSoloPartyFrame then
 		RegisterStateDriver(partyHeader.container, "visibility", "[@player,nogroup:raid] show; hide")
+		RegisterStateDriver(
+			partyBossGroup.container,
+			"visibility",
+			npcPartyEnabled and "[@player,nogroup:raid] show; hide" or "hide"
+		)
 	else
 		RegisterStateDriver(partyHeader.container, "visibility", "[@player,group:party,nogroup:raid] show; hide")
+		RegisterStateDriver(
+			partyBossGroup.container,
+			"visibility",
+			npcPartyEnabled and "[@player,group:party,nogroup:raid] show; hide" or "hide"
+		)
 	end
 
 	for groupIndex, raidContainer in ipairs(raidHeaders.containers) do
@@ -269,6 +366,11 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 			RegisterStateDriver(raidContainer, "visibility", "hide")
 		end
 	end
+	RegisterStateDriver(
+		raidBossGroup.container,
+		"visibility",
+		npcRaidEnabled and "[@player,group:raid] show; hide" or "hide"
+	)
 
 	self.restoreLiveDriversAfterCombat = false
 	NotifyMiniCCFramesChanged()
@@ -291,25 +393,13 @@ end
 function FrameRegistry:GetSettingsForFrame(frame)
 	local profile = addon.Database:GetProfile()
 	local parent = frame:GetParent()
-	if not parent then
-		return nil
-	end
+	local settingsType = frame.settingsType or (parent and parent.settingsType)
 
-	local headerKind = parent.HeaderKind
-	if not headerKind then
-		local parentName = parent.GetName and parent:GetName() or nil
-		if parentName == "MRF_PartyHeader" then
-			headerKind = "party"
-		elseif parentName and parentName:match("^MRF_RaidHeader%d+$") then
-			headerKind = "raid"
-		end
-	end
-
-	if headerKind == "party" then
+	if settingsType == "party" then
 		return profile.party or {}
 	end
 
-	if headerKind == "raid" then
+	if settingsType == "raid" then
 		return self:ResolveRaidSettings(profile)
 	end
 
@@ -337,6 +427,14 @@ function FrameRegistry:UpdateClickCasting()
 			addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
 		end
 	end
+
+	for _, frame in ipairs(partyBossGroup.frames) do
+		addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+	end
+
+	for _, frame in ipairs(raidBossGroup.frames) do
+		addon.Frames.ClickCasting:UpdateClickCastBindsForFrame(frame, clickCasting)
+	end
 end
 
 function FrameRegistry:UpdateManagedContainersVisibility(unit)
@@ -344,41 +442,36 @@ function FrameRegistry:UpdateManagedContainersVisibility(unit)
 		return
 	end
 
-	local frame = unitFrameMap[unit]
-	if not frame then
-		return
-	end
+	self:UpdateUnit(unit, function(frame, settings)
+		local managedContainers = frame.managedContainers
+		if not managedContainers then
+			return
+		end
 
-	local managedContainers = frame.managedContainers
-	if not managedContainers then
-		return
-	end
+		if managedContainers.buffs then
+			addon.Frames.ManagedContainers.Buffs:UpdateState(frame, settings)
+		end
 
-	local settings = self:GetSettingsForFrame(frame)
+		if managedContainers.customBuffs then
+			addon.Frames.ManagedContainers.CustomBuffs:UpdateState(frame, settings)
+		end
 
-	if managedContainers.buffs then
-		addon.Frames.ManagedContainers.Buffs:UpdateState(frame, settings)
-	end
+		if managedContainers.debuffs then
+			addon.Frames.ManagedContainers.Debuffs:UpdateState(frame, settings)
+		end
 
-	if managedContainers.customBuffs then
-		addon.Frames.ManagedContainers.CustomBuffs:UpdateState(frame, settings)
-	end
+		if managedContainers.defensives then
+			addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
+		end
 
-	if managedContainers.debuffs then
-		addon.Frames.ManagedContainers.Debuffs:UpdateState(frame, settings)
-	end
+		if managedContainers.buffOverlay then
+			addon.Frames.ManagedContainers.BuffOverlay:UpdateState(frame, settings)
+		end
 
-	if managedContainers.defensives then
-		addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
-	end
-
-	if managedContainers.buffOverlay then
-		addon.Frames.ManagedContainers.BuffOverlay:UpdateState(frame, settings)
-	end
-
-	if managedContainers.raidBuffReminder and settings then
-		addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
-	end
+		if managedContainers.raidBuffReminder and settings then
+			addon.Frames.ManagedContainers.RaidBuffReminder:UpdateState(frame, settings)
+		end
+	end)
 end
 
 function FrameRegistry:UpdateManagedContainersUnit(unit)
@@ -386,36 +479,35 @@ function FrameRegistry:UpdateManagedContainersUnit(unit)
 		return
 	end
 
-	local frame = unitFrameMap[unit]
-	if not frame or not frame.managedContainers then
-		return
-	end
+	self:UpdateUnit(unit, function(frame, settings)
+		if not frame.managedContainers then
+			return
+		end
 
-	local settings = self:GetSettingsForFrame(frame)
+		if frame.managedContainers.buffs then
+			addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
+		end
 
-	if frame.managedContainers.buffs then
-		addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
-	end
+		if frame.managedContainers.customBuffs then
+			addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
+		end
 
-	if frame.managedContainers.customBuffs then
-		addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
-	end
+		if frame.managedContainers.debuffs then
+			addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+		end
 
-	if frame.managedContainers.debuffs then
-		addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
-	end
+		if frame.managedContainers.defensives then
+			addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
+		end
 
-	if frame.managedContainers.defensives then
-		addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
-	end
+		if frame.managedContainers.buffOverlay then
+			addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
+		end
 
-	if frame.managedContainers.buffOverlay then
-		addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
-	end
-
-	if frame.managedContainers.raidBuffReminder then
-		addon.Frames.ManagedContainers.RaidBuffReminder:SetUnit(frame, settings)
-	end
+		if frame.managedContainers.raidBuffReminder then
+			addon.Frames.ManagedContainers.RaidBuffReminder:SetUnit(frame, settings)
+		end
+	end)
 end
 
 function FrameRegistry:HideManagedContainers(unit)
@@ -423,52 +515,53 @@ function FrameRegistry:HideManagedContainers(unit)
 		return
 	end
 
-	local frame = unitFrameMap[unit]
-	local managedContainers = frame and frame.managedContainers
-	if not managedContainers then
-		return
-	end
-
-	if managedContainers.buffs then
-		if managedContainers.buffs.isShown ~= false or managedContainers.buffs:IsShown() then
-			managedContainers.buffs.isShown = false
-			managedContainers.buffs:Hide()
+	self:UpdateUnit(unit, function(frame)
+		local managedContainers = frame.managedContainers
+		if not managedContainers then
+			return
 		end
-	end
 
-	if managedContainers.customBuffs then
-		if managedContainers.customBuffs.isShown ~= false or managedContainers.customBuffs:IsShown() then
-			managedContainers.customBuffs.isShown = false
-			managedContainers.customBuffs:Hide()
+		if managedContainers.buffs then
+			if managedContainers.buffs.isShown ~= false or managedContainers.buffs:IsShown() then
+				managedContainers.buffs.isShown = false
+				managedContainers.buffs:Hide()
+			end
 		end
-	end
 
-	if managedContainers.debuffs then
-		if managedContainers.debuffs.isShown ~= false or managedContainers.debuffs:IsShown() then
-			managedContainers.debuffs.isShown = false
-			managedContainers.debuffs:Hide()
+		if managedContainers.customBuffs then
+			if managedContainers.customBuffs.isShown ~= false or managedContainers.customBuffs:IsShown() then
+				managedContainers.customBuffs.isShown = false
+				managedContainers.customBuffs:Hide()
+			end
 		end
-	end
 
-	if managedContainers.defensives then
-		if managedContainers.defensives.isShown ~= false or managedContainers.defensives:IsShown() then
-			managedContainers.defensives.isShown = false
-			managedContainers.defensives:Hide()
+		if managedContainers.debuffs then
+			if managedContainers.debuffs.isShown ~= false or managedContainers.debuffs:IsShown() then
+				managedContainers.debuffs.isShown = false
+				managedContainers.debuffs:Hide()
+			end
 		end
-	end
 
-	if managedContainers.buffOverlay then
-		if managedContainers.buffOverlay.isShown ~= false or managedContainers.buffOverlay:IsShown() then
-			managedContainers.buffOverlay.isShown = false
-			managedContainers.buffOverlay:Hide()
+		if managedContainers.defensives then
+			if managedContainers.defensives.isShown ~= false or managedContainers.defensives:IsShown() then
+				managedContainers.defensives.isShown = false
+				managedContainers.defensives:Hide()
+			end
 		end
-	end
 
-	if managedContainers.raidBuffReminder then
-		if managedContainers.raidBuffReminder.wrapper:IsShown() then
-			managedContainers.raidBuffReminder.wrapper:Hide()
+		if managedContainers.buffOverlay then
+			if managedContainers.buffOverlay.isShown ~= false or managedContainers.buffOverlay:IsShown() then
+				managedContainers.buffOverlay.isShown = false
+				managedContainers.buffOverlay:Hide()
+			end
 		end
-	end
+
+		if managedContainers.raidBuffReminder then
+			if managedContainers.raidBuffReminder.wrapper:IsShown() then
+				managedContainers.raidBuffReminder.wrapper:Hide()
+			end
+		end
+	end)
 end
 
 local function UpdateFrame(frame, settings, stateCallback, settingsCallback)
@@ -489,6 +582,21 @@ function FrameRegistry:UpdateUnit(unit, stateCallback, settingsCallback)
 	local profile = addon.Database:GetProfile()
 	local partySettings = profile.party or {}
 	local raidSettings = self:ResolveRaidSettings(profile)
+
+	local bossIndex = unit and unit:match("^boss(%d)$")
+	if bossIndex then
+		local partyBossFrame = partyBossGroup.frames[tonumber(bossIndex)]
+		if partyBossFrame then
+			UpdateFrame(partyBossFrame, partySettings, stateCallback, settingsCallback)
+		end
+
+		local raidBossFrame = raidBossGroup.frames[tonumber(bossIndex)]
+		if raidBossFrame then
+			UpdateFrame(raidBossFrame, raidSettings, stateCallback, settingsCallback)
+		end
+
+		return
+	end
 
 	local frame = unitFrameMap[unit]
 	if frame then
@@ -525,6 +633,14 @@ function FrameRegistry:UpdateAllUnits(stateCallback, settingsCallback)
 				UpdateFrame(frame, raidSettings, stateCallback, settingsCallback)
 			end
 		end
+	end
+
+	for _, frame in ipairs(partyBossGroup.frames) do
+		UpdateFrame(frame, partySettings, stateCallback, settingsCallback)
+	end
+
+	for _, frame in ipairs(raidBossGroup.frames) do
+		UpdateFrame(frame, raidSettings, stateCallback, settingsCallback)
 	end
 
 	if previewFrames.party then
@@ -569,7 +685,10 @@ function FrameRegistry:UpdateRoster()
 			local guid = UnitExists(unit) and UnitGUID(unit) or nil
 			local rosterKey = unit .. ":" .. (guid or "none")
 			if frame.RosterKey ~= rosterKey then
-				addon.AuraHandler:UpdateAurasForUnit(unit)
+				if not addon.IsRestrictedAuraAPI then
+					addon.AuraHandler:UpdateAurasForUnit(unit)
+				end
+
 				addon.Modules:RequestUpdateState(unit)
 				frame.RosterKey = rosterKey
 			end
@@ -600,8 +719,16 @@ function FrameRegistry:UpdateLayout()
 		addon.Frames:UpdateLayout(testPartyGroup, partySettings)
 	end
 
+	if testPartyBossGroup.isActive and testPartyBossGroup.container then
+		addon.Frames:UpdateLayout(testPartyBossGroup, partySettings)
+	end
+
 	if testRaidGroup.isActive and testRaidGroup.container then
 		addon.Frames:UpdateLayout(testRaidGroup, profile.raid or {})
+	end
+
+	if testRaidBossGroup.isActive and testRaidBossGroup.container then
+		addon.Frames:UpdateLayout(testRaidBossGroup, profile.raid or {})
 	end
 
 	local previewSection = addon.Options and addon.Options.Preview
@@ -616,7 +743,9 @@ function FrameRegistry:UpdateLayout()
 	end
 
 	addon.Frames:UpdateLayout(partyHeader, partySettings)
+	addon.Frames:UpdateLayout(partyBossGroup, partySettings)
 	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
+	addon.Frames:UpdateLayout(raidBossGroup, raidSettings)
 end
 
 function FrameRegistry:Initialize()
@@ -629,10 +758,15 @@ function FrameRegistry:Initialize()
 	local raidSettings = self:ResolveRaidSettings(profile)
 
 	partyHeader.container = addon.Frames:CreatePartyHeader(partySettings)
+	partyBossGroup.container = addon.Frames:CreateBossUnitGroup("MRF_PartyBossUnitGroup", "party")
+	partyBossGroup.frames = partyBossGroup.container.frames
 
 	for groupIndex = 1, 8 do
 		raidHeaders.containers[groupIndex] = addon.Frames:CreateRaidHeader(raidSettings, groupIndex)
 	end
+
+	raidBossGroup.container = addon.Frames:CreateBossUnitGroup("MRF_RaidBossUnitGroup", "raid")
+	raidBossGroup.frames = raidBossGroup.container.frames
 
 	ApplyBlizzardFramesVisibility()
 	self:UpdateStateDrivers(true)
@@ -641,7 +775,9 @@ function FrameRegistry:Initialize()
 	self:UpdateClickCasting()
 
 	addon.Frames:UpdateLayout(partyHeader, partySettings)
+	addon.Frames:UpdateLayout(partyBossGroup, partySettings)
 	addon.Frames:UpdateLayout(raidHeaders, raidSettings)
+	addon.Frames:UpdateLayout(raidBossGroup, raidSettings)
 	RegisterMiniCCProvider()
 end
 
@@ -659,13 +795,13 @@ function FrameRegistry:CreatePreviewFrames(parent)
 	local raidSettings = profile.raid or {}
 
 	if not previewFrames.party then
-		previewFrames.party = addon.Frames:CreatePreviewFrame(parent)
+		previewFrames.party = addon.Frames:CreatePreviewFrame(parent, "party")
 		addon.Modules:EnsureFrame(previewFrames.party, partySettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.party, partySettings)
 	end
 
 	if not previewFrames.raid then
-		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent)
+		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent, "raid")
 		addon.Modules:EnsureFrame(previewFrames.raid, raidSettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.raid, raidSettings)
 	end
@@ -711,16 +847,56 @@ function FrameRegistry:CreateTestGroup(groupType)
 	return group
 end
 
+function FrameRegistry:CreateBossTestGroup(groupType)
+	local group
+	local settings
+	local groupName
+
+	if groupType == "party" then
+		group = testPartyBossGroup
+		settings = addon.Database:GetProfile().party or {}
+		groupName = "MRF_TestPartyBossGroup"
+	elseif groupType == "raid" then
+		group = testRaidBossGroup
+		settings = addon.Database:GetProfile().raid or {}
+		groupName = "MRF_TestRaidBossGroup"
+	else
+		error("FrameRegistry:CreateBossTestGroup requires 'party' or 'raid'", 2)
+	end
+
+	if group.container then
+		return group
+	end
+
+	group.container = addon.Frames:CreateBossTestGroup(groupName, groupType)
+
+	for frameIndex = 1, 5 do
+		local frame = addon.Frames:CreateTestFrame(group.container, frameIndex)
+		frame.testName = "NPC Frame"
+		frame.testText:SetText("NPC Frame")
+		group.frames[frameIndex] = frame
+	end
+
+	addon.Frames:UpdateLayout(group, settings)
+
+	group.container:Hide()
+
+	return group
+end
+
 function FrameRegistry:EnableTestMode(groupType)
 	if InCombatLockdown() then
 		return
 	end
 
 	local group
+	local bossGroup
 	if groupType == "party" then
 		group = testPartyGroup
+		bossGroup = testPartyBossGroup
 	elseif groupType == "raid" then
 		group = testRaidGroup
+		bossGroup = testRaidBossGroup
 	else
 		error("FrameRegistry:EnableTestMode requires 'party' or 'raid'", 2)
 	end
@@ -738,8 +914,23 @@ function FrameRegistry:EnableTestMode(groupType)
 		addon.Frames:UpdateLayout(group, settings)
 	end
 
+	if not bossGroup.container then
+		self:CreateBossTestGroup(groupType)
+	else
+		local settings
+		if groupType == "party" then
+			settings = addon.Database:GetProfile().party or {}
+		else
+			settings = addon.Database:GetProfile().raid or {}
+		end
+
+		addon.Frames:UpdateLayout(bossGroup, settings)
+	end
+
 	group.container:Show()
 	group.isActive = true
+	bossGroup.container:Show()
+	bossGroup.isActive = true
 
 	self:UpdateStateDrivers()
 end
@@ -758,6 +949,12 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 		if testPartyGroup.container then
 			testPartyGroup.container:Hide()
 		end
+
+		testPartyBossGroup.isActive = false
+
+		if testPartyBossGroup.container then
+			testPartyBossGroup.container:Hide()
+		end
 	end
 
 	if disableRaid then
@@ -765,6 +962,12 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 
 		if testRaidGroup.container then
 			testRaidGroup.container:Hide()
+		end
+
+		testRaidBossGroup.isActive = false
+
+		if testRaidBossGroup.container then
+			testRaidBossGroup.container:Hide()
 		end
 	end
 

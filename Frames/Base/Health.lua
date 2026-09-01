@@ -41,6 +41,14 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
+local function IsGroupUnit(unit)
+	return type(unit) == "string" and (unit == "player" or unit:match("^party%d$") or unit:match("^raid%d+$"))
+end
+
+local function IsBossUnit(unit)
+	return type(unit) == "string" and unit:match("^boss%d$")
+end
+
 local function ApplyHealthColor(healthBar, frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
@@ -55,11 +63,18 @@ local function ApplyHealthColor(healthBar, frame, settings)
 
 	local classToken
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		classToken = select(2, UnitClass("player"))
 	else
 		local unit = frame and frame.unit
-		if unit and UnitExists(unit) then
+		if IsBossUnit(unit) and UnitExists(unit) then
+			local reaction = UnitReaction("player", unit)
+			local reactionColor = reaction and FACTION_BAR_COLORS[reaction]
+			if reactionColor then
+				healthBar:SetStatusBarColor(reactionColor.r, reactionColor.g, reactionColor.b, reactionColor.a or color.a)
+				return
+			end
+		elseif IsGroupUnit(unit) and UnitExists(unit) then
 			classToken = select(2, UnitClass(unit))
 		end
 	end

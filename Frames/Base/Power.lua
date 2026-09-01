@@ -95,6 +95,10 @@ local function IsPowerBarEnabled(frame, cachedSettings)
 end
 
 function Power:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.powerBar then
 		local powerBar = CreateFrame("StatusBar", nil, frame)
 		powerBar:SetFrameLevel(20)
@@ -120,6 +124,10 @@ function Power:Ensure(frame)
 end
 
 function Power:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	UpdateSettingsCache(settings)
 
 	if frame.dataProvider == addon.Frames.DataProvider.Live then
@@ -150,6 +158,10 @@ function Power:UpdateSettings(frame, settings)
 end
 
 function Power:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

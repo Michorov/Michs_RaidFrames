@@ -66,11 +66,13 @@ local CUSTOM_AURA_DEFAULTS = {
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 		[257] = {
 			[139] = { enabled = true, name = "Renew" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
 			[77489] = { enabled = true, name = "Echo of Light" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 		[-1] = {
 			[139] = { enabled = true, name = "Renew" },
@@ -79,6 +81,7 @@ local CUSTOM_AURA_DEFAULTS = {
 			[17] = { enabled = true, name = "Power Word: Shield" },
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 	},
 
@@ -393,8 +396,11 @@ local DEFAULTS = {
 		party = {
 			size = { width = 128, height = 64 },
 			position = { x = -400, y = 0 },
+			npcEnabled = true,
+			npcPosition = { x = -270, y = 0 },
 			spacing = { x = -1, y = -1 },
 			direction = "VERTICAL",
+			npcDirection = "VERTICAL",
 			background = {
 				color = {
 					r = 0.12,
@@ -575,6 +581,7 @@ local DEFAULTS = {
 					dispels = {
 						enabled = true,
 						showOnlyPlayerDispellable = true,
+						iconsOnly = false,
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
@@ -715,6 +722,8 @@ local DEFAULTS = {
 		raid = {
 			size = { width = 110, height = 56 },
 			position = { x = -600, y = 0 },
+			npcEnabled = true,
+			npcPosition = { x = -270, y = 0 },
 			spacing = { x = -1, y = -1 },
 			groups = {
 				[1] = true,
@@ -727,6 +736,7 @@ local DEFAULTS = {
 				[8] = false,
 			},
 			direction = "HORIZONTAL",
+			npcDirection = "VERTICAL",
 			reverse = true,
 			showGroupLabel = false,
 			background = {
@@ -909,6 +919,7 @@ local DEFAULTS = {
 					dispels = {
 						enabled = true,
 						showOnlyPlayerDispellable = true,
+						iconsOnly = false,
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",

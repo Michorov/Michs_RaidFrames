@@ -180,7 +180,7 @@ local function UpdateManagedSettings(frame, settings)
 end
 
 function RaidBuffReminder:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -225,7 +225,7 @@ end
 function RaidBuffReminder:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -238,7 +238,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 		UpdateSettingsCache(settings)
 	end
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -251,7 +251,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 end
 
 function RaidBuffReminder:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 

@@ -59,11 +59,18 @@ local function ApplyNameColor(text, frame, settings)
 
 	local classToken
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		classToken = select(2, UnitClass("player"))
 	else
 		local unit = frame and frame.unit
-		if unit and UnitExists(unit) then
+		if frame.frameType == "boss" and unit and UnitExists(unit) then
+			local reaction = UnitReaction("player", unit)
+			local reactionColor = reaction and FACTION_BAR_COLORS[reaction]
+			if reactionColor then
+				text:SetTextColor(reactionColor.r, reactionColor.g, reactionColor.b, reactionColor.a or c.a)
+				return
+			end
+		elseif unit and UnitExists(unit) then
 			classToken = select(2, UnitClass(unit))
 		end
 	end
@@ -155,11 +162,19 @@ function Name:UpdateState(frame, settings)
 
 	local rosterKey = frame.RosterKey
 	local rawName = frame.dataProvider:GetName(frame)
-	local isValidName = type(rawName) == "string" and rawName ~= "" and rawName ~= UNKNOWNOBJECT
+	local isSecretName = issecretvalue and issecretvalue(rawName)
+	local isValidName = false
+
+	if not isSecretName then
+		isValidName = type(rawName) == "string" and rawName ~= "" and rawName ~= UNKNOWNOBJECT
+	end
 
 	local displayName
 
-	if isValidName then
+	if isSecretName then
+		displayName = rawName
+		StopRetry(name)
+	elseif isValidName then
 		displayName = rawName
 
 		if cachedSettings.truncate then

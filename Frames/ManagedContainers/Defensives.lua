@@ -78,7 +78,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Defensives:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -109,7 +109,7 @@ end
 function Defensives:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -120,7 +120,7 @@ function Defensives:UpdateSettings(frame, settings)
 end
 
 function Defensives:UpdateState(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -139,7 +139,7 @@ function Defensives:UpdateState(frame, settings)
 end
 
 function Defensives:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 

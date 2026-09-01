@@ -173,6 +173,78 @@ function Layout:Create(panel, config)
 		raidGroupCheckboxes[groupIndex] = checkbox
 	end
 
+	local npcSettingsRow = subpage:CreateRow(3)
+	npcSettingsRow:SetLayoutPoint("TOPLEFT", orientationRow.frame, "BOTTOMLEFT", 0, -96)
+
+	local showNpcFramesDropdown = npcSettingsRow:CreateControl("Dropdown", { labelKey = "NPC Frames" })
+	showNpcFramesDropdown:SetOptions({
+		{ value = true, textKey = "Enabled" },
+		{ value = false, textKey = "Disabled" },
+	})
+	showNpcFramesDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].npcEnabled
+		end,
+		set = function(profile, mode, value)
+			profile[mode].npcEnabled = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
+
+	local npcDirectionDropdown = npcSettingsRow:CreateControl("Dropdown", { labelKey = "NPC Frames Direction" })
+	npcDirectionDropdown:SetOptions({
+		{ value = "HORIZONTAL", textKey = "Horizontal" },
+		{ value = "VERTICAL", textKey = "Vertical" },
+	})
+	npcDirectionDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].npcDirection
+		end,
+		set = function(profile, mode, value)
+			profile[mode].npcDirection = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
+
+	local npcPositionRow = subpage:CreateRow(3)
+	npcPositionRow:SetLayoutPoint("TOPLEFT", npcSettingsRow.frame, "BOTTOMLEFT", 0, -8)
+
+	local npcHorizontalPositionSlider = npcPositionRow:CreateControl("Slider", { labelKey = "NPC Horizontal Position" })
+	npcHorizontalPositionSlider:SetMinMaxValues(-2000, 2000)
+	npcHorizontalPositionSlider:SetStep(1)
+	npcHorizontalPositionSlider:SetValueFormatter(FormatInteger)
+	npcHorizontalPositionSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].npcPosition.x
+		end,
+		set = function(profile, mode, value)
+			profile[mode].npcPosition.x = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
+
+	local npcVerticalPositionSlider = npcPositionRow:CreateControl("Slider", { labelKey = "NPC Vertical Position" })
+	npcVerticalPositionSlider:SetMinMaxValues(-2000, 2000)
+	npcVerticalPositionSlider:SetStep(1)
+	npcVerticalPositionSlider:SetValueFormatter(FormatInteger)
+	npcVerticalPositionSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].npcPosition.y
+		end,
+		set = function(profile, mode, value)
+			profile[mode].npcPosition.y = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("layoutChanged")
+		end,
+	})
+
 	subpage:SetStateUpdater(function(_, mode)
 		local isRaidMode = mode == "raid"
 

@@ -231,6 +231,10 @@ local function ShowPreview(frame, cachedSettings)
 end
 
 function Dispels:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.dispelsContainer then
 		local container = CreateFrame("Frame", nil, frame)
 		container:EnableMouse(false)
@@ -240,18 +244,22 @@ function Dispels:Ensure(frame)
 		frame.dispelsContainer = container
 	end
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		EnsurePreview(frame.dispelsContainer)
 	end
 end
 
 function Dispels:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.dispelsContainer
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		RemoveAnchor(frame)
 		ShowPreview(frame, cachedSettings)
 		return

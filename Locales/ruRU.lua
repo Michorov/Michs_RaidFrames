@@ -5,6 +5,12 @@ if not L then
 	return
 end
 
+L["Disabled"] = "Отключено"
+L["NPC Frames"] = "NPC-фреймы"
+L["NPC Frames Direction"] = "Направление NPC-фреймов"
+L["NPC Horizontal Position"] = "Горизонтальная позиция NPC"
+L["NPC Vertical Position"] = "Вертикальная позиция NPC"
+
 L["Class Color"] = "Цвет класса"
 L["Full Name"] = "Полное"
 L["Hide"] = "Скрыть"
