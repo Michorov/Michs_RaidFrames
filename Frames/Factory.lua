@@ -63,6 +63,15 @@ local function CreateTestGroupDragOverlay(group)
 	text:SetText("Drag to Move")
 	overlay.text = text
 
+	local statusText = overlay:CreateFontString(nil, "OVERLAY")
+	statusText:SetPoint("TOP", text, "BOTTOM", 0, addon.Utilities:ToUI(addon.Utilities:Scale(2)))
+	statusText:SetFont(addon.Utilities:GetGameFontNormalPath(), addon.Utilities:ScaleFont(12), "OUTLINE")
+	statusText:SetJustifyH("CENTER")
+	statusText:SetJustifyV("MIDDLE")
+	statusText:SetTextColor(1, 0.25, 0.25, 1)
+	statusText:SetText("")
+	overlay.statusText = statusText
+
 	local border = {}
 	local thickness = addon.Utilities:ToUI(addon.Utilities:Scale(4))
 
