@@ -196,7 +196,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Debuffs:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -233,7 +233,7 @@ end
 function Debuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -243,7 +243,7 @@ function Debuffs:UpdateSettings(frame, settings)
 end
 
 function Debuffs:UpdateState(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -262,7 +262,7 @@ function Debuffs:UpdateState(frame, settings)
 end
 
 function Debuffs:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 

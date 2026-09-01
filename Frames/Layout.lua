@@ -439,9 +439,9 @@ end
 local function UpdateBossUnitGroupLayout(group, settings)
 	settings = settings or {}
 
-	local defaultWidth = group.type == "party" and 128 or 112
-	local defaultHeight = group.type == "party" and 64 or 56
-	local defaultDirection = group.type == "party" and "VERTICAL" or "HORIZONTAL"
+	local defaultWidth = group.settingsType == "party" and 128 or 112
+	local defaultHeight = group.settingsType == "party" and 64 or 56
+	local defaultDirection = group.settingsType == "party" and "VERTICAL" or "HORIZONTAL"
 	local layout = GetLayoutSettings(settings, defaultWidth, defaultHeight, defaultDirection)
 	local npcPosition = settings.npcPosition or {}
 	local npcDirection = settings.npcDirection or defaultDirection
@@ -568,7 +568,7 @@ function Frames:UpdateLayout(group, settings)
 		return
 	end
 
-	if group.type == "party" then
+	if group.settingsType == "party" then
 		if group.isTestGroup then
 			UpdateTestPartyLayout(group, settings)
 		else

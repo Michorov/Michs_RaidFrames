@@ -166,7 +166,7 @@ local function UpdateFilters(frame, settings)
 end
 
 function CustomBuffs:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -192,7 +192,7 @@ function CustomBuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -204,7 +204,7 @@ function CustomBuffs:UpdateSettings(frame, settings)
 end
 
 function CustomBuffs:UpdateState(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -223,7 +223,7 @@ function CustomBuffs:UpdateState(frame, settings)
 end
 
 function CustomBuffs:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 

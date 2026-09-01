@@ -246,7 +246,7 @@ function PrivateAuras:Ensure(frame)
 			addon.Frames.Managers.IconManager:CreateContainer(frame, "privateAurasContainer", 45)
 	end
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		local frameStrata = frame.GetFrameStrata and frame:GetFrameStrata()
 		if frameStrata then
 			frame.privateAurasContainer:SetFrameStrata(frameStrata)
@@ -292,7 +292,7 @@ function PrivateAuras:UpdateSettings(frame, settings)
 
 	ApplyContainerLayout(frame, privateAuraSettings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		if frame.previewWidgetVisibility.privateAuras ~= true then
 			frame.privateAurasContainer:Hide()
 			return

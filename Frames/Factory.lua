@@ -4,7 +4,7 @@ addon.Frames = addon.Frames or {}
 local Frames = addon.Frames
 
 local function SaveTestGroupPosition(group)
-	local groupType = group and group.testGroupType
+	local groupType = group and group.settingsType
 	if groupType ~= "party" and groupType ~= "raid" then
 		return
 	end
@@ -113,7 +113,8 @@ function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
-	header.HeaderKind = "raid"
+	header.frameType = "raid"
+	header.settingsType = "raid"
 	header.GroupIndex = groupIndex
 
 	header.groupText = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -155,7 +156,8 @@ function Frames:CreatePartyHeader(partySettings)
 	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
 
 	local header = CreateFrame("Frame", "MRF_PartyHeader", UIParent, "SecureGroupHeaderTemplate")
-	header.HeaderKind = "party"
+	header.frameType = "party"
+	header.settingsType = "party"
 
 	local totalHeight = (5 * frameHeight) + (4 * spacingY)
 	header:SetPoint("TOP", UIParent, "CENTER", posX, posY + totalHeight / 2)
@@ -184,24 +186,18 @@ function Frames:CreatePartyHeader(partySettings)
 	return header
 end
 
-function Frames:CreateBossUnitGroup(name, ownerKind)
-	if type(name) ~= "string" or name == "" then
-		error("Frames:CreateBossUnitGroup requires a non-empty name", 2)
-	end
-
-	if ownerKind ~= "party" and ownerKind ~= "raid" then
-		error("Frames:CreateBossUnitGroup ownerKind must be party or raid", 2)
-	end
-
+function Frames:CreateBossUnitGroup(name, settingsType)
 	local container = CreateFrame("Frame", name, UIParent)
-	container.HeaderKind = ownerKind
+	container.frameType = "boss"
+	container.settingsType = settingsType
 	container.frames = {}
 
 	for i = 1, 5 do
 		local unit = "boss" .. i
 		local frame = CreateFrame("Button", name .. "UnitButton" .. i, container, "MRF_UnitFrameTemplate")
 
-		frame.isBossFrame = true
+		frame.frameType = "boss"
+		frame.settingsType = settingsType
 		frame.bossUnitIndex = i
 		frame:SetAttribute("unit", unit)
 
@@ -213,19 +209,11 @@ function Frames:CreateBossUnitGroup(name, ownerKind)
 	return container
 end
 
-function Frames:CreateBossTestGroup(name, ownerKind)
-	if type(name) ~= "string" or name == "" then
-		error("Frames:CreateBossTestGroup requires a non-empty name", 2)
-	end
-
-	if ownerKind ~= "party" and ownerKind ~= "raid" then
-		error("Frames:CreateBossTestGroup ownerKind must be party or raid", 2)
-	end
-
+function Frames:CreateBossTestGroup(name, settingsType)
 	local container = CreateFrame("Frame", name, UIParent)
-	container.HeaderKind = ownerKind
+	container.frameType = "test"
+	container.settingsType = settingsType
 	container.name = name
-	container.testGroupType = ownerKind
 	container.testPositionKey = "npcPosition"
 	container.frames = {}
 	container:SetSize(1, 1)
@@ -261,7 +249,8 @@ function Frames:CreateTestGroup(groupType)
 	local groupName = "MRF_Test" .. groupType .. "Group"
 	local group = CreateFrame("Frame", groupName, UIParent)
 	group.name = groupName
-	group.testGroupType = string.lower(groupType)
+	group.frameType = "test"
+	group.settingsType = string.lower(groupType)
 
 	group:SetSize(1, 1)
 	group:ClearAllPoints()
@@ -307,6 +296,8 @@ function Frames:CreateTestFrame(group, frameIndex)
 	local frameName = group.name .. "_Frame" .. frameIndex
 	local frame = CreateFrame("Button", frameName, group)
 
+	frame.frameType = "test"
+	frame.settingsType = group.settingsType
 	frame.unit = nil
 	frame.testName = "Test Frame"
 
@@ -367,14 +358,15 @@ function Frames:CreateTestFrame(group, frameIndex)
 	return frame
 end
 
-function Frames:CreatePreviewFrame(parent)
+function Frames:CreatePreviewFrame(parent, settingsType)
 	if not parent then
 		error("Frames:CreatePreviewFrame requires parent", 2)
 	end
 
 	local frame = CreateFrame("Button", nil, parent)
 
-	frame.isPreview = true
+	frame.frameType = "preview"
+	frame.settingsType = settingsType
 	frame.unit = nil
 	frame.testName = UnitName("player") or ""
 

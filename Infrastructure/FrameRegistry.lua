@@ -9,33 +9,33 @@ FrameRegistry.restoreLiveDriversAfterCombat = false
 FrameRegistry.needsLayoutUpdateAfterCombat = false
 
 local partyHeader = {
-	type = "party",
+	settingsType = "party",
 	isSecureHeader = true,
 	container = nil,
 }
 
 local raidHeaders = {
-	type = "raid",
+	settingsType = "raid",
 	isSecureHeader = true,
 	containers = {},
 }
 
 local partyBossGroup = {
-	type = "party",
+	settingsType = "party",
 	isBossGroup = true,
 	container = nil,
 	frames = {},
 }
 
 local raidBossGroup = {
-	type = "raid",
+	settingsType = "raid",
 	isBossGroup = true,
 	container = nil,
 	frames = {},
 }
 
 local testPartyGroup = {
-	type = "party",
+	settingsType = "party",
 	isTestGroup = true,
 	isActive = false,
 	container = nil,
@@ -43,7 +43,7 @@ local testPartyGroup = {
 }
 
 local testRaidGroup = {
-	type = "raid",
+	settingsType = "raid",
 	isTestGroup = true,
 	isActive = false,
 	container = nil,
@@ -51,7 +51,7 @@ local testRaidGroup = {
 }
 
 local testPartyBossGroup = {
-	type = "party",
+	settingsType = "party",
 	isBossGroup = true,
 	isTestGroup = true,
 	isActive = false,
@@ -60,7 +60,7 @@ local testPartyBossGroup = {
 }
 
 local testRaidBossGroup = {
-	type = "raid",
+	settingsType = "raid",
 	isBossGroup = true,
 	isTestGroup = true,
 	isActive = false,
@@ -142,6 +142,12 @@ local function RegisterMiniCCProvider()
 end
 
 function MRF_OnUnitFrameLoad(frame)
+	local parent = frame:GetParent()
+	local parentFrameType = parent and parent.frameType
+	local parentSettingsType = parent and parent.settingsType
+
+	frame.frameType = frame.frameType or parentFrameType
+	frame.settingsType = frame.settingsType or parentSettingsType
 	frame.dataProvider = addon.Frames.DataProvider.Live
 	frame.managedContainers = {}
 	addon.Frames.ClickCasting:CreateClickCastingButton(frame)
@@ -166,7 +172,7 @@ end
 function MRF_OnUnitChanged(frame, unit)
 	frame.RosterKey = nil
 
-	if frame.isBossFrame then
+	if frame.frameType == "boss" then
 		return
 	end
 
@@ -363,25 +369,13 @@ end
 function FrameRegistry:GetSettingsForFrame(frame)
 	local profile = addon.Database:GetProfile()
 	local parent = frame:GetParent()
-	if not parent then
-		return nil
-	end
+	local settingsType = frame.settingsType or (parent and parent.settingsType)
 
-	local headerKind = parent.HeaderKind
-	if not headerKind then
-		local parentName = parent.GetName and parent:GetName() or nil
-		if parentName == "MRF_PartyHeader" then
-			headerKind = "party"
-		elseif parentName and parentName:match("^MRF_RaidHeader%d+$") then
-			headerKind = "raid"
-		end
-	end
-
-	if headerKind == "party" then
+	if settingsType == "party" then
 		return profile.party or {}
 	end
 
-	if headerKind == "raid" then
+	if settingsType == "raid" then
 		return self:ResolveRaidSettings(profile)
 	end
 
@@ -777,13 +771,13 @@ function FrameRegistry:CreatePreviewFrames(parent)
 	local raidSettings = profile.raid or {}
 
 	if not previewFrames.party then
-		previewFrames.party = addon.Frames:CreatePreviewFrame(parent)
+		previewFrames.party = addon.Frames:CreatePreviewFrame(parent, "party")
 		addon.Modules:EnsureFrame(previewFrames.party, partySettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.party, partySettings)
 	end
 
 	if not previewFrames.raid then
-		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent)
+		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent, "raid")
 		addon.Modules:EnsureFrame(previewFrames.raid, raidSettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.raid, raidSettings)
 	end
