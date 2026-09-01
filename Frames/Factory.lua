@@ -173,6 +173,35 @@ function Frames:CreatePartyHeader(partySettings)
 	return header
 end
 
+function Frames:CreateBossUnitGroup(name, ownerKind)
+	if type(name) ~= "string" or name == "" then
+		error("Frames:CreateBossUnitGroup requires a non-empty name", 2)
+	end
+
+	if ownerKind ~= "party" and ownerKind ~= "raid" then
+		error("Frames:CreateBossUnitGroup ownerKind must be party or raid", 2)
+	end
+
+	local container = CreateFrame("Frame", name, UIParent)
+	container.HeaderKind = ownerKind
+	container.frames = {}
+
+	for i = 1, 5 do
+		local unit = "boss" .. i
+		local frame = CreateFrame("Button", name .. "UnitButton" .. i, container, "MRF_UnitFrameTemplate")
+
+		frame.isBossFrame = true
+		frame.bossUnitIndex = i
+		frame:SetAttribute("unit", unit)
+
+		RegisterStateDriver(frame, "visibility", ("[@%s,exists,help] show; hide"):format(unit))
+
+		container.frames[i] = frame
+	end
+
+	return container
+end
+
 function Frames:CreateTestGroup(groupType)
 	if type(groupType) ~= "string" or groupType == "" then
 		error("Frames:CreateTestGroup requires a non-empty group type", 2)
