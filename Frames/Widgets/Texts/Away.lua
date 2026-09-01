@@ -97,6 +97,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function Away:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.awayText then
 		local awayFrame = CreateFrame("Frame", nil, frame)
 		awayFrame:SetAllPoints(frame)
@@ -109,6 +113,10 @@ function Away:Ensure(frame)
 end
 
 function Away:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local text = frame.awayText.text
@@ -135,6 +143,10 @@ function Away:UpdateSettings(frame, settings)
 end
 
 function Away:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

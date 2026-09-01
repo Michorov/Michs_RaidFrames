@@ -38,6 +38,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function HealAbsorbs:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.healAbsorbText then
 		local healAbsorbTextFrame = CreateFrame("Frame", nil, frame)
 		healAbsorbTextFrame:SetAllPoints(frame)
@@ -50,6 +54,10 @@ function HealAbsorbs:Ensure(frame)
 end
 
 function HealAbsorbs:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local text = frame.healAbsorbText.text
@@ -76,6 +84,10 @@ function HealAbsorbs:UpdateSettings(frame, settings)
 end
 
 function HealAbsorbs:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end

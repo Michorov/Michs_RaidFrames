@@ -86,6 +86,10 @@ local function IsRoleEnabled(cachedSettings, role)
 end
 
 function RoleIcon:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.roleIcon then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetFrameLevel(32)
@@ -97,6 +101,10 @@ function RoleIcon:Ensure(frame)
 end
 
 function RoleIcon:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.roleIcon
 
 	UpdateSettingsCache(settings)
@@ -128,6 +136,10 @@ function RoleIcon:UpdateSettings(frame, settings)
 end
 
 function RoleIcon:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.roleIcon
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.roleIcon ~= true then

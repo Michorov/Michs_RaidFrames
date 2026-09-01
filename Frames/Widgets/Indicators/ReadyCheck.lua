@@ -74,6 +74,10 @@ local function UpdateEvents()
 end
 
 function ReadyCheck:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.readyCheck then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetFrameLevel(75)
@@ -87,6 +91,10 @@ function ReadyCheck:Ensure(frame)
 end
 
 function ReadyCheck:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.readyCheck
 
 	UpdateSettingsCache(settings)
@@ -119,6 +127,10 @@ function ReadyCheck:UpdateSettings(frame, settings)
 end
 
 function ReadyCheck:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.readyCheck
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.readyCheck ~= true then
