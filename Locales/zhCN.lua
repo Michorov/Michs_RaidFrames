@@ -6,10 +6,10 @@ if not L then
 end
 
 L["Disabled"] = "禁用"
+L["NPC Frames"] = "NPC框体"
 L["NPC Frames Direction"] = "NPC框体方向"
 L["NPC Horizontal Position"] = "NPC水平位置"
 L["NPC Vertical Position"] = "NPC垂直位置"
-L["Show NPC Frames"] = "显示NPC框体"
 
 L["Class Color"] = "职业颜色"
 L["Full Name"] = "完整"

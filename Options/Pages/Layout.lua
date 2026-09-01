@@ -176,7 +176,7 @@ function Layout:Create(panel, config)
 	local npcSettingsRow = subpage:CreateRow(3)
 	npcSettingsRow:SetLayoutPoint("TOPLEFT", orientationRow.frame, "BOTTOMLEFT", 0, -96)
 
-	local showNpcFramesDropdown = npcSettingsRow:CreateControl("Dropdown", { labelKey = "Show NPC Frames" })
+	local showNpcFramesDropdown = npcSettingsRow:CreateControl("Dropdown", { labelKey = "NPC Frames" })
 	showNpcFramesDropdown:SetOptions({
 		{ value = true, textKey = "Enabled" },
 		{ value = false, textKey = "Disabled" },
