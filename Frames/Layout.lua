@@ -447,7 +447,7 @@ local function UpdateBossUnitGroupLayout(group, settings)
 	local frameHeight = addon.Utilities:ScaleEven(layout.frameHeightPx)
 	local spacingX = addon.Utilities:Scale(layout.spacingXPx)
 	local spacingY = addon.Utilities:Scale(layout.spacingYPx)
-	local positionX = layout.positionX + addon.Utilities:ToPixels(150)
+	local positionX = layout.positionX + addon.Utilities:Scale(addon.Utilities:ToPixels(150))
 	local positionY = layout.positionY
 	local frameCount = #group.frames
 
