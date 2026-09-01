@@ -701,7 +701,7 @@ local DEFAULTS = {
 					},
 					threat = {
 						enabled = false,
-						borderSize = 2,
+						borderSize = 1,
 					},
 				},
 			},
@@ -1039,7 +1039,7 @@ local DEFAULTS = {
 					},
 					threat = {
 						enabled = false,
-						borderSize = 2,
+						borderSize = 1,
 					},
 				},
 			},
