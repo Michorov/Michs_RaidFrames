@@ -66,11 +66,13 @@ local CUSTOM_AURA_DEFAULTS = {
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 		[257] = {
 			[139] = { enabled = true, name = "Renew" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
 			[77489] = { enabled = true, name = "Echo of Light" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 		[-1] = {
 			[139] = { enabled = true, name = "Renew" },
@@ -79,6 +81,7 @@ local CUSTOM_AURA_DEFAULTS = {
 			[17] = { enabled = true, name = "Power Word: Shield" },
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
+			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 	},
 
@@ -578,6 +581,7 @@ local DEFAULTS = {
 					dispels = {
 						enabled = true,
 						showOnlyPlayerDispellable = true,
+						iconsOnly = false,
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
@@ -915,6 +919,7 @@ local DEFAULTS = {
 					dispels = {
 						enabled = true,
 						showOnlyPlayerDispellable = true,
+						iconsOnly = false,
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
