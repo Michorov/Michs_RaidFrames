@@ -6,10 +6,10 @@ if not L then
 end
 
 L["Disabled"] = "Disabilitato"
+L["NPC Frames"] = "Riquadri PNG"
 L["NPC Frames Direction"] = "Direzione riquadri PNG"
 L["NPC Horizontal Position"] = "Posizione orizzontale PNG"
 L["NPC Vertical Position"] = "Posizione verticale PNG"
-L["Show NPC Frames"] = "Mostra riquadri PNG"
 
 L["Class Color"] = "Colore classe"
 L["Full Name"] = "Completo"

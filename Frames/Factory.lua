@@ -20,9 +20,11 @@ local function SaveTestGroupPosition(group)
 
 	local profile = addon.Database:GetProfile()
 	profile[groupType] = profile[groupType] or {}
-	profile[groupType].position = profile[groupType].position or {}
-	profile[groupType].position.x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
-	profile[groupType].position.y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
+
+	local positionKey = group.testPositionKey or "position"
+	profile[groupType][positionKey] = profile[groupType][positionKey] or {}
+	profile[groupType][positionKey].x = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionXPx))
+	profile[groupType][positionKey].y = addon.Utilities:RoundToNearestInt(addon.Utilities:ToUI(positionYPx))
 
 	if addon.Options and addon.Options.RefreshState then
 		addon.Options:RefreshState()
@@ -214,10 +216,30 @@ function Frames:CreateBossTestGroup(name, ownerKind)
 	local container = CreateFrame("Frame", name, UIParent)
 	container.HeaderKind = ownerKind
 	container.name = name
+	container.testGroupType = ownerKind
+	container.testPositionKey = "npcPosition"
 	container.frames = {}
 	container:SetSize(1, 1)
 	container:ClearAllPoints()
 	container:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+	container:SetMovable(true)
+	container:SetClampedToScreen(true)
+	container:EnableMouse(true)
+	container:RegisterForDrag("LeftButton")
+	container.dragOverlay = CreateTestGroupDragOverlay(container)
+
+	container:SetScript("OnDragStart", function(self)
+		if InCombatLockdown() then
+			return
+		end
+
+		self:StartMoving()
+	end)
+
+	container:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		SaveTestGroupPosition(self)
+	end)
 
 	return container
 end
