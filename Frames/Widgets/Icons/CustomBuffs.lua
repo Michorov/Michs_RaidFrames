@@ -59,7 +59,7 @@ function CustomBuffs:Ensure(frame)
 	if not frame.customBuffsFrame then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetAllPoints(frame)
-		container:SetFrameLevel(43)
+		container:SetFrameLevel(60)
 		frame.customBuffsFrame = container
 	end
 
