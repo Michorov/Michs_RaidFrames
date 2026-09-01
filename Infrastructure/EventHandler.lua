@@ -36,6 +36,10 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", unit)
 		frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", unit)
 
+		if unit:match("^boss%d+$") then
+			frame:RegisterUnitEvent("UNIT_TARGETABLE_CHANGED", unit)
+		end
+
 		frame:SetScript("OnEvent", function(_, event, eventUnit, ...)
 			local handler = EventHandler[event]
 			if handler then
@@ -57,6 +61,11 @@ local function CreateUnitEventTrackers()
 
 	for i = 1, 40 do
 		local unit = "raid" .. i
+		trackers[unit] = CreateUnitEventTracker(unit)
+	end
+
+	for i = 1, 5 do
+		local unit = "boss" .. i
 		trackers[unit] = CreateUnitEventTracker(unit)
 	end
 
@@ -158,6 +167,8 @@ function EventHandler:Initialize()
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("PLAYER_ALIVE")
 	self:RegisterEvent("PLAYER_UNGHOST")
+	self:RegisterEvent("ENCOUNTER_START")
+	self:RegisterEvent("ENCOUNTER_END")
 
 	self:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 
@@ -376,6 +387,31 @@ end
 function EventHandler:UNIT_CONNECTION(unit)
 	addon.UpdateScheduler:Notify("statusStateChanged", unit)
 end
+
+function EventHandler:UNIT_TARGETABLE_CHANGED(unit)
+	addon.UpdateScheduler:Notify("healthStateChanged", unit)
+	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("nameStateChanged", unit)
+	addon.UpdateScheduler:Notify("statusStateChanged", unit)
+	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
+	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
+end
+
+function EventHandler:ENCOUNTER_START()
+	for i = 1, 5 do
+		local unit = "boss" .. i
+		addon.UpdateScheduler:Notify("healthStateChanged", unit)
+		addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
+		addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+		addon.UpdateScheduler:Notify("nameStateChanged", unit)
+		addon.UpdateScheduler:Notify("statusStateChanged", unit)
+		addon.UpdateScheduler:Notify("aurasStateChanged", unit)
+		addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
+	end
+end
+
+EventHandler.ENCOUNTER_END = EventHandler.ENCOUNTER_START
 
 function EventHandler:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
 	addon.Database:ApplyProfileForCurrentSpec()

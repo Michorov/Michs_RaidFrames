@@ -155,11 +155,19 @@ function Name:UpdateState(frame, settings)
 
 	local rosterKey = frame.RosterKey
 	local rawName = frame.dataProvider:GetName(frame)
-	local isValidName = type(rawName) == "string" and rawName ~= "" and rawName ~= UNKNOWNOBJECT
+	local isSecretName = issecretvalue and issecretvalue(rawName)
+	local isValidName = false
+
+	if not isSecretName then
+		isValidName = type(rawName) == "string" and rawName ~= "" and rawName ~= UNKNOWNOBJECT
+	end
 
 	local displayName
 
-	if isValidName then
+	if isSecretName then
+		displayName = rawName
+		StopRetry(name)
+	elseif isValidName then
 		displayName = rawName
 
 		if cachedSettings.truncate then
