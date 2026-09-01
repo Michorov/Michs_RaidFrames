@@ -727,7 +727,7 @@ local DEFAULTS = {
 				[8] = false,
 			},
 			direction = "HORIZONTAL",
-			reverse = false,
+			reverse = true,
 			showGroupLabel = false,
 			background = {
 				color = {
