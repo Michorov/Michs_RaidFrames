@@ -437,18 +437,22 @@ local function UpdateTestPartyLayout(group, settings)
 end
 
 local function UpdateBossUnitGroupLayout(group, settings)
+	settings = settings or {}
+
 	local defaultWidth = group.type == "party" and 128 or 112
 	local defaultHeight = group.type == "party" and 64 or 56
 	local defaultDirection = group.type == "party" and "VERTICAL" or "HORIZONTAL"
 	local layout = GetLayoutSettings(settings, defaultWidth, defaultHeight, defaultDirection)
-	local isHorizontal = layout.isHorizontal
+	local npcPosition = settings.npcPosition or {}
+	local npcDirection = settings.npcDirection or defaultDirection
+	local isHorizontal = npcDirection == "HORIZONTAL"
 
 	local frameWidth = addon.Utilities:ScaleEven(layout.frameWidthPx)
 	local frameHeight = addon.Utilities:ScaleEven(layout.frameHeightPx)
 	local spacingX = addon.Utilities:Scale(layout.spacingXPx)
 	local spacingY = addon.Utilities:Scale(layout.spacingYPx)
-	local positionX = layout.positionX + addon.Utilities:Scale(addon.Utilities:ToPixels(150))
-	local positionY = layout.positionY
+	local positionX = addon.Utilities:ToPixels(npcPosition.x or 0)
+	local positionY = addon.Utilities:ToPixels(npcPosition.y or 0)
 	local frameCount = #group.frames
 
 	local containerWidth = isHorizontal and (frameCount * frameWidth + (frameCount - 1) * spacingX) or frameWidth

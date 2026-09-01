@@ -5,6 +5,12 @@ if not L then
 	return
 end
 
+L["Disabled"] = "Deaktiviert"
+L["NPC Frames Direction"] = "Richtung der NPC-Frames"
+L["NPC Horizontal Position"] = "Horizontale NPC-Position"
+L["NPC Vertical Position"] = "Vertikale NPC-Position"
+L["Show NPC Frames"] = "NPC-Frames anzeigen"
+
 L["Class Color"] = "Klassenfarbe"
 L["Full Name"] = "Vollständig"
 L["Hide"] = "Ausblenden"
