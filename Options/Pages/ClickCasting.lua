@@ -275,18 +275,21 @@ local function SetRowActionOptions(row, bindingType)
 	return options
 end
 
-local function HasActionOption(options, value)
+local function AddSavedActionOption(options, value)
 	if not value then
-		return false
+		return
 	end
 
 	for _, option in ipairs(options or {}) do
 		if option.value == value then
-			return true
+			return
 		end
 	end
 
-	return false
+	options[#options + 1] = {
+		value = value,
+		text = tostring(value),
+	}
 end
 
 local function ClearRow(row)
@@ -404,8 +407,9 @@ local function RefreshRows(rows, bindings)
 		row.typeDropdown:SetValue(bindingType)
 		local actionOptions = SetRowActionOptions(row, bindingType)
 		local action = binding and binding.action or nil
-		if not HasActionOption(actionOptions, action) then
-			action = nil
+		if bindingType == "spell" or bindingType == "macro" then
+			AddSavedActionOption(actionOptions, action)
+			row.actionDropdown:SetOptions(actionOptions)
 		end
 
 		row.actionDropdown:SetValue(action)
