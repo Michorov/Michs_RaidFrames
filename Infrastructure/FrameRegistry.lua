@@ -50,6 +50,24 @@ local testRaidGroup = {
 	frames = {},
 }
 
+local testPartyBossGroup = {
+	type = "party",
+	isBossGroup = true,
+	isTestGroup = true,
+	isActive = false,
+	container = nil,
+	frames = {},
+}
+
+local testRaidBossGroup = {
+	type = "raid",
+	isBossGroup = true,
+	isTestGroup = true,
+	isActive = false,
+	container = nil,
+	frames = {},
+}
+
 local previewFrames = {
 	party = nil,
 	raid = nil,
@@ -659,8 +677,16 @@ function FrameRegistry:UpdateLayout()
 		addon.Frames:UpdateLayout(testPartyGroup, partySettings)
 	end
 
+	if testPartyBossGroup.isActive and testPartyBossGroup.container then
+		addon.Frames:UpdateLayout(testPartyBossGroup, partySettings)
+	end
+
 	if testRaidGroup.isActive and testRaidGroup.container then
 		addon.Frames:UpdateLayout(testRaidGroup, profile.raid or {})
+	end
+
+	if testRaidBossGroup.isActive and testRaidBossGroup.container then
+		addon.Frames:UpdateLayout(testRaidBossGroup, profile.raid or {})
 	end
 
 	local previewSection = addon.Options and addon.Options.Preview
@@ -779,16 +805,56 @@ function FrameRegistry:CreateTestGroup(groupType)
 	return group
 end
 
+function FrameRegistry:CreateBossTestGroup(groupType)
+	local group
+	local settings
+	local groupName
+
+	if groupType == "party" then
+		group = testPartyBossGroup
+		settings = addon.Database:GetProfile().party or {}
+		groupName = "MRF_TestPartyBossGroup"
+	elseif groupType == "raid" then
+		group = testRaidBossGroup
+		settings = addon.Database:GetProfile().raid or {}
+		groupName = "MRF_TestRaidBossGroup"
+	else
+		error("FrameRegistry:CreateBossTestGroup requires 'party' or 'raid'", 2)
+	end
+
+	if group.container then
+		return group
+	end
+
+	group.container = addon.Frames:CreateBossTestGroup(groupName, groupType)
+
+	for frameIndex = 1, 5 do
+		local frame = addon.Frames:CreateTestFrame(group.container, frameIndex)
+		frame.testName = "NPC Frame"
+		frame.testText:SetText("NPC Frame")
+		group.frames[frameIndex] = frame
+	end
+
+	addon.Frames:UpdateLayout(group, settings)
+
+	group.container:Hide()
+
+	return group
+end
+
 function FrameRegistry:EnableTestMode(groupType)
 	if InCombatLockdown() then
 		return
 	end
 
 	local group
+	local bossGroup
 	if groupType == "party" then
 		group = testPartyGroup
+		bossGroup = testPartyBossGroup
 	elseif groupType == "raid" then
 		group = testRaidGroup
+		bossGroup = testRaidBossGroup
 	else
 		error("FrameRegistry:EnableTestMode requires 'party' or 'raid'", 2)
 	end
@@ -806,8 +872,23 @@ function FrameRegistry:EnableTestMode(groupType)
 		addon.Frames:UpdateLayout(group, settings)
 	end
 
+	if not bossGroup.container then
+		self:CreateBossTestGroup(groupType)
+	else
+		local settings
+		if groupType == "party" then
+			settings = addon.Database:GetProfile().party or {}
+		else
+			settings = addon.Database:GetProfile().raid or {}
+		end
+
+		addon.Frames:UpdateLayout(bossGroup, settings)
+	end
+
 	group.container:Show()
 	group.isActive = true
+	bossGroup.container:Show()
+	bossGroup.isActive = true
 
 	self:UpdateStateDrivers()
 end
@@ -826,6 +907,12 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 		if testPartyGroup.container then
 			testPartyGroup.container:Hide()
 		end
+
+		testPartyBossGroup.isActive = false
+
+		if testPartyBossGroup.container then
+			testPartyBossGroup.container:Hide()
+		end
 	end
 
 	if disableRaid then
@@ -833,6 +920,12 @@ function FrameRegistry:DisableTestMode(groupType, skipDriverUpdate)
 
 		if testRaidGroup.container then
 			testRaidGroup.container:Hide()
+		end
+
+		testRaidBossGroup.isActive = false
+
+		if testRaidBossGroup.container then
+			testRaidBossGroup.container:Hide()
 		end
 	end
 
