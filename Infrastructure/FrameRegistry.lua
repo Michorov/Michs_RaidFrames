@@ -170,11 +170,11 @@ function MRF_OnUnitFrameLoad(frame)
 end
 
 function MRF_OnUnitChanged(frame, unit)
-	frame.RosterKey = nil
-
 	if frame.frameType == "boss" then
 		return
 	end
+
+	frame.RosterKey = nil
 
 	for k, v in pairs(unitFrameMap) do
 		if v == frame then

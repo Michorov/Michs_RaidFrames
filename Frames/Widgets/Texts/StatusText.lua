@@ -37,6 +37,10 @@ local function UpdateSettingsCache(settings)
 end
 
 function StatusText:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.statusText then
 		local statusFrame = CreateFrame("Frame", nil, frame)
 		statusFrame:SetAllPoints(frame)
@@ -56,6 +60,10 @@ function StatusText:Ensure(frame)
 end
 
 function StatusText:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local scaledFontSize = frame.dataProvider:ScaleFont(frame, cachedSettings.size)
@@ -77,6 +85,10 @@ function StatusText:UpdateSettings(frame, settings)
 end
 
 function StatusText:UpdateState(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local text = frame.statusText.text
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.statusText ~= true then

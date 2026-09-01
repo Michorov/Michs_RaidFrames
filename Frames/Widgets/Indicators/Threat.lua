@@ -66,6 +66,10 @@ local function ApplyThreatColor(container, threatStatus)
 end
 
 function Threat:Ensure(frame)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	if not frame.threat then
 		local container = CreateFrame("Frame", nil, frame)
 		container:SetAllPoints(frame)
@@ -91,6 +95,10 @@ function Threat:Ensure(frame)
 end
 
 function Threat:UpdateSettings(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.threat
 
 	UpdateSettingsCache(settings)
@@ -134,6 +142,10 @@ function Threat:UpdateSettings(frame, settings)
 end
 
 function Threat:UpdateState(frame, settings)
+	if frame.frameType == "boss" then
+		return
+	end
+
 	local container = frame.threat
 
 	if frame.previewWidgetVisibility and frame.previewWidgetVisibility.threat ~= true then
