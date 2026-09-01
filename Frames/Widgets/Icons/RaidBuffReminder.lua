@@ -34,7 +34,7 @@ local function UpdateSettingsCache(settings)
 end
 
 function RaidBuffReminder:Ensure(frame)
-	if addon.IsRestrictedAuraAPI and not frame.isPreview then
+	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
 		return
 	end
 
@@ -48,7 +48,7 @@ end
 function RaidBuffReminder:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if addon.IsRestrictedAuraAPI and not frame.isPreview then
+	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
 		return
 	end
 
@@ -84,7 +84,7 @@ function RaidBuffReminder:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if addon.IsRestrictedAuraAPI and not frame.isPreview then
+	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
 		return
 	end
 

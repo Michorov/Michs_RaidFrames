@@ -121,7 +121,7 @@ local function UpdateButtonsSettings(frame, settings)
 end
 
 function Buffs:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -156,7 +156,7 @@ end
 function Buffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -168,7 +168,7 @@ end
 function Buffs:UpdateFilters(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -186,7 +186,7 @@ function Buffs:UpdateFilters(frame, settings)
 end
 
 function Buffs:UpdateState(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -205,7 +205,7 @@ function Buffs:UpdateState(frame, settings)
 end
 
 function Buffs:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 

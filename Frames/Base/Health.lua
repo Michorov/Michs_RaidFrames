@@ -63,7 +63,7 @@ local function ApplyHealthColor(healthBar, frame, settings)
 
 	local classToken
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		classToken = select(2, UnitClass("player"))
 	else
 		local unit = frame and frame.unit

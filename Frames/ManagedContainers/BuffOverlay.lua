@@ -76,7 +76,7 @@ local function UpdateFilters(frame, settings)
 end
 
 function BuffOverlay:Ensure(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -110,7 +110,7 @@ end
 function BuffOverlay:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -119,7 +119,7 @@ function BuffOverlay:UpdateSettings(frame, settings)
 end
 
 function BuffOverlay:UpdateState(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
@@ -138,7 +138,7 @@ function BuffOverlay:UpdateState(frame, settings)
 end
 
 function BuffOverlay:SetUnit(frame, settings)
-	if frame.isPreview then
+	if frame.frameType == "preview" then
 		return
 	end
 
