@@ -5,6 +5,7 @@
 ## Author: Mich
 ## Version: 3.1.2
 ## SavedVariables: Michs_RaidFramesDB
+## IconTexture: Interface\AddOns\Michs_RaidFrames\Media\LogoIcon.png
 ## OptionalDeps: MiniCC
 
 # Libs
