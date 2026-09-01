@@ -375,6 +375,10 @@ local DEFAULTS = {
 			uiScale = 1.0,
 			lsmTexture = "M-SolidDarker",
 			lsmFont = -2,
+			minimap = {
+				hide = false,
+				minimapPos = 225,
+			},
 			clickCasting = {
 				source = "external",
 				specs = {},
@@ -1353,6 +1357,10 @@ function Database:Initialize()
 		end
 
 		addon.Frames.RangeChecker:UpdateSettings()
+		if addon.Options and addon.Options.Minimap then
+			addon.Options.Minimap:Refresh()
+		end
+
 		addon.UpdateScheduler:Notify("clickCastingSettingsChanged")
 		addon.UpdateScheduler:Notify("rosterChanged")
 		addon.Modules:RequestUpdateAll()
