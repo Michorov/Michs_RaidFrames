@@ -52,22 +52,9 @@ local function GetClickCastingSource(profile)
 end
 
 local function CreateDefaultBindings()
-	local bindings = {
-		{
-			action = "target",
-			button = "1",
-			modifier = "",
-			type = "action",
-		},
-		{
-			action = "togglemenu",
-			button = "2",
-			modifier = "",
-			type = "action",
-		},
-	}
+	local bindings = {}
 
-	for i = 3, MAX_BINDING_ROWS do
+	for i = 1, MAX_BINDING_ROWS do
 		bindings[i] = {}
 	end
 
