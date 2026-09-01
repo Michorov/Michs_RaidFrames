@@ -5,6 +5,12 @@ if not L then
 	return
 end
 
+L["Disabled"] = "비활성화"
+L["NPC Frames Direction"] = "NPC 프레임 방향"
+L["NPC Horizontal Position"] = "NPC 가로 위치"
+L["NPC Vertical Position"] = "NPC 세로 위치"
+L["Show NPC Frames"] = "NPC 프레임 표시"
+
 L["Class Color"] = "직업 색상"
 L["Full Name"] = "전체"
 L["Hide"] = "숨기기"

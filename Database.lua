@@ -393,8 +393,11 @@ local DEFAULTS = {
 		party = {
 			size = { width = 128, height = 64 },
 			position = { x = -400, y = 0 },
+			npcEnabled = true,
+			npcPosition = { x = -270, y = 0 },
 			spacing = { x = -1, y = -1 },
 			direction = "VERTICAL",
+			npcDirection = "VERTICAL",
 			background = {
 				color = {
 					r = 0.12,
@@ -715,6 +718,8 @@ local DEFAULTS = {
 		raid = {
 			size = { width = 110, height = 56 },
 			position = { x = -600, y = 0 },
+			npcEnabled = true,
+			npcPosition = { x = -270, y = 0 },
 			spacing = { x = -1, y = -1 },
 			groups = {
 				[1] = true,
@@ -727,6 +732,7 @@ local DEFAULTS = {
 				[8] = false,
 			},
 			direction = "HORIZONTAL",
+			npcDirection = "VERTICAL",
 			reverse = true,
 			showGroupLabel = false,
 			background = {

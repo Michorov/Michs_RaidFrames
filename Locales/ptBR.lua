@@ -5,6 +5,12 @@ if not L then
 	return
 end
 
+L["Disabled"] = "Desativado"
+L["NPC Frames Direction"] = "Direcao dos quadros de PNJ"
+L["NPC Horizontal Position"] = "Posicao horizontal de PNJ"
+L["NPC Vertical Position"] = "Posicao vertical de PNJ"
+L["Show NPC Frames"] = "Mostrar quadros de PNJ"
+
 L["Class Color"] = "Cor da classe"
 L["Full Name"] = "Completo"
 L["Hide"] = "Ocultar"
