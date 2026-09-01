@@ -20,6 +20,18 @@ local raidHeaders = {
 	containers = {},
 }
 
+local partyBossGroup = {
+	type = "party",
+	container = nil,
+	frames = {},
+}
+
+local raidBossGroup = {
+	type = "raid",
+	container = nil,
+	frames = {},
+}
+
 local testPartyGroup = {
 	type = "party",
 	isTestGroup = true,
@@ -134,6 +146,10 @@ end
 function MRF_OnUnitChanged(frame, unit)
 	frame.RosterKey = nil
 
+	if frame.isBossFrame then
+		return
+	end
+
 	for k, v in pairs(unitFrameMap) do
 		if v == frame then
 			unitFrameMap[k] = nil
@@ -226,18 +242,26 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 	end
 
 	UnregisterStateDriver(partyHeader.container, "visibility")
+	UnregisterStateDriver(partyBossGroup.container, "visibility")
 	for _, raidContainer in ipairs(raidHeaders.containers) do
 		UnregisterStateDriver(raidContainer, "visibility")
 	end
+	UnregisterStateDriver(raidBossGroup.container, "visibility")
 
 	local raidGroupSettings = (profile.raid and profile.raid.groups) or {}
 
 	if testModeActive then
 		if showSoloPartyFrame then
 			RegisterStateDriver(partyHeader.container, "visibility", "[@player,combat,nogroup:raid] show; hide")
+			RegisterStateDriver(partyBossGroup.container, "visibility", "[@player,combat,nogroup:raid] show; hide")
 		else
 			RegisterStateDriver(
 				partyHeader.container,
+				"visibility",
+				"[@player,combat,group:party,nogroup:raid] show; hide"
+			)
+			RegisterStateDriver(
+				partyBossGroup.container,
 				"visibility",
 				"[@player,combat,group:party,nogroup:raid] show; hide"
 			)
@@ -250,6 +274,7 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 				RegisterStateDriver(raidContainer, "visibility", "hide")
 			end
 		end
+		RegisterStateDriver(raidBossGroup.container, "visibility", "[@player,combat,group:raid] show; hide")
 
 		self.restoreLiveDriversAfterCombat = false
 		NotifyMiniCCFramesChanged()
@@ -258,8 +283,10 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 
 	if showSoloPartyFrame then
 		RegisterStateDriver(partyHeader.container, "visibility", "[@player,nogroup:raid] show; hide")
+		RegisterStateDriver(partyBossGroup.container, "visibility", "[@player,nogroup:raid] show; hide")
 	else
 		RegisterStateDriver(partyHeader.container, "visibility", "[@player,group:party,nogroup:raid] show; hide")
+		RegisterStateDriver(partyBossGroup.container, "visibility", "[@player,group:party,nogroup:raid] show; hide")
 	end
 
 	for groupIndex, raidContainer in ipairs(raidHeaders.containers) do
@@ -269,6 +296,7 @@ function FrameRegistry:UpdateStateDrivers(allowInCombat)
 			RegisterStateDriver(raidContainer, "visibility", "hide")
 		end
 	end
+	RegisterStateDriver(raidBossGroup.container, "visibility", "[@player,group:raid] show; hide")
 
 	self.restoreLiveDriversAfterCombat = false
 	NotifyMiniCCFramesChanged()
@@ -629,10 +657,15 @@ function FrameRegistry:Initialize()
 	local raidSettings = self:ResolveRaidSettings(profile)
 
 	partyHeader.container = addon.Frames:CreatePartyHeader(partySettings)
+	partyBossGroup.container = addon.Frames:CreateBossUnitGroup("MRF_PartyBossUnitGroup", "party")
+	partyBossGroup.frames = partyBossGroup.container.frames
 
 	for groupIndex = 1, 8 do
 		raidHeaders.containers[groupIndex] = addon.Frames:CreateRaidHeader(raidSettings, groupIndex)
 	end
+
+	raidBossGroup.container = addon.Frames:CreateBossUnitGroup("MRF_RaidBossUnitGroup", "raid")
+	raidBossGroup.frames = raidBossGroup.container.frames
 
 	ApplyBlizzardFramesVisibility()
 	self:UpdateStateDrivers(true)
