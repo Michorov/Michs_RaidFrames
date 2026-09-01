@@ -60,8 +60,12 @@ local function UpdateExternalBinds(frame, source)
 end
 
 local function UpdateLocalBinds(frame, settings)
-	local specID = addon.Utilities:GetPlayerSpecID()
-	local specSettings = settings.specs[specID]
+	local specSettings = settings.specs[addon.Utilities:GetPlayerSpecID()]
+
+	if not specSettings then
+		local _, fallbackSpecSettings = next(settings.specs)
+		specSettings = fallbackSpecSettings
+	end
 
 	RouteClicks(frame)
 
