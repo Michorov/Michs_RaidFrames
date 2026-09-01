@@ -106,6 +106,14 @@ function Utilities.IsSupportedUnit(unit)
 end
 
 function Utilities:GetManagedAuraUnit(unit)
+	if issecretvalue and issecretvalue(unit) then
+		return nil
+	end
+
+	if type(unit) == "string" and unit:match("^boss%d$") then
+		return unit
+	end
+
 	if not Utilities.IsSupportedUnit(unit) then
 		return nil
 	end

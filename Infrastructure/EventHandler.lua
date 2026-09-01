@@ -409,6 +409,14 @@ function EventHandler:ENCOUNTER_START()
 		addon.UpdateScheduler:Notify("aurasStateChanged", unit)
 		addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
 	end
+
+	if addon.IsRestrictedAuraAPI then
+		C_Timer.After(0, function()
+			for i = 1, 5 do
+				addon.FrameRegistry:UpdateManagedContainersUnit("boss" .. i)
+			end
+		end)
+	end
 end
 
 EventHandler.ENCOUNTER_END = EventHandler.ENCOUNTER_START

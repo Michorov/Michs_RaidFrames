@@ -63,7 +63,14 @@ local function ApplyNameColor(text, frame, settings)
 		classToken = select(2, UnitClass("player"))
 	else
 		local unit = frame and frame.unit
-		if unit and UnitExists(unit) then
+		if frame.frameType == "boss" and unit and UnitExists(unit) then
+			local reaction = UnitReaction("player", unit)
+			local reactionColor = reaction and FACTION_BAR_COLORS[reaction]
+			if reactionColor then
+				text:SetTextColor(reactionColor.r, reactionColor.g, reactionColor.b, reactionColor.a or c.a)
+				return
+			end
+		elseif unit and UnitExists(unit) then
 			classToken = select(2, UnitClass(unit))
 		end
 	end

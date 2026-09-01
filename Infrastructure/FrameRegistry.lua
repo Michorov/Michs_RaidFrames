@@ -171,6 +171,30 @@ end
 
 function MRF_OnUnitChanged(frame, unit)
 	if frame.frameType == "boss" then
+		if addon.IsRestrictedAuraAPI and frame.managedContainers then
+			local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
+
+			if frame.managedContainers.debuffs then
+				addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.buffs then
+				addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.customBuffs then
+				addon.Frames.ManagedContainers.CustomBuffs:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.defensives then
+				addon.Frames.ManagedContainers.Defensives:SetUnit(frame, settings)
+			end
+
+			if frame.managedContainers.buffOverlay then
+				addon.Frames.ManagedContainers.BuffOverlay:SetUnit(frame, settings)
+			end
+		end
+
 		return
 	end
 
