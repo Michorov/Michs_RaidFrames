@@ -129,6 +129,7 @@ local function BuildSettingsUpdater(updateReasons)
 		end
 
 		if updateReasons.dispelsSettingsChanged then
+			addon.Frames.ManagedContainers.Dispels:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
@@ -198,6 +199,7 @@ local function BuildStateUpdater(updateReasons)
 		end
 
 		if updateReasons.aurasStateChanged then
+			addon.Frames.ManagedContainers.Dispels:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Buffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.CustomBuffs:UpdateState(frame, settings)
 			addon.Frames.Widgets.Icons.Debuffs:UpdateState(frame, settings)

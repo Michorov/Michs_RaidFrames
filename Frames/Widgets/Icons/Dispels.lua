@@ -18,7 +18,9 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = dispels.enabled ~= false,
+		style = dispels.style == "modern" and "modern" or "blizzard",
 		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
+		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
 	}
 
@@ -41,6 +43,10 @@ local function HidePreview(container)
 
 	if container.previewGradient then
 		container.previewGradient:Hide()
+	end
+
+	if container.previewFlat then
+		container.previewFlat:Hide()
 	end
 
 	if container.previewBorder then
@@ -71,6 +77,10 @@ local function EnsurePreview(container)
 	container.previewGradient = container:CreateTexture(nil, "ARTWORK")
 	container.previewGradient:SetTexture("Interface\\Buttons\\WHITE8x8")
 	container.previewGradient:SetBlendMode("BLEND")
+
+	container.previewFlat = container:CreateTexture(nil, "ARTWORK")
+	container.previewFlat:SetBlendMode("BLEND")
+	container.previewFlat:Hide()
 
 	container.previewBorder = CreateFrame("Frame", nil, container, BackdropTemplateMixin and "BackdropTemplate")
 	container.previewBorder:SetAllPoints(container)
@@ -165,6 +175,16 @@ local function ApplyPreviewGradient(texture, aura, color, gradientDirection)
 	texture:Show()
 end
 
+local function ApplyPreviewFlat(frame, texture, color)
+	local healthTexture = frame.healthBar:GetStatusBarTexture()
+
+	texture:ClearAllPoints()
+	texture:SetPoint("TOPLEFT", healthTexture, "TOPLEFT", 0, 0)
+	texture:SetPoint("BOTTOMRIGHT", healthTexture, "BOTTOMRIGHT", 0, 0)
+	texture:SetColorTexture(color.r, color.g, color.b, 1)
+	texture:Show()
+end
+
 local function ApplyPreviewBorder(frame, border, color)
 	border:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8x8",
@@ -189,16 +209,30 @@ local function ShowPreview(frame, cachedSettings)
 	local auras = GetPreviewAuras(frame)
 	local firstAura = auras[1]
 	local color = GetPreviewColor(frame, firstAura)
+	local texture = cachedSettings.style == "blizzard" and "Gradient" or cachedSettings.texture
+	local gradientDirection = cachedSettings.style == "blizzard" and 0 or cachedSettings.gradientDirection
 
 	container:Show()
 
-	ApplyPreviewGradient(container.previewGradient, firstAura, color, cachedSettings.gradientDirection)
+	if texture == "Flat" then
+		container.previewGradient:Hide()
+		ApplyPreviewFlat(frame, container.previewFlat, color)
+	else
+		container.previewFlat:Hide()
+		ApplyPreviewGradient(container.previewGradient, firstAura, color, gradientDirection)
+	end
+
 	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
 	container.previewBorder:ClearAllPoints()
 	container.previewBorder:SetPoint("TOPLEFT", container, "TOPLEFT", borderInset, -borderInset)
 	container.previewBorder:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -borderInset, borderInset)
 	container.previewBorder:SetFrameLevel(container:GetFrameLevel() + 1)
-	ApplyPreviewBorder(frame, container.previewBorder, color)
+
+	if cachedSettings.style == "blizzard" then
+		ApplyPreviewBorder(frame, container.previewBorder, color)
+	else
+		container.previewBorder:Hide()
+	end
 
 	local iconSizePx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(15))
 	local spacingPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(0))
@@ -209,7 +243,7 @@ local function ShowPreview(frame, cachedSettings)
 		local icon = container.previewIcons[index]
 		local aura = auras[index]
 
-		if aura then
+		if cachedSettings.style == "blizzard" and aura then
 			local xOffsetPx = insetPx + ((index - 1) * (iconSizePx + spacingPx))
 
 			icon:SetFrameLevel(container:GetFrameLevel() + 2)
@@ -240,7 +274,7 @@ function Dispels:Ensure(frame)
 		container:EnableMouse(false)
 		container:ClearAllPoints()
 		container:SetAllPoints(frame)
-		container:SetFrameLevel(17)
+		container:SetFrameLevel(18)
 		frame.dispelsContainer = container
 	end
 
@@ -268,9 +302,7 @@ function Dispels:UpdateSettings(frame, settings)
 	HidePreview(container)
 
 	local unit = frame.unit
-	local canRegister = cachedSettings.enabled and unit and C_UnitAuras and C_UnitAuras.AddPrivateAuraAnchor
-
-	if not canRegister then
+	if cachedSettings.style ~= "blizzard" or not cachedSettings.enabled or not unit then
 		RemoveAnchor(frame)
 		container:Hide()
 		return
@@ -293,7 +325,7 @@ function Dispels:UpdateSettings(frame, settings)
 	container:SetAttribute("show-dispel-indicator-overlay", true)
 	container:SetAttribute("suppress-dispel-border-icons", true)
 	container:SetAttribute("dispel-indicator-option", dispelIndicatorOption)
-	container:SetAttribute("aura-organization-type", cachedSettings.gradientDirection)
+	container:SetAttribute("aura-organization-type", Enum.RaidAuraOrganizationType.Legacy)
 	container:SetAttribute("group-type", groupType)
 	container:SetAttribute("power-bar-used-height", 0)
 	container:SetAttribute("icon-size", 12)

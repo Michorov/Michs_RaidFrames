@@ -12,6 +12,16 @@ local gradientDirectionOptions = {
 	{ value = 1, textKey = "Bottom" },
 }
 
+local textureOptions = {
+	{ value = "Gradient", textKey = "Gradient" },
+	{ value = "Flat", textKey = "Flat" },
+}
+
+local styleOptions = {
+	{ value = "modern", textKey = "Modern" },
+	{ value = "blizzard", textKey = "Blizzard" },
+}
+
 function Dispels:Create(page)
 	local subpage = page:RegisterSubPage("dispels", { titleKey = "Dispels" })
 
@@ -47,8 +57,41 @@ function Dispels:Create(page)
 		end,
 	})
 
+	local styleRow = subpage:CreateRow(3)
+	styleRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local styleDropdown = styleRow:CreateControl("Dropdown", { labelKey = "Style" })
+	styleDropdown:SetOptions(styleOptions)
+	styleDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.style or "blizzard"
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.style = value
+		end,
+		onChange = function()
+			page.panel:UpdateState()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+			addon.UpdateScheduler:Notify("aurasStateChanged")
+		end,
+	})
+
 	local gradientDirectionRow = subpage:CreateRow(4)
-	gradientDirectionRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
+	gradientDirectionRow:SetLayoutPoint("TOPLEFT", styleRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local textureDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Texture" })
+	textureDropdown:SetOptions(textureOptions)
+	textureDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.texture or "Gradient"
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.texture = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+		end,
+	})
 
 	local gradientDirectionDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Start Gradient From" })
 	gradientDirectionDropdown:SetOptions(gradientDirectionOptions)
@@ -63,6 +106,13 @@ function Dispels:Create(page)
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
 		end,
 	})
+
+	subpage:SetStateUpdater(function(profile, mode)
+		local showModernSettings = profile[mode].widgets.icons.dispels.style == "modern"
+
+		textureDropdown:SetShown(showModernSettings)
+		gradientDirectionDropdown:SetShown(showModernSettings)
+	end)
 
 	return subpage
 end

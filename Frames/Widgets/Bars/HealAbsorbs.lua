@@ -38,7 +38,7 @@ end
 function HealAbsorbs:Ensure(frame)
 	if not frame.healAbsorbBar then
 		local bar = CreateFrame("StatusBar", nil, frame)
-		bar:SetFrameLevel(10)
+		bar:SetFrameLevel(15)
 		bar:SetOrientation("HORIZONTAL")
 		bar:SetReverseFill(false)
 		bar:SetAllPoints(frame)
