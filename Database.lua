@@ -571,8 +571,10 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
+						style = "blizzard",
 						showOnlyPlayerDispellable = true,
 						iconsOnly = false,
+						texture = "Gradient",
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",
@@ -909,8 +911,10 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
+						style = "blizzard",
 						showOnlyPlayerDispellable = true,
 						iconsOnly = false,
+						texture = "Gradient",
 						gradientDirection = 0,
 						anchor = "TOPRIGHT",
 						relativeAnchor = "TOPRIGHT",

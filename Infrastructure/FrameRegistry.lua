@@ -178,6 +178,10 @@ function MRF_OnUnitChanged(frame, unit)
 				addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
 			end
 
+			if frame.managedContainers.dispels then
+				addon.Frames.ManagedContainers.Dispels:SetUnit(frame, settings)
+			end
+
 			if frame.managedContainers.buffs then
 				addon.Frames.ManagedContainers.Buffs:SetUnit(frame, settings)
 			end
@@ -219,6 +223,10 @@ function MRF_OnUnitChanged(frame, unit)
 
 		if frame.managedContainers.debuffs then
 			addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+		end
+
+		if frame.managedContainers.dispels then
+			addon.Frames.ManagedContainers.Dispels:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.buffs then
@@ -460,6 +468,10 @@ function FrameRegistry:UpdateManagedContainersVisibility(unit)
 			addon.Frames.ManagedContainers.Debuffs:UpdateState(frame, settings)
 		end
 
+		if managedContainers.dispels then
+			addon.Frames.ManagedContainers.Dispels:UpdateState(frame, settings)
+		end
+
 		if managedContainers.defensives then
 			addon.Frames.ManagedContainers.Defensives:UpdateState(frame, settings)
 		end
@@ -494,6 +506,10 @@ function FrameRegistry:UpdateManagedContainersUnit(unit)
 
 		if frame.managedContainers.debuffs then
 			addon.Frames.ManagedContainers.Debuffs:SetUnit(frame, settings)
+		end
+
+		if frame.managedContainers.dispels then
+			addon.Frames.ManagedContainers.Dispels:SetUnit(frame, settings)
 		end
 
 		if frame.managedContainers.defensives then
@@ -539,6 +555,13 @@ function FrameRegistry:HideManagedContainers(unit)
 			if managedContainers.debuffs.isShown ~= false or managedContainers.debuffs:IsShown() then
 				managedContainers.debuffs.isShown = false
 				managedContainers.debuffs:Hide()
+			end
+		end
+
+		if managedContainers.dispels then
+			if managedContainers.dispels.isEnabled ~= false then
+				managedContainers.dispels.isEnabled = false
+				managedContainers.dispels:SetEnabled(false)
 			end
 		end
 

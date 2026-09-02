@@ -38,7 +38,7 @@ end
 function Absorbs:Ensure(frame)
 	if not frame.absorbBar then
 		local bar = CreateFrame("StatusBar", nil, frame)
-		bar:SetFrameLevel(15)
+		bar:SetFrameLevel(17)
 		bar:SetOrientation("HORIZONTAL")
 		bar:SetReverseFill(true)
 		bar:SetAllPoints(frame)
