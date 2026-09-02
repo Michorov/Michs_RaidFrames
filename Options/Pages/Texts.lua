@@ -16,6 +16,7 @@ function Texts:Create(panel)
 	})
 
 	self.Name:Create(page)
+	self.Power:Create(page)
 	self.StatusText:Create(page)
 	self.Away:Create(page)
 	self.HealAbsorbs:Create(page)
