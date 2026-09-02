@@ -442,6 +442,26 @@ local DEFAULTS = {
 						truncate = false,
 						maxLength = 12,
 					},
+					powerText = {
+						enabled = false,
+						healerOnly = false,
+						format = "abbreviated",
+						anchor = "BOTTOM",
+						colorByPowerType = false,
+						position = {
+							x = 0,
+							y = 1,
+						},
+						lsmFont = -1,
+						size = 10,
+						outline = "",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
+					},
 					healAbsorbs = {
 						enabled = false,
 						abbreviate = true,
@@ -781,6 +801,26 @@ local DEFAULTS = {
 						outline = "",
 						truncate = false,
 						maxLength = 12,
+					},
+					powerText = {
+						enabled = false,
+						healerOnly = false,
+						format = "abbreviated",
+						anchor = "BOTTOM",
+						colorByPowerType = false,
+						position = {
+							x = 0,
+							y = 1,
+						},
+						lsmFont = -1,
+						size = 10,
+						outline = "",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
 					},
 					healAbsorbs = {
 						enabled = false,

@@ -147,6 +147,58 @@ local function GetTestAuraInstanceID(filter, index)
 	return 5000 + index
 end
 
+local function FormatLivePowerPercent(unit, powerType)
+	return string.format("%.0f%%", UnitPowerPercent(unit, powerType, true, CurveConstants.ScaleTo100))
+end
+
+local livePowerFormatters = {
+	abbreviated = function(unit, powerType)
+		return AbbreviateNumbers(UnitPower(unit, powerType))
+	end,
+	percent = FormatLivePowerPercent,
+	full = function(unit, powerType)
+		return BreakUpLargeNumbers(UnitPower(unit, powerType))
+	end,
+	abbreviatedPercent = function(unit, powerType)
+		return AbbreviateNumbers(UnitPower(unit, powerType)) .. " | " .. FormatLivePowerPercent(unit, powerType)
+	end,
+	percentAbbreviated = function(unit, powerType)
+		return FormatLivePowerPercent(unit, powerType) .. " | " .. AbbreviateNumbers(UnitPower(unit, powerType))
+	end,
+	fullPercent = function(unit, powerType)
+		return BreakUpLargeNumbers(UnitPower(unit, powerType)) .. " | " .. FormatLivePowerPercent(unit, powerType)
+	end,
+	percentFull = function(unit, powerType)
+		return FormatLivePowerPercent(unit, powerType) .. " | " .. BreakUpLargeNumbers(UnitPower(unit, powerType))
+	end,
+}
+
+local function FormatTestPowerPercent(current, max)
+	return string.format("%.0f%%", (current / max) * 100)
+end
+
+local testPowerFormatters = {
+	abbreviated = function(current, max)
+		return AbbreviateNumbers(current)
+	end,
+	percent = FormatTestPowerPercent,
+	full = function(current, max)
+		return BreakUpLargeNumbers(current)
+	end,
+	abbreviatedPercent = function(current, max)
+		return AbbreviateNumbers(current) .. " | " .. FormatTestPowerPercent(current, max)
+	end,
+	percentAbbreviated = function(current, max)
+		return FormatTestPowerPercent(current, max) .. " | " .. AbbreviateNumbers(current)
+	end,
+	fullPercent = function(current, max)
+		return BreakUpLargeNumbers(current) .. " | " .. FormatTestPowerPercent(current, max)
+	end,
+	percentFull = function(current, max)
+		return FormatTestPowerPercent(current, max) .. " | " .. BreakUpLargeNumbers(current)
+	end,
+}
+
 function DataProvider.Live:GetHealth(frame)
 	if not frame or not frame.unit or not UnitExists(frame.unit) then
 		return 0, 1
@@ -328,6 +380,27 @@ function DataProvider.Live:GetPower(frame)
 	return UnitPower(unit), UnitPowerMax(unit), token
 end
 
+function DataProvider.Live:GetFormattedPower(frame, format)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return nil, nil
+	end
+
+	local powerToken
+	local powerType
+
+	if self:IsHealer(frame) then
+		powerType = Enum.PowerType and Enum.PowerType.Mana or 0
+		powerToken = "MANA"
+	else
+		local _, unitPowerToken = UnitPowerType(unit)
+		powerToken = unitPowerToken
+	end
+
+	local formatter = livePowerFormatters[format] or livePowerFormatters.abbreviated
+	return formatter(unit, powerType), powerToken
+end
+
 function DataProvider.Test:GetPower(frame)
 	local powerSamples = {
 		{ current = 100, max = 100 },
@@ -371,6 +444,16 @@ function DataProvider.Test:GetPower(frame)
 	local powerType = classToPowerType[classToken] or "MANA"
 
 	return sample.current, sample.max, powerType
+end
+
+function DataProvider.Test:GetFormattedPower(frame, format)
+	local current, max, powerToken = self:GetPower(frame)
+	if not current or not max or max <= 0 then
+		return nil, nil
+	end
+
+	local formatter = testPowerFormatters[format] or testPowerFormatters.abbreviated
+	return formatter(current, max), powerToken
 end
 
 function DataProvider.Live:GetAbsorbs(frame)
