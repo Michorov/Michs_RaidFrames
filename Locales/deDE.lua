@@ -190,8 +190,6 @@ L["Status"] = "Status"
 L["Summon"] = "Beschwoerung"
 L["Summon indicator settings are disabled during combat."] =
 	"Einstellungen fuer den Beschwoerungsindikator sind im Kampf deaktiviert."
-L["Private Auras"] = "Private Auren"
-L["Private Auras settings are disabled during combat."] = "Einstellungen für private Auren sind im Kampf deaktiviert."
 L["Profile '%s' already exists."] = "Profil '%s' existiert bereits."
 L["Profile '%s' does not exist."] = "Profil '%s' existiert nicht."
 L["Profiles"] = "Profile"

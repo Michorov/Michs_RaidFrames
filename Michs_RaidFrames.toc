@@ -77,7 +77,6 @@ Frames/Widgets/Icons/Buffs.lua
 Frames/Widgets/Icons/CustomBuffs.lua
 Frames/Widgets/Icons/Debuffs.lua
 Frames/Widgets/Icons/BigDefensive.lua
-Frames/Widgets/Icons/PrivateAuras.lua
 Frames/Widgets/Icons/Dispels.lua
 Frames/Widgets/Icons/RaidBuffReminder.lua
 
@@ -130,7 +129,6 @@ Options/Pages/Auras/BuffCustomIcons.lua
 Options/Pages/Auras/Debuffs.lua
 Options/Pages/Auras/Dispels.lua
 Options/Pages/Auras/BigDefensive.lua
-Options/Pages/Auras/PrivateAuras.lua
 Options/Pages/Auras/RaidBuffReminder.lua
 Options/Pages/Indicators.lua
 Options/Pages/Indicators/ReadyCheck.lua

@@ -397,7 +397,6 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 		debuffs = false,
 		bigDefensive = false,
 		raidBuffReminder = false,
-		privateAuras = false,
 		dispels = false,
 	}
 

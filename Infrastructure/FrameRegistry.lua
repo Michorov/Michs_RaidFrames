@@ -256,10 +256,6 @@ function MRF_OnUnitChanged(frame, unit)
 
 	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 	if settings then
-		if frame.privateAurasAnchoredUnit ~= unit then
-			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
-		end
-
 		if frame.dispelsAnchoredUnit ~= unit then
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end

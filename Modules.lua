@@ -58,7 +58,6 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Icons.CustomBuffs,
 		addon.Frames.Widgets.Icons.Debuffs,
 		addon.Frames.Widgets.Icons.BigDefensive,
-		addon.Frames.Widgets.Icons.PrivateAuras,
 		addon.Frames.Widgets.Icons.Dispels,
 		addon.Frames.Widgets.Icons.RaidBuffReminder,
 		addon.Frames.Widgets.Bars.BuffOverlay,

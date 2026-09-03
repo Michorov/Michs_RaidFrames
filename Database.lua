@@ -563,15 +563,6 @@ local DEFAULTS = {
 						filterBlacklistedDebuffs = true,
 						filterPermanentDebuffs = false,
 					},
-					privateAuras = {
-						anchor = "LEFT",
-						offsetX = 2,
-						offsetY = 2,
-
-						maxIcons = 3,
-						iconSize = 20,
-						spacing = 1,
-					},
 					bigDefensive = {
 						anchor = "CENTER",
 						relativeAnchor = "CENTER",
@@ -922,15 +913,6 @@ local DEFAULTS = {
 						borderColorByDebuffType = false,
 						filterBlacklistedDebuffs = true,
 						filterPermanentDebuffs = false,
-					},
-					privateAuras = {
-						anchor = "LEFT",
-						offsetX = 2,
-						offsetY = 2,
-
-						maxIcons = 3,
-						iconSize = 16,
-						spacing = 1,
 					},
 					bigDefensive = {
 						anchor = "CENTER",
