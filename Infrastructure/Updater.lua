@@ -128,10 +128,6 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Icons.RaidBuffReminder:UpdateState(frame, settings)
 		end
 
-		if updateReasons.privateAurasSettingsChanged then
-			addon.Frames.Widgets.Icons.PrivateAuras:UpdateSettings(frame, settings)
-		end
-
 		if updateReasons.dispelsSettingsChanged then
 			addon.Frames.ManagedContainers.Dispels:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)

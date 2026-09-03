@@ -5,8 +5,6 @@ addon.Options.Preview = addon.Options.Preview or {}
 
 local Preview = addon.Options.Preview
 local OptionsUILib = LibStub("MichsOptionsUILib-1.0", true)
-local _, _, _, interfaceVersion = GetBuildInfo()
-local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local preview
 local panel
@@ -67,12 +65,6 @@ local previewWidgetFlags = {
 		updateStateReason = "dispelsSettingsChanged",
 	},
 }
-
-if not isRestrictedAuraAPI then
-	table.insert(auraPreviewControls, 4, "privateAuras")
-	previewWidgetFlags.privateAuras =
-		{ label = "Private Auras", enabled = false, updateStateReason = "privateAurasSettingsChanged" }
-end
 
 local previewPageWidgets = {
 	general = {
