@@ -7,46 +7,22 @@ addon.Frames.Widgets.Icons.Dispels = addon.Frames.Widgets.Icons.Dispels or {}
 
 local Dispels = addon.Frames.Widgets.Icons.Dispels
 
-local settingsCache = setmetatable({}, { __mode = "k" })
-
-local function UpdateSettingsCache(settings)
-	settingsCache[settings] = nil
+local function BuildPreviewSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local dispels = icons.dispels or {}
 	local gradientDirection = dispels.gradientDirection == 1 and 1 or 0
 
-	local result = {
+	return {
 		enabled = dispels.enabled ~= false,
 		showOverlay = dispels.showOverlay ~= false,
+		showIcons = dispels.showIcons ~= false,
+		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
+		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 0),
 		showBorder = dispels.showBorder ~= false,
 		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
 	}
-
-	settingsCache[settings] = result
-end
-
-local function HidePreview(container)
-	if not container then
-		return
-	end
-
-	if container.previewGradient then
-		container.previewGradient:Hide()
-	end
-
-	if container.previewFlat then
-		container.previewFlat:Hide()
-	end
-
-	if container.previewBorder then
-		container.previewBorder:Hide()
-	end
-
-	for _, icon in ipairs(container.previewIcons or {}) do
-		icon:Hide()
-	end
 end
 
 local function CreatePreviewIcon(container)
@@ -60,11 +36,7 @@ local function CreatePreviewIcon(container)
 	return icon
 end
 
-local function EnsurePreview(container)
-	if container.previewGradient then
-		return
-	end
-
+local function CreatePreview(container)
 	container.previewGradient = container:CreateTexture(nil, "ARTWORK")
 	container.previewGradient:SetTexture("Interface\\Buttons\\WHITE8x8")
 	container.previewGradient:SetBlendMode("BLEND")
@@ -185,14 +157,12 @@ local function ApplyPreviewBorder(frame, border, color)
 	border:Show()
 end
 
-local function ShowPreview(frame, cachedSettings)
+local function ShowPreview(frame, previewSettings)
 	local container = frame.dispelsContainer
-	EnsurePreview(container)
 
 	if
-		not cachedSettings.enabled or (frame.previewWidgetVisibility and frame.previewWidgetVisibility.dispels ~= true)
+		not previewSettings.enabled or (frame.previewWidgetVisibility and frame.previewWidgetVisibility.dispels ~= true)
 	then
-		HidePreview(container)
 		container:Hide()
 		return
 	end
@@ -203,15 +173,15 @@ local function ShowPreview(frame, cachedSettings)
 
 	container:Show()
 
-	if not cachedSettings.showOverlay then
+	if not previewSettings.showOverlay then
 		container.previewGradient:Hide()
 		container.previewFlat:Hide()
-	elseif cachedSettings.texture == "Flat" then
+	elseif previewSettings.texture == "Flat" then
 		container.previewGradient:Hide()
 		ApplyPreviewFlat(frame, container.previewFlat, color)
 	else
 		container.previewFlat:Hide()
-		ApplyPreviewGradient(container.previewGradient, firstAura, color, cachedSettings.gradientDirection)
+		ApplyPreviewGradient(container.previewGradient, firstAura, color, previewSettings.gradientDirection)
 	end
 
 	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
@@ -220,14 +190,14 @@ local function ShowPreview(frame, cachedSettings)
 	container.previewBorder:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -borderInset, borderInset)
 	container.previewBorder:SetFrameLevel(container:GetFrameLevel() + 1)
 
-	if cachedSettings.showOverlay and cachedSettings.showBorder and cachedSettings.texture ~= "Flat" then
+	if previewSettings.showOverlay and previewSettings.showBorder and previewSettings.texture ~= "Flat" then
 		ApplyPreviewBorder(frame, container.previewBorder, color)
 	else
 		container.previewBorder:Hide()
 	end
 
-	local iconSizePx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(15))
-	local spacingPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(0))
+	local iconSizePx = frame.dataProvider:Scale(frame, previewSettings.iconSizePx)
+	local spacingPx = frame.dataProvider:Scale(frame, previewSettings.spacingPx)
 	local insetPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(2))
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
 
@@ -235,7 +205,7 @@ local function ShowPreview(frame, cachedSettings)
 		local icon = container.previewIcons[index]
 		local aura = auras[index]
 
-		if aura then
+		if previewSettings.showIcons and aura then
 			local xOffsetPx = insetPx + ((index - 1) * (iconSizePx + spacingPx))
 
 			icon:SetFrameLevel(container:GetFrameLevel() + 2)
@@ -261,16 +231,16 @@ function Dispels:Ensure(frame)
 		return
 	end
 
-	if not frame.dispelsContainer then
-		local container = CreateFrame("Frame", nil, frame)
-		container:EnableMouse(false)
-		container:ClearAllPoints()
-		container:SetAllPoints(frame)
-		container:SetFrameLevel(18)
-		frame.dispelsContainer = container
+	if frame.dispelsContainer then
+		return
 	end
 
-	EnsurePreview(frame.dispelsContainer)
+	local container = CreateFrame("Frame", nil, frame)
+	container:EnableMouse(false)
+	container:SetAllPoints(frame)
+	container:SetFrameLevel(18)
+	frame.dispelsContainer = container
+	CreatePreview(container)
 end
 
 function Dispels:UpdateSettings(frame, settings)
@@ -278,8 +248,7 @@ function Dispels:UpdateSettings(frame, settings)
 		return
 	end
 
-	UpdateSettingsCache(settings)
-	ShowPreview(frame, settingsCache[settings])
+	ShowPreview(frame, BuildPreviewSettings(settings))
 end
 
 function Dispels:Init()
