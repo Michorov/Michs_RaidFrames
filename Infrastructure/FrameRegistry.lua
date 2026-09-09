@@ -256,13 +256,6 @@ function MRF_OnUnitChanged(frame, unit)
 		return
 	end
 
-	local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
-	if settings then
-		if frame.dispelsAnchoredUnit ~= unit then
-			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
-		end
-	end
-
 	addon.UpdateScheduler:Notify("rosterChanged")
 end
 

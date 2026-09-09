@@ -27,7 +27,8 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = dispels.enabled ~= false,
-		style = dispels.style == "modern" and "modern" or "blizzard",
+		showOverlay = dispels.showOverlay ~= false,
+		showBorder = dispels.showBorder ~= false,
 		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
 		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
@@ -43,7 +44,7 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function Dispels:SetEnabled(frame, enabled)
+function Dispels:SetEnabled(frame, enabled, showOverlay)
 	if frame.frameType == "preview" or frame.frameType == "boss" then
 		return
 	end
@@ -51,9 +52,10 @@ function Dispels:SetEnabled(frame, enabled)
 	local dispels = frame.managedContainers.dispels
 	for _, key in ipairs({ "overlayContainer", "iconsContainer" }) do
 		local container = dispels[key]
-		if container.isEnabled ~= enabled then
-			container.isEnabled = enabled
-			container:SetEnabled(enabled)
+		local containerEnabled = enabled and (key ~= "overlayContainer" or showOverlay ~= false)
+		if container.isEnabled ~= containerEnabled then
+			container.isEnabled = containerEnabled
+			container:SetEnabled(containerEnabled)
 		end
 	end
 end
@@ -66,8 +68,8 @@ function Dispels:Ensure(frame, settings)
 	if not settingsCache[settings] then
 		UpdateSettingsCache(settings)
 	end
-
 	local cachedSettings = settingsCache[settings]
+	
 	local filter = cachedSettings.showOnlyPlayerDispellable and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
 	addon.Frames.ManagedContainers.DispelsOverlay:Ensure(frame, cachedSettings, DISPEL_SLOTS, filter)
 	addon.Frames.ManagedContainers.DispelsIcons:Ensure(frame, cachedSettings, DISPEL_SLOTS, filter)
@@ -80,15 +82,6 @@ function Dispels:UpdateSettings(frame, settings)
 
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
-	local dispels = frame.managedContainers.dispels
-
-	if cachedSettings.style ~= "modern" then
-		self:SetEnabled(frame, false)
-		dispels.overlayContainer:SetUnit("none")
-		dispels.iconsContainer:SetUnit("none")
-
-		return
-	end
 
 	local filter = cachedSettings.showOnlyPlayerDispellable and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
 
@@ -107,15 +100,9 @@ function Dispels:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if cachedSettings.style ~= "modern" then
-		self:SetEnabled(frame, false)
-
-		return
-	end
-
 	local shouldEnable = cachedSettings.enabled and addon.Utilities:IsManagedAuraUnitVisible(frame.unit)
 
-	self:SetEnabled(frame, shouldEnable)
+	self:SetEnabled(frame, shouldEnable, cachedSettings.showOverlay)
 end
 
 function Dispels:SetUnit(frame, settings)
@@ -123,17 +110,6 @@ function Dispels:SetUnit(frame, settings)
 		return
 	end
 	local dispels = frame.managedContainers.dispels
-
-	if not settingsCache[settings] then
-		UpdateSettingsCache(settings)
-	end
-
-	if settingsCache[settings].style ~= "modern" then
-		self:SetEnabled(frame, false)
-		dispels.overlayContainer:SetUnit("none")
-		dispels.iconsContainer:SetUnit("none")
-		return
-	end
 
 	local unit = addon.Utilities:GetManagedAuraUnit(frame.unit) or "none"
 	dispels.overlayContainer:SetUnit(unit)

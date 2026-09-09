@@ -18,22 +18,13 @@ local function UpdateSettingsCache(settings)
 
 	local result = {
 		enabled = dispels.enabled ~= false,
-		style = dispels.style == "modern" and "modern" or "blizzard",
-		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
+		showOverlay = dispels.showOverlay ~= false,
+		showBorder = dispels.showBorder ~= false,
 		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
 	}
 
 	settingsCache[settings] = result
-end
-
-local function RemoveAnchor(frame)
-	if frame.dispelsAnchorID and C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor then
-		C_UnitAuras.RemovePrivateAuraAnchor(frame.dispelsAnchorID)
-	end
-
-	frame.dispelsAnchorID = nil
-	frame.dispelsAnchoredUnit = nil
 end
 
 local function HidePreview(container)
@@ -209,17 +200,18 @@ local function ShowPreview(frame, cachedSettings)
 	local auras = GetPreviewAuras(frame)
 	local firstAura = auras[1]
 	local color = GetPreviewColor(frame, firstAura)
-	local texture = cachedSettings.style == "blizzard" and "Gradient" or cachedSettings.texture
-	local gradientDirection = cachedSettings.style == "blizzard" and 0 or cachedSettings.gradientDirection
 
 	container:Show()
 
-	if texture == "Flat" then
+	if not cachedSettings.showOverlay then
+		container.previewGradient:Hide()
+		container.previewFlat:Hide()
+	elseif cachedSettings.texture == "Flat" then
 		container.previewGradient:Hide()
 		ApplyPreviewFlat(frame, container.previewFlat, color)
 	else
 		container.previewFlat:Hide()
-		ApplyPreviewGradient(container.previewGradient, firstAura, color, gradientDirection)
+		ApplyPreviewGradient(container.previewGradient, firstAura, color, cachedSettings.gradientDirection)
 	end
 
 	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
@@ -228,7 +220,7 @@ local function ShowPreview(frame, cachedSettings)
 	container.previewBorder:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -borderInset, borderInset)
 	container.previewBorder:SetFrameLevel(container:GetFrameLevel() + 1)
 
-	if cachedSettings.style == "blizzard" then
+	if cachedSettings.showOverlay and cachedSettings.showBorder and cachedSettings.texture ~= "Flat" then
 		ApplyPreviewBorder(frame, container.previewBorder, color)
 	else
 		container.previewBorder:Hide()
@@ -243,7 +235,7 @@ local function ShowPreview(frame, cachedSettings)
 		local icon = container.previewIcons[index]
 		local aura = auras[index]
 
-		if cachedSettings.style == "blizzard" and aura then
+		if aura then
 			local xOffsetPx = insetPx + ((index - 1) * (iconSizePx + spacingPx))
 
 			icon:SetFrameLevel(container:GetFrameLevel() + 2)
@@ -265,7 +257,7 @@ local function ShowPreview(frame, cachedSettings)
 end
 
 function Dispels:Ensure(frame)
-	if frame.frameType == "boss" then
+	if frame.frameType ~= "preview" then
 		return
 	end
 
@@ -278,91 +270,16 @@ function Dispels:Ensure(frame)
 		frame.dispelsContainer = container
 	end
 
-	if frame.frameType == "preview" then
-		EnsurePreview(frame.dispelsContainer)
-	end
+	EnsurePreview(frame.dispelsContainer)
 end
 
 function Dispels:UpdateSettings(frame, settings)
-	if frame.frameType == "boss" then
+	if frame.frameType ~= "preview" then
 		return
 	end
-
-	local container = frame.dispelsContainer
 
 	UpdateSettingsCache(settings)
-	local cachedSettings = settingsCache[settings]
-
-	if frame.frameType == "preview" then
-		RemoveAnchor(frame)
-		ShowPreview(frame, cachedSettings)
-		return
-	end
-
-	HidePreview(container)
-
-	local unit = frame.unit
-	if cachedSettings.style ~= "blizzard" or not cachedSettings.enabled or not unit then
-		RemoveAnchor(frame)
-		container:Hide()
-		return
-	end
-
-	local groupType = 5
-	if unit:find("^party") then
-		groupType = 4
-	end
-
-	local dispelIndicatorOption = cachedSettings.showOnlyPlayerDispellable and 1 or 2
-	local dispelIndicatorOverlayType = Enum.RaidDispelOverlayType and Enum.RaidDispelOverlayType.UseDebuffColor
-
-	container:SetAttribute("max-buffs", 0)
-	container:SetAttribute("max-debuffs", 0)
-	container:SetAttribute("max-dispel-debuffs", 5)
-	container:SetAttribute("ignore-buffs", true)
-	container:SetAttribute("ignore-debuffs", true)
-	container:SetAttribute("ignore-dispel-debuffs", true)
-	container:SetAttribute("show-dispel-indicator-overlay", true)
-	container:SetAttribute("suppress-dispel-border-icons", true)
-	container:SetAttribute("dispel-indicator-option", dispelIndicatorOption)
-	container:SetAttribute("aura-organization-type", Enum.RaidAuraOrganizationType.Legacy)
-	container:SetAttribute("group-type", groupType)
-	container:SetAttribute("power-bar-used-height", 0)
-	container:SetAttribute("icon-size", 12)
-	container:SetAttribute("debuff-size", 12)
-	container:SetAttribute("buff-size", 12)
-	container:SetAttribute("debuff-border-scale", 1)
-	container:SetAttribute("buff-border-scale", 1)
-	container:SetAttribute("set-aura-size-to-icon-size", true)
-	container:SetAttribute("always-hide-duration", true)
-	if dispelIndicatorOverlayType then
-		container:SetAttribute("dispel-indicator-overlay-type", dispelIndicatorOverlayType)
-		container:SetAttribute("dispel-indicator-overlay-animation", false)
-	end
-	container:SetAttribute("update-settings", true)
-	container:Show()
-
-	if frame.dispelsAnchorID and frame.dispelsAnchoredUnit == unit then
-		return
-	end
-
-	RemoveAnchor(frame)
-
-	local ok, anchorID = pcall(C_UnitAuras.AddPrivateAuraAnchor, {
-		unitToken = unit,
-		auraIndex = 1,
-		parent = container,
-		isContainer = true,
-		showCountdownFrame = false,
-		showCountdownNumbers = false,
-	})
-
-	if ok and anchorID then
-		frame.dispelsAnchorID = anchorID
-		frame.dispelsAnchoredUnit = unit
-	else
-		container:Hide()
-	end
+	ShowPreview(frame, settingsCache[settings])
 end
 
 function Dispels:Init()

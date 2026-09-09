@@ -17,13 +17,13 @@ local function UpdateBorder(button, container)
 	border.right:SetWidth(thickness)
 	border.top:SetHeight(thickness)
 	border.bottom:SetHeight(thickness)
+	border:SetShown(container.showBorder and container.textureType ~= "Flat")
 end
 
 local function UpdateTexture(button, textureType, gradientDirection)
 	local color = button.color
 	local gradientTexture = button.gradientTexture
 	local flatTexture = button.flatTexture
-	button.border:SetShown(textureType ~= "Flat")
 
 	if textureType == "Flat" then
 		flatTexture:Show()
@@ -117,6 +117,7 @@ function DispelsOverlay:UpdateSettings(frame, cachedSettings, dispelSlots, filte
 	container.overlayWidth = width
 	container.overlayHeight = height
 	container.textureType = cachedSettings.texture
+	container.showBorder = cachedSettings.showBorder
 	container.gradientDirection = cachedSettings.gradientDirection
 	container.borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.frameBorderThicknessPx))
 	container.borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
@@ -166,6 +167,7 @@ function DispelsOverlay:Ensure(frame, cachedSettings, dispelSlots, filter)
 	container.overlayWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx))
 	container.overlayHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
 	container.textureType = cachedSettings.texture
+	container.showBorder = cachedSettings.showBorder
 	container.gradientDirection = cachedSettings.gradientDirection
 	container.borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.frameBorderThicknessPx))
 	container.borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))

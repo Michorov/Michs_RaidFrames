@@ -582,7 +582,8 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
-						style = "blizzard",
+						showOverlay = true,
+						showBorder = true,
 						showOnlyPlayerDispellable = true,
 						iconsOnly = false,
 						texture = "Gradient",
@@ -931,7 +932,8 @@ local DEFAULTS = {
 					},
 					dispels = {
 						enabled = true,
-						style = "blizzard",
+						showOverlay = true,
+						showBorder = true,
 						showOnlyPlayerDispellable = true,
 						iconsOnly = false,
 						texture = "Gradient",

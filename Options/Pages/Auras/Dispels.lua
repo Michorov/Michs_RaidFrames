@@ -17,9 +17,9 @@ local textureOptions = {
 	{ value = "Flat", textKey = "Flat" },
 }
 
-local styleOptions = {
-	{ value = "modern", textKey = "Modern" },
-	{ value = "blizzard", textKey = "Blizzard" },
+local visibilityOptions = {
+	{ value = true, textKey = "Show" },
+	{ value = false, textKey = "Hide" },
 }
 
 function Dispels:Create(page)
@@ -57,27 +57,25 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local styleRow = subpage:CreateRow(3)
-	styleRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
+	local overlayRow = subpage:CreateRow(4)
+	overlayRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local styleDropdown = styleRow:CreateControl("Dropdown", { labelKey = "Style" })
-	styleDropdown:SetOptions(styleOptions)
-	styleDropdown:BindValue({
+	local overlayDropdown = overlayRow:CreateControl("Dropdown", { labelKey = "Dispel Overlay" })
+	overlayDropdown:SetOptions(visibilityOptions)
+	overlayDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].widgets.icons.dispels.style or "blizzard"
+			return profile[mode].widgets.icons.dispels.showOverlay ~= false
 		end,
 		set = function(profile, mode, value)
-			profile[mode].widgets.icons.dispels.style = value
+			profile[mode].widgets.icons.dispels.showOverlay = value
 		end,
 		onChange = function()
-			page.panel:UpdateState()
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
-			addon.UpdateScheduler:Notify("aurasStateChanged")
 		end,
 	})
 
 	local gradientDirectionRow = subpage:CreateRow(4)
-	gradientDirectionRow:SetLayoutPoint("TOPLEFT", styleRow.frame, "BOTTOMLEFT", 0, -16)
+	gradientDirectionRow:SetLayoutPoint("TOPLEFT", overlayRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local textureDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Texture" })
 	textureDropdown:SetOptions(textureOptions)
@@ -89,6 +87,7 @@ function Dispels:Create(page)
 			profile[mode].widgets.icons.dispels.texture = value
 		end,
 		onChange = function()
+			page.panel:UpdateState()
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
 		end,
 	})
@@ -107,11 +106,24 @@ function Dispels:Create(page)
 		end,
 	})
 
-	subpage:SetStateUpdater(function(profile, mode)
-		local showModernSettings = profile[mode].widgets.icons.dispels.style == "modern"
+	local borderDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.showBorder ~= false
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.showBorder = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+		end,
+	})
 
-		textureDropdown:SetShown(showModernSettings)
-		gradientDirectionDropdown:SetShown(showModernSettings)
+	subpage:SetStateUpdater(function(profile, mode)
+		local showGradientSettings = (profile[mode].widgets.icons.dispels.texture or "Gradient") == "Gradient"
+		gradientDirectionDropdown:SetShown(showGradientSettings)
+		borderDropdown:SetShown(showGradientSettings)
 	end)
 
 	return subpage
