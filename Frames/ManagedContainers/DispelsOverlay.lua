@@ -6,18 +6,44 @@ addon.Frames.ManagedContainers.DispelsOverlay = addon.Frames.ManagedContainers.D
 
 local DispelsOverlay = addon.Frames.ManagedContainers.DispelsOverlay
 
-local function UpdateBorder(button, container)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local dispels = icons.dispels or {}
+	local size = (settings and settings.size) or {}
+	local border = (settings and settings.border) or {}
+	local gradientDirection = dispels.gradientDirection == 1 and 1 or 0
+
+	local result = {
+		showBorder = dispels.showBorder ~= false,
+		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
+		gradientDirection = gradientDirection,
+		frameWidthPx = addon.Utilities:ToPixels(size.width or 128),
+		frameHeightPx = addon.Utilities:ToPixels(size.height or 64),
+		frameBorderThicknessPx = addon.Utilities:ToPixels(border.thicknessPx or 1),
+	}
+
+	settingsCache[settings] = result
+end
+
+local function UpdateBorder(button, cachedSettings)
 	local border = button.border
-	local inset = container.borderInset
-	local thickness = container.borderThickness
+	local inset = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.frameBorderThicknessPx))
+	local thickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
+
 	border:ClearAllPoints()
 	border:SetPoint("TOPLEFT", button, "TOPLEFT", inset, -inset)
 	border:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -inset, inset)
+
 	border.left:SetWidth(thickness)
 	border.right:SetWidth(thickness)
 	border.top:SetHeight(thickness)
 	border.bottom:SetHeight(thickness)
-	border:SetShown(container.showBorder and container.textureType ~= "Flat")
+
+	border:SetShown(cachedSettings.showBorder and cachedSettings.texture ~= "Flat")
 end
 
 local function UpdateTexture(button, textureType, gradientDirection)
@@ -57,10 +83,19 @@ local function UpdateTexture(button, textureType, gradientDirection)
 	flatTexture:Hide()
 end
 
-local function CreateOverlayButton(button, container, color)
+local function UpdateButtonSettings(button, cachedSettings)
+	button:SetSize(
+		addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx)),
+		addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
+	)
+	
+	UpdateBorder(button, cachedSettings)
+	UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
+end
+
+local function InitializeButton(button, container, color)
 	button:EnableMouse(false)
 	button:SetFrameLevel(container:GetFrameLevel())
-	button:SetSize(container.overlayWidth, container.overlayHeight)
 
 	local gradientTexture = button:CreateTexture(nil, "ARTWORK")
 	gradientTexture:SetAllPoints(button)
@@ -79,10 +114,8 @@ local function CreateOverlayButton(button, container, color)
 	flatTexture:SetBlendMode("BLEND")
 	flatTexture:Hide()
 
-	-- The border moves with its aura button, so lower-priority borders are
-	-- clipped along with their gradients. Keep it below the outer frame border.
 	local border = CreateFrame("Frame", nil, button, "DisableUntrustedLayoutScriptsTemplate")
-	border:SetFrameLevel(24)
+	border:SetFrameLevel(button:GetFrameLevel())
 	for _, edge in ipairs({ "left", "right", "top", "bottom" }) do
 		local texture = border:CreateTexture(nil, "OVERLAY")
 		texture:SetColorTexture(color.r, color.g, color.b, 1)
@@ -99,46 +132,35 @@ local function CreateOverlayButton(button, container, color)
 	border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
 	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
 	button.border = border
-	UpdateBorder(button, container)
 
 	button.gradientTexture = gradientTexture
 	button.flatTexture = flatTexture
 	button.color = color
 	container.overlayButtons[button] = true
-	UpdateTexture(button, container.textureType, container.gradientDirection)
 end
 
-function DispelsOverlay:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
+function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
 	local container = frame.managedContainers.dispels.overlayContainer
 	local wrapper = container.wrapper
-	-- Match the even-pixel dimensions used by the secure header layout.
 	local width = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx))
 	local height = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
-	container.overlayWidth = width
-	container.overlayHeight = height
-	container.textureType = cachedSettings.texture
-	container.showBorder = cachedSettings.showBorder
-	container.gradientDirection = cachedSettings.gradientDirection
-	container.borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.frameBorderThicknessPx))
-	container.borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
 
 	wrapper:ClearAllPoints()
 	if cachedSettings.texture == "Flat" then
-		-- Clip to the live health fill without reading its secret dimensions.
 		wrapper:SetAllPoints(frame.healthBar:GetStatusBarTexture())
 	else
 		wrapper:SetAllPoints(frame)
 	end
 
 	for button in pairs(container.overlayButtons) do
-		button:SetSize(width, height)
-		UpdateBorder(button, container)
-		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
+		UpdateButtonSettings(button, cachedSettings)
 	end
 
-	for index, slot in ipairs(dispelSlots) do
-		container:SetAuraGroupFilterString(slot.key, filter)
-		container:SetAuraGroupLayout(slot.key, {
+	for index, dispel in ipairs(dispelTypes) do
+		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupLayout(dispel.type, {
 			layoutIndex = index,
 			groupSpacing = 0,
 			elementSpacing = 0,
@@ -149,7 +171,7 @@ function DispelsOverlay:UpdateSettings(frame, cachedSettings, dispelSlots, filte
 	end
 end
 
-function DispelsOverlay:Ensure(frame, cachedSettings, dispelSlots, filter)
+function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
 	if frame.managedContainers.dispels.overlayContainer then
 		return
 	end
@@ -164,15 +186,6 @@ function DispelsOverlay:Ensure(frame, cachedSettings, dispelSlots, filter)
 	container:SetFrameLevel(10)
 	container.wrapper = wrapper
 	container.overlayButtons = {}
-	container.overlayWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx))
-	container.overlayHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
-	container.textureType = cachedSettings.texture
-	container.showBorder = cachedSettings.showBorder
-	container.gradientDirection = cachedSettings.gradientDirection
-	container.borderInset = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.frameBorderThicknessPx))
-	container.borderThickness = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(1)))
-	-- Only the first active, full-frame group fits inside the wrapper. Other
-	-- groups flow to its right and are clipped, so their colors cannot mix.
 	container:SetPoint("TOPLEFT", wrapper, "TOPLEFT", 0, 0)
 	container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Horizontal)
 	container:SetFlowLayoutAnchorPoint("TOPLEFT")
@@ -183,13 +196,13 @@ function DispelsOverlay:Ensure(frame, cachedSettings, dispelSlots, filter)
 	container.isEnabled = false
 	container:SetEnabled(false)
 
-	for index, slot in ipairs(dispelSlots) do
-		local color = slot.color or DEBUFF_TYPE_NONE_COLOR
-		container:AddAuraGroup(slot.key, filter, {
+	for index, dispel in ipairs(dispelTypes) do
+		local color = dispel.color or DEBUFF_TYPE_NONE_COLOR
+		container:AddAuraGroup(dispel.type, filter, {
 			maxFrameCount = 1,
 			candidateFilters = {
 				includeDispelTypes = {
-					[slot.dispelType] = true,
+					[dispel.type] = true,
 				},
 			},
 			sortMethod = AuraContainerSortMethod.Default,
@@ -199,10 +212,10 @@ function DispelsOverlay:Ensure(frame, cachedSettings, dispelSlots, filter)
 				forceNewLine = false,
 			},
 			initializeFrame = function(auraButton)
-				CreateOverlayButton(auraButton, container, color)
+				InitializeButton(auraButton, container, color)
 			end,
 		})
 	end
 
-	self:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
+	self:UpdateSettings(frame, settings, dispelTypes, filter)
 end

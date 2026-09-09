@@ -22,6 +22,10 @@ local visibilityOptions = {
 	{ value = false, textKey = "Hide" },
 }
 
+local function FormatInteger(value)
+	return string.format("%d", value)
+end
+
 function Dispels:Create(page)
 	local subpage = page:RegisterSubPage("dispels", { titleKey = "Dispels" })
 
@@ -114,6 +118,39 @@ function Dispels:Create(page)
 		end,
 		set = function(profile, mode, value)
 			profile[mode].widgets.icons.dispels.showBorder = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+		end,
+	})
+
+	local iconsRow = subpage:CreateRow(4)
+	iconsRow:SetLayoutPoint("TOPLEFT", gradientDirectionRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local iconsDropdown = iconsRow:CreateControl("Dropdown", { labelKey = "Dispel Icons" })
+	iconsDropdown:SetOptions(visibilityOptions)
+	iconsDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.showIcons ~= false
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.showIcons = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+		end,
+	})
+
+	local iconSizeSlider = iconsRow:CreateControl("Slider", { labelKey = "Icon Size" })
+	iconSizeSlider:SetMinMaxValues(8, 128)
+	iconSizeSlider:SetStep(1)
+	iconSizeSlider:SetValueFormatter(FormatInteger)
+	iconSizeSlider:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.iconSize or 14
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.iconSize = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")

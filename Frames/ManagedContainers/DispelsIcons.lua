@@ -6,24 +6,49 @@ addon.Frames.ManagedContainers.DispelsIcons = addon.Frames.ManagedContainers.Dis
 
 local DispelsIcons = addon.Frames.ManagedContainers.DispelsIcons
 
-local function CreateDispelIcon(button, container, atlas)
+local settingsCache = setmetatable({}, { __mode = "k" })
+
+local function UpdateSettingsCache(settings)
+	settingsCache[settings] = nil
+	local widgets = (settings and settings.widgets) or {}
+	local icons = widgets.icons or {}
+	local dispels = icons.dispels or {}
+
+	local result = {
+		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
+		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 0),
+		offsetXPx = addon.Utilities:ToPixels(dispels.offsetX or -2),
+		offsetYPx = addon.Utilities:ToPixels(dispels.offsetY or -2),
+	}
+
+	settingsCache[settings] = result
+end
+
+local function InitializeButton(button, container, atlas)
 	button:EnableMouse(false)
 	button:SetFrameLevel(container:GetFrameLevel())
-	button:SetSize(container.iconSize, container.iconSize)
 
 	local icon = button:CreateTexture(nil, "ARTWORK")
 	icon:SetAtlas(atlas, false)
-	icon:SetSize(container.iconSize, container.iconSize)
 	icon:SetPoint("CENTER", button, "CENTER", 0, 0)
 	button.icon = icon
 	container.iconButtons[button] = true
 end
 
-function DispelsIcons:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
+local function UpdateButtonSettings(button, cachedSettings)
+	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
+	button:SetSize(iconSize, iconSize)
+	button.icon:SetSize(iconSize, iconSize)
+end
+
+function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
 	local container = frame.managedContainers.dispels.iconsContainer
 	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
 	local spacing = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.spacingPx))
-	container.iconSize = iconSize
+	
 	container:ClearAllPoints()
 	container:SetPoint(
 		"TOPRIGHT",
@@ -36,9 +61,9 @@ function DispelsIcons:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
 	container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
 	container:SetFlowLayoutMaximumLineSize(math.huge)
 
-	for index, slot in ipairs(dispelSlots) do
-		container:SetAuraGroupFilterString(slot.key, filter)
-		container:SetAuraGroupLayout(slot.key, {
+	for index, dispel in ipairs(dispelTypes) do
+		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupLayout(dispel.type, {
 			layoutIndex = index,
 			groupSpacing = spacing,
 			forceNewLine = false,
@@ -48,12 +73,11 @@ function DispelsIcons:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
 	end
 
 	for button in pairs(container.iconButtons) do
-		button:SetSize(iconSize, iconSize)
-		button.icon:SetSize(iconSize, iconSize)
+		UpdateButtonSettings(button, cachedSettings)
 	end
 end
 
-function DispelsIcons:Ensure(frame, cachedSettings, dispelSlots, filter)
+function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 	if frame.managedContainers.dispels.iconsContainer then
 		return
 	end
@@ -61,18 +85,17 @@ function DispelsIcons:Ensure(frame, cachedSettings, dispelSlots, filter)
 	local iconContainer = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
 	iconContainer:SetFrameLevel(20)
 	iconContainer.iconButtons = {}
-	iconContainer.iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
 	frame.managedContainers.dispels.iconsContainer = iconContainer
 	iconContainer.isEnabled = false
 	iconContainer:SetEnabled(false)
 
-	for index, slot in ipairs(dispelSlots) do
-		local atlas = "RaidFrame-Icon-Debuff" .. slot.dispelType
-		iconContainer:AddAuraGroup(slot.key, filter, {
+	for index, dispel in ipairs(dispelTypes) do
+		local atlas = "RaidFrame-Icon-Debuff" .. dispel.type
+		iconContainer:AddAuraGroup(dispel.type, filter, {
 			maxFrameCount = 1,
 			candidateFilters = {
 				includeDispelTypes = {
-					[slot.dispelType] = true,
+					[dispel.type] = true,
 				},
 			},
 			sortMethod = AuraContainerSortMethod.Default,
@@ -82,10 +105,10 @@ function DispelsIcons:Ensure(frame, cachedSettings, dispelSlots, filter)
 				forceNewLine = false,
 			},
 			initializeFrame = function(button)
-				CreateDispelIcon(button, iconContainer, atlas)
+				InitializeButton(button, iconContainer, atlas)
 			end,
 		})
 	end
 
-	self:UpdateSettings(frame, cachedSettings, dispelSlots, filter)
+	self:UpdateSettings(frame, settings, dispelTypes, filter)
 end
