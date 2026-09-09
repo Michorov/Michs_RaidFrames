@@ -149,7 +149,9 @@ function MRF_OnUnitFrameLoad(frame)
 	frame.frameType = frame.frameType or parentFrameType
 	frame.settingsType = frame.settingsType or parentSettingsType
 	frame.dataProvider = addon.Frames.DataProvider.Live
-	frame.managedContainers = {}
+	frame.managedContainers = {
+		dispels = {},
+	}
 	addon.Frames.ClickCasting:CreateClickCastingButton(frame)
 
 	local targetedSpellsApi = _G.TargetedSpellsAPI

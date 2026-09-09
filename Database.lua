@@ -592,9 +592,7 @@ local DEFAULTS = {
 						growDirection = "LEFT",
 						offsetX = -2,
 						offsetY = -2,
-						maxIcons = 4,
-
-						iconSize = 12,
+						iconSize = 14,
 						spacing = 1,
 						alpha = 1.0,
 					},
@@ -943,9 +941,7 @@ local DEFAULTS = {
 						growDirection = "LEFT",
 						offsetX = -2,
 						offsetY = -2,
-						maxIcons = 4,
-
-						iconSize = 12,
+						iconSize = 14,
 						spacing = 1,
 						alpha = 1.0,
 					},
