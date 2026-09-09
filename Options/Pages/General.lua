@@ -38,6 +38,19 @@ function General:Create(panel)
 		addon.Locale:SetLocaleOverride(value)
 	end)
 
+	local minimapIconCheckbox = subpage:CreateControl("Checkbox", { labelKey = "Minimap Icon" })
+	minimapIconCheckbox:BindValue({
+		get = function(profile)
+			return not profile.core.minimap.hide
+		end,
+		set = function(profile, _, value)
+			profile.core.minimap.hide = not value
+		end,
+		onChange = function()
+			addon.Options.Minimap:Refresh()
+		end,
+	})
+
 	local textureDropdown = subpage:CreateControl("Dropdown", { labelKey = "Global Texture" })
 	textureDropdown:SetLayoutWidth(174)
 	textureDropdown:SetOptions(addon.Styles.Textures:GetOptions())
@@ -160,6 +173,7 @@ function General:Create(panel)
 	end)
 
 	languageDropdown:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
+	minimapIconCheckbox:SetLayoutPoint("BOTTOMLEFT", languageDropdown, "BOTTOMLEFT", 291, 0)
 	fontDropdown:SetLayoutPoint("TOPLEFT", languageDropdown, "BOTTOMLEFT", 0, -32)
 	textureDropdown:SetLayoutPoint("TOPLEFT", fontDropdown, "TOPLEFT", 291, 0)
 	showSoloPartyFrameCheckbox:SetLayoutPoint("TOPLEFT", fontDropdown, "BOTTOMLEFT", 0, -32)

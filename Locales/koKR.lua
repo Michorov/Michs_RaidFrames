@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Minimap Icon"] = "미니맵 아이콘"
+
 L["Disabled"] = "비활성화"
 L["NPC Frames"] = "NPC 프레임"
 L["NPC Frames Direction"] = "NPC 프레임 방향"

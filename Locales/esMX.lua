@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Minimap Icon"] = "Icono del minimapa"
+
 L["Disabled"] = "Desactivado"
 L["NPC Frames"] = "Marcos de PNJ"
 L["NPC Frames Direction"] = "Direccion de marcos de PNJ"
