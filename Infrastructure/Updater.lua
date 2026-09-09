@@ -131,6 +131,12 @@ local function BuildSettingsUpdater(updateReasons)
 		if updateReasons.dispelsSettingsChanged then
 			addon.Frames.ManagedContainers.Dispels:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
+		elseif
+			(updateReasons.layoutChanged or updateReasons.healthSettingsChanged or updateReasons.borderSettingsChanged)
+			and not InCombatLockdown()
+		then
+			-- Refresh overlay dimensions, the health clip, and the outer-border inset.
+			addon.Frames.ManagedContainers.Dispels:UpdateSettings(frame, settings)
 		end
 	end
 end

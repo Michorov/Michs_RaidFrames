@@ -52,6 +52,8 @@ Frames/ManagedContainers/AuraButtons.lua
 Frames/ManagedContainers/Buffs.lua
 Frames/ManagedContainers/CustomBuffs.lua
 Frames/ManagedContainers/Debuffs.lua
+Frames/ManagedContainers/DispelsOverlay.lua
+Frames/ManagedContainers/DispelsIcons.lua
 Frames/ManagedContainers/Dispels.lua
 Frames/ManagedContainers/Defensives.lua
 Frames/ManagedContainers/BuffOverlay.lua
