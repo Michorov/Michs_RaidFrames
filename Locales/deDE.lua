@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Minimap Icon"] = "Minikartensymbol"
+
 L["Disabled"] = "Deaktiviert"
 L["NPC Frames"] = "NPC-Frames"
 L["NPC Frames Direction"] = "Richtung der NPC-Frames"

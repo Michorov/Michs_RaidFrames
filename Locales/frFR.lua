@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Minimap Icon"] = "Icône de la minicarte"
+
 L["Disabled"] = "Desactive"
 L["NPC Frames"] = "Cadres PNJ"
 L["NPC Frames Direction"] = "Direction des cadres PNJ"

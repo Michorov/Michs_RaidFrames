@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Minimap Icon"] = "小地圖圖示"
+
 L["Disabled"] = "停用"
 L["NPC Frames"] = "NPC框架"
 L["NPC Frames Direction"] = "NPC框架方向"

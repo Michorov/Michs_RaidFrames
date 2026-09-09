@@ -6,6 +6,7 @@ if not L then
 end
 
 L["Hide"] = "Hide"
+L["Minimap Icon"] = "Minimap Icon"
 L["Select..."] = "Select..."
 L["Show"] = "Show"
 
