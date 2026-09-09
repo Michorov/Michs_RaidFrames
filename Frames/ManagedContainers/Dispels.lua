@@ -29,6 +29,11 @@ local function UpdateSettingsCache(settings)
 		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
 		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
+		iconSizePx = addon.Utilities:ToPixels(12),
+		-- iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 12),
+		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 1),
+		offsetXPx = addon.Utilities:ToPixels(dispels.offsetX or -2),
+		offsetYPx = addon.Utilities:ToPixels(dispels.offsetY or -2),
 	}
 
 	settingsCache[settings] = result
@@ -96,16 +101,66 @@ local function CreateSlotButton(button, frame, color)
 	flatTexture:SetBlendMode("BLEND")
 	flatTexture:Hide()
 
-	local icon = button:CreateTexture(nil, "OVERLAY")
-	icon:SetSize(12, 12)
-	icon:SetPoint("TOPRIGHT", button, "TOPRIGHT", -1, -1)
-	icon:Hide()
-
 	button.unitFrame = frame
 	button.gradientTexture = gradientTexture
 	button.flatTexture = flatTexture
 	button.color = color
+end
+
+local function CreateDispelIcon(button, container, atlas)
+	button:EnableMouse(false)
+	button:SetFrameLevel(container:GetFrameLevel())
+	button:SetSize(container.iconSize, container.iconSize)
+
+	local icon = button:CreateTexture(nil, "ARTWORK")
+	icon:SetAtlas(atlas, false)
+	icon:SetSize(container.iconSize, container.iconSize)
+	icon:SetPoint("CENTER", button, "CENTER", 0, 0)
 	button.icon = icon
+	container.iconButtons[button] = true
+end
+
+local function UpdateIconContainerSettings(frame, cachedSettings)
+	local container = frame.managedContainers.dispelsIcons
+	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
+	local spacing = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.spacingPx))
+	container.iconSize = iconSize
+	container:ClearAllPoints()
+	container:SetPoint(
+		"TOPRIGHT",
+		frame,
+		"TOPRIGHT",
+		addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.offsetXPx)),
+		addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.offsetYPx))
+	)
+	container:SetFlowLayoutAnchorPoint("TOPRIGHT")
+	container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
+	container:SetFlowLayoutMaximumLineSize(math.huge)
+
+	for index, slot in ipairs(DISPEL_SLOTS) do
+		container:SetAuraGroupLayout(slot.key, {
+			layoutIndex = index,
+			groupSpacing = spacing,
+			forceNewLine = false,
+			elementWidth = iconSize,
+			elementHeight = iconSize,
+		})
+	end
+
+	for button in pairs(container.iconButtons) do
+		button:SetSize(iconSize, iconSize)
+		button.icon:SetSize(iconSize, iconSize)
+	end
+end
+
+function Dispels:SetEnabled(frame, enabled)
+	for _, key in ipairs({ "dispels", "dispelsIcons" }) do
+		local container = frame.managedContainers[key]
+		if container and container.isEnabled ~= enabled then
+			container.isEnabled = enabled
+			container:SetEnabled(enabled)
+		end
+	end
 end
 
 function Dispels:Ensure(frame, settings)
@@ -151,6 +206,36 @@ function Dispels:Ensure(frame, settings)
 	for _, button in pairs(container.slotsButtons) do
 		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
 	end
+
+	local iconContainer = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
+	iconContainer:SetFrameLevel(20)
+	iconContainer.iconButtons = {}
+	iconContainer.iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
+	frame.managedContainers.dispelsIcons = iconContainer
+	self:SetEnabled(frame, false)
+
+	for index, slot in ipairs(DISPEL_SLOTS) do
+		local atlas = "RaidFrame-Icon-Debuff" .. slot.dispelType
+		iconContainer:AddAuraGroup(slot.key, filter, {
+			maxFrameCount = 1,
+			candidateFilters = {
+				includeDispelTypes = {
+					[slot.dispelType] = true,
+				},
+			},
+			sortMethod = AuraContainerSortMethod.Default,
+			sortDirection = AuraContainerSortDirection.Normal,
+			layout = {
+				layoutIndex = index,
+				forceNewLine = false,
+			},
+			initializeFrame = function(button)
+				CreateDispelIcon(button, iconContainer, atlas)
+			end,
+		})
+	end
+
+	UpdateIconContainerSettings(frame, cachedSettings)
 end
 
 function Dispels:UpdateSettings(frame, settings)
@@ -161,11 +246,12 @@ function Dispels:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local container = frame.managedContainers.dispels
+	local iconContainer = frame.managedContainers.dispelsIcons
 
 	if cachedSettings.style ~= "modern" then
-		container.isEnabled = false
-		container:SetEnabled(false)
+		self:SetEnabled(frame, false)
 		container:SetUnit("none")
+		iconContainer:SetUnit("none")
 
 		return
 	end
@@ -174,12 +260,12 @@ function Dispels:UpdateSettings(frame, settings)
 
 	for slotKey, button in pairs(container.slotsButtons) do
 		container:SetAuraSlotFilterString(slotKey, filter)
+		iconContainer:SetAuraGroupFilterString(slotKey, filter)
 		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
 	end
 
-	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
-	container:UpdateAllAuras()
-	self:UpdateState(frame, settings)
+	UpdateIconContainerSettings(frame, cachedSettings)
+	self:SetUnit(frame, settings)
 end
 
 function Dispels:UpdateState(frame, settings)
@@ -198,20 +284,14 @@ function Dispels:UpdateState(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	if cachedSettings.style ~= "modern" then
-		if container.isEnabled ~= false then
-			container.isEnabled = false
-			container:SetEnabled(false)
-		end
+		self:SetEnabled(frame, false)
 
 		return
 	end
 
 	local shouldEnable = cachedSettings.enabled and addon.Utilities:IsManagedAuraUnitVisible(frame.unit)
 
-	if container.isEnabled ~= shouldEnable then
-		container.isEnabled = shouldEnable
-		container:SetEnabled(shouldEnable)
-	end
+	self:SetEnabled(frame, shouldEnable)
 end
 
 function Dispels:SetUnit(frame, settings)
@@ -225,12 +305,18 @@ function Dispels:SetUnit(frame, settings)
 	end
 
 	if settingsCache[settings].style ~= "modern" then
+		self:SetEnabled(frame, false)
 		container:SetUnit("none")
+		frame.managedContainers.dispelsIcons:SetUnit("none")
 		return
 	end
 
-	container:SetUnit(addon.Utilities:GetManagedAuraUnit(frame.unit) or "none")
+	local iconContainer = frame.managedContainers.dispelsIcons
+	local unit = addon.Utilities:GetManagedAuraUnit(frame.unit) or "none"
+	container:SetUnit(unit)
 	container:UpdateAllAuras()
+	iconContainer:SetUnit(unit)
+	iconContainer:UpdateAllAuras()
 	self:UpdateState(frame, settings)
 end
 

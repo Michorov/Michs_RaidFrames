@@ -555,10 +555,7 @@ function FrameRegistry:HideManagedContainers(unit)
 		end
 
 		if managedContainers.dispels then
-			if managedContainers.dispels.isEnabled ~= false then
-				managedContainers.dispels.isEnabled = false
-				managedContainers.dispels:SetEnabled(false)
-			end
+			addon.Frames.ManagedContainers.Dispels:SetEnabled(frame, false)
 		end
 
 		if managedContainers.defensives then
