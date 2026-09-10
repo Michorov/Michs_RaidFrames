@@ -15,10 +15,9 @@ local function UpdateSettingsCache(settings)
 	local dispels = icons.dispels or {}
 
 	local result = {
+		anchor = dispels.anchor or "TOPRIGHT",
 		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
 		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 0),
-		offsetXPx = addon.Utilities:ToPixels(dispels.offsetX or -2),
-		offsetYPx = addon.Utilities:ToPixels(dispels.offsetY or -2),
 	}
 
 	settingsCache[settings] = result
@@ -40,19 +39,30 @@ function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
 	local cachedSettings = settingsCache[settings]
 
 	local container = frame.managedContainers.dispels.iconsContainer
+	local anchor = cachedSettings.anchor
 	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
 	local spacing = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.spacingPx))
+	local inset = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(2)))
 	
 	container:ClearAllPoints()
 	container:SetPoint(
-		"TOPRIGHT",
+		anchor,
 		frame,
-		"TOPRIGHT",
-		addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.offsetXPx)),
-		addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.offsetYPx))
+		anchor,
+		(anchor == "TOPLEFT" or anchor == "BOTTOMLEFT") and inset or -inset,
+		(anchor == "BOTTOMLEFT" or anchor == "BOTTOMRIGHT") and inset or -inset
 	)
-	container:SetFlowLayoutAnchorPoint("TOPRIGHT")
-	container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
+	
+	container:SetFlowLayoutAnchorPoint(anchor)
+	if anchor == "TOPLEFT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
+	elseif anchor == "TOPRIGHT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
+	elseif anchor == "BOTTOMLEFT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Up)
+	elseif anchor == "BOTTOMRIGHT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Up)
+	end
 	container:SetFlowLayoutMaximumLineSize(math.huge)
 
 	for index, dispel in ipairs(dispelTypes) do
@@ -78,7 +88,7 @@ function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 	end
 
 	local iconContainer = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
-	iconContainer:SetFrameLevel(20)
+	iconContainer:SetFrameLevel(38)
 	iconContainer.iconButtons = {}
 	frame.managedContainers.dispels.iconsContainer = iconContainer
 	iconContainer.isEnabled = false
