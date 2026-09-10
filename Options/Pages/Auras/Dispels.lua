@@ -7,6 +7,13 @@ addon.Options.Pages.Auras.Dispels = addon.Options.Pages.Auras.Dispels or {}
 
 local Dispels = addon.Options.Pages.Auras.Dispels
 
+local anchorOptions = {
+	{ value = "TOPLEFT", textKey = "Top Left" },
+	{ value = "TOPRIGHT", textKey = "Top Right" },
+	{ value = "BOTTOMLEFT", textKey = "Bottom Left" },
+	{ value = "BOTTOMRIGHT", textKey = "Bottom Right" },
+}
+
 local gradientDirectionOptions = {
 	{ value = 0, textKey = "Top" },
 	{ value = 1, textKey = "Bottom" },
@@ -135,6 +142,20 @@ function Dispels:Create(page)
 		end,
 		set = function(profile, mode, value)
 			profile[mode].widgets.icons.dispels.showIcons = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+		end,
+	})
+
+	local iconsPositionDropdown = iconsRow:CreateControl("Dropdown", { labelKey = "Icons position" })
+	iconsPositionDropdown:SetOptions(anchorOptions)
+	iconsPositionDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.icons.dispels.anchor or "TOPRIGHT"
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.icons.dispels.anchor = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")

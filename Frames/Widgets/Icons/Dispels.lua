@@ -17,6 +17,7 @@ local function BuildPreviewSettings(settings)
 		enabled = dispels.enabled ~= false,
 		showOverlay = dispels.showOverlay ~= false,
 		showIcons = dispels.showIcons ~= false,
+		anchor = dispels.anchor or "TOPRIGHT",
 		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
 		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 0),
 		showBorder = dispels.showBorder ~= false,
@@ -200,22 +201,26 @@ local function ShowPreview(frame, previewSettings)
 	local spacingPx = frame.dataProvider:Scale(frame, previewSettings.spacingPx)
 	local insetPx = frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(2))
 	local iconSize = addon.Utilities:ToUI(iconSizePx)
+	local anchor = previewSettings.anchor
+	local growRight = anchor == "TOPLEFT" or anchor == "BOTTOMLEFT"
+	local offsetXPx = growRight and insetPx or -insetPx
+	local offsetYPx = (anchor == "BOTTOMLEFT" or anchor == "BOTTOMRIGHT") and insetPx or -insetPx
 
 	for index = 1, 3 do
 		local icon = container.previewIcons[index]
 		local aura = auras[index]
 
 		if previewSettings.showIcons and aura then
-			local xOffsetPx = insetPx + ((index - 1) * (iconSizePx + spacingPx))
+			local xOffsetPx = offsetXPx + (growRight and 1 or -1) * (index - 1) * (iconSizePx + spacingPx)
 
-			icon:SetFrameLevel(container:GetFrameLevel() + 2)
+			icon:SetFrameLevel(38)
 			icon:ClearAllPoints()
 			icon:SetPoint(
-				"TOPRIGHT",
+				anchor,
 				container,
-				"TOPRIGHT",
-				-addon.Utilities:ToUI(xOffsetPx),
-				-addon.Utilities:ToUI(insetPx)
+				anchor,
+				addon.Utilities:ToUI(xOffsetPx),
+				addon.Utilities:ToUI(offsetYPx)
 			)
 			icon:SetSize(iconSize, iconSize)
 			icon.texture:SetAtlas(aura.atlas)
