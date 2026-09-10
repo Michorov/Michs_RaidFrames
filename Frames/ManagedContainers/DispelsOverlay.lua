@@ -83,16 +83,6 @@ local function UpdateTexture(button, textureType, gradientDirection)
 	flatTexture:Hide()
 end
 
-local function UpdateButtonSettings(button, cachedSettings)
-	button:SetSize(
-		addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx)),
-		addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
-	)
-	
-	UpdateBorder(button, cachedSettings)
-	UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
-end
-
 local function InitializeButton(button, container, color)
 	button:EnableMouse(false)
 	button:SetFrameLevel(container:GetFrameLevel())
@@ -155,7 +145,9 @@ function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
 	end
 
 	for button in pairs(container.overlayButtons) do
-		UpdateButtonSettings(button, cachedSettings)
+		button:SetSize(width, height)
+		UpdateBorder(button, cachedSettings)
+		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
 	end
 
 	for index, dispel in ipairs(dispelTypes) do
