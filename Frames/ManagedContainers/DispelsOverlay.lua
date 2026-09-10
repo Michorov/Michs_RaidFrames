@@ -129,40 +129,6 @@ local function InitializeButton(button, container, color)
 	container.overlayButtons[button] = true
 end
 
-function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
-	UpdateSettingsCache(settings)
-	local cachedSettings = settingsCache[settings]
-	local container = frame.managedContainers.dispels.overlayContainer
-	local wrapper = container.wrapper
-	local width = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx))
-	local height = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
-
-	wrapper:ClearAllPoints()
-	if cachedSettings.texture == "Flat" then
-		wrapper:SetAllPoints(frame.healthBar:GetStatusBarTexture())
-	else
-		wrapper:SetAllPoints(frame)
-	end
-
-	for button in pairs(container.overlayButtons) do
-		button:SetSize(width, height)
-		UpdateBorder(button, cachedSettings)
-		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
-	end
-
-	for index, dispel in ipairs(dispelTypes) do
-		container:SetAuraGroupFilterString(dispel.type, filter)
-		container:SetAuraGroupLayout(dispel.type, {
-			layoutIndex = index,
-			groupSpacing = 0,
-			elementSpacing = 0,
-			forceNewLine = false,
-			elementWidth = width,
-			elementHeight = height,
-		})
-	end
-end
-
 function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
 	if frame.managedContainers.dispels.overlayContainer then
 		return
@@ -210,4 +176,38 @@ function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
 	end
 
 	self:UpdateSettings(frame, settings, dispelTypes, filter)
+end
+
+function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+	local container = frame.managedContainers.dispels.overlayContainer
+	local wrapper = container.wrapper
+	local width = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameWidthPx))
+	local height = addon.Utilities:ToUI(addon.Utilities:ScaleEven(cachedSettings.frameHeightPx))
+
+	wrapper:ClearAllPoints()
+	if cachedSettings.texture == "Flat" then
+		wrapper:SetAllPoints(frame.healthBar:GetStatusBarTexture())
+	else
+		wrapper:SetAllPoints(frame)
+	end
+
+	for button in pairs(container.overlayButtons) do
+		button:SetSize(width, height)
+		UpdateBorder(button, cachedSettings)
+		UpdateTexture(button, cachedSettings.texture, cachedSettings.gradientDirection)
+	end
+
+	for index, dispel in ipairs(dispelTypes) do
+		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupLayout(dispel.type, {
+			layoutIndex = index,
+			groupSpacing = 0,
+			elementSpacing = 0,
+			forceNewLine = false,
+			elementWidth = width,
+			elementHeight = height,
+		})
+	end
 end

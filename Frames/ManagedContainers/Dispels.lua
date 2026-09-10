@@ -32,25 +32,6 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = result
 end
 
-function Dispels:SetEnabled(frame, enabled, cachedSettings)
-	if frame.frameType == "preview" or frame.frameType == "boss" then
-		return
-	end
-
-	local dispels = frame.managedContainers.dispels
-	local overlayEnabled = enabled and cachedSettings.showOverlay
-	if dispels.overlayContainer.isEnabled ~= overlayEnabled then
-		dispels.overlayContainer.isEnabled = overlayEnabled
-		dispels.overlayContainer:SetEnabled(overlayEnabled)
-	end
-
-	local iconsEnabled = enabled and cachedSettings.showIcons
-	if dispels.iconsContainer.isEnabled ~= iconsEnabled then
-		dispels.iconsContainer.isEnabled = iconsEnabled
-		dispels.iconsContainer:SetEnabled(iconsEnabled)
-	end
-end
-
 function Dispels:Ensure(frame, settings)
 	if frame.frameType == "preview" or frame.frameType == "boss" then
 		return
@@ -108,6 +89,25 @@ function Dispels:SetUnit(frame, settings)
 	dispels.iconsContainer:SetUnit(unit)
 	dispels.iconsContainer:UpdateAllAuras()
 	self:UpdateState(frame, settings)
+end
+
+function Dispels:SetEnabled(frame, enabled, cachedSettings)
+	if frame.frameType == "preview" or frame.frameType == "boss" then
+		return
+	end
+
+	local dispels = frame.managedContainers.dispels
+	local overlayEnabled = enabled and cachedSettings.showOverlay
+	if dispels.overlayContainer.isEnabled ~= overlayEnabled then
+		dispels.overlayContainer.isEnabled = overlayEnabled
+		dispels.overlayContainer:SetEnabled(overlayEnabled)
+	end
+
+	local iconsEnabled = enabled and cachedSettings.showIcons
+	if dispels.iconsContainer.isEnabled ~= iconsEnabled then
+		dispels.iconsContainer.isEnabled = iconsEnabled
+		dispels.iconsContainer:SetEnabled(iconsEnabled)
+	end
 end
 
 function Dispels:Init()
