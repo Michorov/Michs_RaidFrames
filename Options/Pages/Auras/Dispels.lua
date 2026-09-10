@@ -85,10 +85,10 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local gradientDirectionRow = subpage:CreateRow(4)
-	gradientDirectionRow:SetLayoutPoint("TOPLEFT", overlayRow.frame, "BOTTOMLEFT", 0, -16)
+	local overlayOptionsRow = subpage:CreateRow(4)
+	overlayOptionsRow:SetLayoutPoint("TOPLEFT", overlayRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local textureDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Texture" })
+	local textureDropdown = overlayOptionsRow:CreateControl("Dropdown", { labelKey = "Texture" })
 	textureDropdown:SetOptions(textureOptions)
 	textureDropdown:BindValue({
 		get = function(profile, mode)
@@ -103,7 +103,7 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local gradientDirectionDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Start Gradient From" })
+	local gradientDirectionDropdown = overlayOptionsRow:CreateControl("Dropdown", { labelKey = "Start Gradient From" })
 	gradientDirectionDropdown:SetOptions(gradientDirectionOptions)
 	gradientDirectionDropdown:BindValue({
 		get = function(profile, mode)
@@ -117,7 +117,7 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local borderDropdown = gradientDirectionRow:CreateControl("Dropdown", { labelKey = "Border" })
+	local borderDropdown = overlayOptionsRow:CreateControl("Dropdown", { labelKey = "Border" })
 	borderDropdown:SetOptions(visibilityOptions)
 	borderDropdown:BindValue({
 		get = function(profile, mode)
@@ -132,7 +132,7 @@ function Dispels:Create(page)
 	})
 
 	local iconsRow = subpage:CreateRow(4)
-	iconsRow:SetLayoutPoint("TOPLEFT", gradientDirectionRow.frame, "BOTTOMLEFT", 0, -16)
+	iconsRow:SetLayoutPoint("TOPLEFT", overlayOptionsRow.frame, "BOTTOMLEFT", 0, -16)
 
 	local iconsDropdown = iconsRow:CreateControl("Dropdown", { labelKey = "Dispel Icons" })
 	iconsDropdown:SetOptions(visibilityOptions)
@@ -148,7 +148,10 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local iconsPositionDropdown = iconsRow:CreateControl("Dropdown", { labelKey = "Icons position" })
+	local iconsOptionsRow = subpage:CreateRow(4)
+	iconsOptionsRow:SetLayoutPoint("TOPLEFT", iconsRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local iconsPositionDropdown = iconsOptionsRow:CreateControl("Dropdown", { labelKey = "Icons position" })
 	iconsPositionDropdown:SetOptions(anchorOptions)
 	iconsPositionDropdown:BindValue({
 		get = function(profile, mode)
@@ -162,7 +165,7 @@ function Dispels:Create(page)
 		end,
 	})
 
-	local iconSizeSlider = iconsRow:CreateControl("Slider", { labelKey = "Icon Size" })
+	local iconSizeSlider = iconsOptionsRow:CreateControl("Slider", { labelKey = "Icon Size" })
 	iconSizeSlider:SetMinMaxValues(8, 128)
 	iconSizeSlider:SetStep(1)
 	iconSizeSlider:SetValueFormatter(FormatInteger)
