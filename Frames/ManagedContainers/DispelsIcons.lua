@@ -34,54 +34,6 @@ local function InitializeButton(button, container, atlas)
 	container.iconButtons[button] = true
 end
 
-function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
-	UpdateSettingsCache(settings)
-	local cachedSettings = settingsCache[settings]
-
-	local container = frame.managedContainers.dispels.iconsContainer
-	local anchor = cachedSettings.anchor
-	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
-	local spacing = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.spacingPx))
-	local inset = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(2)))
-	
-	container:ClearAllPoints()
-	container:SetPoint(
-		anchor,
-		frame,
-		anchor,
-		(anchor == "TOPLEFT" or anchor == "BOTTOMLEFT") and inset or -inset,
-		(anchor == "BOTTOMLEFT" or anchor == "BOTTOMRIGHT") and inset or -inset
-	)
-	
-	container:SetFlowLayoutAnchorPoint(anchor)
-	if anchor == "TOPLEFT" then
-		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
-	elseif anchor == "TOPRIGHT" then
-		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
-	elseif anchor == "BOTTOMLEFT" then
-		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Up)
-	elseif anchor == "BOTTOMRIGHT" then
-		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Up)
-	end
-	container:SetFlowLayoutMaximumLineSize(math.huge)
-
-	for index, dispel in ipairs(dispelTypes) do
-		container:SetAuraGroupFilterString(dispel.type, filter)
-		container:SetAuraGroupLayout(dispel.type, {
-			layoutIndex = index,
-			groupSpacing = spacing,
-			forceNewLine = false,
-			elementWidth = iconSize,
-			elementHeight = iconSize,
-		})
-	end
-
-	for button in pairs(container.iconButtons) do
-		button:SetSize(iconSize, iconSize)
-		button.icon:SetSize(iconSize, iconSize)
-	end
-end
-
 function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 	if frame.managedContainers.dispels.iconsContainer then
 		return
@@ -116,4 +68,52 @@ function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 	end
 
 	self:UpdateSettings(frame, settings, dispelTypes, filter)
+end
+
+function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
+	UpdateSettingsCache(settings)
+	local cachedSettings = settingsCache[settings]
+
+	local container = frame.managedContainers.dispels.iconsContainer
+	local anchor = cachedSettings.anchor
+	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
+	local spacing = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.spacingPx))
+	local inset = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(2)))
+	
+	container:ClearAllPoints()
+	container:SetPoint(
+		anchor,
+		frame,
+		anchor,
+		(anchor == "TOPLEFT" or anchor == "BOTTOMLEFT") and inset or -inset,
+		(anchor == "BOTTOMLEFT" or anchor == "BOTTOMRIGHT") and inset or -inset
+	)
+
+	container:SetFlowLayoutAnchorPoint(anchor)
+	if anchor == "TOPLEFT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Down)
+	elseif anchor == "TOPRIGHT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down)
+	elseif anchor == "BOTTOMLEFT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Right, AnchorUtil.FlowDirection.Up)
+	elseif anchor == "BOTTOMRIGHT" then
+		container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Up)
+	end
+	container:SetFlowLayoutMaximumLineSize(math.huge)
+
+	for index, dispel in ipairs(dispelTypes) do
+		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupLayout(dispel.type, {
+			layoutIndex = index,
+			groupSpacing = spacing,
+			forceNewLine = false,
+			elementWidth = iconSize,
+			elementHeight = iconSize,
+		})
+	end
+
+	for button in pairs(container.iconButtons) do
+		button:SetSize(iconSize, iconSize)
+		button.icon:SetSize(iconSize, iconSize)
+	end
 end
