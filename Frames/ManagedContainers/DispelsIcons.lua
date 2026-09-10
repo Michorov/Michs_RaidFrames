@@ -35,12 +35,6 @@ local function InitializeButton(button, container, atlas)
 	container.iconButtons[button] = true
 end
 
-local function UpdateButtonSettings(button, cachedSettings)
-	local iconSize = addon.Utilities:ToUI(addon.Utilities:Scale(cachedSettings.iconSizePx))
-	button:SetSize(iconSize, iconSize)
-	button.icon:SetSize(iconSize, iconSize)
-end
-
 function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
@@ -73,7 +67,8 @@ function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
 	end
 
 	for button in pairs(container.iconButtons) do
-		UpdateButtonSettings(button, cachedSettings)
+		button:SetSize(iconSize, iconSize)
+		button.icon:SetSize(iconSize, iconSize)
 	end
 end
 
