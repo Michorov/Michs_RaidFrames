@@ -36,7 +36,7 @@ end
 function Dispels:Create(page)
 	local subpage = page:RegisterSubPage("dispels", { titleKey = "Dispels" })
 
-	local settingsRow = subpage:CreateRow(2)
+	local settingsRow = subpage:CreateRow(3)
 	settingsRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local checkboxSlot = settingsRow:CreateCheckboxSlot("top")
@@ -67,6 +67,36 @@ function Dispels:Create(page)
 			addon.UpdateScheduler:Notify("dispelsSettingsChanged")
 		end,
 	})
+
+	local classCheckboxSlot = settingsRow:CreateCheckboxSlot("top")
+	local playerClass = addon.Utilities:GetPlayerClassFileName()
+	if playerClass == "SHAMAN" then
+		local showPoisonCheckbox = classCheckboxSlot:CreateControl("Checkbox", { labelKey = "Show Poison for Shaman" })
+		showPoisonCheckbox:BindValue({
+			get = function(profile, mode)
+				return profile[mode].widgets.icons.dispels.showPoisonForShaman == true
+			end,
+			set = function(profile, mode, value)
+				profile[mode].widgets.icons.dispels.showPoisonForShaman = value
+			end,
+			onChange = function()
+				addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+			end,
+		})
+	elseif playerClass == "WARLOCK" then
+		local showMagicCheckbox = classCheckboxSlot:CreateControl("Checkbox", { labelKey = "Show Magic for Warlock" })
+		showMagicCheckbox:BindValue({
+			get = function(profile, mode)
+				return profile[mode].widgets.icons.dispels.showMagicForWarlock == true
+			end,
+			set = function(profile, mode, value)
+				profile[mode].widgets.icons.dispels.showMagicForWarlock = value
+			end,
+			onChange = function()
+				addon.UpdateScheduler:Notify("dispelsSettingsChanged")
+			end,
+		})
+	end
 
 	local overlayRow = subpage:CreateRow(4)
 	overlayRow:SetLayoutPoint("TOPLEFT", settingsRow.frame, "BOTTOMLEFT", 0, -16)

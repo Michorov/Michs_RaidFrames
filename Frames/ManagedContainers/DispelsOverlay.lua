@@ -129,7 +129,7 @@ local function InitializeButton(button, container, color)
 	container.overlayButtons[button] = true
 end
 
-function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
+function DispelsOverlay:Ensure(frame, settings, dispelTypes, filters)
 	if frame.managedContainers.dispels.overlayContainer then
 		return
 	end
@@ -156,7 +156,7 @@ function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
 
 	for index, dispel in ipairs(dispelTypes) do
 		local color = dispel.color or DEBUFF_TYPE_NONE_COLOR
-		container:AddAuraGroup(dispel.type, filter, {
+		container:AddAuraGroup(dispel.type, filters[dispel.type], {
 			maxFrameCount = 1,
 			candidateFilters = {
 				includeDispelTypes = {
@@ -175,10 +175,10 @@ function DispelsOverlay:Ensure(frame, settings, dispelTypes, filter)
 		})
 	end
 
-	self:UpdateSettings(frame, settings, dispelTypes, filter)
+	self:UpdateSettings(frame, settings, dispelTypes, filters)
 end
 
-function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
+function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filters)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 	local container = frame.managedContainers.dispels.overlayContainer
@@ -200,7 +200,7 @@ function DispelsOverlay:UpdateSettings(frame, settings, dispelTypes, filter)
 	end
 
 	for index, dispel in ipairs(dispelTypes) do
-		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupFilterString(dispel.type, filters[dispel.type])
 		container:SetAuraGroupLayout(dispel.type, {
 			layoutIndex = index,
 			groupSpacing = 0,
