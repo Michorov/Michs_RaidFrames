@@ -27,7 +27,21 @@ local function UpdateSettingsCache(settings)
 		showOverlay = dispels.showOverlay ~= false,
 		showIcons = dispels.showIcons ~= false,
 		showOnlyPlayerDispellable = dispels.showOnlyPlayerDispellable ~= false,
+		filters = {},
 	}
+
+	local filter = result.showOnlyPlayerDispellable and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
+	for _, dispel in ipairs(DISPEL_TYPES) do
+		result.filters[dispel.type] = filter
+	end
+
+	local playerClass = addon.Utilities:GetPlayerClassFileName()
+	if playerClass == "SHAMAN" and dispels.showPoisonForShaman == true then
+		result.filters.Poison = "HARMFUL"
+	end
+	if playerClass == "WARLOCK" and dispels.showMagicForWarlock == true then
+		result.filters.Magic = "HARMFUL"
+	end
 
 	settingsCache[settings] = result
 end
@@ -42,9 +56,8 @@ function Dispels:Ensure(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 	
-	local filter = cachedSettings.showOnlyPlayerDispellable and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
-	addon.Frames.ManagedContainers.DispelsOverlay:Ensure(frame, settings, DISPEL_TYPES, filter)
-	addon.Frames.ManagedContainers.DispelsIcons:Ensure(frame, settings, DISPEL_TYPES, filter)
+	addon.Frames.ManagedContainers.DispelsOverlay:Ensure(frame, settings, DISPEL_TYPES, cachedSettings.filters)
+	addon.Frames.ManagedContainers.DispelsIcons:Ensure(frame, settings, DISPEL_TYPES, cachedSettings.filters)
 end
 
 function Dispels:UpdateSettings(frame, settings)
@@ -55,10 +68,8 @@ function Dispels:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
-	local filter = cachedSettings.showOnlyPlayerDispellable and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
-
-	addon.Frames.ManagedContainers.DispelsOverlay:UpdateSettings(frame, settings, DISPEL_TYPES, filter)
-	addon.Frames.ManagedContainers.DispelsIcons:UpdateSettings(frame, settings, DISPEL_TYPES, filter)
+	addon.Frames.ManagedContainers.DispelsOverlay:UpdateSettings(frame, settings, DISPEL_TYPES, cachedSettings.filters)
+	addon.Frames.ManagedContainers.DispelsIcons:UpdateSettings(frame, settings, DISPEL_TYPES, cachedSettings.filters)
 	self:SetUnit(frame, settings)
 end
 

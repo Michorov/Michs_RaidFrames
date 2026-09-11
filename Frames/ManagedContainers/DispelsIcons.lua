@@ -34,7 +34,7 @@ local function InitializeButton(button, container, atlas)
 	container.iconButtons[button] = true
 end
 
-function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
+function DispelsIcons:Ensure(frame, settings, dispelTypes, filters)
 	if frame.managedContainers.dispels.iconsContainer then
 		return
 	end
@@ -48,7 +48,7 @@ function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 
 	for index, dispel in ipairs(dispelTypes) do
 		local atlas = "RaidFrame-Icon-Debuff" .. dispel.type
-		iconContainer:AddAuraGroup(dispel.type, filter, {
+		iconContainer:AddAuraGroup(dispel.type, filters[dispel.type], {
 			maxFrameCount = 1,
 			candidateFilters = {
 				includeDispelTypes = {
@@ -67,10 +67,10 @@ function DispelsIcons:Ensure(frame, settings, dispelTypes, filter)
 		})
 	end
 
-	self:UpdateSettings(frame, settings, dispelTypes, filter)
+	self:UpdateSettings(frame, settings, dispelTypes, filters)
 end
 
-function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
+function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filters)
 	UpdateSettingsCache(settings)
 	local cachedSettings = settingsCache[settings]
 
@@ -102,7 +102,7 @@ function DispelsIcons:UpdateSettings(frame, settings, dispelTypes, filter)
 	container:SetFlowLayoutMaximumLineSize(math.huge)
 
 	for index, dispel in ipairs(dispelTypes) do
-		container:SetAuraGroupFilterString(dispel.type, filter)
+		container:SetAuraGroupFilterString(dispel.type, filters[dispel.type])
 		container:SetAuraGroupLayout(dispel.type, {
 			layoutIndex = index,
 			groupSpacing = spacing,
