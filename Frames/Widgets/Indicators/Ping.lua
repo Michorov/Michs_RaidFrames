@@ -41,7 +41,7 @@ end
 
 local function ShowPing(icon, textureKit)
 	ClearPing(icon)
-	
+
 	if issecretvalue(textureKit) or type(textureKit) ~= "string" then
 		return
 	end
@@ -110,6 +110,12 @@ function Ping:Ensure(frame)
 	container.background:SetAllPoints(container)
 	container.icon = container:CreateTexture(nil, "ARTWORK")
 	container.icon:SetAllPoints(container)
+	
+	if frame.frameType == "preview" then
+		container.background:SetAtlas("Ping_Frame_BG_NonThreat", false)
+		container.icon:SetAtlas("Ping_Frame_NonThreat", false)
+	end
+
 	container:Hide()
 	frame.ping = container
 end
@@ -137,10 +143,14 @@ function Ping:UpdateSettings(frame, settings)
 		addon.Utilities:ToUI(frame.dataProvider:Scale(frame, cachedSettings.offsetXPx)),
 		addon.Utilities:ToUI(frame.dataProvider:Scale(frame, cachedSettings.offsetYPx))
 	)
+
+	if frame.frameType == "preview" then
+		container:SetShown(frame.previewWidgetVisibility.ping == true)
+	end
 end
 
 function Ping:UpdateState(frame, settings)
-	if frame.frameType == "boss" then
+	if frame.frameType == "boss" or frame.frameType == "preview" then
 		return
 	end
 
