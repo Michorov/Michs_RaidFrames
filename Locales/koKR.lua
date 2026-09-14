@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "신호"
+
 L["Minimap Icon"] = "미니맵 아이콘"
 
 L["Disabled"] = "비활성화"

@@ -15,9 +15,10 @@ function Indicators:Create(panel)
 		modeSwitchType = "toggle",
 	})
 
-	self.ReadyCheck:Create(page)
-	self.PendingSummon:Create(page)
+	self.Ping:Create(page)
 	self.RaidMarker:Create(page)
+	self.PendingSummon:Create(page)
+	self.ReadyCheck:Create(page)
 	self.RoleIndicator:Create(page)
 	self.GroupStatus:Create(page)
 	self.Threat:Create(page)

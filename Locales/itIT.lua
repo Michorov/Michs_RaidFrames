@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "Segnalazione"
+
 L["Minimap Icon"] = "Icona della minimappa"
 
 L["Disabled"] = "Disabilitato"
