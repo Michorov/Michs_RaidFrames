@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover"] = "Mouseover"
+
 L["Health Format"] = "Health Format"
 
 L["Ping"] = "Ping"

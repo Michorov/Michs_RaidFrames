@@ -60,6 +60,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.Threat:UpdateState(frame, settings)
 		end
 
+		if updateReasons.mouseoverSettingsChanged or updateReasons.borderSettingsChanged then
+			addon.Frames.Widgets.Indicators.Mouseover:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.nameSettingsChanged then
 			addon.Frames.Widgets.Texts.Name:UpdateSettings(frame, settings)
 		end
@@ -201,6 +205,10 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.groupStatusStateChanged or updateReasons.groupStatusSettingsChanged then
 			addon.Frames.Widgets.Indicators.GroupStatus:UpdateState(frame, settings)
+		end
+
+		if updateReasons.mouseoverStateChanged then
+			addon.Frames.Widgets.Indicators.Mouseover:UpdateState(frame, settings)
 		end
 
 		if updateReasons.threatStateChanged then

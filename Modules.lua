@@ -41,6 +41,7 @@ function Modules:Initialize()
 		addon.Frames.Widgets.Indicators.RoleIcon,
 		addon.Frames.Widgets.Indicators.GroupStatus,
 		addon.Frames.Widgets.Indicators.Threat,
+		addon.Frames.Widgets.Indicators.Mouseover,
 		addon.Frames.Widgets.Bars.Absorbs,
 		addon.Frames.Widgets.Bars.HealAbsorbs,
 		addon.Frames.Widgets.Texts.Name,
