@@ -51,7 +51,7 @@ local function UpdateSettingsCache(settings)
 		healerOnly = power.healerOnly == true,
 		texture = texture,
 		heightPx = addon.Utilities:ToPixels(power.height or 4),
-		borderThicknessPx = addon.Utilities:ToPixels(power.borderThicknessPx or 1),
+		borderThicknessPx = addon.Utilities:ToPixels((power.borderThicknessPx or 1) > 0 and 1 or 0),
 	}
 
 	settingsCache[settings] = result
