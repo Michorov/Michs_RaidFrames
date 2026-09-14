@@ -29,7 +29,7 @@ function Frames:Create(panel, config)
 	})
 	local subpage = page:RegisterSubPage("frames", { titleKey = "Frames" })
 
-	local frameRow = subpage:CreateRow(3)
+	local frameRow = subpage:CreateRow(4)
 	frameRow:SetLayoutPoint("TOPLEFT", subpage.frame, "TOPLEFT", 0, 0)
 
 	local frameWidthSlider = frameRow:CreateControl("Slider", { labelKey = "Frame Width" })
@@ -78,7 +78,7 @@ function Frames:Create(panel, config)
 		end,
 	})
 
-	local borderRow = subpage:CreateRow(3)
+	local borderRow = subpage:CreateRow(4)
 	borderRow:SetLayoutPoint("TOPLEFT", frameRow.frame, "BOTTOMLEFT", 0, -8)
 
 	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
