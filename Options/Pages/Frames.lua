@@ -6,6 +6,11 @@ addon.Options.Pages.Frames = addon.Options.Pages.Frames or {}
 
 local Frames = addon.Options.Pages.Frames
 
+local visibilityOptions = {
+	{ value = 1, textKey = "Show" },
+	{ value = 0, textKey = "Hide" },
+}
+
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
@@ -76,13 +81,11 @@ function Frames:Create(panel, config)
 	local borderRow = subpage:CreateRow(3)
 	borderRow:SetLayoutPoint("TOPLEFT", frameRow.frame, "BOTTOMLEFT", 0, -8)
 
-	local frameBorderThicknessSlider = borderRow:CreateControl("Slider", { labelKey = "Border Size" })
-	frameBorderThicknessSlider:SetMinMaxValues(0, 6)
-	frameBorderThicknessSlider:SetStep(1)
-	frameBorderThicknessSlider:SetValueFormatter(FormatInteger)
-	frameBorderThicknessSlider:BindValue({
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
 		get = function(profile, mode)
-			return profile[mode].border.thicknessPx
+			return (profile[mode].border.thicknessPx or 1) > 0 and 1 or 0
 		end,
 		set = function(profile, mode, value)
 			profile[mode].border.thicknessPx = value

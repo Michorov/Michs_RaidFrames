@@ -15,7 +15,7 @@ local function UpdateSettingsCache(settings)
 	local color = border.color or {}
 
 	local result = {
-		thicknessPx = addon.Utilities:ToPixels(border.thicknessPx or 1),
+		showBorder = (border.thicknessPx or 1) > 0,
 		color = {
 			r = color.r or 0,
 			g = color.g or 0,
@@ -50,14 +50,12 @@ function Border:UpdateSettings(frame, settings)
 
 	local border = frame.border
 
-	local scaledThickness = frame.dataProvider:Scale(frame, cachedSettings.thicknessPx)
-
-	if scaledThickness == 0 then
+	if not cachedSettings.showBorder then
 		border:Hide()
 		return
 	end
 
-	local uiThickness = addon.Utilities:ToUI(scaledThickness)
+	local uiThickness = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
 
 	border.left:ClearAllPoints()
 	border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
