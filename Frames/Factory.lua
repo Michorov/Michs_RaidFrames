@@ -379,6 +379,7 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 
 	frame.previewWidgetVisibility = {
 		power = false,
+		ping = false,
 		readyCheck = false,
 		pendingSummon = false,
 		raidMarker = false,
