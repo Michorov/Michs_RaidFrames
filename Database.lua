@@ -743,7 +743,6 @@ local DEFAULTS = {
 					},
 					threat = {
 						enabled = false,
-						borderSize = 1,
 					},
 					mouseover = {
 						enabled = false,
@@ -1123,7 +1122,6 @@ local DEFAULTS = {
 					},
 					threat = {
 						enabled = false,
-						borderSize = 1,
 					},
 					mouseover = {
 						enabled = false,

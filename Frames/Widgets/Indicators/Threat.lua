@@ -23,7 +23,6 @@ local function UpdateSettingsCache(settings)
 
 	settingsCache[settings] = {
 		enabled = threat.enabled == true,
-		borderSizePx = addon.Utilities:ToPixels(threat.borderSize or 2),
 		frameBorderSizePx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 	}
 end
@@ -109,12 +108,12 @@ function Threat:UpdateSettings(frame, settings)
 
 	local cachedSettings = settingsCache[settings]
 
-	if not cachedSettings.enabled or cachedSettings.borderSizePx <= 0 then
+	if not cachedSettings.enabled then
 		container:Hide()
 		return
 	end
 
-	local scaledBorderSizePx = math.max(1, frame.dataProvider:Scale(frame, cachedSettings.borderSizePx))
+	local scaledBorderSizePx = math.max(1, frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
 	local uiBorderSize = addon.Utilities:ToUI(scaledBorderSizePx)
 	local scaledFrameBorderSizePx = frame.dataProvider:Scale(frame, cachedSettings.frameBorderSizePx)
 	local insetPx = scaledFrameBorderSizePx > 0 and scaledFrameBorderSizePx or 0
@@ -158,7 +157,7 @@ function Threat:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if not cachedSettings.enabled or cachedSettings.borderSizePx <= 0 then
+	if not cachedSettings.enabled then
 		container:Hide()
 		return
 	end
