@@ -11,6 +11,7 @@ local function BuildPreviewSettings(settings)
 	local widgets = (settings and settings.widgets) or {}
 	local icons = widgets.icons or {}
 	local dispels = icons.dispels or {}
+	local border = (settings and settings.border) or {}
 	local gradientDirection = dispels.gradientDirection == 1 and 1 or 0
 
 	return {
@@ -21,6 +22,7 @@ local function BuildPreviewSettings(settings)
 		iconSizePx = addon.Utilities:ToPixels(dispels.iconSize or 14),
 		spacingPx = addon.Utilities:ToPixels(dispels.spacing or 0),
 		showBorder = dispels.showBorder ~= false,
+		frameBorderSizePx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 		texture = dispels.texture == "Flat" and "Flat" or "Gradient",
 		gradientDirection = gradientDirection,
 	}
@@ -185,7 +187,7 @@ local function ShowPreview(frame, previewSettings)
 		ApplyPreviewGradient(container.previewGradient, firstAura, color, previewSettings.gradientDirection)
 	end
 
-	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
+	local borderInset = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, previewSettings.frameBorderSizePx))
 	container.previewBorder:ClearAllPoints()
 	container.previewBorder:SetPoint("TOPLEFT", container, "TOPLEFT", borderInset, -borderInset)
 	container.previewBorder:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -borderInset, borderInset)

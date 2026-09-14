@@ -149,6 +149,7 @@ local function BuildSettingsUpdater(updateReasons)
 		then
 			-- Refresh overlay dimensions, the health clip, and the outer-border inset.
 			addon.Frames.ManagedContainers.Dispels:UpdateSettings(frame, settings)
+			addon.Frames.Widgets.Icons.Dispels:UpdateSettings(frame, settings)
 		end
 	end
 end
