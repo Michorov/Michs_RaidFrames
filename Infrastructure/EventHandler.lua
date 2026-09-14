@@ -184,6 +184,7 @@ end
 function EventHandler:PLAYER_ENTERING_WORLD()
 	addon.Database:ApplyProfileForCurrentSpec()
 	addon.FrameRegistry:Initialize()
+	addon.Frames.Widgets.Indicators.Ping:ClearAll()
 
 	addon.UpdateScheduler:Notify("aurasStateChanged")
 	addon.UpdateScheduler:Notify("statusStateChanged")
@@ -197,6 +198,7 @@ function EventHandler:ZONE_CHANGED_NEW_AREA()
 end
 
 function EventHandler:GROUP_ROSTER_UPDATE()
+	addon.Frames.Widgets.Indicators.Ping:ClearAll()
 	addon.UpdateScheduler:Notify("rosterChanged")
 	addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged")
 end

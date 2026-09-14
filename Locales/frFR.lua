@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "Signal"
+
 L["Minimap Icon"] = "Icône de la minicarte"
 
 L["Disabled"] = "Desactive"

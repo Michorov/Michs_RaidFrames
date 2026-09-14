@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "标记"
+
 L["Minimap Icon"] = "小地图图标"
 
 L["Disabled"] = "禁用"

@@ -39,6 +39,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.pingSettingsChanged then
+			addon.Frames.Widgets.Indicators.Ping:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.raidMarkerSettingsChanged then
 			addon.Frames.Widgets.Indicators.RaidMarker:UpdateSettings(frame, settings)
 		end
@@ -173,6 +177,10 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.pendingSummonStateChanged or updateReasons.pendingSummonSettingsChanged then
 			addon.Frames.Widgets.Indicators.PendingSummon:UpdateState(frame, settings)
+		end
+
+		if updateReasons.pingStateChanged or updateReasons.pingSettingsChanged then
+			addon.Frames.Widgets.Indicators.Ping:UpdateState(frame, settings)
 		end
 
 		if updateReasons.raidMarkerStateChanged or updateReasons.raidMarkerSettingsChanged then

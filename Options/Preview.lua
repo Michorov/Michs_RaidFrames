@@ -35,6 +35,7 @@ local previewWidgetFlags = {
 	health = { label = "Health", enabled = false, updateStateReason = "healthStateChanged" },
 	border = { label = "Border", enabled = false, updateStateReason = "borderSettingsChanged" },
 	power = { label = "Power Bar", enabled = false, updateStateReason = "powerStateChanged" },
+	ping = { label = "Ping", enabled = false, updateStateReason = "pingSettingsChanged" },
 	readyCheck = { label = "Ready Check", enabled = false, updateStateReason = "readyCheckStateChanged" },
 	pendingSummon = { label = "Summon", enabled = false, updateStateReason = "pendingSummonStateChanged" },
 	raidMarker = { label = "Raid Marker", enabled = false, updateStateReason = "raidMarkerStateChanged" },
@@ -104,7 +105,7 @@ local previewPageWidgets = {
 	},
 	indicators = {
 		enabled = { "background", "health", "border", "power", "name" },
-		controls = { "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
+		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	profiles = {
