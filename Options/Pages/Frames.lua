@@ -95,20 +95,6 @@ function Frames:Create(panel, config)
 		end,
 	})
 
-	local borderColorPicker = borderRow:CreateControl("ColorPicker", { labelKey = "Border Color" })
-	borderColorPicker:SetHasOpacity(true)
-	borderColorPicker:BindValue({
-		get = function(profile, mode)
-			return profile[mode].border.color
-		end,
-		set = function(profile, mode, value)
-			profile[mode].border.color = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("borderSettingsChanged")
-		end,
-	})
-
 	local mouseoverRow = subpage:CreateRow(4)
 	mouseoverRow:SetLayoutPoint("TOPLEFT", borderRow.frame, "BOTTOMLEFT", 0, -8)
 

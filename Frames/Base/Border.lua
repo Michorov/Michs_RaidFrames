@@ -12,16 +12,9 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = nil
 
 	local border = (settings and settings.border) or {}
-	local color = border.color or {}
 
 	local result = {
 		showBorder = (border.thicknessPx or 1) > 0,
-		color = {
-			r = color.r or 0,
-			g = color.g or 0,
-			b = color.b or 0,
-			a = color.a or 1,
-		},
 	}
 
 	settingsCache[settings] = result
@@ -39,6 +32,10 @@ function Border:Ensure(frame)
 		border.bottom = border:CreateTexture(nil, "OVERLAY", nil, 0)
 		border.left = border:CreateTexture(nil, "OVERLAY", nil, 0)
 		border.right = border:CreateTexture(nil, "OVERLAY", nil, 0)
+
+		for _, texture in ipairs({ border.top, border.bottom, border.left, border.right }) do
+			texture:SetColorTexture(0, 0, 0, 1)
+		end
 
 		frame.border = border
 	end
@@ -76,12 +73,6 @@ function Border:UpdateSettings(frame, settings)
 	border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
 	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
 	border.bottom:SetHeight(uiThickness)
-
-	local color = cachedSettings.color
-	border.top:SetColorTexture(color.r, color.g, color.b, color.a)
-	border.bottom:SetColorTexture(color.r, color.g, color.b, color.a)
-	border.left:SetColorTexture(color.r, color.g, color.b, color.a)
-	border.right:SetColorTexture(color.r, color.g, color.b, color.a)
 
 	for _, tex in ipairs({ border.top, border.bottom, border.left, border.right }) do
 		if tex.SetSnapToPixelGrid then
