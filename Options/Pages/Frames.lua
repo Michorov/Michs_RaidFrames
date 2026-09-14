@@ -109,5 +109,36 @@ function Frames:Create(panel, config)
 		end,
 	})
 
+	local mouseoverRow = subpage:CreateRow(4)
+	mouseoverRow:SetLayoutPoint("TOPLEFT", borderRow.frame, "BOTTOMLEFT", 0, -8)
+
+	local mouseoverDropdown = mouseoverRow:CreateControl("Dropdown", { labelKey = "Mouseover" })
+	mouseoverDropdown:SetOptions(visibilityOptions)
+	mouseoverDropdown:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.mouseover.enabled and 1 or 0
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.mouseover.enabled = value == 1
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("mouseoverSettingsChanged")
+		end,
+	})
+
+	local mouseoverColorPicker = mouseoverRow:CreateControl("ColorPicker", { labelKey = "Mouseover Color" })
+	mouseoverColorPicker:SetHasOpacity(false)
+	mouseoverColorPicker:BindValue({
+		get = function(profile, mode)
+			return profile[mode].widgets.indicators.mouseover.color
+		end,
+		set = function(profile, mode, value)
+			profile[mode].widgets.indicators.mouseover.color = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("mouseoverSettingsChanged")
+		end,
+	})
+
 	return page
 end

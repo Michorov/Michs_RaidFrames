@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover Color"] = "Color al pasar el ratón"
+
 L["Mouseover"] = "Al pasar el ratón"
 
 L["Health Format"] = "Formato de salud"

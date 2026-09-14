@@ -746,7 +746,7 @@ local DEFAULTS = {
 					},
 					mouseover = {
 						enabled = false,
-						color = { r = 1, g = 0.95, b = 0.7, a = 1 },
+						color = { r = 227 / 255, g = 220 / 255, b = 195 / 255, a = 1 },
 					},
 				},
 			},
@@ -1125,7 +1125,7 @@ local DEFAULTS = {
 					},
 					mouseover = {
 						enabled = false,
-						color = { r = 1, g = 0.95, b = 0.7, a = 1 },
+						color = { r = 227 / 255, g = 220 / 255, b = 195 / 255, a = 1 },
 					},
 				},
 			},

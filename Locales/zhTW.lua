@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover Color"] = "滑鼠懸停顏色"
+
 L["Mouseover"] = "滑鼠懸停"
 
 L["Health Format"] = "生命值格式"

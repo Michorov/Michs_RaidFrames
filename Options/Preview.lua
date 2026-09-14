@@ -87,7 +87,7 @@ local previewPageWidgets = {
 	},
 	frames = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
-		controls = {},
+		controls = { "mouseover" },
 		testData = { testHealthIndex = 2, testPowerIndex = 1 },
 	},
 	bars = {
@@ -107,7 +107,7 @@ local previewPageWidgets = {
 	},
 	indicators = {
 		enabled = { "background", "health", "border", "power", "name" },
-		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat", "mouseover" },
+		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	profiles = {
