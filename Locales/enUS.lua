@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Health Format"] = "Health Format"
+
 L["Ping"] = "Ping"
 
 L["Hide"] = "Hide"

@@ -11,6 +11,7 @@ local callbacksRegistered = false
 
 local fontSettingReasons = {
 	{ key = "name", reason = "nameSettingsChanged" },
+	{ key = "healthText", reason = "healthTextSettingsChanged" },
 	{ key = "powerText", reason = "powerTextSettingsChanged" },
 	{ key = "away", reason = "awayTextSettingsChanged" },
 	{ key = "healAbsorbs", reason = "healAbsorbsTextSettingsChanged" },

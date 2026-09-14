@@ -442,6 +442,25 @@ local DEFAULTS = {
 						truncate = false,
 						maxLength = 12,
 					},
+					healthText = {
+						enabled = false,
+						format = "abbreviated",
+						anchor = "CENTER",
+						classColor = false,
+						position = {
+							x = 0,
+							y = 0,
+						},
+						lsmFont = -1,
+						size = 16,
+						outline = "",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
+					},
 					powerText = {
 						enabled = false,
 						healerOnly = false,
@@ -798,6 +817,25 @@ local DEFAULTS = {
 						outline = "",
 						truncate = false,
 						maxLength = 12,
+					},
+					healthText = {
+						enabled = false,
+						format = "abbreviated",
+						anchor = "CENTER",
+						classColor = false,
+						position = {
+							x = 0,
+							y = 0,
+						},
+						lsmFont = -1,
+						size = 16,
+						outline = "",
+						color = {
+							r = 1,
+							g = 1,
+							b = 1,
+							a = 1,
+						},
 					},
 					powerText = {
 						enabled = false,

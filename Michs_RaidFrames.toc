@@ -61,6 +61,7 @@ Frames/ManagedContainers/RaidBuffReminder.lua
 
 # Widgets Text
 Frames/Widgets/Texts/Name.lua
+Frames/Widgets/Texts/Health.lua
 Frames/Widgets/Texts/Power.lua
 Frames/Widgets/Texts/StatusText.lua
 Frames/Widgets/Texts/Away.lua
@@ -120,6 +121,7 @@ Options/Pages/Bars/HealAbsorbs.lua
 Options/Pages/Bars/Absorbs.lua
 Options/Pages/Texts.lua
 Options/Pages/Texts/Name.lua
+Options/Pages/Texts/Health.lua
 Options/Pages/Texts/Power.lua
 Options/Pages/Texts/StatusText.lua
 Options/Pages/Texts/Away.lua

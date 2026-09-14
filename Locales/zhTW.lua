@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Health Format"] = "生命值格式"
+
 L["Ping"] = "標記"
 
 L["Minimap Icon"] = "小地圖圖示"
