@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Health Format"] = "생명력 표시 형식"
+
 L["Ping"] = "신호"
 
 L["Minimap Icon"] = "미니맵 아이콘"

@@ -199,6 +199,58 @@ local testPowerFormatters = {
 	end,
 }
 
+local function FormatLiveHealthPercent(unit)
+	return string.format("%.0f%%", UnitHealthPercent(unit, true, CurveConstants.ScaleTo100))
+end
+
+local liveHealthFormatters = {
+	abbreviated = function(unit)
+		return AbbreviateNumbers(UnitHealth(unit))
+	end,
+	percent = FormatLiveHealthPercent,
+	full = function(unit)
+		return BreakUpLargeNumbers(UnitHealth(unit))
+	end,
+	abbreviatedPercent = function(unit)
+		return string.format("%s | %s", AbbreviateNumbers(UnitHealth(unit)), FormatLiveHealthPercent(unit))
+	end,
+	percentAbbreviated = function(unit)
+		return string.format("%s | %s", FormatLiveHealthPercent(unit), AbbreviateNumbers(UnitHealth(unit)))
+	end,
+	fullPercent = function(unit)
+		return string.format("%s | %s", BreakUpLargeNumbers(UnitHealth(unit)), FormatLiveHealthPercent(unit))
+	end,
+	percentFull = function(unit)
+		return string.format("%s | %s", FormatLiveHealthPercent(unit), BreakUpLargeNumbers(UnitHealth(unit)))
+	end,
+}
+
+local function FormatTestHealthPercent(current, max)
+	return string.format("%.0f%%", (current / max) * 100)
+end
+
+local testHealthFormatters = {
+	abbreviated = function(current)
+		return AbbreviateNumbers(current)
+	end,
+	percent = FormatTestHealthPercent,
+	full = function(current)
+		return BreakUpLargeNumbers(current)
+	end,
+	abbreviatedPercent = function(current, max)
+		return string.format("%s | %s", AbbreviateNumbers(current), FormatTestHealthPercent(current, max))
+	end,
+	percentAbbreviated = function(current, max)
+		return string.format("%s | %s", FormatTestHealthPercent(current, max), AbbreviateNumbers(current))
+	end,
+	fullPercent = function(current, max)
+		return string.format("%s | %s", BreakUpLargeNumbers(current), FormatTestHealthPercent(current, max))
+	end,
+	percentFull = function(current, max)
+		return string.format("%s | %s", FormatTestHealthPercent(current, max), BreakUpLargeNumbers(current))
+	end,
+}
+
 function DataProvider.Live:GetHealth(frame)
 	if not frame or not frame.unit or not UnitExists(frame.unit) then
 		return 0, 1
@@ -229,6 +281,26 @@ function DataProvider.Test:GetHealth(frame)
 	local sample = healthSamples[healthIndex] or healthSamples[1]
 
 	return sample.current, sample.max
+end
+
+function DataProvider.Live:GetFormattedHealth(frame, format)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) then
+		return ""
+	end
+
+	local formatter = liveHealthFormatters[format] or liveHealthFormatters.abbreviated
+	return formatter(unit)
+end
+
+function DataProvider.Test:GetFormattedHealth(frame, format)
+	local current, max = self:GetHealth(frame)
+	if not current or not max or max <= 0 then
+		return ""
+	end
+
+	local formatter = testHealthFormatters[format] or testHealthFormatters.abbreviated
+	return formatter(current, max)
 end
 
 function DataProvider.Test:Scale(frame, value)

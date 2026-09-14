@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Health Format"] = "Формат здоровья"
+
 L["Ping"] = "Метка"
 
 L["Minimap Icon"] = "Значок у мини-карты"

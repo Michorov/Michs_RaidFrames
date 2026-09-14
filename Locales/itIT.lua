@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Health Format"] = "Formato della salute"
+
 L["Ping"] = "Segnalazione"
 
 L["Minimap Icon"] = "Icona della minimappa"

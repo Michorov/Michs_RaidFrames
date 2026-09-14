@@ -68,6 +68,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Texts.Power:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.healthTextSettingsChanged then
+			addon.Frames.Widgets.Texts.Health:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.statusTextSettingsChanged then
 			addon.Frames.Widgets.Texts.StatusText:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Texts.StatusText:UpdateState(frame, settings)
@@ -161,6 +165,10 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.powerStateChanged then
 			addon.Frames.Widgets.Texts.Power:UpdateState(frame, settings)
+		end
+
+		if updateReasons.healthStateChanged then
+			addon.Frames.Widgets.Texts.Health:UpdateState(frame, settings)
 		end
 
 		if updateReasons.nameStateChanged or updateReasons.nameSettingsChanged then

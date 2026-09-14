@@ -387,6 +387,7 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 		groupStatus = false,
 		threat = false,
 		name = false,
+		healthText = false,
 		away = false,
 		statusText = false,
 		absorbs = false,
