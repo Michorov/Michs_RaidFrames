@@ -19,7 +19,7 @@ local function UpdateSettingsCache(settings)
 
 	settingsCache[settings] = {
 		enabled = mouseover.enabled == true,
-		color = { r = color.r or 1, g = color.g or 0.95, b = color.b or 0.7, a = color.a or 1 },
+		color = { r = color.r or 227 / 255, g = color.g or 220 / 255, b = color.b or 195 / 255, a = color.a or 1 },
 		frameBorderSizePx = addon.Utilities:ToPixels(border.thicknessPx or 1),
 	}
 end

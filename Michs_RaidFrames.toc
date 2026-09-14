@@ -144,7 +144,6 @@ Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
 Options/Pages/Indicators/GroupStatus.lua
 Options/Pages/Indicators/Threat.lua
-Options/Pages/Indicators/Mouseover.lua
 Options/Pages/ClickCasting.lua
 Options/Pages/Profiles.lua
 Options/Preview.lua
