@@ -204,6 +204,7 @@ function MRF_OnUnitChanged(frame, unit)
 		return
 	end
 
+	addon.Frames.Widgets.Indicators.Ping:Clear(frame)
 	frame.RosterKey = nil
 
 	for k, v in pairs(unitFrameMap) do
