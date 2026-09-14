@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover"] = "Passaggio del mouse"
+
 L["Health Format"] = "Formato della salute"
 
 L["Ping"] = "Segnalazione"

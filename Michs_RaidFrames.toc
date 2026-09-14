@@ -75,6 +75,7 @@ Frames/Widgets/Indicators/RaidMarker.lua
 Frames/Widgets/Indicators/RoleIcon.lua
 Frames/Widgets/Indicators/GroupStatus.lua
 Frames/Widgets/Indicators/Threat.lua
+Frames/Widgets/Indicators/Mouseover.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua
@@ -143,6 +144,7 @@ Options/Pages/Indicators/RaidMarker.lua
 Options/Pages/Indicators/RoleIndicator.lua
 Options/Pages/Indicators/GroupStatus.lua
 Options/Pages/Indicators/Threat.lua
+Options/Pages/Indicators/Mouseover.lua
 Options/Pages/ClickCasting.lua
 Options/Pages/Profiles.lua
 Options/Preview.lua

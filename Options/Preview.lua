@@ -42,6 +42,7 @@ local previewWidgetFlags = {
 	roleIcon = { label = "Role", enabled = false, updateStateReason = "roleIconStateChanged" },
 	groupStatus = { label = "Group Leader", enabled = false, updateStateReason = "groupStatusStateChanged" },
 	threat = { label = "Threat", enabled = false, updateStateReason = "threatStateChanged" },
+	mouseover = { label = "Mouseover", enabled = false, updateStateReason = "mouseoverStateChanged" },
 	name = { label = "Name", enabled = false, updateStateReason = "nameStateChanged" },
 	healthText = { label = "Health", enabled = false, updateStateReason = "healthStateChanged" },
 	powerText = { label = "Power", enabled = false, updateStateReason = "powerStateChanged" },
@@ -106,7 +107,7 @@ local previewPageWidgets = {
 	},
 	indicators = {
 		enabled = { "background", "health", "border", "power", "name" },
-		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
+		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat", "mouseover" },
 		testData = { testHealthIndex = 1, testPowerIndex = 1 },
 	},
 	profiles = {

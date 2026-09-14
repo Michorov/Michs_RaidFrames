@@ -22,6 +22,7 @@ function Indicators:Create(panel)
 	self.RoleIndicator:Create(page)
 	self.GroupStatus:Create(page)
 	self.Threat:Create(page)
+	self.Mouseover:Create(page)
 
 	return page
 end
