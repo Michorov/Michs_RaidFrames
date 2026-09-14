@@ -745,6 +745,10 @@ local DEFAULTS = {
 						enabled = false,
 						borderSize = 1,
 					},
+					mouseover = {
+						enabled = false,
+						color = { r = 1, g = 0.95, b = 0.7, a = 1 },
+					},
 				},
 			},
 		},
@@ -1120,6 +1124,10 @@ local DEFAULTS = {
 					threat = {
 						enabled = false,
 						borderSize = 1,
+					},
+					mouseover = {
+						enabled = false,
+						color = { r = 1, g = 0.95, b = 0.7, a = 1 },
 					},
 				},
 			},

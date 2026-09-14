@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover"] = "Наведение мыши"
+
 L["Health Format"] = "Формат здоровья"
 
 L["Ping"] = "Метка"

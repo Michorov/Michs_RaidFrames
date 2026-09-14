@@ -386,6 +386,7 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 		roleIcon = false,
 		groupStatus = false,
 		threat = false,
+		mouseover = false,
 		name = false,
 		healthText = false,
 		away = false,

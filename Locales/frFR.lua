@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover"] = "Survol"
+
 L["Health Format"] = "Format de santé"
 
 L["Ping"] = "Signal"

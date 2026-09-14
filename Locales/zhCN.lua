@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Mouseover"] = "鼠标悬停"
+
 L["Health Format"] = "生命值格式"
 
 L["Ping"] = "标记"
