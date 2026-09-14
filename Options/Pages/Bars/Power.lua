@@ -7,6 +7,11 @@ addon.Options.Pages.Bars.Power = addon.Options.Pages.Bars.Power or {}
 
 local Power = addon.Options.Pages.Bars.Power
 
+local visibilityOptions = {
+	{ value = 1, textKey = "Show" },
+	{ value = 0, textKey = "Hide" },
+}
+
 local function FormatInteger(value)
 	return string.format("%d", value)
 end
@@ -62,10 +67,27 @@ function Power:Create(page)
 		end,
 	})
 
-	local sliderRow = subpage:CreateRow(4)
-	sliderRow:SetLayoutPoint("TOPLEFT", textureRow.frame, "BOTTOMLEFT", 0, -16)
+	local borderRow = subpage:CreateRow(4)
+	borderRow:SetLayoutPoint("TOPLEFT", textureRow.frame, "BOTTOMLEFT", 0, -16)
 
-	local heightSlider = sliderRow:CreateControl("Slider", { labelKey = "Height" })
+	local borderDropdown = borderRow:CreateControl("Dropdown", { labelKey = "Border" })
+	borderDropdown:SetOptions(visibilityOptions)
+	borderDropdown:BindValue({
+		get = function(profile, mode)
+			return (profile[mode].power.borderThicknessPx or 1) > 0 and 1 or 0
+		end,
+		set = function(profile, mode, value)
+			profile[mode].power.borderThicknessPx = value
+		end,
+		onChange = function()
+			addon.UpdateScheduler:Notify("powerSettingsChanged")
+		end,
+	})
+
+	local heightRow = subpage:CreateRow(4)
+	heightRow:SetLayoutPoint("TOPLEFT", borderRow.frame, "BOTTOMLEFT", 0, -16)
+
+	local heightSlider = heightRow:CreateControl("Slider", { labelKey = "Height" })
 	heightSlider:SetMinMaxValues(1, 20)
 	heightSlider:SetStep(1)
 	heightSlider:SetValueFormatter(FormatInteger)
@@ -75,22 +97,6 @@ function Power:Create(page)
 		end,
 		set = function(profile, mode, value)
 			profile[mode].power.height = value
-		end,
-		onChange = function()
-			addon.UpdateScheduler:Notify("powerSettingsChanged")
-		end,
-	})
-
-	local borderThicknessSlider = sliderRow:CreateControl("Slider", { labelKey = "Border Size" })
-	borderThicknessSlider:SetMinMaxValues(0, 6)
-	borderThicknessSlider:SetStep(1)
-	borderThicknessSlider:SetValueFormatter(FormatInteger)
-	borderThicknessSlider:BindValue({
-		get = function(profile, mode)
-			return profile[mode].power.borderThicknessPx
-		end,
-		set = function(profile, mode, value)
-			profile[mode].power.borderThicknessPx = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("powerSettingsChanged")
