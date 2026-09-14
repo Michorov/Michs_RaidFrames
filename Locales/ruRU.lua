@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "Метка"
+
 L["Minimap Icon"] = "Значок у мини-карты"
 
 L["Disabled"] = "Отключено"

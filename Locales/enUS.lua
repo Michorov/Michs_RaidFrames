@@ -5,6 +5,8 @@ if not L then
 	return
 end
 
+L["Ping"] = "Ping"
+
 L["Hide"] = "Hide"
 L["Minimap Icon"] = "Minimap Icon"
 L["Select..."] = "Select..."
