@@ -69,6 +69,7 @@ Frames/Widgets/Texts/HealAbsorbs.lua
 # Widgets Indicators
 Frames/Widgets/Indicators/ReadyCheck.lua
 Frames/Widgets/Indicators/PendingSummon.lua
+Frames/Widgets/Indicators/Ping.lua
 Frames/Widgets/Indicators/RaidMarker.lua
 Frames/Widgets/Indicators/RoleIcon.lua
 Frames/Widgets/Indicators/GroupStatus.lua

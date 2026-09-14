@@ -36,6 +36,7 @@ function Modules:Initialize()
 		addon.Frames.Base.Border,
 		addon.Frames.Widgets.Indicators.ReadyCheck,
 		addon.Frames.Widgets.Indicators.PendingSummon,
+		addon.Frames.Widgets.Indicators.Ping,
 		addon.Frames.Widgets.Indicators.RaidMarker,
 		addon.Frames.Widgets.Indicators.RoleIcon,
 		addon.Frames.Widgets.Indicators.GroupStatus,

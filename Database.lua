@@ -675,6 +675,13 @@ local DEFAULTS = {
 					},
 				},
 				indicators = {
+					ping = {
+						enabled = true,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						size = 30,
+					},
 					readyCheck = {
 						enabled = true,
 						anchor = "CENTER",
@@ -1025,6 +1032,13 @@ local DEFAULTS = {
 					},
 				},
 				indicators = {
+					ping = {
+						enabled = true,
+						anchor = "CENTER",
+						offsetX = 0,
+						offsetY = 0,
+						size = 30,
+					},
 					readyCheck = {
 						enabled = true,
 						anchor = "CENTER",
