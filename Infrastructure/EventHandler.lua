@@ -440,6 +440,7 @@ end
 
 function EventHandler:UI_SCALE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
+	addon.Utilities.PixelPerfect:RefreshScaling()
 	addon.Modules:RequestUpdateAll()
 	if addon.Options and addon.Options.UpdateLayout then
 		addon.Options:UpdateLayout()
@@ -448,6 +449,7 @@ end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
 	addon.Utilities:RefreshPixelGrid()
+	addon.Utilities.PixelPerfect:RefreshScaling()
 	addon.Modules:RequestUpdateAll()
 	if addon.Options and addon.Options.UpdateLayout then
 		addon.Options:UpdateLayout()
