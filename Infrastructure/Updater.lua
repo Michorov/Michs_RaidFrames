@@ -268,11 +268,20 @@ local function BuildStateUpdater(updateReasons)
 end
 
 local function Flush(updateReasons)
+	local globalReasons = updateReasons.global or {}
+	if globalReasons.scalingChanged then
+		addon.Utilities:RefreshPixelGrid()
+		addon.Utilities.PixelPerfect:RefreshScaling()
+		if addon.Options and addon.Options.UpdateLayout then
+			addon.Options:UpdateLayout()
+		end
+		globalReasons.scalingChanged = nil
+	end
+
 	if not addon.FrameRegistry:IsInitialized() then
 		return
 	end
 
-	local globalReasons = updateReasons.global or {}
 	if globalReasons.rosterChanged then
 		addon.FrameRegistry:UpdateRoster()
 		globalReasons.rosterChanged = nil
