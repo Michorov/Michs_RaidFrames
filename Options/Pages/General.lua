@@ -141,7 +141,8 @@ function General:Create(panel)
 		set = function(profile, _, value)
 			profile.core.uiScale = value
 		end,
-		onChange = function()
+		onChange = function(value)
+			addon.Utilities.PixelPerfect:SetGlobalScale(value)
 			addon.UpdateScheduler:Notify("layoutChanged")
 			addon.Modules:RequestUpdateSettings()
 		end,

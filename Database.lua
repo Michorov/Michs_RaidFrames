@@ -1431,6 +1431,7 @@ function Database:Initialize()
 		PruneProfileValuesMissingFromDefaults(self.db.profile)
 		SyncAllProfilesCustomAuraDefaults(self.db.profile)
 		NormalizeCurrentProfileFontSettings(self.db.profile)
+		addon.Utilities.PixelPerfect:SetGlobalScale(self.db.profile.core.uiScale)
 
 		if addon.Options and addon.Options.RefreshState then
 			addon.Options:RefreshState()
