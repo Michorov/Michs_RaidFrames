@@ -63,11 +63,14 @@ function Layout:Create(panel, config)
 	spacingRow:SetLayoutPoint("TOPLEFT", positionRow.frame, "BOTTOMLEFT", 0, -8)
 
 	local horizontalSpacingSlider = spacingRow:CreateControl("Slider", { labelKey = "Horizontal Spacing" })
-	horizontalSpacingSlider:SetMinMaxValues(-25, 25)
+	horizontalSpacingSlider:SetMinMaxValues(0, 25)
 	horizontalSpacingSlider:SetStep(1)
 	horizontalSpacingSlider:SetValueFormatter(FormatInteger)
 	horizontalSpacingSlider:BindValue({
 		get = function(profile, mode)
+			if profile[mode].spacing.x < 1 then
+				return 0
+			end
 			return profile[mode].spacing.x
 		end,
 		set = function(profile, mode, value)
@@ -79,11 +82,14 @@ function Layout:Create(panel, config)
 	})
 
 	local verticalSpacingSlider = spacingRow:CreateControl("Slider", { labelKey = "Vertical Spacing" })
-	verticalSpacingSlider:SetMinMaxValues(-25, 25)
+	verticalSpacingSlider:SetMinMaxValues(0, 25)
 	verticalSpacingSlider:SetStep(1)
 	verticalSpacingSlider:SetValueFormatter(FormatInteger)
 	verticalSpacingSlider:BindValue({
 		get = function(profile, mode)
+			if profile[mode].spacing.y < 1 then
+				return 0
+			end
 			return profile[mode].spacing.y
 		end,
 		set = function(profile, mode, value)

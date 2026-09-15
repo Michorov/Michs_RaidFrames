@@ -106,11 +106,11 @@ end
 
 function Frames:CreateRaidHeader(raidSettings, groupIndex)
 	local size = raidSettings.size or {}
-	local spacing = raidSettings.spacing or {}
+	local _, spacingYPx = self:GetLayoutSpacing(raidSettings)
 
 	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.width or 112)))
 	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.height or 56)))
-	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
+	local spacingY = addon.Utilities:ToUI(spacingYPx)
 
 	local header = CreateFrame("Frame", "MRF_RaidHeader" .. groupIndex, UIParent, "SecureGroupHeaderTemplate")
 	header.frameType = "raid"
@@ -146,12 +146,12 @@ end
 
 function Frames:CreatePartyHeader(partySettings)
 	local size = partySettings.size or {}
-	local spacing = partySettings.spacing or {}
+	local _, spacingYPx = self:GetLayoutSpacing(partySettings)
 	local position = partySettings.position or {}
 
 	local frameWidth = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.width or 128)))
 	local frameHeight = addon.Utilities:ToUI(addon.Utilities:ScaleEven(addon.Utilities:ToPixels(size.height or 64)))
-	local spacingY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(spacing.y or 0)))
+	local spacingY = addon.Utilities:ToUI(spacingYPx)
 	local posX = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.x or 0)))
 	local posY = addon.Utilities:ToUI(addon.Utilities:Scale(addon.Utilities:ToPixels(position.y or 0)))
 
