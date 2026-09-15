@@ -439,21 +439,13 @@ function EventHandler:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
 end
 
 function EventHandler:UI_SCALE_CHANGED()
-	addon.Utilities:RefreshPixelGrid()
-	addon.Utilities.PixelPerfect:RefreshScaling()
+	addon.UpdateScheduler:Notify("scalingChanged")
 	addon.Modules:RequestUpdateAll()
-	if addon.Options and addon.Options.UpdateLayout then
-		addon.Options:UpdateLayout()
-	end
 end
 
 function EventHandler:DISPLAY_SIZE_CHANGED()
-	addon.Utilities:RefreshPixelGrid()
-	addon.Utilities.PixelPerfect:RefreshScaling()
+	addon.UpdateScheduler:Notify("scalingChanged")
 	addon.Modules:RequestUpdateAll()
-	if addon.Options and addon.Options.UpdateLayout then
-		addon.Options:UpdateLayout()
-	end
 end
 
 function EventHandler:RAID_TARGET_UPDATE()

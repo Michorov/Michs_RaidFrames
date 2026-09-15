@@ -9,12 +9,11 @@ local Border = addon.Frames.Base.Border
 local settingsCache = setmetatable({}, { __mode = "k" })
 
 local function UpdateSettingsCache(settings)
-	settingsCache[settings] = nil
-
-	local border = (settings and settings.border) or {}
+	local borderSizePx = addon.Utilities.PixelPerfect:Scale(1)
 
 	local result = {
-		showBorder = (border.thicknessPx or 1) > 0,
+		showBorder = settings.border.thicknessPx > 0,
+		borderSizeUI = addon.Utilities.PixelPerfect:ToUI(borderSizePx),
 	}
 
 	settingsCache[settings] = result
@@ -33,9 +32,22 @@ function Border:Ensure(frame)
 		border.left = border:CreateTexture(nil, "OVERLAY", nil, 0)
 		border.right = border:CreateTexture(nil, "OVERLAY", nil, 0)
 
-		for _, texture in ipairs({ border.top, border.bottom, border.left, border.right }) do
-			texture:SetColorTexture(0, 0, 0, 1)
-		end
+		border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
+		border.left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
+
+		border.right:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
+		border.right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
+
+		border.top:SetPoint("TOPLEFT", border.left, "TOPRIGHT", 0, 0)
+		border.top:SetPoint("TOPRIGHT", border.right, "TOPLEFT", 0, 0)
+
+		border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
+		border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
+
+		border.top:SetColorTexture(0, 0, 0, 1)
+		border.bottom:SetColorTexture(0, 0, 0, 1)
+		border.left:SetColorTexture(0, 0, 0, 1)
+		border.right:SetColorTexture(0, 0, 0, 1)
 
 		frame.border = border
 	end
@@ -52,36 +64,10 @@ function Border:UpdateSettings(frame, settings)
 		return
 	end
 
-	local uiThickness = addon.Utilities:ToUI(frame.dataProvider:Scale(frame, addon.Utilities:ToPixels(1)))
-
-	border.left:ClearAllPoints()
-	border.left:SetPoint("TOPLEFT", border, "TOPLEFT", 0, 0)
-	border.left:SetPoint("BOTTOMLEFT", border, "BOTTOMLEFT", 0, 0)
-	border.left:SetWidth(uiThickness)
-
-	border.right:ClearAllPoints()
-	border.right:SetPoint("TOPRIGHT", border, "TOPRIGHT", 0, 0)
-	border.right:SetPoint("BOTTOMRIGHT", border, "BOTTOMRIGHT", 0, 0)
-	border.right:SetWidth(uiThickness)
-
-	border.top:ClearAllPoints()
-	border.top:SetPoint("TOPLEFT", border.left, "TOPRIGHT", 0, 0)
-	border.top:SetPoint("TOPRIGHT", border.right, "TOPLEFT", 0, 0)
-	border.top:SetHeight(uiThickness)
-
-	border.bottom:ClearAllPoints()
-	border.bottom:SetPoint("BOTTOMLEFT", border.left, "BOTTOMRIGHT", 0, 0)
-	border.bottom:SetPoint("BOTTOMRIGHT", border.right, "BOTTOMLEFT", 0, 0)
-	border.bottom:SetHeight(uiThickness)
-
-	for _, tex in ipairs({ border.top, border.bottom, border.left, border.right }) do
-		if tex.SetSnapToPixelGrid then
-			tex:SetSnapToPixelGrid(true)
-		end
-		if tex.SetTexelSnappingBias then
-			tex:SetTexelSnappingBias(0)
-		end
-	end
+	border.left:SetWidth(cachedSettings.borderSizeUI)
+	border.right:SetWidth(cachedSettings.borderSizeUI)
+	border.top:SetHeight(cachedSettings.borderSizeUI)
+	border.bottom:SetHeight(cachedSettings.borderSizeUI)
 
 	border:Show()
 end
