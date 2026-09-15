@@ -4,7 +4,8 @@ local _, _, _, interfaceVersion = GetBuildInfo()
 addon.IsRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
 
 local function InitializeAddon()
-    addon.Utilities:RefreshPixelGrid()
+	addon.Utilities:RefreshPixelGrid()
+	addon.Utilities.PixelPerfect:RefreshScaling()
 
 	addon.Database:Initialize()
 	addon.Locale:Initialize()
