@@ -9,6 +9,14 @@ local step
 local resolutionMultiplier
 local globalScale = 1
 
+function PixelPerfect:SetGlobalScale(value)
+	if type(value) ~= "number" then
+		value = 1
+	end
+
+	globalScale = math.min(2, math.max(0.5, value))
+end
+
 function PixelPerfect:RefreshScaling()
 	local _, physicalHeight = GetPhysicalScreenSize()
 	local uiScale = UIParent:GetEffectiveScale()

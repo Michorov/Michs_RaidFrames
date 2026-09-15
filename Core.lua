@@ -8,6 +8,7 @@ local function InitializeAddon()
 	addon.Utilities.PixelPerfect:RefreshScaling()
 
 	addon.Database:Initialize()
+	addon.Utilities.PixelPerfect:SetGlobalScale(addon.Database:GetProfile().core.uiScale)
 	addon.Locale:Initialize()
 
 	local flushCallback = addon.Updater:CreateFlushCallback()
