@@ -92,6 +92,7 @@ function Frames:Create(panel, config)
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("borderSettingsChanged")
+			addon.UpdateScheduler:Notify("layoutChanged")
 		end,
 	})
 
