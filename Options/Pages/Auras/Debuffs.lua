@@ -7,7 +7,9 @@ addon.Options.Pages.Auras.Debuffs = addon.Options.Pages.Auras.Debuffs or {}
 
 local Debuffs = addon.Options.Pages.Auras.Debuffs
 local _, _, _, interfaceVersion = GetBuildInfo()
-local isRestrictedAuraAPI = (tonumber(interfaceVersion) or 0) >= 120100
+interfaceVersion = tonumber(interfaceVersion) or 0
+local isRestrictedAuraAPI = interfaceVersion >= 120100
+	or (interfaceVersion > 16000 and interfaceVersion < 20000)
 
 local anchorOptions = {
 	{ value = "TOPLEFT", textKey = "Top Left" },
