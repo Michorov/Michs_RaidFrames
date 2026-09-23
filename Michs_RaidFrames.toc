@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 16001, 120100
 ## Title: Mich's RaidFrames
 ## Category: Mich's Toolkit
 ## Notes: Custom Party & Raid Frames for group play
