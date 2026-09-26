@@ -393,6 +393,7 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 		statusText = false,
 		absorbs = false,
 		healAbsorbs = false,
+		healPrediction = false,
 		healAbsorbsText = false,
 		buffs = false,
 		customBuffs = false,

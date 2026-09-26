@@ -28,6 +28,7 @@ local function CreateUnitEventTrackers()
 		frame:RegisterUnitEvent("UNIT_HEALTH", unit)
 		frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
 		frame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", unit)
+		frame:RegisterUnitEvent("UNIT_HEAL_PREDICTION", unit)
 		frame:RegisterUnitEvent("UNIT_AURA", unit)
 		frame:RegisterUnitEvent("UNIT_NAME_UPDATE", unit)
 		frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
@@ -282,6 +283,7 @@ function EventHandler:UNIT_THREAT_SITUATION_UPDATE(unit)
 end
 
 function EventHandler:UNIT_MAXHEALTH(unit)
+	addon.UpdateScheduler:Notify("healPredictionStateChanged", unit)
 	addon.UpdateScheduler:Notify("healthStateChanged", unit)
 	addon.UpdateScheduler:Notify("absorbsStateChanged", unit)
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
@@ -313,6 +315,11 @@ end
 
 function EventHandler:UNIT_HEAL_ABSORB_AMOUNT_CHANGED(unit)
 	addon.UpdateScheduler:Notify("healAbsorbsStateChanged", unit)
+	addon.UpdateScheduler:Notify("healPredictionStateChanged", unit)
+end
+
+function EventHandler:UNIT_HEAL_PREDICTION(unit)
+	addon.UpdateScheduler:Notify("healPredictionStateChanged", unit)
 end
 
 function EventHandler:UNIT_AURA(unit, updateInfo)

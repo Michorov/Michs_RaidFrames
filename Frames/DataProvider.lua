@@ -528,6 +528,33 @@ function DataProvider.Test:GetFormattedPower(frame, format)
 	return formatter(current, max), powerToken
 end
 
+function DataProvider.Live:GetHealPrediction(frame)
+	local unit = frame and frame.unit
+	if type(unit) ~= "string" or unit == "" or not UnitExists(unit) or UnitCanAttack("player", unit) then
+		return nil, nil
+	end
+
+	if not CreateUnitHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+		return nil, nil
+	end
+
+	if not frame.healPredictionCalculator then
+		local calculator = CreateUnitHealPredictionCalculator()
+		calculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth)
+		calculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth)
+		frame.healPredictionCalculator = calculator
+	end
+
+	local calculator = frame.healPredictionCalculator
+	UnitGetDetailedHealPrediction(unit, nil, calculator)
+	return calculator:GetIncomingHeals(), calculator:GetMaximumHealth()
+end
+
+function DataProvider.Test:GetHealPrediction(frame)
+	local _, maxHealth = self:GetHealth(frame)
+	return math.min(20000, maxHealth), maxHealth
+end
+
 function DataProvider.Live:GetAbsorbs(frame)
 	local unit = frame and frame.unit
 	if type(unit) ~= "string" or unit == "" then

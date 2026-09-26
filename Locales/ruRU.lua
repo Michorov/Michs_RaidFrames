@@ -68,6 +68,7 @@ L["Spec: Windwalker"] = "Танцующий с ветром"
 
 L["Abbreviate Numbers"] = "Сокращать числа"
 L["Absorbs"] = "Поглощения"
+L["Heal Prediction"] = "Прогноз исцеления"
 L["Absorbs settings are disabled during combat."] = "Настройки поглощений отключены в бою."
 L["Active Profile"] = "Активный профиль"
 L["Anchor"] = "Точка привязки"

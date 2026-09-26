@@ -693,6 +693,10 @@ local DEFAULTS = {
 					},
 				},
 				indicators = {
+					healPrediction = {
+						enabled = false,
+						color = { r = 0.1, g = 0.6, b = 0.2, a = 1 },
+					},
 					ping = {
 						enabled = true,
 						anchor = "CENTER",
@@ -1071,6 +1075,10 @@ local DEFAULTS = {
 					},
 				},
 				indicators = {
+					healPrediction = {
+						enabled = false,
+						color = { r = 0.1, g = 0.6, b = 0.2, a = 1 },
+					},
 					ping = {
 						enabled = true,
 						anchor = "CENTER",

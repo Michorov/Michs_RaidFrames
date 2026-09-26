@@ -31,6 +31,7 @@ L["Truncated"] = "Gekürzt"
 
 L["Abbreviate Numbers"] = "Zahlen abkürzen"
 L["Absorbs"] = "Absorptionen"
+L["Heal Prediction"] = "Heilungsvorhersage"
 L["Absorbs settings are disabled during combat."] = "Einstellungen für Absorptionen sind im Kampf deaktiviert."
 L["Active Profile"] = "Aktives Profil"
 L["Anchor"] = "Ankerpunkt"

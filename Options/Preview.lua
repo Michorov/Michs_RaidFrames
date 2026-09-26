@@ -49,6 +49,7 @@ local previewWidgetFlags = {
 	away = { label = "Away", enabled = false, updateStateReason = "awayStateChanged" },
 	statusText = { label = "Status", enabled = false, updateStateReason = "statusStateChanged" },
 	absorbs = { label = "Absorbs", enabled = false, updateStateReason = "absorbsStateChanged" },
+	healPrediction = { label = "Heal Prediction", enabled = false, updateStateReason = "healPredictionStateChanged" },
 	healAbsorbs = { label = "Heal Absorbs", enabled = false, updateStateReason = "healAbsorbsStateChanged" },
 	healAbsorbsText = { label = "Heal Absorbs", enabled = false, updateStateReason = "healAbsorbsStateChanged" },
 	buffs = {
@@ -107,8 +108,8 @@ local previewPageWidgets = {
 	},
 	indicators = {
 		enabled = { "background", "health", "border", "power", "name" },
-		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat" },
-		testData = { testHealthIndex = 1, testPowerIndex = 1 },
+		controls = { "ping", "readyCheck", "pendingSummon", "raidMarker", "roleIcon", "groupStatus", "threat", "healPrediction" },
+		testData = { testHealthIndex = 2, testPowerIndex = 1 },
 	},
 	profiles = {
 		enabled = { "background", "health", "border", "power", "name", "roleIcon" },
@@ -413,6 +414,9 @@ function Preview:UpdateLayout()
 	local profile = addon.Database:GetProfile()
 	self:UpdateFrameLayout(preview.partyFrame, profile.party or {})
 	self:UpdateFrameLayout(preview.raidFrame, profile.raid or {})
+
+	addon.Frames.Widgets.Indicators.HealPrediction:UpdateSettings(preview.partyFrame, profile.party or {})
+	addon.Frames.Widgets.Indicators.HealPrediction:UpdateSettings(preview.raidFrame, profile.raid or {})
 
 	for _, control in pairs(preview.controls) do
 		control:SetLayoutWidth(layoutValues.bodyWidth)

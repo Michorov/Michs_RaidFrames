@@ -808,12 +808,14 @@ function FrameRegistry:CreatePreviewFrames(parent)
 
 	if not previewFrames.party then
 		previewFrames.party = addon.Frames:CreatePreviewFrame(parent, "party")
+		addon.Frames:UpdatePreviewFrameLayout(previewFrames.party, partySettings)
 		addon.Modules:EnsureFrame(previewFrames.party, partySettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.party, partySettings)
 	end
 
 	if not previewFrames.raid then
 		previewFrames.raid = addon.Frames:CreatePreviewFrame(parent, "raid")
+		addon.Frames:UpdatePreviewFrameLayout(previewFrames.raid, raidSettings)
 		addon.Modules:EnsureFrame(previewFrames.raid, raidSettings)
 		addon.Modules:UpdateSettingsFrame(previewFrames.raid, raidSettings)
 	end

@@ -94,6 +94,10 @@ local function BuildSettingsUpdater(updateReasons)
 			addon.Frames.Widgets.Bars.HealAbsorbs:UpdateSettings(frame, settings)
 		end
 
+		if updateReasons.healPredictionSettingsChanged or updateReasons.healthSettingsChanged or updateReasons.layoutChanged then
+			addon.Frames.Widgets.Indicators.HealPrediction:UpdateSettings(frame, settings)
+		end
+
 		if updateReasons.healAbsorbsTextSettingsChanged then
 			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateSettings(frame, settings)
 			addon.Frames.Widgets.Texts.HealAbsorbs:UpdateState(frame, settings)
@@ -218,6 +222,14 @@ local function BuildStateUpdater(updateReasons)
 
 		if updateReasons.absorbsStateChanged then
 			addon.Frames.Widgets.Bars.Absorbs:UpdateState(frame, settings)
+		end
+
+		if
+			updateReasons.healPredictionStateChanged
+			or updateReasons.healPredictionSettingsChanged
+			or updateReasons.healthSettingsChanged
+		then
+			addon.Frames.Widgets.Indicators.HealPrediction:UpdateState(frame, settings)
 		end
 
 		if updateReasons.healAbsorbsStateChanged then

@@ -77,6 +77,7 @@ Frames/Widgets/Indicators/RoleIcon.lua
 Frames/Widgets/Indicators/GroupStatus.lua
 Frames/Widgets/Indicators/Threat.lua
 Frames/Widgets/Indicators/Mouseover.lua
+Frames/Widgets/Indicators/HealPrediction.lua
 
 # Widgets Icons
 Frames/Widgets/Icons/Buffs.lua
@@ -138,6 +139,7 @@ Options/Pages/Auras/Dispels.lua
 Options/Pages/Auras/BigDefensive.lua
 Options/Pages/Auras/RaidBuffReminder.lua
 Options/Pages/Indicators.lua
+Options/Pages/Indicators/HealPrediction.lua
 Options/Pages/Indicators/ReadyCheck.lua
 Options/Pages/Indicators/PendingSummon.lua
 Options/Pages/Indicators/Ping.lua

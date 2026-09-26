@@ -68,6 +68,7 @@ L["Spec: Windwalker"] = "풍운"
 
 L["Abbreviate Numbers"] = "숫자 축약"
 L["Absorbs"] = "흡수"
+L["Heal Prediction"] = "치유 예측"
 L["Absorbs settings are disabled during combat."] = "전투 중에는 흡수 설정을 변경할 수 없습니다."
 L["Active Profile"] = "활성 프로필"
 L["Anchor"] = "고정 위치"

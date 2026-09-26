@@ -90,6 +90,7 @@ end
 function Health:Ensure(frame)
 	if not frame.healthBar then
 		local healthBar = CreateFrame("StatusBar", nil, frame)
+		healthBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8x8")
 		healthBar:SetAllPoints()
 		healthBar:SetMinMaxValues(0, 1)
 		healthBar:SetValue(0)

@@ -68,6 +68,7 @@ L["Spec: Windwalker"] = "Impeto"
 
 L["Abbreviate Numbers"] = "Abbrevia numeri"
 L["Absorbs"] = "Assorbimenti"
+L["Heal Prediction"] = "Previsione delle cure"
 L["Absorbs settings are disabled during combat."] = "Le impostazioni degli assorbimenti sono disattivate in combattimento."
 L["Active Profile"] = "Profilo attivo"
 L["Anchor"] = "Ancoraggio"

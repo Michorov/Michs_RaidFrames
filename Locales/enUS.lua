@@ -20,6 +20,7 @@ L["Show"] = "Show"
 
 L["Abbreviate Numbers"] = "Abbreviate Numbers"
 L["Absorbs"] = "Absorbs"
+L["Heal Prediction"] = "Heal Prediction"
 L["Absorbs settings are disabled during combat."] = "Absorbs settings are disabled during combat."
 L["Active Profile"] = "Active Profile"
 L["Anchor"] = "Anchor"

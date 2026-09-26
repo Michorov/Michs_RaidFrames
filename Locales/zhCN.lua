@@ -68,6 +68,7 @@ L["Spec: Windwalker"] = "踏风"
 
 L["Abbreviate Numbers"] = "缩写数字"
 L["Absorbs"] = "吸收"
+L["Heal Prediction"] = "治疗预测"
 L["Absorbs settings are disabled during combat."] = "战斗中无法更改吸收设置。"
 L["Active Profile"] = "当前配置文件"
 L["Anchor"] = "锚点"
