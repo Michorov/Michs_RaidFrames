@@ -52,7 +52,7 @@ local function UpdateSettingsCache(settings)
 end
 
 function CustomBuffs:Ensure(frame)
-	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
+	if frame.frameType ~= "preview" then
 		return
 	end
 
@@ -83,7 +83,7 @@ end
 function CustomBuffs:UpdateSettings(frame, settings)
 	UpdateSettingsCache(settings)
 
-	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
+	if frame.frameType ~= "preview" then
 		return
 	end
 
@@ -129,7 +129,7 @@ function CustomBuffs:UpdateState(frame, settings)
 	end
 	local cachedSettings = settingsCache[settings]
 
-	if addon.IsRestrictedAuraAPI and frame.frameType ~= "preview" then
+	if frame.frameType ~= "preview" then
 		return
 	end
 

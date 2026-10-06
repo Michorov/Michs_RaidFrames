@@ -6,10 +6,6 @@ addon.Options.Pages.Auras = addon.Options.Pages.Auras or {}
 addon.Options.Pages.Auras.Buffs = addon.Options.Pages.Auras.Buffs or {}
 
 local Buffs = addon.Options.Pages.Auras.Buffs
-local _, _, _, interfaceVersion = GetBuildInfo()
-interfaceVersion = tonumber(interfaceVersion) or 0
-local isRestrictedAuraAPI = interfaceVersion >= 120100
-	or (interfaceVersion > 16000 and interfaceVersion < 20000)
 
 local anchorOptions = {
 	{ value = "TOPLEFT", textKey = "Top Left" },
@@ -49,22 +45,14 @@ function Buffs:Create(page)
 	})
 
 	local secondaryCheckbox = topSlot:CreateControl("Checkbox", {
-		labelKey = isRestrictedAuraAPI and "Show Tooltips" or "Show External Buffs",
+		labelKey = "Show Tooltips",
 	})
 	secondaryCheckbox:BindValue({
 		get = function(profile, mode)
-			if isRestrictedAuraAPI then
-				return profile[mode].widgets.icons.buffs.showTooltips
-			end
-
-			return profile[mode].widgets.icons.buffs.showExternals
+			return profile[mode].widgets.icons.buffs.showTooltips
 		end,
 		set = function(profile, mode, value)
-			if isRestrictedAuraAPI then
-				profile[mode].widgets.icons.buffs.showTooltips = value
-			else
-				profile[mode].widgets.icons.buffs.showExternals = value
-			end
+			profile[mode].widgets.icons.buffs.showTooltips = value
 		end,
 		onChange = function()
 			addon.UpdateScheduler:Notify("buffAurasSettingsChanged")

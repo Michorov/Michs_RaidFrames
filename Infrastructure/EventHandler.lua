@@ -271,10 +271,6 @@ function EventHandler:UNIT_PHASE(unit)
 end
 
 function EventHandler:UNIT_FACTION(unit)
-	if not addon.IsRestrictedAuraAPI then
-		return
-	end
-
 	addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
 end
 
@@ -322,42 +318,28 @@ function EventHandler:UNIT_HEAL_PREDICTION(unit)
 	addon.UpdateScheduler:Notify("healPredictionStateChanged", unit)
 end
 
-function EventHandler:UNIT_AURA(unit, updateInfo)
-	if addon.IsRestrictedAuraAPI then
-		if vehicleTransitionUnits[unit] then
+function EventHandler:UNIT_AURA(unit)
+	if vehicleTransitionUnits[unit] then
+		return
+	end
+
+	if vehicleAuraHiddenUnits[unit] then
+		if addon.Utilities:ShouldHideManagedAurasForVehicle(unit) then
 			return
 		end
 
-		if vehicleAuraHiddenUnits[unit] then
-			if addon.Utilities:ShouldHideManagedAurasForVehicle(unit) then
-				return
-			end
-
-			vehicleAuraHiddenUnits[unit] = nil
-		end
-
-		addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
-		return
+		vehicleAuraHiddenUnits[unit] = nil
 	end
 
-	addon.AuraHandler:UpdateAurasForUnit(unit, updateInfo)
-	addon.UpdateScheduler:Notify("aurasStateChanged", unit)
+	addon.FrameRegistry:UpdateManagedContainersVisibility(unit)
 end
 
 function EventHandler:UNIT_ENTERING_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI then
-		return
-	end
-
 	vehicleTransitionUnits[unit] = true
 	addon.FrameRegistry:HideManagedContainers(unit)
 end
 
 function EventHandler:UNIT_ENTERED_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI then
-		return
-	end
-
 	if addon.Utilities:ShouldHideManagedAurasForVehicle(unit) then
 		vehicleTransitionUnits[unit] = nil
 		vehicleAuraHiddenUnits[unit] = true
@@ -374,10 +356,6 @@ end
 EventHandler.UNIT_EXITING_VEHICLE = EventHandler.UNIT_ENTERING_VEHICLE
 
 function EventHandler:UNIT_EXITED_VEHICLE(unit)
-	if not addon.IsRestrictedAuraAPI then
-		return
-	end
-
 	C_Timer.After(0, function()
 		addon.FrameRegistry:UpdateManagedContainersUnit(unit)
 		vehicleTransitionUnits[unit] = nil
@@ -419,13 +397,11 @@ function EventHandler:ENCOUNTER_START()
 		addon.UpdateScheduler:Notify("outOfRangeAlphaStateChanged", unit)
 	end
 
-	if addon.IsRestrictedAuraAPI then
-		C_Timer.After(0, function()
-			for i = 1, 5 do
-				addon.FrameRegistry:UpdateManagedContainersUnit("boss" .. i)
-			end
-		end)
-	end
+	C_Timer.After(0, function()
+		for i = 1, 5 do
+			addon.FrameRegistry:UpdateManagedContainersUnit("boss" .. i)
+		end
+	end)
 end
 
 EventHandler.ENCOUNTER_END = EventHandler.ENCOUNTER_START

@@ -38,7 +38,6 @@ Libraries.lua
 Utilities.lua
 Utilities/Utilities.xml
 Database.lua
-AuraHandler.lua
 Modules.lua
 
 # Style

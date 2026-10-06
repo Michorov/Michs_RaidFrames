@@ -914,15 +914,6 @@ function DataProvider.Test:GetDispelPreviewAuras(frame)
 	return DISPEL_PREVIEW_AURAS
 end
 
-function DataProvider.Live:GetUnitAuras(frame, collectionKey)
-	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" then
-		return {}
-	end
-
-	return addon.AuraHandler:GetUnitAuras(unit, collectionKey)
-end
-
 function DataProvider.Live:GetRaidBuffReminderSpellIds(frame)
 	return GetPlayerRaidBuffReminderSpellIds()
 end
@@ -1180,15 +1171,6 @@ function DataProvider.Test:GetUnitAuras(frame, filter)
 		end
 	end
 	return map
-end
-
-function DataProvider.Live:GetUnitAuraInstanceIDs(frame, filterKey)
-	local unit = frame and frame.unit
-	if type(unit) ~= "string" or unit == "" then
-		return {}
-	end
-
-	return addon.AuraHandler:GetUnitAuraInstanceIDs(unit, filterKey)
 end
 
 function DataProvider.Test:GetUnitAuraInstanceIDs(frame, filterKey)

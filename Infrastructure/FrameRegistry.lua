@@ -173,7 +173,7 @@ end
 
 function MRF_OnUnitChanged(frame, unit)
 	if frame.frameType == "boss" then
-		if addon.IsRestrictedAuraAPI and frame.managedContainers then
+		if frame.managedContainers then
 			local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 
 			if frame.managedContainers.debuffs then
@@ -221,7 +221,7 @@ function MRF_OnUnitChanged(frame, unit)
 
 	local isSupportedUnit = IsSupportedUnit(unit)
 
-	if addon.IsRestrictedAuraAPI and frame.managedContainers then
+	if frame.managedContainers then
 		local settings = addon.FrameRegistry:GetSettingsForFrame(frame)
 
 		if frame.managedContainers.debuffs then
@@ -697,10 +697,6 @@ function FrameRegistry:UpdateRoster()
 			local guid = UnitExists(unit) and UnitGUID(unit) or nil
 			local rosterKey = unit .. ":" .. (guid or "none")
 			if frame.RosterKey ~= rosterKey then
-				if not addon.IsRestrictedAuraAPI then
-					addon.AuraHandler:UpdateAurasForUnit(unit)
-				end
-
 				addon.Modules:RequestUpdateState(unit)
 				frame.RosterKey = rosterKey
 			end

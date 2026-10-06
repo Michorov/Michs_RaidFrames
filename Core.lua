@@ -1,10 +1,5 @@
 local addonName, addon = ...
 
-local _, _, _, interfaceVersion = GetBuildInfo()
-interfaceVersion = tonumber(interfaceVersion) or 0
-addon.IsRestrictedAuraAPI = interfaceVersion >= 120100
-	or (interfaceVersion > 16000 and interfaceVersion < 20000)
-
 local function InitializeAddon()
 	addon.Utilities:RefreshPixelGrid()
 	addon.Utilities.PixelPerfect:RefreshScaling()
