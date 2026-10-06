@@ -34,6 +34,13 @@ function PixelPerfect:Scale(value)
 
 	local resolutionScaledValue = value * resolutionMultiplier
 	local globalScaledValue = resolutionScaledValue * globalScale
+
+	if globalScaledValue > 0 then
+		globalScaledValue = math.max(1, globalScaledValue)
+	elseif globalScaledValue < 0 then
+		globalScaledValue = math.min(-1, globalScaledValue)
+	end
+
 	local roundedValue = addon.Utilities.Math:RoundToNearestInt(globalScaledValue)
 
 	return roundedValue

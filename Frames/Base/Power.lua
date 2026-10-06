@@ -46,9 +46,7 @@ local function UpdateSettingsCache(settings)
 
 	texture = texture or "M-SolidDarker"
 
-	local scaledHeightPx = addon.Utilities.PixelPerfect:Scale(power.height)
-	local heightPx = math.max(1, scaledHeightPx)
-
+	local heightPx = addon.Utilities.PixelPerfect:Scale(power.height)
 	local borderSizePx = addon.Utilities.PixelPerfect:Scale(math.min(1, power.borderThicknessPx))
 
 	local result = {
