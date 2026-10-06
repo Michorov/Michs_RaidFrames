@@ -7,7 +7,7 @@ addon.Frames.Base.Power = addon.Frames.Base.Power or {}
 local Power = addon.Frames.Base.Power
 
 local settingsCache = setmetatable({}, { __mode = "k" })
-local eventsRegistered = nil
+local eventsRegistered
 
 local UNIT_EVENTS = {
 	"UNIT_POWER_UPDATE",
@@ -33,15 +33,11 @@ local POWER_COLORS = {
 }
 
 local function UpdateSettingsCache(settings)
-	settingsCache[settings] = nil
-
-	local power = (settings and settings.power) or {}
-	local profile = addon.Database:GetProfile()
-	local core = (profile and profile.core) or {}
+	local power = settings.power
 	local texture = power.lsmTexture
 
 	if texture == -1 then
-		texture = core.lsmTexture
+		texture = addon.Database:GetProfile().core.lsmTexture
 	end
 
 	texture = texture or "M-SolidDarker"
@@ -49,15 +45,13 @@ local function UpdateSettingsCache(settings)
 	local heightPx = addon.Utilities.PixelPerfect:Scale(power.height)
 	local borderSizePx = addon.Utilities.PixelPerfect:Scale(math.min(1, power.borderThicknessPx))
 
-	local result = {
-		enabled = power.enabled == true,
-		healerOnly = power.healerOnly == true,
+	settingsCache[settings] = {
+		enabled = power.enabled,
+		healerOnly = power.healerOnly,
 		texture = texture,
 		heightUI = addon.Utilities.PixelPerfect:ToUI(heightPx),
 		borderSizeUI = addon.Utilities.PixelPerfect:ToUI(borderSizePx),
 	}
-
-	settingsCache[settings] = result
 end
 
 local function UpdateEvents()
@@ -98,33 +92,30 @@ local function IsPowerBarEnabled(frame, cachedSettings)
 end
 
 function Power:Ensure(frame)
-	if frame.frameType == "boss" then
+	if frame.frameType == "boss" or frame.powerBar then
 		return
 	end
 
-	if not frame.powerBar then
-		local powerBar = CreateFrame("StatusBar", nil, frame)
-		powerBar:SetFrameLevel(20)
-		powerBar:SetOrientation("HORIZONTAL")
-		powerBar:SetMinMaxValues(0, 1)
-		powerBar:SetValue(0)
+	local powerBar = CreateFrame("StatusBar", nil, frame)
+	powerBar:SetFrameLevel(20)
+	powerBar:SetOrientation("HORIZONTAL")
+	powerBar:SetMinMaxValues(0, 1)
+	powerBar:SetValue(0)
 
-		powerBar.background = powerBar:CreateTexture(nil, "BACKGROUND")
-		powerBar.background:SetAllPoints(powerBar)
-		powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)
+	powerBar.background = powerBar:CreateTexture(nil, "BACKGROUND")
+	powerBar.background:SetAllPoints(powerBar)
+	powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)
 
-		powerBar.border = CreateFrame("Frame", nil, powerBar, BackdropTemplateMixin and "BackdropTemplate")
-		powerBar.border:SetFrameLevel(powerBar:GetFrameLevel() + 1)
-		powerBar.border:SetAllPoints(powerBar)
+	powerBar.border = CreateFrame("Frame", nil, powerBar, "BackdropTemplate")
+	powerBar.border:SetFrameLevel(powerBar:GetFrameLevel() + 1)
+	powerBar.border:SetAllPoints(powerBar)
 
-		powerBar:ClearAllPoints()
-		powerBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-		powerBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-		powerBar:SetHeight(1)
-		powerBar:Hide()
+	powerBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+	powerBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+	powerBar:SetHeight(1)
+	powerBar:Hide()
 
-		frame.powerBar = powerBar
-	end
+	frame.powerBar = powerBar
 end
 
 function Power:UpdateSettings(frame, settings)
