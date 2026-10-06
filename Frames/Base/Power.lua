@@ -46,12 +46,17 @@ local function UpdateSettingsCache(settings)
 
 	texture = texture or "M-SolidDarker"
 
+	local scaledHeightPx = addon.Utilities.PixelPerfect:Scale(power.height)
+	local heightPx = math.max(1, scaledHeightPx)
+
+	local borderSizePx = addon.Utilities.PixelPerfect:Scale(math.min(1, power.borderThicknessPx))
+
 	local result = {
 		enabled = power.enabled == true,
 		healerOnly = power.healerOnly == true,
 		texture = texture,
-		heightPx = addon.Utilities:ToPixels(power.height or 4),
-		borderThicknessPx = addon.Utilities:ToPixels((power.borderThicknessPx or 1) > 0 and 1 or 0),
+		heightUI = addon.Utilities.PixelPerfect:ToUI(heightPx),
+		borderSizeUI = addon.Utilities.PixelPerfect:ToUI(borderSizePx),
 	}
 
 	settingsCache[settings] = result
@@ -108,6 +113,7 @@ function Power:Ensure(frame)
 
 		powerBar.background = powerBar:CreateTexture(nil, "BACKGROUND")
 		powerBar.background:SetAllPoints(powerBar)
+		powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)
 
 		powerBar.border = CreateFrame("Frame", nil, powerBar, BackdropTemplateMixin and "BackdropTemplate")
 		powerBar.border:SetFrameLevel(powerBar:GetFrameLevel() + 1)
@@ -137,18 +143,14 @@ function Power:UpdateSettings(frame, settings)
 	local cachedSettings = settingsCache[settings]
 
 	local powerBar = frame.powerBar
-	local scaledHeightPx = math.max(1, frame.dataProvider:Scale(frame, cachedSettings.heightPx))
-	local scaledBorderPx = frame.dataProvider:Scale(frame, cachedSettings.borderThicknessPx)
 
 	powerBar:SetStatusBarTexture(addon.Styles.Textures:Fetch(cachedSettings.texture))
-	powerBar:SetHeight(addon.Utilities:ToUI(scaledHeightPx))
+	powerBar:SetHeight(cachedSettings.heightUI)
 
-	powerBar.background:SetColorTexture(0.04, 0.04, 0.04, 1)
-
-	if scaledBorderPx > 0 then
+	if cachedSettings.borderSizeUI > 0 then
 		powerBar.border:SetBackdrop({
 			edgeFile = "Interface\\Buttons\\WHITE8x8",
-			edgeSize = addon.Utilities:ToUI(scaledBorderPx),
+			edgeSize = cachedSettings.borderSizeUI,
 		})
 		powerBar.border:SetBackdropBorderColor(0, 0, 0, 1)
 		powerBar.border:Show()
