@@ -33,6 +33,9 @@ Locales/ruRU.lua
 Locales/zhCN.lua
 Locales/zhTW.lua
 
+# Data
+Data/CustomAuraDefaults.lua
+
 # Helpers
 Libraries.lua
 Utilities.lua
