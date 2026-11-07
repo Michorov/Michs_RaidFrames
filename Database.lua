@@ -62,6 +62,9 @@ local CUSTOM_AURA_DEFAULTS = {
 
 	PRIEST = {
 		[256] = {
+			[12774462] = { enabled = true, name = "Contingency Plan" },
+			[600] = { enabled = true, name = "Power Word: Shield" },
+			[6074] = { enabled = true, name = "Renew" },
 			[17] = { enabled = true, name = "Power Word: Shield" },
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
@@ -69,6 +72,9 @@ local CUSTOM_AURA_DEFAULTS = {
 			[10060] = { enabled = true, name = "Power Infusion" },
 		},
 		[257] = {
+			[12774462] = { enabled = true, name = "Contingency Plan" },
+			[600] = { enabled = true, name = "Power Word: Shield" },
+			[6074] = { enabled = true, name = "Renew" },
 			[139] = { enabled = true, name = "Renew" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
 			[77489] = { enabled = true, name = "Echo of Light" },
@@ -76,9 +82,12 @@ local CUSTOM_AURA_DEFAULTS = {
 		},
 		[-1] = {
 			[139] = { enabled = true, name = "Renew" },
+			[6074] = { enabled = true, name = "Renew" },
 			[41635] = { enabled = true, name = "Prayer of Mending" },
 			[77489] = { enabled = true, name = "Echo of Light" },
 			[17] = { enabled = true, name = "Power Word: Shield" },
+			[600] = { enabled = true, name = "Power Word: Shield" },
+			[12774462] = { enabled = true, name = "Contingency Plan" },
 			[194384] = { enabled = true, name = "Atonement" },
 			[1253593] = { enabled = true, name = "Void Shield" },
 			[10060] = { enabled = true, name = "Power Infusion" },
