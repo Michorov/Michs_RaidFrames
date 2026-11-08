@@ -186,6 +186,14 @@ function Utilities:GetPlayerClassFileName()
 	return classFileName
 end
 
+function Utilities:GetUnitDisplayName(unit)
+	if RegionalUniqueNamesEnabled and RegionalUniqueNamesEnabled() then
+		return GetUnitName(unit) or ""
+	end
+
+	return UnitName(unit) or ""
+end
+
 function Utilities:GetPlayerSpecID()
 	local specIndex = C_SpecializationInfo.GetSpecialization()
 	if not specIndex then

@@ -332,7 +332,7 @@ function DataProvider.Live:GetName(frame)
 		return ""
 	end
 
-	return UnitName(frame.unit) or ""
+	return addon.Utilities:GetUnitDisplayName(frame.unit)
 end
 
 function DataProvider.Test:GetName(frame)

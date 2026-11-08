@@ -368,7 +368,7 @@ function Frames:CreatePreviewFrame(parent, settingsType)
 	frame.frameType = "preview"
 	frame.settingsType = settingsType
 	frame.unit = nil
-	frame.testName = UnitName("player") or ""
+	frame.testName = addon.Utilities:GetUnitDisplayName("player")
 
 	frame.testIndex = 2
 	frame.testClassIndex = 5
