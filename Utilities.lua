@@ -187,10 +187,10 @@ function Utilities:GetPlayerClassFileName()
 end
 
 function Utilities:GetPlayerSpecID()
-	local specIndex = GetSpecialization and GetSpecialization()
+	local specIndex = C_SpecializationInfo.GetSpecialization()
 	if not specIndex then
 		return nil
 	end
 
-	return select(1, GetSpecializationInfo(specIndex))
+	return select(1, C_SpecializationInfo.GetSpecializationInfo(specIndex))
 end
