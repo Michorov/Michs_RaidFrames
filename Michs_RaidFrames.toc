@@ -3,7 +3,7 @@
 ## Category: Mich's Toolkit
 ## Notes: Custom Party & Raid Frames for group play
 ## Author: Mich
-## Version: 3.2.8
+## Version: 3.2.9
 ## SavedVariables: Michs_RaidFramesDB
 ## IconTexture: Interface\AddOns\Michs_RaidFrames\Media\LogoIcon.png
 ## OptionalDeps: MiniCC
