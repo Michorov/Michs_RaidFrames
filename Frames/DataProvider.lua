@@ -53,7 +53,7 @@ local CLASS_SAMPLES = {
 	"EVOKER",
 }
 
-local RAID_BUFF_REMINDER_CLASS_BUFFS = {
+local RAID_BUFF_REMINDER_RETAIL_CLASS_BUFFS = {
 	DRUID = { 1126 }, -- Mark of the Wild
 	MAGE = { 1459 }, -- Arcane Intellect
 	WARRIOR = { 6673 }, -- Battle Shout
@@ -61,6 +61,12 @@ local RAID_BUFF_REMINDER_CLASS_BUFFS = {
 	SHAMAN = { 462854 }, -- Skyfury
 	-- EVOKER = { 369459 }, -- Source of Magic
 	-- DRUID - { 474753 }, -- Symbiotic Relationship
+}
+
+local RAID_BUFF_REMINDER_FOREVER_CLASS_BUFFS = {
+	DRUID = { 1126, 5232, 6756, 5234, 8907, 9884, 9885, 21849, 21850 }, -- Mark of the Wild / Gift of the Wild
+	MAGE = { 1459, 1460, 1461, 10156, 10157, 23028 }, -- Arcane Intellect / Arcane Brilliance
+	PRIEST = { 1243, 1244, 1245, 2791, 10937, 10938, 21562, 21564 }, -- Power Word: Fortitude / Prayer of Fortitude
 }
 
 local RAID_BUFF_REMINDER_BLESSING_OF_THE_BRONZE = {
@@ -89,12 +95,17 @@ local DISPEL_PREVIEW_AURAS = {
 
 local function GetPlayerRaidBuffReminderSpellIds()
 	local playerClass = addon.Utilities:GetPlayerClassFileName()
+	local interfaceVersion = select(4, GetBuildInfo())
+
+	if interfaceVersion >= 16000 and interfaceVersion < 17000 then
+		return RAID_BUFF_REMINDER_FOREVER_CLASS_BUFFS[playerClass], nil
+	end
 
 	if playerClass == "EVOKER" then
 		return nil, RAID_BUFF_REMINDER_BLESSING_OF_THE_BRONZE
 	end
 
-	return RAID_BUFF_REMINDER_CLASS_BUFFS[playerClass], nil
+	return RAID_BUFF_REMINDER_RETAIL_CLASS_BUFFS[playerClass], nil
 end
 
 local function BuildCustomHelpfulTestAuras()
