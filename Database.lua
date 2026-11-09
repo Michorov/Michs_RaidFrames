@@ -7,7 +7,206 @@ local AceDB = LibStub("AceDB-3.0")
 
 local initialized = false
 
-local CUSTOM_AURA_DEFAULTS = addon.Data.CustomAuraDefaults
+local CUSTOM_AURA_DEFAULTS = {
+	EVOKER = {
+		[1468] = {
+			[355941] = { enabled = true, name = "Dream Breath", spellIDs = { 355941 } },
+			[363502] = { enabled = true, name = "Dream Flight", spellIDs = { 363502 } },
+			[364343] = { enabled = true, name = "Echo", spellIDs = { 364343 } },
+			[366155] = { enabled = true, name = "Reversion", spellIDs = { 366155 } },
+			[367364] = { enabled = true, name = "Echo Reversion", spellIDs = { 367364 } },
+			[373267] = { enabled = true, name = "Lifebind", spellIDs = { 373267 } },
+			[376788] = { enabled = true, name = "Echo Dream Breath", spellIDs = { 376788 } },
+		},
+		[1473] = {
+			[360827] = { enabled = true, name = "Blistering Scales", spellIDs = { 360827 } },
+			[395152] = { enabled = true, name = "Ebon Might", spellIDs = { 395152 } },
+			[410089] = { enabled = true, name = "Prescience", spellIDs = { 410089 } },
+			[410263] = { enabled = true, name = "Inferno's Blessing", spellIDs = { 410263 } },
+			[410686] = { enabled = true, name = "Symbiotic Bloom", spellIDs = { 410686 } },
+			[413984] = { enabled = true, name = "Shifting Sands", spellIDs = { 413984 } },
+		},
+		[-1] = {
+			[360827] = { enabled = true, name = "Blistering Scales", spellIDs = { 360827 } },
+			[395152] = { enabled = true, name = "Ebon Might", spellIDs = { 395152 } },
+			[410089] = { enabled = true, name = "Prescience", spellIDs = { 410089 } },
+			[410263] = { enabled = true, name = "Inferno's Blessing", spellIDs = { 410263 } },
+			[410686] = { enabled = true, name = "Symbiotic Bloom", spellIDs = { 410686 } },
+			[413984] = { enabled = true, name = "Shifting Sands", spellIDs = { 413984 } },
+			[355941] = { enabled = true, name = "Dream Breath", spellIDs = { 355941 } },
+			[363502] = { enabled = true, name = "Dream Flight", spellIDs = { 363502 } },
+			[364343] = { enabled = true, name = "Echo", spellIDs = { 364343 } },
+			[366155] = { enabled = true, name = "Reversion", spellIDs = { 366155 } },
+			[367364] = { enabled = true, name = "Echo Reversion", spellIDs = { 367364 } },
+			[373267] = { enabled = true, name = "Lifebind", spellIDs = { 373267 } },
+			[376788] = { enabled = true, name = "Echo Dream Breath", spellIDs = { 376788 } },
+		},
+	},
+
+	DRUID = {
+		[105] = {
+			[774] = { enabled = true, name = "Rejuvenation", spellIDs = { 774 } },
+			[8936] = { enabled = true, name = "Regrowth", spellIDs = { 8936 } },
+			[33763] = { enabled = true, name = "Lifebloom", spellIDs = { 33763 } },
+			[48438] = { enabled = true, name = "Wild Growth", spellIDs = { 48438 } },
+			[155777] = { enabled = true, name = "Germination", spellIDs = { 155777 } },
+		},
+		[1484] = {
+			[774] = {
+				enabled = true,
+				name = "Rejuvenation",
+				spellIDs = { 774, 1058, 1430, 2090, 2091, 3627, 8910, 9839, 9840, 9841, 25299 },
+			},
+			[8936] = {
+				enabled = true,
+				name = "Regrowth",
+				spellIDs = { 8936, 8938, 8939, 8940, 8941, 9750, 9856, 9857, 9858 },
+			},
+			[408120] = {
+				enabled = true,
+				name = "Wild Growth",
+				spellIDs = { 408120, 1238214, 1238215 },
+			},
+			[29166] = {
+				enabled = true,
+				name = "Innervate",
+				spellIDs = { 29166 },
+			},
+			[467] = {
+				enabled = true,
+				name = "Thorns",
+				spellIDs = { 467, 782, 1075, 8914, 9756, 9910 },
+			},
+		},
+		[-1] = {
+			[774] = { enabled = true, name = "Rejuvenation", spellIDs = { 774 } },
+			[8936] = { enabled = true, name = "Regrowth", spellIDs = { 8936 } },
+			[33763] = { enabled = true, name = "Lifebloom", spellIDs = { 33763 } },
+			[48438] = { enabled = true, name = "Wild Growth", spellIDs = { 48438 } },
+			[155777] = { enabled = true, name = "Germination", spellIDs = { 155777 } },
+		},
+	},
+
+	PRIEST = {
+		[256] = {
+			[17] = { enabled = true, name = "Power Word: Shield", spellIDs = { 17 } },
+			[194384] = { enabled = true, name = "Atonement", spellIDs = { 194384 } },
+			[1253593] = { enabled = true, name = "Void Shield", spellIDs = { 1253593 } },
+			[41635] = { enabled = true, name = "Prayer of Mending", spellIDs = { 41635 } },
+			[10060] = { enabled = true, name = "Power Infusion", spellIDs = { 10060 } },
+		},
+		[257] = {
+			[139] = { enabled = true, name = "Renew", spellIDs = { 139 } },
+			[41635] = { enabled = true, name = "Prayer of Mending", spellIDs = { 41635 } },
+			[77489] = { enabled = true, name = "Echo of Light", spellIDs = { 77489 } },
+			[10060] = { enabled = true, name = "Power Infusion", spellIDs = { 10060 } },
+		},
+		[1487] = {
+			[139] = {
+				enabled = true,
+				name = "Renew",
+				spellIDs = { 139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315 },
+			},
+			[17] = {
+				enabled = true,
+				name = "Power Word: Shield",
+				spellIDs = { 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901 },
+			},
+			[401877] = {
+				enabled = true,
+				name = "Prayer of Mending",
+				spellIDs = { 401877, 1240848, 1240849 },
+			},
+			[1277462] = {
+				enabled = true,
+				name = "Contingency Plan - Ward",
+				spellIDs = { 1277462, 1277634, 1277638, 1277639, 1277640 },
+			},
+			[1277463] = {
+				enabled = true,
+				name = "Contingency Plan - Shield",
+				spellIDs = { 1277463, 1277464, 1277465, 1277467, 1277466 },
+			},
+			[1277456] = {
+				enabled = true,
+				name = "Contingency Plan - Healing",
+				spellIDs = { 1277456, 1277457, 1277458, 1277459, 1277460 },
+			},
+		},
+		[-1] = {
+			[139] = { enabled = true, name = "Renew", spellIDs = { 139 } },
+			[41635] = { enabled = true, name = "Prayer of Mending", spellIDs = { 41635 } },
+			[77489] = { enabled = true, name = "Echo of Light", spellIDs = { 77489 } },
+			[17] = { enabled = true, name = "Power Word: Shield", spellIDs = { 17 } },
+			[194384] = { enabled = true, name = "Atonement", spellIDs = { 194384 } },
+			[1253593] = { enabled = true, name = "Void Shield", spellIDs = { 1253593 } },
+			[10060] = { enabled = true, name = "Power Infusion", spellIDs = { 10060 } },
+		},
+	},
+
+	MONK = {
+		[270] = {
+			[115175] = { enabled = true, name = "Soothing Mist", spellIDs = { 115175 } },
+			[119611] = { enabled = true, name = "Renewing Mist", spellIDs = { 119611 } },
+			[124682] = { enabled = true, name = "Enveloping Mist", spellIDs = { 124682 } },
+			[450769] = { enabled = true, name = "Aspect of Harmony", spellIDs = { 450769 } },
+		},
+		[-1] = {
+			[115175] = { enabled = true, name = "Soothing Mist", spellIDs = { 115175 } },
+			[119611] = { enabled = true, name = "Renewing Mist", spellIDs = { 119611 } },
+			[124682] = { enabled = true, name = "Enveloping Mist", spellIDs = { 124682 } },
+			[450769] = { enabled = true, name = "Aspect of Harmony", spellIDs = { 450769 } },
+		},
+	},
+
+	SHAMAN = {
+		[264] = {
+			[974] = { enabled = true, name = 'Earth Shield "Ally"', spellIDs = { 974 } },
+			[383648] = { enabled = true, name = 'Earth Shield "Self"', spellIDs = { 383648 } },
+			[61295] = { enabled = true, name = "Riptide", spellIDs = { 61295 } },
+			[207400] = { enabled = true, name = "Ancestral Vigor", spellIDs = { 207400 } },
+			[382024] = { enabled = true, name = "Earthliving Weapon", spellIDs = { 382024 } },
+			-- [444490] = { enabled = true, name = "Hydrobubble", spellIDs = { 444490 }, allowMissingSource = true },
+			-- Some issues with filtering Hydrobubble because source is not player but ancestors so can't be filtered by HELPFUL|PLAYER
+		},
+		[1489] = {
+			[408521] = {
+				enabled = true,
+				name = "Riptide",
+				spellIDs = { 408521, 1239242, 1239243 },
+			},
+			[16177] = {
+				enabled = true,
+				name = "Ancestral Fortitude",
+				spellIDs = { 16177 },
+			},
+		},
+		[-1] = {
+			[974] = { enabled = true, name = 'Earth Shield "Ally"', spellIDs = { 974 } },
+			[383648] = { enabled = true, name = 'Earth Shield "Self"', spellIDs = { 383648 } },
+			[61295] = { enabled = true, name = "Riptide", spellIDs = { 61295 } },
+			[207400] = { enabled = true, name = "Ancestral Vigor", spellIDs = { 207400 } },
+			[382024] = { enabled = true, name = "Earthliving Weapon", spellIDs = { 382024 } },
+			-- [444490] = { enabled = true, name = "Hydrobubble", spellIDs = { 444490 }, allowMissingSource = true },
+			-- Some issues with filtering Hydrobubble because source is not player but ancestors so can't be filtered by HELPFUL|PLAYER
+		},
+	},
+
+	PALADIN = {
+		[65] = {
+			[53563] = { enabled = true, name = "Beacon of Light", spellIDs = { 53563 } },
+			[156322] = { enabled = true, name = "Eternal Flame", spellIDs = { 156322 } },
+			[156910] = { enabled = true, name = "Beacon of Faith", spellIDs = { 156910 } },
+			[1244893] = { enabled = true, name = "Beacon of the Savior", spellIDs = { 1244893 } },
+		},
+		[-1] = {
+			[53563] = { enabled = true, name = "Beacon of Light", spellIDs = { 53563 } },
+			[156322] = { enabled = true, name = "Eternal Flame", spellIDs = { 156322 } },
+			[156910] = { enabled = true, name = "Beacon of Faith", spellIDs = { 156910 } },
+			[1244893] = { enabled = true, name = "Beacon of the Savior", spellIDs = { 1244893 } },
+		},
+	},
+}
 
 local CUSTOM_BUFF_SETTING_DEFAULTS = {
 	enabled = false,
@@ -128,6 +327,7 @@ local function SyncCustomAuraDefaults(currentValues, defaultValues, entrySetting
 
 					if useEntrySettingDefaults then
 						currentEntry.name = defaultEntry.name
+						currentEntry.spellIDs = CopyTable(defaultEntry.spellIDs)
 
 						for key, value in pairs(entrySettingDefaults) do
 							if currentEntry[key] == nil then
@@ -138,6 +338,8 @@ local function SyncCustomAuraDefaults(currentValues, defaultValues, entrySetting
 						for key, value in pairs(defaultEntry) do
 							if key == "name" then
 								currentEntry[key] = value
+							elseif key == "spellIDs" then
+								currentEntry[key] = CopyTable(value)
 							elseif currentEntry[key] == nil then
 								currentEntry[key] = value
 							end

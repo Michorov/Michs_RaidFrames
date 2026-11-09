@@ -16,9 +16,11 @@ local function GetEnabledBuffSpellIDs(buffs)
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
 	local spellIDs = {}
 
-	for spellID, auraSettings in pairs(specAuras) do
-		if auraSettings.enabled == true then
-			spellIDs[tonumber(spellID) or spellID] = true
+	for _, entry in pairs(specAuras) do
+		if entry.enabled == true then
+			for _, spellID in ipairs(entry.spellIDs) do
+				spellIDs[spellID] = true
+			end
 		end
 	end
 

@@ -108,9 +108,9 @@ function BuffOverlay:UpdateState(frame, settings)
 	end
 
 	local specID = addon.Utilities:GetPlayerSpecID()
-	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
-	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
-	local specAuras = classAuras[specID] or {}
+	local classFileName = addon.Utilities:GetPlayerClassFileName() or ""
+	local classDefaults = addon.Database:GetCustomAuraDefaults()[classFileName] or {}
+	local specDefaults = classDefaults[specID] or {}
 
 	local auras = isTestProvider and nil or provider:GetUnitAuras(frame, "helpfulPlayer")
 
@@ -129,11 +129,13 @@ function BuffOverlay:UpdateState(frame, settings)
 			local spellId = specSettings and specSettings.spellId or 0
 			local color = specSettings and specSettings.color or nil
 
-			local ok, isAllowedAura = pcall(function()
-				return specAuras[spellId] ~= nil
-			end)
-			if not ok then
-				isAllowedAura = false
+			local entry = specDefaults[spellId]
+			local isAllowedAura = entry ~= nil
+			local includeSpellIDs = {}
+			if entry then
+				for _, auraSpellID in ipairs(entry.spellIDs) do
+					includeSpellIDs[auraSpellID] = true
+				end
 			end
 
 			if not enabled or not color or (not isTestProvider and (spellId == 0 or not isAllowedAura)) then
@@ -145,7 +147,7 @@ function BuffOverlay:UpdateState(frame, settings)
 					for _, aura in pairs(auras) do
 						local matchesSpell = false
 						local ok = pcall(function()
-							matchesSpell = aura.spellId == spellId
+							matchesSpell = includeSpellIDs[aura.spellId] == true
 						end)
 
 						if ok and matchesSpell then

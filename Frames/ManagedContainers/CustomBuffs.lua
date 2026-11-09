@@ -9,8 +9,8 @@ local AuraButtons = addon.Frames.ManagedContainers.AuraButtons
 
 local settingsCache = setmetatable({}, { __mode = "k" })
 
-local function GetSlotKey(spellID)
-	return "CustomBuff" .. tostring(spellID)
+local function GetSlotKey(entryID)
+	return "CustomBuff" .. tostring(entryID)
 end
 
 local function UpdateSettingsCache(settings)
@@ -30,29 +30,29 @@ local function UpdateSettingsCache(settings)
 	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
 	local classDefaults = defaultAuraValues[classFileName] or {}
 	for _, specDefaults in pairs(classDefaults) do
-		for spellID, defaultEntry in pairs(specDefaults) do
+		for entryID, defaultEntry in pairs(specDefaults) do
 			if defaultEntry.enabled ~= false then
-				local numericSpellID = tonumber(spellID) or spellID
-				slotKeys[GetSlotKey(numericSpellID)] = true
+				slotKeys[GetSlotKey(entryID)] = true
 			end
 		end
 	end
 
 	for _, specSettings in pairs(classAuras) do
-		for spellID in pairs(specSettings) do
-			local numericSpellID = tonumber(spellID) or spellID
-			slotKeys[GetSlotKey(numericSpellID)] = true
+		for entryID in pairs(specSettings) do
+			slotKeys[GetSlotKey(entryID)] = true
 		end
 	end
 
-	for spellID, iconData in pairs(specAuras) do
-		local numericSpellID = tonumber(spellID) or spellID
+	for entryID, iconData in pairs(specAuras) do
 		local icon = iconData or {}
 		local color = icon.colorTextureColor or {}
 
 		if icon.enabled == true then
-			slotSettings[GetSlotKey(numericSpellID)] = {
-				spellID = numericSpellID,
+			local includeSpellIDs = {}
+			for _, spellID in ipairs(icon.spellIDs) do
+				includeSpellIDs[spellID] = true
+			end
+			slotSettings[GetSlotKey(entryID)] = {
 				anchor = icon.anchor or "CENTER",
 				offsetXPx = addon.Utilities:ToPixels(icon.offsetX or 0),
 				offsetYPx = addon.Utilities:ToPixels(icon.offsetY or 0),
@@ -70,9 +70,7 @@ local function UpdateSettingsCache(settings)
 					b = color.b or 1,
 					a = color.a or 1,
 				},
-				includeSpellIDs = {
-					[numericSpellID] = true,
-				},
+				includeSpellIDs = includeSpellIDs,
 			}
 		end
 	end

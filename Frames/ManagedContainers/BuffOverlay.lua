@@ -20,11 +20,16 @@ local function UpdateSettingsCache(settings)
 	local spellID = specSettings and specSettings.spellId or 0
 	local color = specSettings and specSettings.color or {}
 
-	local defaultAuraValues = addon.Database:GetCustomAuraDefaults() or {}
-	local classAuras = defaultAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
-	local specAuras = (specID and classAuras[specID]) or {}
-	local isAllowedAura = specAuras[spellID] ~= nil
-	local enabled = specSettings and specSettings.enabled == true and spellID ~= 0 and isAllowedAura
+	local classDefaults = addon.Database:GetCustomAuraDefaults()[addon.Utilities:GetPlayerClassFileName() or ""] or {}
+	local specDefaults = classDefaults[specID] or {}
+	local entry = specDefaults[spellID]
+	local enabled = specSettings and specSettings.enabled == true and spellID ~= 0 and entry ~= nil
+	local includeSpellIDs = {}
+	if enabled then
+		for _, auraSpellID in ipairs(entry.spellIDs) do
+			includeSpellIDs[auraSpellID] = true
+		end
+	end
 
 	local result = {
 		enabled = enabled,
@@ -34,7 +39,7 @@ local function UpdateSettingsCache(settings)
 			g = color.g or 1,
 			b = color.b or 1,
 		},
-		includeSpellIDs = enabled and { [spellID] = true } or {},
+		includeSpellIDs = includeSpellIDs,
 	}
 
 	settingsCache[settings] = result

@@ -20,11 +20,15 @@ local function UpdateSettingsCache(settings)
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
 
 	local iconSettings = {}
-	for spellId, iconData in pairs(specAuras) do
+	local entryIDsBySpellID = {}
+	for entryID, iconData in pairs(specAuras) do
 		if iconData.enabled then
 			local icon = iconData or {}
 			local color = icon.colorTextureColor or {}
-			iconSettings[spellId] = {
+			for _, spellID in ipairs(icon.spellIDs) do
+				entryIDsBySpellID[spellID] = entryID
+			end
+			iconSettings[entryID] = {
 				anchor = icon.anchor or "CENTER",
 				offsetXPx = addon.Utilities:ToPixels(icon.offsetX or 0),
 				offsetYPx = addon.Utilities:ToPixels(icon.offsetY or 0),
@@ -48,6 +52,7 @@ local function UpdateSettingsCache(settings)
 	settingsCache[settings] = {
 		specAuras = specAuras,
 		iconSettings = iconSettings,
+		entryIDsBySpellID = entryIDsBySpellID,
 	}
 end
 
@@ -72,9 +77,9 @@ function CustomBuffs:Ensure(frame)
 	local classDefaults = defaultAuraValues[classFileName] or {}
 
 	for _, specDefaults in pairs(classDefaults) do
-		for spellId, defaultEntry in pairs(specDefaults) do
-			if defaultEntry.enabled ~= false and not frame.customBuffs[spellId] then
-				frame.customBuffs[spellId] = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
+		for entryID, defaultEntry in pairs(specDefaults) do
+			if defaultEntry.enabled ~= false and not frame.customBuffs[entryID] then
+				frame.customBuffs[entryID] = addon.Frames.Managers.IconManager:CreateIcon(frame.customBuffsFrame, 1)
 			end
 		end
 	end
@@ -159,11 +164,12 @@ function CustomBuffs:UpdateState(frame, settings)
 
 	local auras = provider:GetUnitAuras(frame, "helpfulPlayer")
 	for _, aura in pairs(auras) do
-		local spellOk, iconSettings = pcall(function()
-			return aura.spellId and cachedSettings.iconSettings[aura.spellId]
+		local spellOk, entryID = pcall(function()
+			return aura.spellId and cachedSettings.entryIDsBySpellID[aura.spellId]
 		end)
+		local iconSettings = spellOk and cachedSettings.iconSettings[entryID]
 		if spellOk and iconSettings then
-			local icon = customBuffs[aura.spellId]
+			local icon = customBuffs[entryID]
 			if icon and (aura.icon or iconSettings.colorTexture) then
 				local hasExpiration = provider:DoesAuraHaveExpirationTime(frame, aura)
 				local stackText = provider:GetAuraApplicationDisplayCount(frame, aura, 2, 99)

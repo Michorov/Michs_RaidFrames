@@ -20,6 +20,12 @@ local function UpdateSettingsCache(settings)
 	local classAuras = customAuraValues[addon.Utilities:GetPlayerClassFileName() or ""] or {}
 	local specID = addon.Utilities:GetPlayerSpecID()
 	local specAuras = classAuras[specID] or classAuras[-1] or {}
+	local auraSettingsBySpellID = {}
+	for _, entry in pairs(specAuras) do
+		for _, spellID in ipairs(entry.spellIDs) do
+			auraSettingsBySpellID[spellID] = entry
+		end
+	end
 
 	local result = {
 		enabled = buffs.enabled ~= false,
@@ -36,7 +42,7 @@ local function UpdateSettingsCache(settings)
 		cooldownFontSize = buffs.cooldownFontSize or 10,
 		showExternals = buffs.showExternals == true,
 		borderSizePx = addon.Utilities:ToPixels((buffs.borderSizePx ~= 0) and 1 or 0),
-		specAuras = specAuras,
+		auraSettingsBySpellID = auraSettingsBySpellID,
 	}
 
 	settingsCache[settings] = result
@@ -190,7 +196,7 @@ function Buffs:UpdateState(frame, settings)
 		end
 
 		local ok, customAuraSettings = pcall(function()
-			return cachedSettings.specAuras[aura.spellId]
+			return cachedSettings.auraSettingsBySpellID[aura.spellId]
 		end)
 		if not ok then
 			customAuraSettings = nil
