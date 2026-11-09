@@ -117,6 +117,26 @@ local CUSTOM_AURA_DEFAULTS = {
 				name = "Prayer of Mending",
 				spellIDs = { 401877, 1240848, 1240849 },
 			},
+			[6346] = {
+				enabled = true,
+				name = "Fear Ward",
+				spellIDs = { 6346 },
+			},
+			[431624] = {
+				enabled = true,
+				name = "Divine Aegis",
+				spellIDs = { 431624 },
+			},
+			[10060] = {
+				enabled = true,
+				name = "Power Infusion",
+				spellIDs = { 10060 },
+			},
+			[14893] = {
+				enabled = true,
+				name = "Inspiration",
+				spellIDs = { 14893 },
+			},
 			[1277462] = {
 				enabled = true,
 				name = "Contingency Plan - Ward",
@@ -141,6 +161,21 @@ local CUSTOM_AURA_DEFAULTS = {
 			[194384] = { enabled = true, name = "Atonement", spellIDs = { 194384 } },
 			[1253593] = { enabled = true, name = "Void Shield", spellIDs = { 1253593 } },
 			[10060] = { enabled = true, name = "Power Infusion", spellIDs = { 10060 } },
+		},
+	},
+
+	MAGE = {
+		[1482] = {
+			[1008] = {
+				enabled = true,
+				name = "Amplify Magic",
+				spellIDs = { 1008, 8455, 10169, 10170 },
+			},
+			[604] = {
+				enabled = true,
+				name = "Dampen Magic",
+				spellIDs = { 604, 8450, 8451, 10173, 10174 },
+			},
 		},
 	},
 
@@ -198,6 +233,33 @@ local CUSTOM_AURA_DEFAULTS = {
 			[156322] = { enabled = true, name = "Eternal Flame", spellIDs = { 156322 } },
 			[156910] = { enabled = true, name = "Beacon of Faith", spellIDs = { 156910 } },
 			[1244893] = { enabled = true, name = "Beacon of the Savior", spellIDs = { 1244893 } },
+		},
+		[1486] = {
+			[1310909] = {
+				enabled = true,
+				name = "Light's Vigil",
+				spellIDs = { 1310909, 1311593, 1311597 },
+			},
+			[1328548] = {
+				enabled = true,
+				name = "Oath of Light",
+				spellIDs = { 1328548 },
+			},
+			[1022] = {
+				enabled = true,
+				name = "Blessing of Protection",
+				spellIDs = { 1022, 5599, 10278 },
+			},
+			[1044] = {
+				enabled = true,
+				name = "Blessing of Freedom",
+				spellIDs = { 1044 },
+			},
+			[6940] = {
+				enabled = true,
+				name = "Blessing of Sacrifice",
+				spellIDs = { 6940, 20729 },
+			},
 		},
 		[-1] = {
 			[53563] = { enabled = true, name = "Beacon of Light", spellIDs = { 53563 } },
