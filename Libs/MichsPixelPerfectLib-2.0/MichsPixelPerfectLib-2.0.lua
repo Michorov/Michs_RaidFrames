@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "MichsPixelPerfectLib-2.0", 5
+local MAJOR, MINOR = "MichsPixelPerfectLib-2.0", 6
 
 assert(LibStub, MAJOR .. " requires LibStub")
 
@@ -153,12 +153,14 @@ function Scaler:CenterElement(element, parent, offsetX, offsetY)
 	element:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", ToRawUI(leftPx), ToRawUI(bottomPx))
 end
 
-local pixelGridEventFrame = CreateFrame("Frame")
-pixelGridEventFrame:RegisterEvent("PLAYER_LOGIN")
-pixelGridEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-pixelGridEventFrame:RegisterEvent("UI_SCALE_CHANGED")
-pixelGridEventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
-pixelGridEventFrame:SetScript("OnEvent", function(_, event)
+local pixelPerfectEventFrame = MichsPixelPerfect.pixelPerfectEventFrame or CreateFrame("Frame")
+MichsPixelPerfect.pixelPerfectEventFrame = pixelPerfectEventFrame
+
+pixelPerfectEventFrame:RegisterEvent("PLAYER_LOGIN")
+pixelPerfectEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+pixelPerfectEventFrame:RegisterEvent("UI_SCALE_CHANGED")
+pixelPerfectEventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+pixelPerfectEventFrame:SetScript("OnEvent", function(_, event)
 	C_Timer.After(0, function()
 		RefreshPixelGrid()
 		RunAllUpdateCallbacks(event)
