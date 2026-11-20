@@ -48,15 +48,15 @@ function Methods:UpdateLayout()
 	local panel = self.panel
 	local PP = panel.instance.PP
 
-	self:SetHeight(PP:ToUIScaled(panel.layout.headerHeight))
+	self:SetHeight(PP:ToUI(panel.layout.headerHeight))
 
 	self.title:ClearAllPoints()
-	self.title:SetPoint("TOPLEFT", self, "TOPLEFT", PP:ToUIScaled(8), PP:ToUIScaled(-8))
-	OptionsUILib.Theme:ApplyFont(self.title, PP:ScaleFont(22), "", "title")
+	self.title:SetPoint("TOPLEFT", self, "TOPLEFT", PP:ToUI(8), PP:ToUI(-8))
+	OptionsUILib.Theme:ApplyFont(self.title, PP:ToUI(22), "", "title")
 
 	self.closeButton:ClearAllPoints()
-	self.closeButton:SetPoint("TOPRIGHT", self, "TOPRIGHT", PP:ToUIScaled(-8), PP:ToUIScaled(-8))
-	self.closeButton:SetSize(PP:ToUIScaled(24), PP:ToUIScaled(24))
+	self.closeButton:SetPoint("TOPRIGHT", self, "TOPRIGHT", PP:ToUI(-8), PP:ToUI(-8))
+	self.closeButton:SetSize(PP:ToUI(24), PP:ToUI(24))
 
-	OptionsUILib.Theme:ApplyFont(self.closeButton.text, PP:ScaleFont(16), "")
+	OptionsUILib.Theme:ApplyFont(self.closeButton.text, PP:ToUI(16), "")
 end

@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "MichsOptionsUILib-1.0", 1
+local MAJOR, MINOR = "MichsOptionsUILib-1.0", 2
 
 assert(LibStub, MAJOR .. " requires LibStub")
 

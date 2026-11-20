@@ -15,7 +15,7 @@ local function ApplyVisualState(control)
 	local inactiveTextColor = { 0.82, 0.83, 0.87, 1 }
 	local inactiveHoverTextColor = { 0.94, 0.95, 0.98, 1 }
 	local activeTextColor = { OptionsUILib.Theme:GetColor("background", 1) }
-	local plateInset = PP:ToUIScaled(2)
+	local plateInset = PP:ToUI(2)
 
 	local leftActive = control.value == control.leftOption.value
 	local activePlateColor = activeBg
@@ -81,7 +81,7 @@ local function CreateSegment(control, option)
 	segment.text:SetPoint("CENTER", segment, "CENTER", 0, 0)
 	segment.text:SetShadowOffset(0, 0)
 	segment.text:SetShadowColor(0, 0, 0, 0)
-	OptionsUILib.Theme:ApplyFont(segment.text, control.PP:ScaleFont(control.layout.fontSize), "")
+	OptionsUILib.Theme:ApplyFont(segment.text, control.PP:ToUI(control.layout.fontSize), "")
 	segment.text:SetText(segment.option.text or "")
 
 	segment:SetScript("OnEnter", function(self)
@@ -216,11 +216,11 @@ function SegmentedToggle:Create(parent, PP, leftOption, rightOption)
 
 	function control:UpdateLayout()
 		local PP = self.PP
-		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
+		local borderThickness = PP:ToUI(self.layout.borderThickness)
 
-		self:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
-		OptionsUILib.Theme:ApplyFont(self.leftSegment.text, PP:ScaleFont(self.layout.fontSize), "")
-		OptionsUILib.Theme:ApplyFont(self.rightSegment.text, PP:ScaleFont(self.layout.fontSize), "")
+		self:SetSize(PP:ToUI(self.layout.width), PP:ToUI(self.layout.height))
+		OptionsUILib.Theme:ApplyFont(self.leftSegment.text, PP:ToUI(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.rightSegment.text, PP:ToUI(self.layout.fontSize), "")
 
 		self.activePlate.topHighlight:SetHeight(borderThickness)
 		self.topBorder:SetHeight(borderThickness)

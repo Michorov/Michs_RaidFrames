@@ -73,8 +73,8 @@ function Label:Create(parent, PP, text)
 	function control:UpdateLayout()
 		local PP = self.PP
 
-		self:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
-		OptionsUILib.Theme:ApplyFont(self.text, PP:ScaleFont(self.layout.fontSize), "")
+		self:SetSize(PP:ToUI(self.layout.width), PP:ToUI(self.layout.height))
+		OptionsUILib.Theme:ApplyFont(self.text, PP:ToUI(self.layout.fontSize), "")
 
 		self.text:ClearAllPoints()
 		self.text:SetPoint("LEFT", self, "LEFT", 0, 0)
@@ -86,8 +86,8 @@ function Label:Create(parent, PP, text)
 				self.layout.point,
 				self.layout.relativeTo,
 				self.layout.relativePoint,
-				PP:ToUIScaled(self.layout.offsetX),
-				PP:ToUIScaled(self.layout.offsetY)
+				PP:ToUI(self.layout.offsetX),
+				PP:ToUI(self.layout.offsetY)
 			)
 		end
 	end

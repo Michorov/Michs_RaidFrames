@@ -138,8 +138,8 @@ end
 
 function Methods:UpdateLayout()
 	local PP = self.PP
-	local width = PP:ToUIScaled(self.layout.width)
-	local height = PP:ToUIScaled(self.layout.height)
+	local width = PP:ToUI(self.layout.width)
+	local height = PP:ToUI(self.layout.height)
 
 	self.frame:SetSize(width, height)
 
@@ -149,8 +149,8 @@ function Methods:UpdateLayout()
 			self.layout.point,
 			self.layout.relativeTo,
 			self.layout.relativePoint,
-			PP:ToUIScaled(self.layout.offsetX),
-			PP:ToUIScaled(self.layout.offsetY)
+			PP:ToUI(self.layout.offsetX),
+			PP:ToUI(self.layout.offsetY)
 		)
 	end
 
@@ -160,17 +160,19 @@ function Methods:UpdateLayout()
 
 	for index, item in ipairs(self.items) do
 		local columnIndex = ((index - 1) % self.columns) + 1
-		local offsetX = (columnIndex - 1) * (columnWidth + columnGap)
+		local offsetX = (columnIndex - 1) * (PP:ToUI(columnWidth) + PP:ToUI(columnGap))
 
 		if item.frame then
 			item.layout.width = columnWidth
 			item.layout.height = self.layout.height
 			item.frame:ClearAllPoints()
-			item.frame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", PP:ToUIScaled(offsetX), 0)
+			item.frame:SetPoint("TOPLEFT", self.frame, "TOPLEFT", offsetX, 0)
 			item:UpdateLayout()
 		else
 			item:SetLayoutWidth(columnWidth)
-			item:SetLayoutPoint("BOTTOMLEFT", self.frame, "BOTTOMLEFT", offsetX, 0)
+			item.layout.point = nil
+			item:ClearAllPoints()
+			item:SetPoint("BOTTOMLEFT", self.frame, "BOTTOMLEFT", offsetX, 0)
 		end
 	end
 end
@@ -210,7 +212,7 @@ function SlotMethods:UpdateLayout()
 	local PP = self.row.PP
 	local controlCount = #self.controls
 
-	self.frame:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
+	self.frame:SetSize(PP:ToUI(self.layout.width), PP:ToUI(self.layout.height))
 
 	if controlCount == 1 then
 		local control = self.controls[1]

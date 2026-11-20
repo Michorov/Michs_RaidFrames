@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "MichsPixelPerfectLib-1.0", 3
+local MAJOR, MINOR = "MichsPixelPerfectLib-2.0", 5
 
 assert(LibStub, MAJOR .. " requires LibStub")
 
@@ -8,6 +8,7 @@ if not MichsPixelPerfect then
 end
 
 local cachedPixelStep
+local resolutionMultiplier
 
 local Scaler = MichsPixelPerfect.Scaler or {}
 MichsPixelPerfect.Scaler = Scaler
@@ -30,6 +31,7 @@ local function RefreshPixelGrid()
 
 	local pixelScale = 768 / physicalHeight
 	cachedPixelStep = pixelScale / uiScale
+	resolutionMultiplier = physicalHeight / 1080
 end
 
 local function GetPixelStep()
@@ -50,17 +52,22 @@ local function RoundToNearestInt(value)
 end
 
 local function Scale(scaler, value)
-	return (value or 0) * scaler.globalScale
-end
+	if type(value) ~= "number" or (value > -1 and value < 1) then
+		return 0
+	end
 
-local function ScaleToResolution(value)
-	local step = GetPixelStep()
-	return (value or 0) / step
+	local scaledPixels = value * resolutionMultiplier * scaler.globalScale
+	if scaledPixels > 0 then
+		scaledPixels = math.max(1, scaledPixels)
+	elseif scaledPixels < 0 then
+		scaledPixels = math.min(-1, scaledPixels)
+	end
+
+	return RoundToNearestInt(scaledPixels)
 end
 
 local function ToPixels(uiUnits)
-	local step = GetPixelStep()
-	return RoundToNearestInt((uiUnits or 0) / step)
+	return RoundToNearestInt((uiUnits or 0) / GetPixelStep())
 end
 
 local function ToRawUI(pixelCount)
@@ -121,24 +128,9 @@ function Scaler:RegisterForUpdate(callback)
 	callback("REGISTERED")
 end
 
-function Scaler:ToUI(pixelCount)
-	local scaledPixels = Scale(self, pixelCount)
-	local roundedPixels = RoundToNearestInt(scaledPixels)
-
-	return roundedPixels * GetPixelStep()
-end
-
-function Scaler:ToUIScaled(value)
-	local scaledToResolutionPixels = ScaleToResolution(value)
-
-	return self:ToUI(scaledToResolutionPixels)
-end
-
-function Scaler:ScaleFont(size)
-	local scaledFontSize = Scale(self, size)
-	local roundedFontSize = RoundToNearestInt(scaledFontSize)
-
-	return math.max(1, roundedFontSize)
+function Scaler:ToUI(value)
+	local step = GetPixelStep()
+	return Scale(self, value) * step
 end
 
 function Scaler:CenterElement(element, parent, offsetX, offsetY)
@@ -152,8 +144,8 @@ function Scaler:CenterElement(element, parent, offsetX, offsetY)
 	local parentHeightPx = ToPixels(parent:GetHeight())
 	local elementWidthPx = ToPixels(element:GetWidth())
 	local elementHeightPx = ToPixels(element:GetHeight())
-	local offsetXPx = ToPixels(offsetX)
-	local offsetYPx = ToPixels(offsetY)
+	local offsetXPx = Scale(self, offsetX)
+	local offsetYPx = Scale(self, offsetY)
 	local leftPx = RoundToNearestInt(((parentWidthPx - elementWidthPx) / 2) + offsetXPx)
 	local bottomPx = RoundToNearestInt(((parentHeightPx - elementHeightPx) / 2) + offsetYPx)
 
@@ -162,17 +154,15 @@ function Scaler:CenterElement(element, parent, offsetX, offsetY)
 end
 
 local pixelGridEventFrame = CreateFrame("Frame")
-pixelGridEventFrame:RegisterEvent("ADDON_LOADED")
 pixelGridEventFrame:RegisterEvent("PLAYER_LOGIN")
 pixelGridEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 pixelGridEventFrame:RegisterEvent("UI_SCALE_CHANGED")
 pixelGridEventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
 pixelGridEventFrame:SetScript("OnEvent", function(_, event)
-	RefreshPixelGrid()
-
-	if event ~= "ADDON_LOADED" then
+	C_Timer.After(0, function()
+		RefreshPixelGrid()
 		RunAllUpdateCallbacks(event)
-	end
+	end)
 end)
 
 RefreshPixelGrid()

@@ -42,7 +42,7 @@ function Methods:UpdateLayout()
 	local panel = self.panel
 	local PP = panel.instance.PP
 
-	self:SetWidth(PP:ToUIScaled(panel.layout.mainWidth))
+	self:SetWidth(PP:ToUI(panel.layout.mainWidth))
 
 	for _, page in pairs(self.pages) do
 		page:UpdateLayout()

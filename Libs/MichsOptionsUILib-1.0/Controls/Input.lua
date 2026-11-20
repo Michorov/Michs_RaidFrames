@@ -168,16 +168,16 @@ function Input:Create(parent, PP, labelText)
 
 	function control:UpdateLayout()
 		local PP = self.PP
-		local labelSpacing = PP:ToUIScaled(self.layout.labelSpacing)
-		local fieldHeight = PP:ToUIScaled(self.layout.fieldHeight)
-		local labelHeight = PP:ToUIScaled(self.layout.labelHeight)
-		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
-		local textInset = PP:ToUIScaled(self.layout.textInset)
+		local labelSpacing = PP:ToUI(self.layout.labelSpacing)
+		local fieldHeight = PP:ToUI(self.layout.fieldHeight)
+		local labelHeight = PP:ToUI(self.layout.labelHeight)
+		local borderThickness = PP:ToUI(self.layout.borderThickness)
+		local textInset = PP:ToUI(self.layout.textInset)
 
-		self:SetWidth(PP:ToUIScaled(self.layout.width))
-		OptionsUILib.Theme:ApplyFont(self.label, PP:ScaleFont(self.layout.fontSize), "")
-		OptionsUILib.Theme:ApplyFont(self.field, PP:ScaleFont(self.layout.fontSize), "")
-		OptionsUILib.Theme:ApplyFont(self.placeholderText, PP:ScaleFont(self.layout.fontSize), "")
+		self:SetWidth(PP:ToUI(self.layout.width))
+		OptionsUILib.Theme:ApplyFont(self.label, PP:ToUI(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.field, PP:ToUI(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.placeholderText, PP:ToUI(self.layout.fontSize), "")
 
 		self.label:ClearAllPoints()
 		self.field:ClearAllPoints()
@@ -213,8 +213,8 @@ function Input:Create(parent, PP, labelText)
 				self.layout.point,
 				self.layout.relativeTo,
 				self.layout.relativePoint,
-				PP:ToUIScaled(self.layout.offsetX),
-				PP:ToUIScaled(self.layout.offsetY)
+				PP:ToUI(self.layout.offsetX),
+				PP:ToUI(self.layout.offsetY)
 			)
 		end
 

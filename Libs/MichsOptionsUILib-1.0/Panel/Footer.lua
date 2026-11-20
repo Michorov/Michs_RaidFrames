@@ -34,17 +34,17 @@ end
 function Methods:UpdateLayout()
 	local panel = self.panel
 	local PP = panel.instance.PP
-	local borderThickness = PP:ToUIScaled(1)
+	local borderThickness = PP:ToUI(1)
 
-	self:SetHeight(PP:ToUIScaled(panel.layout.footerHeight))
+	self:SetHeight(PP:ToUI(panel.layout.footerHeight))
 
 	self.text:ClearAllPoints()
-	self.text:SetPoint("LEFT", self, "LEFT", PP:ToUIScaled(10), 0)
-	self.text:SetPoint("RIGHT", self, "RIGHT", PP:ToUIScaled(-8), 0)
-	OptionsUILib.Theme:ApplyFont(self.text, PP:ScaleFont(12), "")
+	self.text:SetPoint("LEFT", self, "LEFT", PP:ToUI(10), 0)
+	self.text:SetPoint("RIGHT", self, "RIGHT", PP:ToUI(-8), 0)
+	OptionsUILib.Theme:ApplyFont(self.text, PP:ToUI(12), "")
 
 	self.topBorder:ClearAllPoints()
-	self.topBorder:SetPoint("TOPLEFT", self, "TOPLEFT", PP:ToUIScaled(8), 0)
-	self.topBorder:SetPoint("TOPRIGHT", self, "TOPRIGHT", PP:ToUIScaled(-8), 0)
+	self.topBorder:SetPoint("TOPLEFT", self, "TOPLEFT", PP:ToUI(8), 0)
+	self.topBorder:SetPoint("TOPRIGHT", self, "TOPRIGHT", PP:ToUI(-8), 0)
 	self.topBorder:SetHeight(borderThickness)
 end

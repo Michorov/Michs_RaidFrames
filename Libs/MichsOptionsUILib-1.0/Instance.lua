@@ -3,7 +3,7 @@ if not OptionsUILib then
 	return
 end
 
-local PixelPerfectLib = LibStub("MichsPixelPerfectLib-1.0")
+local PixelPerfectLib = LibStub("MichsPixelPerfectLib-2.0")
 
 local Instance = OptionsUILib.Instance
 Instance.__index = Instance

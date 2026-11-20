@@ -109,12 +109,12 @@ function Button:Create(parent, PP, text)
 
 	function button:UpdateLayout()
 		local PP = self.PP
-		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
-		local textInset = PP:ToUIScaled(self.layout.textInset)
+		local borderThickness = PP:ToUI(self.layout.borderThickness)
+		local textInset = PP:ToUI(self.layout.textInset)
 
-		self:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
+		self:SetSize(PP:ToUI(self.layout.width), PP:ToUI(self.layout.height))
 
-		OptionsUILib.Theme:ApplyFont(self.text, PP:ScaleFont(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.text, PP:ToUI(self.layout.fontSize), "")
 		self.text:SetJustifyH(self.layout.textAlignment)
 		self.text:ClearAllPoints()
 
@@ -137,8 +137,8 @@ function Button:Create(parent, PP, text)
 				self.layout.point,
 				self.layout.relativeTo,
 				self.layout.relativePoint,
-				PP:ToUIScaled(self.layout.offsetX),
-				PP:ToUIScaled(self.layout.offsetY)
+				PP:ToUI(self.layout.offsetX),
+				PP:ToUI(self.layout.offsetY)
 			)
 		end
 	end

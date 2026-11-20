@@ -96,12 +96,12 @@ end
 function Methods:UpdateLayout()
 	local panel = self.panel
 	local PP = panel.instance.PP
-	local outerInset = PP:ToUIScaled(8)
-	local spacing = PP:ToUIScaled(4)
-	local textInset = PP:ToUIScaled(10)
-	local buttonHeight = PP:ToUIScaled(32)
+	local outerInset = PP:ToUI(8)
+	local spacing = PP:ToUI(4)
+	local textInset = PP:ToUI(10)
+	local buttonHeight = PP:ToUI(32)
 
-	self:SetWidth(PP:ToUIScaled(panel.layout.sidebarWidth))
+	self:SetWidth(PP:ToUI(panel.layout.sidebarWidth))
 
 	local previousTopButton
 	for _, page in ipairs(self.topPages) do
@@ -121,7 +121,7 @@ function Methods:UpdateLayout()
 			button.text:ClearAllPoints()
 			button.text:SetPoint("LEFT", button, "LEFT", textInset, 0)
 			button.text:SetPoint("RIGHT", button, "RIGHT", -textInset, 0)
-			OptionsUILib.Theme:ApplyFont(button.text, PP:ScaleFont(14), "")
+			OptionsUILib.Theme:ApplyFont(button.text, PP:ToUI(14), "")
 			UpdateButtonState(button)
 
 			previousTopButton = button
@@ -146,7 +146,7 @@ function Methods:UpdateLayout()
 			button.text:ClearAllPoints()
 			button.text:SetPoint("LEFT", button, "LEFT", textInset, 0)
 			button.text:SetPoint("RIGHT", button, "RIGHT", -textInset, 0)
-			OptionsUILib.Theme:ApplyFont(button.text, PP:ScaleFont(14), "")
+			OptionsUILib.Theme:ApplyFont(button.text, PP:ToUI(14), "")
 			UpdateButtonState(button)
 
 			previousBottomButton = button
@@ -156,5 +156,5 @@ function Methods:UpdateLayout()
 	self.rightBorder:ClearAllPoints()
 	self.rightBorder:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -outerInset)
 	self.rightBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, outerInset)
-	self.rightBorder:SetWidth(PP:ToUIScaled(1))
+	self.rightBorder:SetWidth(PP:ToUI(1))
 end

@@ -47,14 +47,14 @@ end
 function Methods:UpdateLayout()
 	local panel = self.panel
 	local PP = panel.instance.PP
-	local outerInset = PP:ToUIScaled(8)
+	local outerInset = PP:ToUI(8)
 
 	self:SetShown(panel.previewEnabled)
-	self:SetWidth(PP:ToUIScaled(panel.layout.previewWidth))
+	self:SetWidth(PP:ToUI(panel.layout.previewWidth))
 	self.leftBorder:ClearAllPoints()
 	self.leftBorder:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -outerInset)
 	self.leftBorder:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, outerInset)
-	self.leftBorder:SetWidth(PP:ToUIScaled(1))
+	self.leftBorder:SetWidth(PP:ToUI(1))
 
 	if self.layoutUpdater then
 		self.layoutUpdater()

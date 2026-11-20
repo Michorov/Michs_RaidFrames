@@ -176,7 +176,7 @@ function Preview:Create(ownerPanel)
 	preview.title = preview:CreateFontString(nil, "OVERLAY")
 	preview.title:SetJustifyH("CENTER")
 	preview.title:SetTextColor(OptionsUILib.Theme:GetTextColor("highlight"))
-	OptionsUILib.Theme:ApplyFont(preview.title, PP:ScaleFont(20), "")
+	OptionsUILib.Theme:ApplyFont(preview.title, PP:ToUI(20), "")
 
 	preview.body = CreateFrame("Frame", nil, preview)
 	preview.frameAreaBackground = preview.body:CreateTexture(nil, "BACKGROUND")
@@ -365,7 +365,7 @@ function Preview:UpdateFrameLayout(frame, settings)
 	end
 
 	local frameWidthPx, frameHeightPx = addon.Frames:UpdatePreviewFrameLayout(frame, settings)
-	local bodyWidthPx = addon.Utilities:ToPixels(layoutValues.bodyWidth)
+	local bodyWidthPx = addon.Utilities:ToPixels(panel.instance.PP:ToUI(layoutValues.bodyWidth))
 	local offsetXPx = addon.Utilities:RoundToNearestInt((bodyWidthPx - frameWidthPx) / 2)
 	local offsetYPx = addon.Utilities:RoundToNearestInt((bodyWidthPx - frameHeightPx) / 2)
 
@@ -387,11 +387,11 @@ function Preview:UpdateLayout()
 	end
 
 	local PP = panel.instance.PP
-	local titleInset = PP:ToUIScaled(layoutValues.titleInset)
-	local titleTopInset = PP:ToUIScaled(layoutValues.titleTopInset)
-	local titleHeight = PP:ToUIScaled(layoutValues.titleHeight)
-	local bodyTopGap = PP:ToUIScaled(layoutValues.bodyTopGap)
-	local bodyWidth = PP:ToUIScaled(layoutValues.bodyWidth)
+	local titleInset = PP:ToUI(layoutValues.titleInset)
+	local titleTopInset = PP:ToUI(layoutValues.titleTopInset)
+	local titleHeight = PP:ToUI(layoutValues.titleHeight)
+	local bodyTopGap = PP:ToUI(layoutValues.bodyTopGap)
+	local bodyWidth = PP:ToUI(layoutValues.bodyWidth)
 	local checkboxTopOffset = layoutValues.checkboxTopOffset
 	local checkboxGap = layoutValues.checkboxGap
 
@@ -399,7 +399,7 @@ function Preview:UpdateLayout()
 	preview.title:SetPoint("TOPLEFT", preview, "TOPLEFT", titleInset, -titleTopInset)
 	preview.title:SetPoint("TOPRIGHT", preview, "TOPRIGHT", -titleInset, -titleTopInset)
 	preview.title:SetHeight(titleHeight)
-	OptionsUILib.Theme:ApplyFont(preview.title, PP:ScaleFont(20), "")
+	OptionsUILib.Theme:ApplyFont(preview.title, PP:ToUI(20), "")
 
 	preview.body:ClearAllPoints()
 	preview.body:SetPoint("TOPLEFT", preview.title, "BOTTOMLEFT", 0, -bodyTopGap)

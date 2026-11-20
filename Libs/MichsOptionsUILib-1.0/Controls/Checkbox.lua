@@ -86,7 +86,7 @@ function Checkbox:Create(parent, PP, text)
 	checkbox.text = checkbox:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	checkbox.text:SetJustifyH("LEFT")
 	checkbox.text:SetTextColor(OptionsUILib.Theme:GetTextColor("primary"))
-	OptionsUILib.Theme:ApplyFont(checkbox.text, PP:ScaleFont(checkbox.layout.fontSize), "")
+	OptionsUILib.Theme:ApplyFont(checkbox.text, PP:ToUI(checkbox.layout.fontSize), "")
 	checkbox.text:SetText(text or "Checkbox")
 
 	function checkbox:SetChecked(checked)
@@ -147,13 +147,13 @@ function Checkbox:Create(parent, PP, text)
 
 	function checkbox:UpdateLayout()
 		local PP = self.PP
-		local borderThickness = PP:ToUIScaled(self.layout.borderThickness)
-		local checkInset = PP:ToUIScaled(self.layout.checkInset)
+		local borderThickness = PP:ToUI(self.layout.borderThickness)
+		local checkInset = PP:ToUI(self.layout.checkInset)
 
-		self:SetSize(PP:ToUIScaled(self.layout.width), PP:ToUIScaled(self.layout.height))
+		self:SetSize(PP:ToUI(self.layout.width), PP:ToUI(self.layout.height))
 		self.box:ClearAllPoints()
 		self.box:SetPoint("LEFT", self, "LEFT", 0, 0)
-		self.box:SetSize(PP:ToUIScaled(self.layout.boxSize), PP:ToUIScaled(self.layout.boxSize))
+		self.box:SetSize(PP:ToUI(self.layout.boxSize), PP:ToUI(self.layout.boxSize))
 
 		self.boxTopBorder:SetHeight(borderThickness)
 		self.boxBottomBorder:SetHeight(borderThickness)
@@ -164,9 +164,9 @@ function Checkbox:Create(parent, PP, text)
 		self.check:SetPoint("TOPLEFT", self.box, "TOPLEFT", checkInset, -checkInset)
 		self.check:SetPoint("BOTTOMRIGHT", self.box, "BOTTOMRIGHT", -checkInset, checkInset)
 
-		OptionsUILib.Theme:ApplyFont(self.text, PP:ScaleFont(self.layout.fontSize), "")
+		OptionsUILib.Theme:ApplyFont(self.text, PP:ToUI(self.layout.fontSize), "")
 		self.text:ClearAllPoints()
-		self.text:SetPoint("LEFT", self, "LEFT", PP:ToUIScaled(self.layout.boxSize + self.layout.textInset), 0)
+		self.text:SetPoint("LEFT", self, "LEFT", PP:ToUI(self.layout.boxSize) + PP:ToUI(self.layout.textInset), 0)
 		self.text:SetPoint("RIGHT", self, "RIGHT", 0, 0)
 
 		if self.layout.point then
@@ -175,8 +175,8 @@ function Checkbox:Create(parent, PP, text)
 				self.layout.point,
 				self.layout.relativeTo,
 				self.layout.relativePoint,
-				PP:ToUIScaled(self.layout.offsetX),
-				PP:ToUIScaled(self.layout.offsetY)
+				PP:ToUI(self.layout.offsetX),
+				PP:ToUI(self.layout.offsetY)
 			)
 		end
 	end

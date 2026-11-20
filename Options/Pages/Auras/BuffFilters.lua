@@ -71,7 +71,7 @@ function BuffFilters:Create(page)
 	subpage.emptyText = subpage.frame:CreateFontString(nil, "OVERLAY")
 	subpage.emptyText:SetJustifyH("LEFT")
 	subpage.emptyText:SetTextColor(OptionsUILib.Theme:GetTextColor("secondary"))
-	OptionsUILib.Theme:ApplyFont(subpage.emptyText, panel.instance.PP:ScaleFont(14), "")
+	OptionsUILib.Theme:ApplyFont(subpage.emptyText, panel.instance.PP:ToUI(14), "")
 	subpage.emptyText:SetText(panel:Localize("No filter found for this specialization"))
 	subpage.emptyText:Hide()
 
@@ -165,7 +165,7 @@ function BuffFilters:Create(page)
 		local PP = panel.instance.PP
 		self.emptyText:ClearAllPoints()
 		self.emptyText:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, 0)
-		OptionsUILib.Theme:ApplyFont(self.emptyText, PP:ScaleFont(14), "")
+		OptionsUILib.Theme:ApplyFont(self.emptyText, PP:ToUI(14), "")
 	end
 
 	RefreshRows(panel.profileGetter(panel), panel:GetActiveMode())

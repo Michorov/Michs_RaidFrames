@@ -185,12 +185,12 @@ end
 
 function Methods:UpdateLayout()
 	local PP = self.panel.instance.PP
-	local padding = PP:ToUIScaled(self.panel.layout.pagePadding)
-	local headerHeight = PP:ToUIScaled(self.panel.layout.pageHeaderHeight)
-	local bodyGap = PP:ToUIScaled(self.panel.layout.pageHeaderBodyGap)
-	local controlGap = PP:ToUIScaled(self.panel.layout.pageHeaderControlGap)
-	local modeWidth = PP:ToUIScaled(self.panel.layout.pageHeaderModeWidth)
-	local buttonWidth = PP:ToUIScaled(self.panel.layout.pageHeaderButtonWidth)
+	local padding = PP:ToUI(self.panel.layout.pagePadding)
+	local headerHeight = PP:ToUI(self.panel.layout.pageHeaderHeight)
+	local bodyGap = PP:ToUI(self.panel.layout.pageHeaderBodyGap)
+	local controlGap = PP:ToUI(self.panel.layout.pageHeaderControlGap)
+	local modeWidth = PP:ToUI(self.panel.layout.pageHeaderModeWidth)
+	local buttonWidth = PP:ToUI(self.panel.layout.pageHeaderButtonWidth)
 
 	if self.header then
 		self.header:ClearAllPoints()
@@ -200,7 +200,7 @@ function Methods:UpdateLayout()
 
 		self.header.title:ClearAllPoints()
 		self.header.title:SetPoint("LEFT", self.header, "LEFT", 0, 0)
-		OptionsUILib.Theme:ApplyFont(self.header.title, PP:ScaleFont(20), "")
+		OptionsUILib.Theme:ApplyFont(self.header.title, PP:ToUI(20), "")
 
 		if self.header.modeSlot then
 			self.header.modeSlot:Hide()

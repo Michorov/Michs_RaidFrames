@@ -14,7 +14,7 @@ Libs/CallbackHandler-1.0/CallbackHandler-1.0.xml
 Libs/LibDataBroker-1.1/LibDataBroker-1.1.lua
 Libs/LibDBIcon-1.0/LibDBIcon-1.0.lua
 Libs/LibSharedMedia-3.0/lib.xml
-Libs/MichsPixelPerfectLib-1.0/MichsPixelPerfectLib-1.0.lua
+Libs/MichsPixelPerfectLib-2.0/MichsPixelPerfectLib-2.0.lua
 Libs/MichsOptionsUILib-1.0/MichsOptionsUILib-1.0.xml
 Libs/AceEvent-3.0/AceEvent-3.0.xml
 Libs/AceDB-3.0/AceDB-3.0.xml

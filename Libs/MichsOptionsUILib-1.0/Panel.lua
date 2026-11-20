@@ -34,9 +34,11 @@ local function SavePosition(panel)
 		return
 	end
 
-	local globalScale = panel.instance.PP.globalScale or 1
-	panel.offsetX = (panelCenterX - parentCenterX) / globalScale
-	panel.offsetY = (panelCenterY - parentCenterY) / globalScale
+	local _, physicalHeight = GetPhysicalScreenSize()
+	local pixelStep = (768 / physicalHeight) / UIParent:GetEffectiveScale()
+	local scale = (physicalHeight / 1080) * panel.instance.PP.globalScale
+	panel.offsetX = (panelCenterX - parentCenterX) / (pixelStep * scale)
+	panel.offsetY = (panelCenterY - parentCenterY) / (pixelStep * scale)
 end
 
 function OptionsUILib.Instance:CreatePanel(config)
@@ -149,16 +151,16 @@ function Panel:UpdateLayout()
 	end
 
 	local PP = self.instance.PP
-	local width = self.layout.sidebarWidth + self.layout.mainWidth
+	local width = PP:ToUI(self.layout.sidebarWidth) + PP:ToUI(self.layout.mainWidth)
 
 	if self.previewEnabled then
-		width = width + self.layout.previewWidth
+		width = width + PP:ToUI(self.layout.previewWidth)
 	end
 
-	self.frame:SetSize(PP:ToUIScaled(width), PP:ToUIScaled(self.layout.height))
-	PP:CenterElement(self.frame, UIParent, PP:ToUIScaled(self.offsetX), PP:ToUIScaled(self.offsetY))
+	self.frame:SetSize(width, PP:ToUI(self.layout.height))
+	PP:CenterElement(self.frame, UIParent, self.offsetX, self.offsetY)
 
-	local borderThickness = PP:ToUIScaled(1)
+	local borderThickness = PP:ToUI(1)
 	self.frame.topBorder:SetHeight(borderThickness)
 	self.frame.bottomBorder:SetHeight(borderThickness)
 	self.frame.leftBorder:SetWidth(borderThickness)
